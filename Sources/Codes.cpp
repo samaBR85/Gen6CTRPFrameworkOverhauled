@@ -1404,11 +1404,8 @@ namespace CTRPluginFramework {
         }
     }
 
-
-
     static int selectedMusic = 0;
     static bool musicApplied = false;
-
 
     void ActionMusic(MenuEntry *entry) {
         int count;
