@@ -1,6 +1,6 @@
 # Gen 6 CTRPluginFramework
 
-Gen 6 CTRPluginFramework is a 3gx plugin for Pokemon X, Y, Omega Ruby, and Alpha Sapphire on the Nintendo 3DS console. This plugin is based off of [Alolan CTRPluginFramework](https://github.com/biometrix76/alolanctrpluginframework/releases/latest), with PKHeX implementations in an updated `.3gx` file format. This project is a continuation of the previously abandoned [project](https://github.com/semaj14/Multi-PokemonFramework) due to lost accesses.
+Gen 6 CTRPluginFramework is a 3gx plugin for Pokemon X, Y, Omega Ruby, and Alpha Sapphire on the Nintendo 3DS console. This plugin is based off of [Alolan CTRPluginFramework](https://github.com/biometrix76/alolanctrpluginframework/releases/latest), with PKHeX implementations in an updated `.3gx` file format. This project is a continuation of the abandoned [Multi-Pokémon Framework project](https://github.com/semaj14/Multi-PokemonFramework). These are the [contributors](https://github.com/semaj14/Multi-PokemonFramework/blob/main/Credits.md) of the previous project. 
 
 ![Top](https://github.com/biometrix76/Gen6CTRPluginFramework/blob/main/Top.bmp)
 ![Bottom](https://github.com/biometrix76/Gen6CTRPluginFramework/blob/main/Bottom.bmp)
