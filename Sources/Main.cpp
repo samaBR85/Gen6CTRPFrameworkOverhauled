@@ -351,7 +351,7 @@ namespace CTRPluginFramework {
     }
 
     int main(void) {
-        PluginMenu *menu = new PluginMenu("Gen 6 CTRPluginFramework", 0, 1, 3, "Gen 6 CTRPluginFramework is a 3gx plugin for Pokemon X, Y, Omega Ruby, and Alpha Sapphire on the Nintendo 3DS console. This plugin is a continuation of Multi-Pokémon Framework, which is no longer active.\n\nRepository:\ngithub.com/biometrix76");
+        PluginMenu *menu = new PluginMenu("Gen 6 CTRPluginFramework", 0, 1, 2, "Gen 6 CTRPluginFramework is a 3gx plugin for Pokemon X, Y, Omega Ruby, and Alpha Sapphire on the Nintendo 3DS console. This plugin is a continuation of Multi-Pokémon Framework, which is no longer active.\n\nRepository:\ngithub.com/biometrix76");
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized
