@@ -323,11 +323,12 @@
     }
     #lightbox.open { display: flex; }
     #lightbox img {
-      max-width: 90vw;
-      max-height: 90vh;
+      max-width: 80vw;
+      max-height: 82vh;
       border-radius: 8px;
       border: 2px solid var(--border);
       object-fit: contain;
+      transition: opacity .12s ease;
     }
     #lightbox-close {
       position: absolute;
@@ -338,6 +339,31 @@
       background: none;
       border: none;
       line-height: 1;
+    }
+    #lightbox-prev, #lightbox-next {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      font-size: 2rem;
+      color: #fff;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 50%;
+      width: 52px; height: 52px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, opacity .2s;
+      z-index: 10;
+    }
+    #lightbox-prev { left: 1.5rem; }
+    #lightbox-next { right: 1.5rem; }
+    #lightbox-prev:hover, #lightbox-next:hover { background: rgba(255,255,255,.18); }
+    #lightbox-counter {
+      position: absolute;
+      bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+      font-size: .8rem;
+      color: rgba(255,255,255,.5);
+      letter-spacing: .05em;
+      pointer-events: none;
     }
 
     /* ── THEMES ───────────────────────────────────────── */
@@ -749,7 +775,10 @@
 <!-- LIGHTBOX -->
 <div id="lightbox" role="dialog" aria-modal="true">
   <button id="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+  <button id="lightbox-prev" onclick="lightboxPrev()" aria-label="Previous">&#8592;</button>
   <img id="lightbox-img" src="" alt="" />
+  <button id="lightbox-next" onclick="lightboxNext()" aria-label="Next">&#8594;</button>
+  <div id="lightbox-counter"></div>
 </div>
 
 <hr class="divider" />
@@ -1021,21 +1050,62 @@
   document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
   /* ── Lightbox ────────────────────────────────────── */
+  let lightboxItems = [];
+  let lightboxIndex = 0;
+
+  function buildLightboxList() {
+    lightboxItems = Array.from(document.querySelectorAll('.screenshot-item, .theme-card'));
+  }
+
   function openLightbox(card) {
-    const img = card.querySelector('img');
-    document.getElementById('lightbox-img').src = img.src;
-    document.getElementById('lightbox-img').alt = img.alt;
+    buildLightboxList();
+    lightboxIndex = lightboxItems.indexOf(card);
+    showLightboxAt(lightboxIndex);
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
+    updateNavButtons();
   }
+
+  function showLightboxAt(index) {
+    const img = lightboxItems[index].querySelector('img');
+    const lb = document.getElementById('lightbox-img');
+    lb.style.opacity = '0';
+    setTimeout(() => {
+      lb.src = img.src;
+      lb.alt = img.alt;
+      lb.style.opacity = '1';
+    }, 120);
+    document.getElementById('lightbox-counter').textContent = (index + 1) + ' / ' + lightboxItems.length;
+    updateNavButtons();
+  }
+
+  function lightboxPrev() {
+    if (lightboxIndex > 0) { lightboxIndex--; showLightboxAt(lightboxIndex); }
+  }
+  function lightboxNext() {
+    if (lightboxIndex < lightboxItems.length - 1) { lightboxIndex++; showLightboxAt(lightboxIndex); }
+  }
+
+  function updateNavButtons() {
+    document.getElementById('lightbox-prev').style.opacity = lightboxIndex > 0 ? '1' : '0.2';
+    document.getElementById('lightbox-next').style.opacity = lightboxIndex < lightboxItems.length - 1 ? '1' : '0.2';
+  }
+
   function closeLightbox() {
     document.getElementById('lightbox').classList.remove('open');
     document.body.style.overflow = '';
   }
+
   document.getElementById('lightbox').addEventListener('click', function(e) {
     if (e.target === this) closeLightbox();
   });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lightboxPrev();
+    if (e.key === 'ArrowRight') lightboxNext();
+  });
 </script>
 </body>
 </html>
