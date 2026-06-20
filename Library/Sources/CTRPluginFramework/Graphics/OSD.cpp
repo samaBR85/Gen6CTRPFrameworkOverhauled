@@ -5,6 +5,7 @@ namespace CTRPluginFramework {
 
     bool g_entryToggleNotif = false;     // see OSD.hpp
     void *g_entryToggleNotifSrc = nullptr; // see OSD.hpp
+    u32 g_cardStatHotkey = static_cast<u32>(Key::L); // see OSD.hpp (synced from Preferences::CardStatHotkeys)
 
     u8 *Screen::GetFramebuffer(u32 posX, u32 posY, bool useRightFb) const {
         if (useRightFb && (!IsTop || !Is3DEnabled))

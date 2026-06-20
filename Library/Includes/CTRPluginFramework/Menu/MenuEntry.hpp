@@ -140,6 +140,26 @@ namespace CTRPluginFramework {
             string &Name(void) const;
 
             /**
+            * \brief Set a short alias shown ONLY in the Favorites list (empty = use the full name).
+            *        Lets long names fit the narrow favorites column so the marquee doesn't scroll.
+            * \param alias The short label to display in Favorites
+            */
+            void SetFavoriteAlias(const string &alias) const;
+
+            /**
+            * \brief Force this entry to span the full width when its folder is rendered in 2 columns.
+            * \param enable Whether the entry should take a full-width row instead of a half-width cell
+            */
+            void SetGridFullWidth(bool enable) const;
+
+            /**
+            * \brief Force this entry to pair into a half-width cell when its folder is rendered in 2 columns,
+            *        even if it is not a checkbox toggle (e.g. a menu-func entry).
+            * \param enable Whether the entry should pair (half-width) instead of taking a full-width row
+            */
+            void SetGridPaired(bool enable) const;
+
+            /**
             * \brief Get the entry's note string
             * \return A reference to current note
             */

@@ -134,6 +134,8 @@
 
    namespace PKHeX {
       void Position(MenuEntry *entry);
+      void ViewPartyInfo(MenuEntry *entry); // read-only party viewer (root menu, after Battle)
+      void SetPartyMode(bool party);        // toggle PC/party target (called from folder OnAction)
       void Shiny(MenuEntry *entry);
       void Species(MenuEntry *entry);
       void IsNicknamed(MenuEntry *entry);

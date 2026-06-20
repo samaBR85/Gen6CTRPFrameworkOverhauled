@@ -2,6 +2,9 @@
 
 namespace CTRPluginFramework {
     PluginHeader *FwkSettings::Header = reinterpret_cast<PluginHeader*>(0x07000000);
+    int  (*FwkSettings::ThemeCount)(void) = nullptr;
+    const char *(*FwkSettings::ThemeName)(int) = nullptr;
+    void (*FwkSettings::ApplyThemeByIndex)(int) = nullptr;
 
     FwkSettings &FwkSettings::Get(void) {
         return Preferences::Settings;

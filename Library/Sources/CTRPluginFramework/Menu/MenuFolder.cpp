@@ -70,6 +70,14 @@ namespace CTRPluginFramework {
         return (_item->name);
     }
 
+    void MenuFolder::SetFavoriteAlias(const string &alias) const {
+        _item->favAlias = alias;
+    }
+
+    void MenuFolder::SetTwoColumns(bool enable) const {
+        _item->Flags.twoColumn = enable;
+    }
+
     string &MenuFolder::Note(void) const {
         return (_item->note);
     }

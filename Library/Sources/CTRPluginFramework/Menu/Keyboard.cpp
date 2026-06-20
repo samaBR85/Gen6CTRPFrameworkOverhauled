@@ -313,10 +313,8 @@ namespace CTRPluginFramework {
 
         if (_hexadecimal) {
             _keyboard->SetMaxInput(2);
-            input = Utils::Format("%X", start);
         }
-
-        else input = Utils::Format("%d", start);
+        input = "";
 
         _keyboard->CanChangeLayout(true);
         _keyboard->SetConvertCallback(ConvertToU8);
@@ -370,10 +368,8 @@ namespace CTRPluginFramework {
 
         if (_hexadecimal) {
             _keyboard->SetMaxInput(4);
-            input = Utils::Format("%X", start);
         }
-
-        else input = Utils::Format("%d", start);
+        input = "";
 
         _keyboard->CanChangeLayout(true);
         _keyboard->SetConvertCallback(ConvertToU16);
@@ -427,10 +423,8 @@ namespace CTRPluginFramework {
 
         if (_hexadecimal) {
             _keyboard->SetMaxInput(8);
-            input = Utils::Format("%X", start);
         }
-
-        else input = Utils::Format("%d", start);
+        input = "";
 
         _keyboard->CanChangeLayout(true);
         _keyboard->SetConvertCallback(ConvertToU32);
@@ -484,10 +478,8 @@ namespace CTRPluginFramework {
 
         if (_hexadecimal) {
             _keyboard->SetMaxInput(16);
-            input = Utils::Format("%X", start);
         }
-
-        else input = Utils::Format("%d", start);
+        input = "";
 
         _keyboard->CanChangeLayout(true);
         _keyboard->SetConvertCallback(ConvertToU64);

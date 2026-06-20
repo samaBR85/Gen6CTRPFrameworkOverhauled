@@ -1,63 +1,108 @@
-# Gen 6 CTRPluginFramework — v0.2.0
+# Gen6CTRPluginFrameworkOverhauled — v0.2.1
 
-A 3gx plugin for Pokémon X, Y, Omega Ruby, and Alpha Sapphire on the Nintendo 3DS.
+A heavily overhauled 3gx plugin for Pokémon X, Y, Omega Ruby, and Alpha Sapphire on the Nintendo 3DS.
 
-**New to modding? This version was made for you.** v0.2.0 is a fork of
-[biometrix76/Gen6CTRPluginFramework](https://github.com/biometrix76/Gen6CTRPluginFramework) (v0.1.2)
-that keeps every feature and wraps it in a friendly, guided experience — so you don't need to be an
-expert to enjoy it. The original is itself a continuation of the abandoned
+**New to modding? This whole thing was built for you.** Gen6CTRPluginFrameworkOverhauled is a fork of
+[biometrix76/Gen6CTRPluginFramework](https://github.com/biometrix76/Gen6CTRPluginFramework) that keeps every
+feature and wraps it in a friendly, guided experience — so you don't need to be an expert to enjoy it. The
+original is itself a continuation of the abandoned
 [Multi-Pokémon Framework](https://github.com/semaj14/Multi-PokemonFramework) and the Alolan
 CTRPluginFramework; all of that work is gratefully preserved (see Credits).
 
 > 🎯 **This release focuses on Pokémon Alpha Sapphire.** Tailored content for **Pokémon X**, **Y**
 > and **Omega Ruby** is already in the works — stay tuned!
 
-![Top](Top.bmp)
-![Bottom](Bottom.bmp)
+![Gen6CTRPluginFrameworkOverhauled running on Pokémon Alpha Sapphire](Screenshots/AS/export/theme_TrainerNavy_default_.png)
 
-## ✨ What's new in v0.2.0 — built for beginners
+## 🌱 Made by a curious player, with Claude
 
-New to modding and worried these tools are only for people already "in the club"? This version is for
-you. v0.2.0 was rethought from the ground up so anyone who loves these games can jump in — no mod
-experience required. Nothing from v0.1.2 was taken away; it was all made easier to find, understand
-and use.
+I'll be upfront: **I'm not a programmer.** I'm a curious player — someone who's good at testing, poking at
+things, and thinking hard about problems and how they might be solved. Every feature in this overhaul was
+built in back-and-forth ("bate-bola") with Claude Desktop, and I'm not the least bit shy about saying so:
+that collaboration is exactly what let me *materialize* the things I kept wishing existed while I played.
 
-- 📖 **A built-in App Guide.** 19 short, friendly pages that teach you the plugin *from inside the
-  plugin* — how to open the menu, what every on-screen icon does, and how to use each feature. Start
-  here and you'll never feel lost.
-- ℹ️ **A clear description on every single function.** Highlight any item and press the info **(i)**
-  button to read a plain, beginner-friendly explanation of what it does and how to use it. No
-  guessing, no wikis.
-- 🧭 **Every menu rewritten and reordered.** The whole menu was rebuilt around five clearly named
-  sections — Edit Pokémon & Trainer, Battle, Cheats, Appearance & Settings, Online Features — most-used
-  first, each with its own short summary, so you always know where to look.
-- 🎮 **A built-in Game Guide.** A complete, beginner-friendly Professor Oak Challenge walkthrough for
-  Omega Ruby / Alpha Sapphire (by Mewlax — see Credits), summarized to read comfortably on the 3DS
-  screen.
-- 📊 **An on-screen HUD.** Show what matters while you play — Money, Clock, Battle Points, your lead
-  Pokémon's status in battle, Pokémiles, party count, even your map coordinates — in a tidy translucent
-  panel you can position and fade to taste.
-- 🔍 **A smarter "See Enemy Pokémon Stats" overlay.** It now shows much more at a glance — gender,
-  shininess, Nature, Ability (including Hidden Abilities), Hidden Power and max HP — plus color-coded
-  IVs and EVs so you can size up any opponent instantly.
-- 🔔 **Friendly on-screen notifications.** A small toast pops up when you turn a cheat on or off, so
-  you always know what's active.
-- 🎯 **Shortcuts that make sense — and are yours to change.** SELECT opens the menu; **X** favorites an
-  item, **Y** shows its info, **START** opens its editor; tap the gamepad icon to rebind any feature's
-  hotkey — all customizable in Tools > Hotkeys.
-- 🎨 **22 color themes.** Make it yours — Trainer Navy, Poké Ball, Game Boy, Zelda BotW, Cyberpunk,
-  Doom and many more. Switches instantly, remembers your choice, and previews its colors right next to
-  each name.
-- 🖼️ **A theme-aware visual refresh.** Icons and accents adapt to your chosen theme so everything stays
-  crisp and readable on both dark and light looks (and the folder icon keeps its friendly yellow).
-- 🔤 **Proper accents everywhere.** "Pokémon", "Pokédex", "Poké Ball" — written correctly throughout
-  the menus, descriptions and guides.
+Because that's where all of this came from — **real needs, discovered while playing.** I'd be deep in a run,
+hit some friction, and think "there should be a way to…", and then we'd go build it. Bit by bit I poured a
+little of my own personality into each feature as it took shape. Some of the things I'm proudest of started
+as a passing "wouldn't it be cool if…" and turned out to be genuinely possible — like sorting your party by
+a stat right inside a card view. I honestly thought that one wouldn't be doable, and the framework turned out
+to be robust enough to pull it off. **Parabéns aos criadores** — standing on the shoulders of giants is no
+exaggeration here (see Credits).
 
-### 🛠️ Fixes
-- The folder icon no longer turns black on light themes.
-- Several in-menu descriptions corrected to match real behavior — e.g. the one-time **ENABLE** unlock
-  for "See Enemy Pokémon Stats", the hold-then-open flow for "View IVs & EVs in Summary", and opening
-  your PC via the OPTIONS icon for "Use PC Anywhere" (plus the free full-heal trick).
+If you're new to homebrew but you love these games: that's who this is for. Welcome.
+
+## ✨ Features born from real needs
+
+Everything below exists because it solved an actual annoyance — not because a checklist said so.
+
+- 📖 **A built-in App Guide.** 20 short, friendly pages that teach you the plugin *from inside the plugin*,
+  sequenced to your real journey through the game — what to do first, what each feature is for, and when it'll
+  actually help you. It reads like a guided adventure, not a manual.
+- ℹ️ **An INFO (i) note on every single function.** Highlight anything and press the info **(i)** button (or
+  **X**) for a plain, beginner-friendly explanation of what it does and how to use it. No guessing, no wikis.
+- 📊 **View Party Summary — sortable stat cards.** See your team's real hidden numbers (stats, IVs, EVs,
+  Nature, Ability, item, moves) as cards. Move a selector over a stat with **Up/Down**, press **A** to jump
+  to the teammate with the **HIGHER** (or **LOWER**) value, flip the mode with **L**, and read ▲/▼ markers
+  that flag your team's best and worst. A battle-decision companion that started as a "this can't be possible"
+  idea.
+
+  ![View Party Summary — sortable stat card with HIGHER/LOWER markers](Screenshots/AS/export/partysummary_card.png)
+- ⭐ **Favorites that actually work for you.** A two-column Favorites list (more on screen, less scrolling),
+  **drag-to-reorder in any direction** (because chronological order made re-organizing a pain), and short
+  **aliases** shown only in Favorites so the list stays clean and readable.
+
+  ![Favorites — two-column grid with tidy aliases](Screenshots/AS/export/favorites.png)
+- 🗂️ **Two-column menus** for the toggle-heavy screens, so you scroll a whole lot less.
+- 📟 **An on-screen HUD.** Show what matters while you play — Money, Clock, Battle Points, Pokémiles, party
+  count, map coordinates, Repel steps, your lead's battle status — in a tidy translucent panel you can
+  position and fade to taste.
+
+  ![Config HUD — pick what shows on screen](Screenshots/AS/export/config_hud.png)
+- 🔍 **A "See Enemy Pokémon Stats" overlay.** Reads the foe at a glance — gender, shininess, Nature, Ability
+  (including Hidden Abilities), Hidden Power, held item, max HP — plus colour-coded IVs and EVs. Pick exactly
+  which fields show, and flip pages mid-battle with **ZR**.
+
+  ![Enemy Stats overlay in battle — Basic & Moves page](Screenshots/AS/export/stats_page01.png)
+  ![Enemy Stats overlay in battle — IVs & EVs page](Screenshots/AS/export/stats_page02.png)
+  ![Choose exactly which enemy stats appear](Screenshots/AS/export/display_enemy_stats.png)
+- 🔔 **Friendly on-screen notifications.** A small toast pops up when you turn a cheat on or off, so you always
+  know what's active.
+- ⚠️ **Gentle guard-rails.** The few cheats that can spoil a beginner's save (Unlock Full Dex, Full Fly Map,
+  all TMs/HMs + Key Items) are flagged in a warning colour, and their info opens with a clear **BEWARE / save
+  first** note.
+- 🎯 **Shortcuts that make sense — and are yours to change.** SELECT opens the menu; **Y** favorites an item,
+  **X** shows its info, **START** opens its editor; tap the gamepad icon to rebind any feature's hotkey — all
+  customizable in **Tools > Hotkeys**.
+
+  ![Tools menu — hotkeys, themes, settings and more](Screenshots/AS/export/tools_menu.png)
+- 🎨 **25 colour themes.** Make it yours — Trainer Navy, Poké Ball, Game Boy, Zelda BotW, Cyberpunk, Synthwave,
+  Persona 5, Hoenn Dreams, Item Bag, Alpha Sapphire and many more. Switches instantly, remembers your choice,
+  and previews its colours right next to each name. (An idea I carried over from another app I made.)
+- 🧭 **Every menu rewritten and reordered** around clearly named sections — most-used first, each with its own
+  short summary — so you always know where to look.
+- 🎮 **A built-in Game Guide.** A complete, beginner-friendly Professor Oak Challenge walkthrough for Omega
+  Ruby / Alpha Sapphire (by Mewlax — see Credits), bundled to read comfortably on the 3DS screen.
+- 🔤 **Proper accents everywhere.** "Pokémon", "Pokédex", "Poké Ball" — written correctly throughout the menus,
+  descriptions and guides.
+
+## 🎨 25 colour themes — pick your style
+
+With **25** colour schemes, the whole interface — menus, buttons, even the in-game keyboard — is yours to
+restyle. Your choice is remembered, and each theme previews its colours right next to its name. Just a taste
+of the range:
+
+<table>
+  <tr>
+    <td align="center"><img src="Screenshots/AS/export/theme_TrainerNavy_default_.png" width="230"><br><b>Trainer Navy</b> <i>(default)</i></td>
+    <td align="center"><img src="Screenshots/AS/export/theme_GameBoyClassic.png" width="230"><br><b>Game Boy</b></td>
+    <td align="center"><img src="Screenshots/AS/export/theme_AlphaSapphire.png" width="230"><br><b>Alpha Sapphire</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="Screenshots/AS/export/theme_WildWest.png" width="230"><br><b>Wild West</b></td>
+    <td align="center"><img src="Screenshots/AS/export/theme_PopArt.png" width="230"><br><b>Pop Art</b></td>
+    <td align="center"><img src="Screenshots/AS/export/theme_ArtDeco.png" width="230"><br><b>Art Deco</b></td>
+  </tr>
+</table>
 
 ## 📥 Installing
 1. Update to the latest [Luma3DS](https://github.com/LumaTeam/Luma3DS/releases/latest).
@@ -83,25 +128,37 @@ and use.
 
 ## 🙏 Credits
 
-This fork stands on a long line of prior work, and all of it deserves recognition.
+This project stands on a long line of volunteer work — from the very first ancestor to this fork — and
+**every bit of it deserves recognition.** Without this community's freely given effort, none of this would
+exist.
 
-**Based on** [Gen 6 CTRPluginFramework](https://github.com/biometrix76/Gen6CTRPluginFramework) by
-[biometrix76](https://github.com/biometrix76) — built on [Alolan CTRPluginFramework](https://github.com/biometrix76/alolanctrpluginframework/releases/latest)
-and a continuation of the abandoned [Multi-Pokémon Framework](https://github.com/semaj14/Multi-PokemonFramework)
-([its contributors](https://github.com/semaj14/Multi-PokemonFramework/blob/main/Credits.md)).
+**The plugin lineage**
+- **Based on** [Gen 6 CTRPluginFramework](https://github.com/biometrix76/Gen6CTRPluginFramework) by
+  [biometrix76](https://github.com/biometrix76) — built on
+  [Alolan CTRPluginFramework](https://github.com/biometrix76/alolanctrpluginframework/releases/latest)
+  and a continuation of the abandoned
+  [Multi-Pokémon Framework](https://github.com/semaj14/Multi-PokemonFramework) and
+  [its contributors](https://github.com/semaj14/Multi-PokemonFramework/blob/main/Credits.md).
 
-Original project credits (preserved from upstream):
+**Foundations & tooling** (preserved from upstream)
 - [ThePixellizerOSS](https://gitlab.com/thepixellizeross) et al. — the 3gxtool and CTRPluginFramework used to build plugins
-- [PKHeX](https://github.com/kwsch/PKHeX/) et al. — database, documentation, examples, and code
+- [PKHeX](https://github.com/kwsch/PKHeX/) (kwsch) et al. — database, documentation, examples, and code
 - [AnalogMan151](https://github.com/AnalogMan151) — the ultraSuMoFramework foundation of Alolan CTRPluginFramework
 - [dragonfyre173](https://github.com/dragonfyre173) — the in-game data viewer overlay
 - [JourneyOver](https://github.com/JourneyOver) et al. — the extensive [ActionReplay code database](https://github.com/JourneyOver/CTRPF-AR-CHEAT-CODES)
 - [Alexander Hartmann](https://github.com/Hartie95) — the XY & ORAS foundation of this plugin
 
-Added in v0.2.0:
-- **Mewlax** ([u/mewlax84](https://www.reddit.com/user/mewlax84)) — the bundled Professor Oak Challenge
-  Game Guide, shared via the [r/ProfessorOak](https://www.reddit.com/r/ProfessorOak/) community.
-- Fork and v0.2.0 additions by [samaBR85](https://github.com/samaBR85).
+**The bundled Game Guide** — the Professor Oak Challenge walkthrough
+- **Mewlax** ([u/mewlax84](https://www.reddit.com/user/mewlax84), Instagram [@pokemewlax](https://www.instagram.com/pokemewlax/),
+  X [@Mewlax1](https://twitter.com/Mewlax1)) — author of the ORAS guide, shared through the
+  [r/ProfessorOak](https://www.reddit.com/r/ProfessorOak/) community.
+- **Chamale** — first inspired the Professor Oak Challenge back in 2018.
+- **Johnstone** and **Chaotic Meatball** — for helping the r/ProfessorOak community grow.
+- **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
+
+**This fork**
+- Fork, overhaul and v0.2.1 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+  with **Claude** (Anthropic).
 
 ## License
 Licensed under **GNU GPL-3.0**, inherited from upstream. See [LICENSE](LICENSE).

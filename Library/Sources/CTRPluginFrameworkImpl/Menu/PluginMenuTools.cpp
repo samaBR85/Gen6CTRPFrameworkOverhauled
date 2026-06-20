@@ -13,7 +13,14 @@ namespace CTRPluginFramework {
         MISCELLANEOUS,
         SETTINGS,
         HOTKEYS,
+        THEMES,
     };
+
+    // Apply the theme carried in the selected entry's arg (the theme index). Used by the themes sub-menu.
+    static void ApplyThemeEntry(MenuEntryTools *entry) {
+        if (FwkSettings::ApplyThemeByIndex)
+            FwkSettings::ApplyThemeByIndex((int)(uintptr_t)entry->GetArg());
+    }
 
     static int g_mode = NORMAL;
 
@@ -24,6 +31,7 @@ namespace CTRPluginFramework {
         _screenshotMenu("Screenshots"),
         _settingsMenu("Settings"),
         _hotkeysMenu("Hotkeys"),
+        _themesMenu("Change Theme"),
         _hexEditorEntry(nullptr),
         _hexEditor(hexEditor),
         _menu(&_mainMenu, nullptr),
@@ -44,7 +52,7 @@ namespace CTRPluginFramework {
 
     static void FavoriteHotkeyModifier(void) {
         u32 keys = Preferences::FavoriteHotkeys;
-        (HotkeysModifier(keys, "Pick the button(s) to FAVORITE the\nhighlighted item.\n\nWorks while the menu is open.\nDefault: X."))();
+        (HotkeysModifier(keys, "Pick the button(s) to FAVORITE the\nhighlighted item.\n\nWorks while the menu is open.\nDefault: Y."))();
 
         if (keys != 0)
             Preferences::FavoriteHotkeys = keys;
@@ -52,7 +60,7 @@ namespace CTRPluginFramework {
 
     static void InfoHotkeyModifier(void) {
         u32 keys = Preferences::InfoHotkeys;
-        (HotkeysModifier(keys, "Pick the button(s) to show the INFO\nnote of the highlighted item.\n\nWorks while the menu is open.\nDefault: Y."))();
+        (HotkeysModifier(keys, "Pick the button(s) to show the INFO\nnote of the highlighted item.\n\nWorks while the menu is open.\nDefault: X."))();
 
         if (keys != 0)
             Preferences::InfoHotkeys = keys;
@@ -64,6 +72,16 @@ namespace CTRPluginFramework {
 
         if (keys != 0)
             Preferences::KeyboardHotkeys = keys;
+    }
+
+    static void CardStatHotkeyModifier(void) {
+        u32 keys = Preferences::CardStatHotkeys;
+        (HotkeysModifier(keys, "Pick the button(s) to flip the Party Summary\ncard between HIGHER and LOWER.\n\nWorks only on the card screen: A jumps to the\nparty member with the highest (or lowest) value\nof the selected stat.\n\nDefault: L."))();
+
+        if (keys != 0) {
+            Preferences::CardStatHotkeys = keys;
+            g_cardStatHotkey = keys; // keep the plugin-visible mirror in sync
+        }
     }
 
     void PluginMenuTools::UpdateSettings(void) {
@@ -492,15 +510,20 @@ namespace CTRPluginFramework {
     void PluginMenuTools::InitMenu(void) {
         // Main menu
         _mainMenu.Append(new MenuEntryTools("About", [] {g_mode = ABOUT;}, Icon::DrawAbout));
+        _mainMenu.Append(new MenuEntryTools("Hotkeys", nullptr, Icon::DrawGameController, new u32(HOTKEYS)));
+        // Plugin-provided theme picker: opens a "Change Theme" sub-menu (one entry per theme, shown on the
+        // top screen like Hotkeys/Settings). The sub-menu is filled lazily on first open because the plugin
+        // registers its theme table (FwkSettings::ThemeCount/ThemeName/ApplyThemeByIndex) AFTER this menu is
+        // built. Harmless no-op if no plugin registers a theme table.
+        _mainMenu.Append(new MenuEntryTools("Change Theme", nullptr, Icon::DrawSettings, new u32(THEMES)));
+        _mainMenu.Append(new MenuEntryTools("Settings", nullptr, Icon::DrawSettings, this));
+        _mainMenu.Append(new MenuEntryTools("Screenshots", nullptr, Icon::DrawUnsplash, new u32(SCREENSHOT)));
         _hexEditorEntry = new MenuEntryTools("HexEditor", [] {g_mode = HEXEDITOR;}, Icon::DrawGrid);
         _mainMenu.Append(_hexEditorEntry);
         _mainMenu.Append(new MenuEntryTools("Gateway RAM Dumper", [] {g_mode = GWRAMDUMP;}, Icon::DrawRAM));
         _mainMenu.Append(new MenuEntryTools("Miscellaneous", nullptr, Icon::DrawMore, new u32(MISCELLANEOUS)));
-        _mainMenu.Append(new MenuEntryTools("Screenshots", nullptr, Icon::DrawUnsplash, new u32(SCREENSHOT)));
-        _mainMenu.Append(new MenuEntryTools("Settings", nullptr, Icon::DrawSettings, this));
-        _mainMenu.Append(new MenuEntryTools("Hotkeys", nullptr, Icon::DrawGameController, new u32(HOTKEYS)));
-        _mainMenu.Append(new MenuEntryTools("Power-off 3DS", Shutdown, Icon::DrawShutdown));
         _mainMenu.Append(new MenuEntryTools("Reboot 3DS", Reboot, Icon::DrawRestart));
+        _mainMenu.Append(new MenuEntryTools("Power-off 3DS", Shutdown, Icon::DrawShutdown));
 
         // Miscellaneous menu
         _miscellaneousMenu.Append(new MenuEntryTools("Export Loaded Game Files", _WriteLoadedFiles, true));
@@ -514,9 +537,10 @@ namespace CTRPluginFramework {
 
         // Hotkeys page — all 4 menu key binds grouped together (open the rebind screen on select)
         _hotkeysMenu.Append(new MenuEntryTools("Open/Close Menu (default Select)", MenuHotkeyModifier, Icon::DrawGameController));
-        _hotkeysMenu.Append(new MenuEntryTools("Favorite item (default X)", FavoriteHotkeyModifier, Icon::DrawGameController));
-        _hotkeysMenu.Append(new MenuEntryTools("Show item Info (default Y)", InfoHotkeyModifier, Icon::DrawGameController));
+        _hotkeysMenu.Append(new MenuEntryTools("Favorite item (default Y)", FavoriteHotkeyModifier, Icon::DrawGameController));
+        _hotkeysMenu.Append(new MenuEntryTools("Show item Info (default X)", InfoHotkeyModifier, Icon::DrawGameController));
         _hotkeysMenu.Append(new MenuEntryTools("Open item Editor (default START)", KeyboardHotkeyModifier, Icon::DrawGameController));
+        _hotkeysMenu.Append(new MenuEntryTools("Card stat HIGHER/LOWER (default L)", CardStatHotkeyModifier, Icon::DrawGameController));
 
         // Settings menu — UpdateSettings() indexes the 5 checkbox entries by position (begin()+0 .. +4).
         // "Set Backlight" is a non-checkbox action entry and MUST stay last (UpdateSettings skips it).
@@ -589,6 +613,11 @@ namespace CTRPluginFramework {
         int ret = _menu.ProcessEvent(event, &item);
 
         if (ret == EntrySelected && item != nullptr) {
+            // A theme entry (inside _themesMenu) already applied itself via FuncArg. Its arg holds a raw
+            // theme index, NOT a u32* tag, so skip the arg dispatch below (which dereferences arg).
+            if (_menu.GetFolder() == &_themesMenu)
+                return;
+
             void *arg = ((MenuEntryTools *)item)->GetArg();
 
             if (arg == this) {
@@ -610,6 +639,24 @@ namespace CTRPluginFramework {
             else if (arg != nullptr && *(u32*)arg == HOTKEYS) {
                 selector = _menu._selector;
                 _menu.Open(&_hotkeysMenu);
+            }
+
+            else if (arg != nullptr && *(u32*)arg == THEMES) {
+                // Fill the themes sub-menu on first open (the plugin's theme table is ready by now).
+                if (_themesMenu.ItemsCount() == 0 && FwkSettings::ThemeCount && FwkSettings::ThemeName) {
+                    int themeCount = FwkSettings::ThemeCount();
+
+                    for (int i = 0; i < themeCount; i++) {
+                        MenuEntryTools *e = new MenuEntryTools(FwkSettings::ThemeName(i), nullptr, Icon::DrawSettings, (void*)(uintptr_t)i);
+                        e->FuncArg = ApplyThemeEntry; // applies theme i (the index lives in the entry's arg)
+                        _themesMenu.Append(e);
+                    }
+                }
+
+                if (_themesMenu.ItemsCount() > 0) {
+                    selector = _menu._selector;
+                    _menu.Open(&_themesMenu);
+                }
             }
         }
 

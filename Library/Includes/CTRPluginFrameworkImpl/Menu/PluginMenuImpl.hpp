@@ -40,6 +40,7 @@ namespace CTRPluginFramework {
 
             static void ForceExit(void);
             static void ForceOpen(void);
+            static void ForceClose(void);
 
             static void UnStar(MenuItem *item);
             static void Refresh(void);
@@ -82,6 +83,7 @@ namespace CTRPluginFramework {
             vector<CallbackPointer> _callbacks;
             vector<CallbackPointer> _callbacksTrashBin;
             bool _forceOpen;
+            bool _forceClose;
             bool _hexEditorState;
     };
 }

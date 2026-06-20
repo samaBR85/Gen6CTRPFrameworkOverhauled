@@ -38,6 +38,7 @@ namespace CTRPluginFramework {
             MenuFolderImpl _screenshotMenu;
             MenuFolderImpl _settingsMenu;
             MenuFolderImpl _hotkeysMenu;
+            MenuFolderImpl _themesMenu;
             MenuEntryTools *_hexEditorEntry;
             HexEditor &_hexEditor;
             GatewayRAMDumper _gatewayRamDumper;

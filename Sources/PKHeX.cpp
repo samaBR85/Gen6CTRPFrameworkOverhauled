@@ -2,6 +2,8 @@
 #include <unordered_set>
 #include "Helpers.hpp"
 #include "Parser.hpp"
+#include "BaseStats.hpp"
+#include "MoveInfo.hpp"
 #include <functional>
 #include <array>
 
@@ -145,7 +147,7 @@ namespace CTRPluginFramework {
 
     void BattlePoints(MenuEntry *entry) {
         // Prompt the user to enter a value then write it to memory if successful.
-        if (KeyboardHandler<u16>::Set(entry->Name() + ":", true, false, 4, battlePoints, 0, 0, 9999, nullptr)) {
+        if (KeyboardHandler<u16>::Set(entry->Name() + " (0-9999):", true, false, 4, battlePoints, 0, 0, 9999, nullptr)) {
             MessageBox(CenterAlign(entry->Name() + ": " + to_string(battlePoints)), DialogType::DialogOk, ClearScreen::Both)();
             entry->SetGameFunc(ApplyBattlePoints);
         }
@@ -183,7 +185,7 @@ namespace CTRPluginFramework {
 
     void Items(MenuEntry *entry) {
         // Prompt the user to enter a value then write it to memory if successful.
-        if (KeyboardHandler<u16>::Set(entry->Name() + ":", true, false, 3, itemAmount, 0, 0, 999, Callback<u16>)) {
+        if (KeyboardHandler<u16>::Set(entry->Name() + " (0-999):", true, false, 3, itemAmount, 0, 0, 999, Callback<u16>)) {
             MessageBox(CenterAlign(getLanguage->Get("PLUGIN_APPLIED_CHANGES") + " to: " + entry->Name()), DialogType::DialogOk, ClearScreen::Both)();
             entry->SetGameFunc(UpdateItems);
         }
@@ -218,7 +220,7 @@ namespace CTRPluginFramework {
     static u16 medAmount;
 
     void Medicines(MenuEntry *entry) {
-        if (KeyboardHandler<u16>::Set(entry->Name() + ":", true, false, 3, medAmount, 0, 0, 999, Callback<u16>)) {
+        if (KeyboardHandler<u16>::Set(entry->Name() + " (0-999):", true, false, 3, medAmount, 0, 0, 999, Callback<u16>)) {
             MessageBox(CenterAlign(getLanguage->Get("PLUGIN_APPLIED_CHANGES") + " to: " + entry->Name()), DialogType::DialogOk, ClearScreen::Both)();
             entry->SetGameFunc(UpdateMedicines);
         }
@@ -251,7 +253,7 @@ namespace CTRPluginFramework {
     static u16 berryAmount;
 
     void Berries(MenuEntry *entry) {
-        if (KeyboardHandler<u16>::Set(entry->Name() + ":", true, false, 3, berryAmount, 0, 0, 999, Callback<u16>)) {
+        if (KeyboardHandler<u16>::Set(entry->Name() + " (0-999):", true, false, 3, berryAmount, 0, 0, 999, Callback<u16>)) {
             MessageBox(CenterAlign(getLanguage->Get("PLUGIN_APPLIED_CHANGES") + " to: " + entry->Name()), DialogType::DialogOk, ClearScreen::Both)();
             entry->SetGameFunc(UpdateBerries);
         }
@@ -601,6 +603,28 @@ namespace CTRPluginFramework {
         return false;
     }
 
+    // Raw (no-crypto) variants, used when the located party block turns out to be stored DECRYPTED in RAM
+    // (the live/working PK6 layout). The block is read/written as-is; only the checksum is refreshed on write.
+    template <class Pokemon>
+    bool GetPokemonRaw(u32 pointer, Pokemon data) {
+        if (data == 0 || pointer == 0)
+            return false;
+
+        if (!Process::CopyMemory(data, (u8*)pointer, 232))
+            return false;
+
+        return (data->species >= 1 && data->species <= 721);
+    }
+
+    template <class Pokemon>
+    bool SetPokemonRaw(u32 pointer, Pokemon data) {
+        if (data == 0 || pointer == 0)
+            return false;
+
+        data->checksum = Checksum(data);
+        return Process::Patch(pointer, (u8*)data, 232);
+    }
+
     template <class Pokemon>
     u8 IsShiny(Pokemon data) {
         // Determines if the Pokemon is shiny based on TID, SID, and PID
@@ -803,15 +827,183 @@ namespace CTRPluginFramework {
         }
 
         static u8 gBoxNumber = 0, gPositionNumber = 0;
-        static u32 dataPointer = 0;
+        static u32 dataPointer = 0;          // PC box target
+
+        // Active-party editing. The overworld party block lives at a fixed-but-unknown RAM address inside the save
+        // buffer (the RAM block layout doesn't match the save-file offsets), so we locate it at runtime by scanning.
+        static bool gPartyMode = false;
+        static u32  gPartyPtr = 0;
+        static u8   gPartySlot = 0;
+        static u32  gPartyBase = 0;          // cached party slot-0 address once found
+        static bool gPartyEncrypted = true;  // whether that block is EK6-encrypted (vs decrypted in RAM)
+
+        u32 CurrentPtr(void) { return gPartyMode ? gPartyPtr : dataPointer; }
+        void SetPartyMode(bool party) { gPartyMode = party; } // called from the folders' OnAction (no-bleed switch)
+
+        // Read the player's visible/secret Trainer ID from the trainer card (same addresses the TID/SID editor uses).
+        static void ReadPlayerTrainerID(u16 &tid, u16 &sid) {
+            tid = sid = 0;
+            Process::Read16(AutoGameSet((u32)0x8C79C3C, (u32)0x8C81340), tid);
+            Process::Read16(AutoGameSet((u32)0x8C79C3E, (u32)0x8C81342), sid);
+        }
+
+        // Locate the overworld party block in the save-buffer RAM region and cache it. Read-only.
+        // Signature: an owned valid lead Pokemon (TID/SID match) whose party-count u32 at +0x618 is 1..6.
+        // Tries both EK6-encrypted and already-decrypted interpretations and records which matched.
+        u32 FindPartyBase(void) {
+            if (gPartyBase != 0)
+                return gPartyBase;
+
+            // Get the player's TID/SID from a REAL owned Pokemon (box slot 1) — the proven, reliable source.
+            const u32 boxBase = AutoGameSet((u32)0x8C861C8, (u32)0x8C9E134);
+            u16 tid = 0, sid = 0;
+            PK6 boxpk;
+            if (GetPokemon(boxBase, &boxpk)) { tid = boxpk.TID; sid = boxpk.SID; }
+            if (tid == 0 && sid == 0)
+                ReadPlayerTrainerID(tid, sid); // fallback to the trainer card
+            if (tid == 0 && sid == 0)
+                return 0;
+
+            // Focus on the save buffer around the proven box base (the party lives in the same region).
+            const u32 SLOT = 0x104;
+            const u32 BOX_SPAN = 31u * 30u * 0xE8;   // whole PC box block, to exclude it
+            const u32 scanStart = boxBase - 0x80000; // 512 KB below ...
+            const u32 scanEnd   = boxBase + 0x80000; // ... to 512 KB above the box
+            const u32 CHUNK = 0x8000;
+            static u8 buf[CHUNK];
+
+            // Collect addresses of the player's owned valid Pokemon (both encrypted + decrypted reads).
+            static u32 matchAddr[256];
+            static u8  matchEnc[256];
+            int n = 0;
+
+            for (u32 chunk = scanStart; chunk + SLOT < scanEnd && n < 256; chunk += (CHUNK - SLOT)) {
+                if (!Process::CopyMemory(buf, (u8*)chunk, CHUNK))
+                    continue;
+
+                for (u32 off = 0; off + SLOT <= CHUNK && n < 256; off += 4) {
+                    if (*(u32*)(buf + off) == 0)            continue; // EC / PID non-zero
+                    if (*(u16*)(buf + off + 0x04) != 0)     continue; // PK6 sanity == 0
+
+                    u32 X = chunk + off;
+                    bool owned = false, enc = false;
+
+                    // Decrypted (live) layout: species/TID/SID readable directly from the copy (free).
+                    u16 sp = *(u16*)(buf + off + 0x08), t = *(u16*)(buf + off + 0x0C), s = *(u16*)(buf + off + 0x0E);
+                    if (sp >= 1 && sp <= 721 && t == tid && s == sid) { owned = true; enc = false; }
+
+                    // Encrypted layout: decrypt + match (small focused window -> probe every candidate).
+                    if (!owned) {
+                        PK6 pk;
+                        if (GetPokemon(X, &pk) && pk.TID == tid && pk.SID == sid) { owned = true; enc = true; }
+                    }
+
+                    if (!owned)
+                        continue;
+
+                    if (X >= boxBase && X < boxBase + BOX_SPAN) continue; // skip the PC box block
+                    matchAddr[n] = X; matchEnc[n] = enc;
+                    n++;
+                }
+            }
+
+            // The party is the only place two owned mons sit exactly 0x104 apart (box stride is 0xE8).
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    if (matchAddr[j] == matchAddr[i] + SLOT) {
+                        gPartyBase = matchAddr[i];
+                        gPartyEncrypted = matchEnc[i];
+                        return gPartyBase;
+                    }
+
+            // Fallback: a single-member party -> the lowest non-box owned match.
+            if (n > 0) {
+                int lo = 0;
+                for (int i = 1; i < n; i++) if (matchAddr[i] < matchAddr[lo]) lo = i;
+                gPartyBase = matchAddr[lo];
+                gPartyEncrypted = matchEnc[lo];
+                return gPartyBase;
+            }
+
+            return 0; // not found
+        }
+
+        // --- Read-back sheet (shown via the Info/Y note on the Position entry) ---------------------------------
+
+        // Decode a UTF-16LE field (max 26 bytes / 13 units) from a decrypted PK6 block into a UTF-8 string.
+        static string Utf16Field(const u8 *buf) {
+            string out;
+            const u16 *u = reinterpret_cast<const u16*>(buf);
+
+            for (int i = 0; i < 13; i++) {
+                u16 c = u[i];
+                if (c == 0) break;
+
+                if (c < 0x80) out += (char)c;
+                else if (c < 0x800) { out += (char)(0xC0 | (c >> 6)); out += (char)(0x80 | (c & 0x3F)); }
+                else { out += (char)(0xE0 | (c >> 12)); out += (char)(0x80 | ((c >> 6) & 0x3F)); out += (char)(0x80 | (c & 0x3F)); }
+            }
+
+            return out;
+        }
+
+        // Level from EXP using the species' growth rate (same growthType/growthTable the Level editor uses).
+        static int LevelFromExp(u16 species, u32 exp) {
+            int type = 0;
+
+            for (size_t t = 0; t < growthType.size(); ++t)
+                if (find(growthType[t].begin(), growthType[t].end(), (int)species) != growthType[t].end()) { type = (int)t; break; }
+
+            int lvl = 1;
+            for (int l = 1; l <= 100; l++) {
+                if ((u32)growthTable[l - 1][type] <= exp) lvl = l;
+                else break;
+            }
+
+            return lvl;
+        }
+
+        string BuildSheet(void) {
+            PK6 pk;
+            // PC box is always encrypted; the located party may be encrypted or already decrypted in RAM.
+            bool ok = (gPartyMode && !gPartyEncrypted) ? GetPokemonRaw(CurrentPtr(), &pk) : GetPokemon(CurrentPtr(), &pk);
+
+            if (!ok)
+                return "Empty / invalid slot.\nPick a valid Position first.";
+
+            const char *genders[] = {"Male", "Female", "Genderless"};
+            int g = (pk.fatefulEncounterGenderForm >> 1) & 0x3;
+            if (g > 2) g = 2;
+
+            string s;
+            if (gPartyMode) s = "Target: Party slot " + to_string(gPartySlot) + " (last saved)\n";
+            else            s = "Target: Box " + to_string(gBoxNumber) + ", slot " + to_string(gPositionNumber) + "\n";
+
+            s += "Species: " + string(speciesList[pk.species - 1]) + "\n";
+            s += "Nickname: " + Utf16Field(pk.nickname) + "\n";
+            s += "Level: " + to_string(LevelFromExp(pk.species, pk.exp)) + "  (EXP " + to_string(pk.exp) + ")\n";
+            s += "Nature: " + (pk.nature < natureList.size() ? natureList[pk.nature] : to_string(pk.nature)) + "\n";
+            s += "Ability: " + string((pk.ability >= 1 && pk.ability <= 191) ? abilityList[pk.ability - 1] : "?") + "\n";
+            s += "Held item: " + string(pk.heldItem == 0 ? "None" : (pk.heldItem <= 775 ? heldItemList[pk.heldItem - 1] : "?")) + "\n";
+            s += "Shiny: " + string(IsShiny(&pk) ? "Yes" : "No") + "   Gender: " + genders[g] + "\n";
+
+            // IVs / EVs in HP/Atk/Def/Spe/SpA/SpD order (matches the editor's stat list).
+            s += "IVs: ";
+            for (int i = 0; i < 6; i++) s += to_string((pk.iv32 >> (5 * i)) & 0x1F) + (i < 5 ? "/" : "\n");
+            s += "EVs: ";
+            for (int i = 0; i < 6; i++) s += to_string(pk.EV[i]) + (i < 5 ? "/" : "\n");
+
+            s += "OT: " + Utf16Field(pk.originalTrainerName) + "  (TID " + to_string(pk.TID) + " / SID " + to_string(pk.SID) + ")";
+            return s;
+        }
 
         bool ConfigureBoxAndPosition() {
             // Prompt for box number and validate input
-            if (!KeyboardHandler<u8>::Set(getLanguage->Get("EDITOR_BOX"), true, false, 2, gBoxNumber, 0, 1, 31))
+            if (!KeyboardHandler<u8>::Set(getLanguage->Get("EDITOR_BOX") + " (1-31)", true, false, 2, gBoxNumber, 0, 1, 31))
                 return false; // Invalid box number input
 
             // Prompt for position number and validate input
-            if (!KeyboardHandler<u8>::Set(getLanguage->Get("EDITOR_POSITION"), true, false, 2, gPositionNumber, 0, 1, 30))
+            if (!KeyboardHandler<u8>::Set(getLanguage->Get("EDITOR_POSITION") + " (1-30)", true, false, 2, gPositionNumber, 0, 1, 30))
                 return false; // Invalid position number input
 
             // Calculate the pointer to the Pokemon data based on box and position
@@ -820,25 +1012,324 @@ namespace CTRPluginFramework {
         }
 
         void Position(MenuEntry *entry) {
-            if (ConfigureBoxAndPosition()) // Handle setup failure if necessary
+            if (ConfigureBoxAndPosition()) { // Handle setup failure if necessary
+                gPartyMode = false; // this Position targets the PC box
                 entry->Name() = getLanguage->Get("EDITOR_POSITION") + " " << Color::Gray << "B" << to_string(gBoxNumber) << " @: " << to_string(gPositionNumber);
+                entry->Note() = BuildSheet(); // press X (Info) here to view the targeted Pokémon
+                entry->RefreshNote();
+            }
 
             else MessageBox(CenterAlign(getLanguage->Get("EDITOR_INVALID_POSITION")), DialogType::DialogOk, ClearScreen::Both)();
         }
 
+        // Final stats (Gen 6 formula). Display order d = HP,Atk,Def,SpA,SpD,Spe (the summary order).
+        // gBaseStats columns are {HP,Atk,Def,SpA,SpD,Spe} (direct); iv32/EV internal order is HP,Atk,Def,Spe,SpA,SpD.
+        static void CalcStats(u16 species, int level, u8 nature, u32 iv32, const u8 EV[6], u16 out[6]) {
+            static const int inMap[6]  = {0, 1, 2, 4, 5, 3}; // display d -> iv32/EV internal index
+            static const int natMap[6] = {-1, 0, 1, 3, 4, 2}; // display d -> nature stat idx (Atk,Def,Spe,SpA,SpD)
+            int up = nature / 5, down = nature % 5;
+
+            for (int d = 0; d < 6; d++) {
+                int b  = gBaseStats[species - 1][d];
+                int iv = (iv32 >> (5 * inMap[d])) & 0x1F;
+                int ev = EV[inMap[d]];
+                int val = ((2 * b + iv + ev / 4) * level) / 100;
+
+                if (d == 0) { out[d] = (species == 292) ? 1 : (u16)(val + level + 10); continue; } // HP (Shedinja=1)
+
+                val += 5;
+                if (up != down && natMap[d] == up)   val = val * 110 / 100; // nature boost
+                if (up != down && natMap[d] == down) val = val * 90 / 100;  // nature drop
+                out[d] = (u16)val;
+            }
+        }
+
+        // Draw the selected slot's card on the top screen (no scroll): textual fields on the left, a vertical
+        // STAT / IV / EV / Tot table on the right (like the in-game summary). Reads the decrypted PK6 directly.
+        static void DrawPartyCard(const Screen &top, u32 ptr, int slot, Color title, Color txt, Color label) {
+            PK6 pk;
+            bool ok = gPartyEncrypted ? GetPokemon(ptr, &pk) : GetPokemonRaw(ptr, &pk);
+            if (!ok || pk.species < 1 || pk.species > 721) {
+                top.DrawSysfont("Party slot " + to_string(slot) + " - empty / invalid", 42, 30, title);
+                return;
+            }
+
+            const char *genders[] = {"Male", "Female", "Genderless"};
+            int g = (pk.fatefulEncounterGenderForm >> 1) & 0x3; if (g > 2) g = 2;
+            int level = LevelFromExp(pk.species, pk.exp);
+            string nick    = Utf16Field(pk.nickname);
+            string nature  = pk.nature < natureList.size() ? natureList[pk.nature] : to_string(pk.nature);
+            string ability = (pk.ability >= 1 && pk.ability <= 191) ? string(abilityList[pk.ability - 1]) : "?";
+            string item    = pk.heldItem == 0 ? "None" : (pk.heldItem <= 775 ? string(heldItemList[pk.heldItem - 1]) : "?");
+
+            top.DrawSysfont(title << "Party slot " + to_string(slot) + " - " + speciesList[pk.species - 1], 42, 30, title);
+
+            // Left column: textual fields.
+            auto L = [&](const string &lab, const string &val, int yy) {
+                top.DrawSysfont(label << lab << txt << val, 42, yy, txt);
+            };
+            const int ldy = 18; int ly = 54;
+            L("Nickname: ", nick,                        ly); ly += ldy;
+            L("Level: ",    to_string(level),            ly); ly += ldy;
+            L("Gender: ",   genders[g],                  ly); ly += ldy;
+            L("Nature: ",   nature,                      ly); ly += ldy;
+            L("Ability: ",  ability,                     ly); ly += ldy;
+            L("Held: ",     item,                        ly); ly += ldy;
+            L("Shiny: ",    IsShiny(&pk) ? "Yes" : "No", ly); ly += ldy;
+
+            // Hidden Power type from the LSB of each IV (HP/Atk/Def/Spe/SpA/SpD bits).
+            static const char *hpTypes[16] = {
+                "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel",
+                "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark"
+            };
+            int hpSum = (pk.iv32 & 1)
+                      + (((pk.iv32 >> 5)  & 1) << 1)
+                      + (((pk.iv32 >> 10) & 1) << 2)
+                      + (((pk.iv32 >> 15) & 1) << 3)
+                      + (((pk.iv32 >> 20) & 1) << 4)
+                      + (((pk.iv32 >> 25) & 1) << 5);
+            L("Hidden Power: ", hpTypes[hpSum * 15 / 63], ly); ly += ldy;
+
+            top.DrawSysfont(label << "OT: " << txt << Utf16Field(pk.originalTrainerName) + " (TID " + to_string(pk.TID) + "/" + to_string(pk.SID) + ")", 42, ly, txt);
+
+            // Right column: STAT / IV / EV / Tot table, order HP,Atk,Def,SpA,SpD,Speed.
+            u16 stat[6]; CalcStats(pk.species, level, pk.nature, pk.iv32, pk.EV, stat);
+            static const char *sName[6] = {"HP", "Atk", "Def", "SpA", "SpD", "Spe"};
+            static const int inMap[6] = {0, 1, 2, 4, 5, 3};
+            const int cN = 210, cT = 258, cIV = 300, cEV = 338; // Tot first, then IV, EV
+            int ry = 54; const int rdy = 18;
+
+            top.DrawSysfont(label << "Tot", cT,  ry, txt);
+            top.DrawSysfont(label << "IV",  cIV, ry, txt);
+            top.DrawSysfont(label << "EV",  cEV, ry, txt);
+            ry += rdy;
+
+            for (int d = 0; d < 6; d++) {
+                int iv = (pk.iv32 >> (5 * inMap[d])) & 0x1F;
+                int ev = pk.EV[inMap[d]];
+                top.DrawSysfont(label << sName[d],           cN,  ry, txt);
+                top.DrawSysfont(title << to_string(stat[d]), cT,  ry, txt);
+                top.DrawSysfont(txt << to_string(iv),        cIV, ry, txt);
+                top.DrawSysfont(txt << to_string(ev),        cEV, ry, txt);
+                ry += rdy;
+            }
+        }
+
+        // Read-only viewer for the active party (editing the save-buffer copy doesn't persist). A button-navigated
+        // list on the TOP screen; pressing A on a slot shows its full card (also on top). B goes back / exits.
+        void ViewPartyInfo(MenuEntry *entry) {
+            (void)entry;
+            u32 base = FindPartyBase();
+            if (base == 0) {
+                MessageBox(CenterAlign("Could not locate your party in memory.\nLoad a save (and save the game) first."), DialogType::DialogOk, ClearScreen::Both)();
+                return;
+            }
+
+            // Read the 6 slots' species once (the last-saved party is static while viewing).
+            string slots[6];
+            for (int i = 0; i < 6; i++) {
+                PK6 pk;
+                bool ok = gPartyEncrypted ? GetPokemon(base + i * 0x104, &pk) : GetPokemonRaw(base + i * 0x104, &pk);
+                string name = (ok && pk.species >= 1 && pk.species <= 721) ? string(speciesList[pk.species - 1]) : "(empty)";
+                slots[i] = to_string(i + 1) + " - " + name;
+            }
+
+            // Precompute every member's 6 stats once (the last-saved party is static while viewing).
+            // Used by the card-mode stat selector's A-jump and the per-stat best/worst markers.
+            // Invalid/empty slots are excluded from the extremes.
+            u16 partyStat[6][6]; bool slotValid[6];
+            for (int i = 0; i < 6; i++) {
+                PK6 pk;
+                bool ok = gPartyEncrypted ? GetPokemon(base + i * 0x104, &pk) : GetPokemonRaw(base + i * 0x104, &pk);
+                slotValid[i] = ok && pk.species >= 1 && pk.species <= 721;
+                if (slotValid[i])
+                    CalcStats(pk.species, LevelFromExp(pk.species, pk.exp), pk.nature, pk.iv32, pk.EV, partyStat[i]);
+                else
+                    for (int d = 0; d < 6; d++) partyStat[i][d] = 0;
+            }
+            u16 partyMax[6], partyMin[6];
+            for (int d = 0; d < 6; d++) {
+                int mx = -1, mn = 0x7FFFFFFF;
+                for (int i = 0; i < 6; i++) {
+                    if (!slotValid[i]) continue;
+                    if (partyStat[i][d] > mx) mx = partyStat[i][d];
+                    if (partyStat[i][d] < mn) mn = partyStat[i][d];
+                }
+                partyMax[d] = (mx < 0) ? 0 : (u16)mx;
+                partyMin[d] = (mx < 0) ? 0 : (u16)mn;
+            }
+
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+            const FwkSettings &st = FwkSettings::Get();
+            Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+            Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+
+            int cursor = 0, mode = 0; // mode 0 = list, 1 = card
+            int selStat = 0;     // card-mode stat selector: 0..5 = HP,Atk,Def,SpA,SpD,Spe
+            bool higher = true;  // A jumps to the party HIGHEST (true) or LOWEST (false) of selStat
+
+            // Swallow the A/B that opened this view so it doesn't bleed into the first frame.
+            while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B)) { Controller::Update(); OSD::SwapBuffers(); }
+
+            while (true) {
+                Controller::Update();
+
+                // Select closes the plugin and returns straight to the game (from either mode).
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    // Wait for release so the framework doesn't re-detect the hotkey and reopen.
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close();
+                    break;
+                }
+
+                if (mode == 0) {
+                    if (Controller::IsKeyPressed(Key::B)) break; // exit the viewer
+                    if (Controller::IsKeyPressed(Key::Up))   cursor = (cursor + 5) % 6;
+                    if (Controller::IsKeyPressed(Key::Down)) cursor = (cursor + 1) % 6;
+                    if (Controller::IsKeyPressed(Key::A))    mode = 1;
+                }
+                else {
+                    // Rebindable key (Tools > Hotkeys, default L) flips the jump direction. Checked
+                    // independently of the else-if chain so it can combine with a D-Pad press.
+                    if (g_cardStatHotkey && Controller::IsKeysPressed(g_cardStatHotkey))
+                        higher = !higher;
+
+                    if (Controller::IsKeyPressed(Key::B))          mode = 0;                  // back to list
+                    else if (Controller::IsKeyPressed(Key::Left))  cursor = (cursor + 5) % 6;  // previous card
+                    else if (Controller::IsKeyPressed(Key::Right)) cursor = (cursor + 1) % 6;  // next card
+                    else if (Controller::IsKeyPressed(Key::Up))    selStat = (selStat + 5) % 6; // move stat selector
+                    else if (Controller::IsKeyPressed(Key::Down))  selStat = (selStat + 1) % 6;
+                    else if (Controller::IsKeyPressed(Key::A)) {
+                        // Jump to the member holding the extreme of selStat. If several tie, each A
+                        // press advances to the next holder after the current card (cycles the tie).
+                        int ext = higher ? -1 : 0x7FFFFFFF;
+                        for (int i = 0; i < 6; i++) {
+                            if (!slotValid[i]) continue;
+                            int v = partyStat[i][selStat];
+                            if (higher ? (v > ext) : (v < ext)) ext = v;
+                        }
+                        if (ext != -1 && ext != 0x7FFFFFFF) {
+                            for (int k = 1; k <= 6; k++) {
+                                int i = (cursor + k) % 6;
+                                if (slotValid[i] && partyStat[i][selStat] == (u16)ext) { cursor = i; break; }
+                            }
+                        }
+                    }
+                }
+
+                // ---- TOP: draw inside the standard window (30,20,340,200) so nothing bleeds outside (no residue
+                // when the menu repaints on exit) and it looks framed like the rest of the plugin. ----
+                top.DrawRect(30, 20, 340, 200, bg, true);
+                top.DrawRect(30, 20, 340, 200, border, false);
+                if (mode == 0) {
+                    top.DrawSysfont(title << "View Party Summary", 42, 30, title);
+                    top.DrawRect(42, 48, 150, 1, title, true); // title underline
+                    top.DrawSysfont("Last saved party - save first if you changed it.", 42, 54, txt);
+                    int y = 78;
+                    for (int i = 0; i < 6; i++) {
+                        if (i == cursor) {
+                            top.DrawRect(36, y - 2, 328, 18, bg2, true);
+                            top.DrawSysfont(slots[i], 46, y, sel);
+                        }
+                        else top.DrawSysfont(slots[i], 46, y, txt);
+                        y += 21;
+                    }
+                }
+                else {
+                    // BuildSheet reads CurrentPtr() while gPartyMode is set; DrawPartyCard reads the ptr directly,
+                    // so set the target only for consistency and reset right after.
+                    gPartyMode = true; gPartySlot = (u8)(cursor + 1); gPartyPtr = base + cursor * 0x104;
+                    DrawPartyCard(top, base + cursor * 0x104, cursor + 1, title, txt, sel);
+                    gPartyMode = false;
+
+                    // --- stat-selector overlay (rows match DrawPartyCard: y = 72 + d*18) ---
+                    const int ROW0 = 72, RDY = 18;
+                    // ▲/▼ markers left of each stat name where the shown member is the team best/worst.
+                    for (int d = 0; d < 6; d++) {
+                        if (!slotValid[cursor] || partyMax[d] == partyMin[d]) continue;
+                        u16 v = partyStat[cursor][d];
+                        if (v == partyMax[d])      top.DrawSysfont(title << "\xE2\x96\xB2", 198, ROW0 + d * RDY, title); // best
+                        else if (v == partyMin[d]) top.DrawSysfont(txt   << "\xE2\x96\xBC", 198, ROW0 + d * RDY, txt);   // worst
+                    }
+                    // selection box around the selected stat row (name + Tot/IV/EV).
+                    top.DrawRect(208, ROW0 + selStat * RDY - 2, 154, 18, sel, false);
+
+                    // HIGHER/LOWER mode indicator (+ tie count) bottom-right of the top window.
+                    string lab = higher ? "\xE2\x96\xB2 HIGHER" : "\xE2\x96\xBC LOWER";
+                    top.DrawSysfont(sel << lab, 364 - (int)OSD::GetTextWidth(true, lab), 202, sel);
+                    int ext = higher ? -1 : 0x7FFFFFFF, ties = 0;
+                    for (int i = 0; i < 6; i++) { if (!slotValid[i]) continue; int v = partyStat[i][selStat]; if (higher ? (v > ext) : (v < ext)) ext = v; }
+                    for (int i = 0; i < 6; i++) if (slotValid[i] && partyStat[i][selStat] == (u16)ext) ties++;
+                    if (ties > 1) {
+                        string t = "TIE x" + to_string(ties) + " (A)";
+                        top.DrawSysfont(txt << t, 364 - (int)OSD::GetTextWidth(true, t), 186, txt);
+                    }
+                }
+
+                // ---- BOTTOM: control hints, inside the bottom window (20,20,280,200) ----
+                bot.DrawRect(20, 20, 280, 200, bg, true);
+                bot.DrawRect(20, 20, 280, 200, border, false);
+                if (mode == 0) {
+                    bot.DrawSysfont("Up / Down : select", 70, 90,  txt);
+                    bot.DrawSysfont("A : view card",       70, 118, txt);
+                    bot.DrawSysfont("B : back",            70, 146, txt);
+                }
+                else {
+                    // Moves of the selected slot (read the same block the card uses).
+                    PK6 mp;
+                    bool mok = gPartyEncrypted ? GetPokemon(base + cursor * 0x104, &mp) : GetPokemonRaw(base + cursor * 0x104, &mp);
+                    bot.DrawSysfont(title << "Moves", 40, 34, title);
+                    bot.DrawSysfont(title << "Pow", 204, 34, title);
+                    bot.DrawSysfont(title << "Acc", 252, 34, title);
+                    bot.DrawRect(40, 52, 248, 1, title, true); // title underline
+                    int my = 62;
+                    for (int i = 0; i < 4; i++) {
+                        u16 mv = mok ? mp.move[i] : 0;
+                        string nm = (mv >= 1 && mv <= 621) ? string(movesList[mv - 1]) : "-";
+                        int pw = (mv >= 1 && mv <= 621) ? gMoveInfo[mv - 1][0] : 0;
+                        int ac = (mv >= 1 && mv <= 621) ? gMoveInfo[mv - 1][1] : 0;
+                        Color c = mv ? sel : Color::Gray;
+                        bot.DrawSysfont(sel << (to_string(i + 1) + ": ") << c << nm, 40, my, txt);
+                        bot.DrawSysfont(c << (pw ? to_string(pw) : "-"), 204, my, txt); // Power
+                        bot.DrawSysfont(c << (ac ? to_string(ac) : "-"), 252, my, txt); // Accuracy
+                        my += 22;
+                    }
+
+                    // Control hints, centered, below the moves list.
+                    auto centerHint = [&](const string &s, int yy) {
+                        int w = (int)OSD::GetTextWidth(true, s);
+                        bot.DrawSysfont(s, 20 + (280 - w) / 2, yy, txt);
+                    };
+                    centerHint("< / > : switch",   170);
+                    centerHint("B : back to list", 194);
+                }
+
+                OSD::SwapBuffers();
+            }
+        }
+
         bool VerifyPokemonData(u32 pointer, PK6 *pokemon) {
-            // Check if the Pokemon data is valid and not in battle
-            if (!GetPokemon(dataPointer, pokemon) && !IfInBattle())
+            // PC box always encrypted; located party may be encrypted or decrypted. Allow through while in battle.
+            bool ok = (gPartyMode && !gPartyEncrypted) ? GetPokemonRaw(CurrentPtr(), pokemon) : GetPokemon(CurrentPtr(), pokemon);
+
+            if (!ok && !IfInBattle())
                 return false; // Data invalid or Pokemon is in battle
 
             return true; // Data is valid
         }
 
         bool HandlePokemonData(PK6 &pokemon, MenuEntry *entry, const function<bool(PK6&)> &processFunc, const function<string()> &getMessage) {
-            if (VerifyPokemonData(dataPointer, &pokemon)) {
+            if (VerifyPokemonData(CurrentPtr(), &pokemon)) {
                 if (processFunc(pokemon)) {
-                    if (SetPokemon(dataPointer, &pokemon)) {
-                        MessageBox(CenterAlign(getMessage()), DialogType::DialogOk, ClearScreen::Both)();
+                    bool wrote = (gPartyMode && !gPartyEncrypted) ? SetPokemonRaw(CurrentPtr(), &pokemon) : SetPokemon(CurrentPtr(), &pokemon);
+
+                    if (wrote) {
+                        string msg = getMessage();
+                        if (gPartyMode) // edits land in the last-saved party block; stats are recomputed by the game
+                            msg += "\n\nSAVE the game to keep this change.\nHP/Atk/... refresh after you heal or deposit/withdraw.";
+
+                        MessageBox(CenterAlign(msg), DialogType::DialogOk, ClearScreen::Both)();
                         return true;
                     }
                 }
@@ -958,7 +1449,7 @@ namespace CTRPluginFramework {
 
             // Lambda function for processing the level update
             auto processLevel = [&](PK6 &data) -> bool {
-                if (KeyboardHandler<u8>::Set(entry->Name() + ":", true, false, 3, level, 0, 1, 100, Callback<u8>)) {
+                if (KeyboardHandler<u8>::Set(entry->Name() + " (1-100):", true, false, 3, level, 0, 1, 100, Callback<u8>)) {
                     // Update level based on growth rates
                     for (const auto &rate : growthType) {
                         if (find(rate.begin(), rate.end(), data.species) != rate.end()) {
@@ -1057,7 +1548,7 @@ namespace CTRPluginFramework {
             static u16 friendship = 0;
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
-                if (KeyboardHandler<u16>::Set(entry->Name() + ":", true, false, 3, friendship, 0, 0, 255, Callback<u16>)) {
+                if (KeyboardHandler<u16>::Set(entry->Name() + " (0-255):", true, false, 3, friendship, 0, 0, 255, Callback<u16>)) {
                     AdjustFriendship(&data, friendship); // Update friendship level
                     return true;
                 }
@@ -1114,15 +1605,15 @@ namespace CTRPluginFramework {
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
                 if (keyboard.Setup(entry->Name() + ":", true, options, cureChoice) != -1) {
                     if (cureChoice == 0) { // Cured
-                        if (KeyboardHandler<u8>::Set(getLanguage->Get("NOTE_VIRUS_STRAIN"), true, false, 1, pkrsVal[1], 0, 0, 3, Callback<u8>)) {
+                        if (KeyboardHandler<u8>::Set(getLanguage->Get("NOTE_VIRUS_STRAIN") + " (0-3):", true, false, 1, pkrsVal[1], 0, 0, 3, Callback<u8>)) {
                             SetPokerusStatus(&data, 0, pkrsVal[1]);
                             return true;
                         }
                     }
 
                     else { // Non-Cured
-                        if (KeyboardHandler<u8>::Set(getLanguage->Get("NOTE_VIRUS_DAYS"), true, false, 2, pkrsVal[0], 0, 1, 15, Callback<u8>)) {
-                            if (KeyboardHandler<u8>::Set(getLanguage->Get("NOTE_VIRUS_STRAIN"), true, false, 1, pkrsVal[1], 0, 0, 3, Callback<u8>)) {
+                        if (KeyboardHandler<u8>::Set(getLanguage->Get("NOTE_VIRUS_DAYS") + " (1-15):", true, false, 2, pkrsVal[0], 0, 1, 15, Callback<u8>)) {
+                            if (KeyboardHandler<u8>::Set(getLanguage->Get("NOTE_VIRUS_STRAIN") + " (0-3):", true, false, 1, pkrsVal[1], 0, 0, 3, Callback<u8>)) {
                                 SetPokerusStatus(&data, pkrsVal[0], pkrsVal[1]);
                                 return true;
                             }
@@ -1236,7 +1727,7 @@ namespace CTRPluginFramework {
             static u8 levelMetAt;
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
-                if (KeyboardHandler<u8>::Set(entry->Name() + ":", true, false, 3, levelMetAt, 0, 1, 100, Callback<u8>)) {
+                if (KeyboardHandler<u8>::Set(entry->Name() + " (1-100):", true, false, 3, levelMetAt, 0, 1, 100, Callback<u8>)) {
                     SpecifyMetLevel(&data, levelMetAt);
                     return true;
                 }
@@ -1306,16 +1797,16 @@ namespace CTRPluginFramework {
             static int eggDateChoice;
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
-                while (true) {
-                    if (keyboard.Setup(entry->Name() + ":", true, options, eggDateChoice) != -1) {
-                        int settings[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+                while (keyboard.Setup(entry->Name() + ":", true, options, eggDateChoice) != -1) {
+                    int settings[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
 
-                        if (KeyboardHandler<u8>::Set(options[eggDateChoice] + ":", true, false, 2, eggDate[eggDateChoice], 0, 1, Calendar(eggDateChoice), Callback<u8>)) {
-                            SpecifyMetOrEggDate(&data, true, eggDate, settings[eggDateChoice][0], settings[eggDateChoice][1], settings[eggDateChoice][2]);
-                            return true;
-                        }
+                    if (KeyboardHandler<u8>::Set(options[eggDateChoice] + ":", true, false, 2, eggDate[eggDateChoice], 0, 1, Calendar(eggDateChoice), Callback<u8>)) {
+                        SpecifyMetOrEggDate(&data, true, eggDate, settings[eggDateChoice][0], settings[eggDateChoice][1], settings[eggDateChoice][2]);
+                        return true;
                     }
                 }
+
+                return false;
             }, [&]() -> string {
                 return getLanguage->Get("PLUGIN_SUCCESS");
             });
@@ -1338,11 +1829,11 @@ namespace CTRPluginFramework {
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
                 while (true) {
-                    if (keyboard.Setup(entry->Name() + ":", true, options, ivChoice) != -1) {
-                        if (KeyboardHandler<u8>::Set(options[ivChoice] + ": " + to_string((u8)(data.iv32 >> (5 * ivChoice)) & 0x1F), true, false, 2, ivs[ivChoice], 0, 0, 31, Callback<u8>)) {
-                            AssignIndividualValue(&data, ivChoice, ivs[ivChoice]);
-                            return true;
-                        }
+                    if (keyboard.Setup(entry->Name() + ":", true, options, ivChoice) == -1)
+                        return false;
+                    if (KeyboardHandler<u8>::Set(options[ivChoice] + " (0-31), now " + to_string((u8)(data.iv32 >> (5 * ivChoice)) & 0x1F) + ":", true, false, 2, ivs[ivChoice], 0, 0, 31, Callback<u8>)) {
+                        AssignIndividualValue(&data, ivChoice, ivs[ivChoice]);
+                        return true;
                     }
                 }
             }, [&]() -> string {
@@ -1367,11 +1858,11 @@ namespace CTRPluginFramework {
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
                 while (true) {
-                    if (keyboard.Setup(entry->Name() + ":", true, options, evChoice) != -1) {
-                        if (KeyboardHandler<u16>::Set(options[evChoice] + ": " + to_string(data.EV[evChoice]), true, false, 3, evAmount[evChoice], 0, 0, 252, Callback<u16>)) {
-                            AssignEffortValue(&data, evChoice, evAmount[evChoice]);
-                            return true;
-                        }
+                    if (keyboard.Setup(entry->Name() + ":", true, options, evChoice) == -1)
+                        return false;
+                    if (KeyboardHandler<u16>::Set(options[evChoice] + " (0-252), now " + to_string(data.EV[evChoice]) + ":", true, false, 3, evAmount[evChoice], 0, 0, 252, Callback<u16>)) {
+                        AssignEffortValue(&data, evChoice, evAmount[evChoice]);
+                        return true;
                     }
                 }
             }, [&]() -> string {
@@ -1396,11 +1887,11 @@ namespace CTRPluginFramework {
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
                 while (true) {
-                    if (keyboard.Setup(entry->Name() + ":", true, options, contestChoice) != -1) {
-                        if (KeyboardHandler<u16>::Set(options[contestChoice] + ":", true, false, 3, contestStats[contestChoice], 0, 0, 255, Callback<u16>)) {
-                            AssignContestStat(&data, contestChoice, contestStats[contestChoice]);
-                            return true;
-                        }
+                    if (keyboard.Setup(entry->Name() + ":", true, options, contestChoice) == -1)
+                        return false;
+                    if (KeyboardHandler<u16>::Set(options[contestChoice] + " (0-255):", true, false, 3, contestStats[contestChoice], 0, 0, 255, Callback<u16>)) {
+                        AssignContestStat(&data, contestChoice, contestStats[contestChoice]);
+                        return true;
                     }
                 }
             }, [&]() -> string {
@@ -1423,18 +1914,16 @@ namespace CTRPluginFramework {
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
                 while (true) {
-                    if (keyboard.Setup(entry->Name() + ":", true, options, moveSlot) != -1) {
-                        SearchForMove(entry);
-                        moves = moveName;
+                    if (keyboard.Setup(entry->Name() + ":", true, options, moveSlot) == -1)
+                        return false;
+                    SearchForMove(entry);
+                    moves = moveName;
 
-                        if (moves > 0) {
-                            AssignMove(&data, moveSlot, moves, false);
-                            return true;
-                        }
+                    if (moves > 0) {
+                        AssignMove(&data, moveSlot, moves, false);
+                        return true;
                     }
                 }
-
-                return false;
             }, [&]() -> string {
                 return options[moveSlot] + ": " + string(movesList[moves - 1]);
             });
@@ -1455,15 +1944,13 @@ namespace CTRPluginFramework {
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
                 while (true) {
-                    if (keyboard.Setup(entry->Name() + ":", true, options, ppUpSlot) != -1) {
-                        if (KeyboardHandler<u8>::Set(options[ppUpSlot] + ":", true, false, 1, ppUp[ppUpSlot], 0, 0, 3, Callback<u8>)) {
-                            AssignPPUp(&data, ppUpSlot, ppUp[ppUpSlot]);
-                            return true;
-                        }
+                    if (keyboard.Setup(entry->Name() + ":", true, options, ppUpSlot) == -1)
+                        return false;
+                    if (KeyboardHandler<u8>::Set(options[ppUpSlot] + " (0-3):", true, false, 1, ppUp[ppUpSlot], 0, 0, 3, Callback<u8>)) {
+                        AssignPPUp(&data, ppUpSlot, ppUp[ppUpSlot]);
+                        return true;
                     }
                 }
-
-                return false;
             }, [&]() -> string {
                 return options[ppUpSlot] + ": " + to_string(ppUp[ppUpSlot]);
             });
@@ -1484,18 +1971,16 @@ namespace CTRPluginFramework {
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
                 while (true) {
-                    if (keyboard.Setup(entry->Name() + ":", true, options, relearnMoveSlot) != -1) {
-                        SearchForMove(entry);
-                        relearnMoves = moveName;
+                    if (keyboard.Setup(entry->Name() + ":", true, options, relearnMoveSlot) == -1)
+                        return false;
+                    SearchForMove(entry);
+                    relearnMoves = moveName;
 
-                        if (relearnMoves > 0) {
-                            AssignMove(&data, relearnMoveSlot, relearnMoves, true);
-                            return true;
-                        }
+                    if (relearnMoves > 0) {
+                        AssignMove(&data, relearnMoveSlot, relearnMoves, true);
+                        return true;
                     }
                 }
-
-                return false;
             }, [&]() -> string {
                 return options[relearnMoveSlot] + ": " + string(movesList[relearnMoves - 1]);
             });
@@ -1506,7 +1991,7 @@ namespace CTRPluginFramework {
             static u32 value;
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
-                if (KeyboardHandler<u32>::Set(entry->Name() + ":", true, false, 5, value, 0, 1, 65535, Callback<u32>)) {
+                if (KeyboardHandler<u32>::Set(entry->Name() + " (1-65535):", true, false, 5, value, 0, 1, 65535, Callback<u32>)) {
                     AssignSecretID(&data, value);
                     return true;
                 }
@@ -1522,7 +2007,7 @@ namespace CTRPluginFramework {
             static u32 value;
 
             HandlePokemonData(pokemon, entry, [&](PK6 &data) -> bool {
-                if (KeyboardHandler<u32>::Set(entry->Name() + ":", true, false, 5, value, 0, 1, 65535, Callback<u32>)) {
+                if (KeyboardHandler<u32>::Set(entry->Name() + " (1-65535):", true, false, 5, value, 0, 1, 65535, Callback<u32>)) {
                     AssignTrainerID(&data, value);
                     return true;
                 }

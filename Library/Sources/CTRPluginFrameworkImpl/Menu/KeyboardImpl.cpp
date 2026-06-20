@@ -185,17 +185,20 @@ namespace CTRPluginFramework {
         if (entry != -1 && _displayScrollbar) {
             int keyRow = _manualKey / (_isIconKeyboard ? 4 : 1);
             int positionRow = _currentPosition / (_isIconKeyboard ? 4 : 1);
+            float rowStride = _isIconKeyboard ? 36.01f : 31.01f; // string list now 6/page (stride 31)
+            int botTrigger  = _isIconKeyboard ? 6 : 7;           // visible rows + 1
+            int botAnchor   = _isIconKeyboard ? 4 : 5;           // make selection the last visible row
 
-            if (keyRow > positionRow + 6 - 2) {
-                positionRow = keyRow - 4;
-                _scrollSize = ((positionRow * 36.01f) + 15) / _scrollJump - _scrollPosition;
+            if (keyRow > positionRow + botTrigger - 2) {
+                positionRow = keyRow - botAnchor;
+                _scrollSize = ((positionRow * rowStride) + 15) / _scrollJump - _scrollPosition;
                 _manualScrollUpdate = true;
                 _UpdateScroll(0.f, true);
             }
 
             else if (keyRow < positionRow + 1) {
                 positionRow = max(keyRow, 0);
-                _scrollSize = ((positionRow * 36.01f) - 15) / _scrollJump - _scrollPosition;
+                _scrollSize = ((positionRow * rowStride) - 15) / _scrollJump - _scrollPosition;
                 _manualScrollUpdate = true;
                 _UpdateScroll(0.f, true);
             }
@@ -205,6 +208,7 @@ namespace CTRPluginFramework {
     void KeyboardImpl::Populate(const vector<string> &input, bool resetScroll) {
         bool mustReset = (_strKeys.size() != input.size()) || resetScroll || _isIconKeyboard;
         int count = input.size();
+        _listMarqueeKey = -1; // drop any marquee state from a previous list
 
         if (mustReset)
             _ChangeManualKey(0);
@@ -229,15 +233,15 @@ namespace CTRPluginFramework {
         }
 
         _strKeys.clear();
-        int posY = (count < 6) ? (20 + (200 - ((30 * count) + 6 * (count - 1))) / 2) : 30;
+        int posY = (count < 7) ? (20 + (200 - ((28 * count) + 3 * (count - 1))) / 2) : 30;
 
         if (mustReset) {
-            if (count < 6)
+            if (count < 7)
                 _displayScrollbar = false;
 
             else {
                 int height = 190;
-                float lsize = 36.f * (float)count + 1;
+                float lsize = 31.f * (float)count + 1;
                 float padding = (float)height / lsize;
                 int cursorSize = padding * height;
                 float scrollTrackSpace = lsize - height;
@@ -260,7 +264,7 @@ namespace CTRPluginFramework {
         _scrollSize = 0;
         _inertialVelocity = 0;
 
-        IntRect box(60, posY, 200, 30);
+        IntRect box(60, posY, 200, 28);
         int i = 0;
 
         for (const string &str : input) {
@@ -272,7 +276,7 @@ namespace CTRPluginFramework {
             _strKeys.push_back(tks);
 
             if (mustReset)
-                box.leftTop.y += 36;
+                box.leftTop.y += 31;
         }
 
         origPosY.clear();
@@ -411,8 +415,11 @@ namespace CTRPluginFramework {
             else if (_layout == HEXADECIMAL)
                 _Hexadecimal();
 
-            // Unlock enter and clear button if blocked
-            if ((!_keys->at(15).IsEnabled() || !_keys->at(16).IsEnabled()) && _mustRelease && (_layout == DECIMAL || _layout == HEXADECIMAL)) {
+            // Unlock enter and clear button if blocked. Indices 15/16 (Backspace/Enter) only exist in the
+            // 20-key _DigitKeyboard layout (HEXADECIMAL); the compact decimal pad has fewer keys, so guard the
+            // access to avoid an out-of-range abort. Decimal keeps Backspace/Enter always enabled, so skipping
+            // the block there is correct.
+            if (_keys->size() > 16 && (!_keys->at(15).IsEnabled() || !_keys->at(16).IsEnabled()) && _mustRelease && (_layout == DECIMAL || _layout == HEXADECIMAL)) {
                 _keys->at(15).Enable(true);
                 _keys->at(16).Enable(true);
                 wasKeysLocked = true;
@@ -501,8 +508,8 @@ namespace CTRPluginFramework {
         }
 
         exit:
-        // Lock enter and clear button back for the HexEditor
-        if (wasKeysLocked) {
+        // Lock enter and clear button back for the HexEditor (only when those indices exist).
+        if (wasKeysLocked && _keys->size() > 16) {
             _keys->at(15).Enable(false);
             _keys->at(16).Enable(false);
             wasKeysLocked = false;
@@ -539,19 +546,21 @@ namespace CTRPluginFramework {
         Window::TopWindow.Draw();
         Renderer::DrawSysStringReturn(reinterpret_cast<const u8*>(_text.c_str()), posX, posY, maxX, Preferences::Settings.MainTextColor, maxY);
 
-        // If error
+        // If error (centered horizontally within the keyboard window)
         if (_errorMessage && !_error.empty()) {
             if (posY < 120)
                 posY += 48;
 
-            Renderer::DrawSysStringReturn(reinterpret_cast<const u8*>(_error.c_str()), posX, posY, maxX, red, maxY);
+            int ew = static_cast<int>(Renderer::GetTextSize(_error.c_str()));
+            int ex = background.leftTop.x + (background.size.x - ew) / 2;
+            if (ex < posX) ex = posX;
+
+            Renderer::DrawSysStringReturn(reinterpret_cast<const u8*>(_error.c_str()), ex, posY, maxX, red, maxY);
         }
     }
 
     void KeyboardImpl::_RenderBottom(void) {
         static IntRect background(20, 20, 280, 200);
-        static IntRect background2(22, 22, 276, 196);
-        static IntRect clampArea(22, 25, 270, 190);
         Renderer::SetTarget(BOTTOM);
 
         // Draw "normal" keyboard
@@ -634,45 +643,94 @@ namespace CTRPluginFramework {
             }
         }
 
-        // Draw custom keyboard
-        else {
-            // Pointer to settings
-            static auto &theme = Preferences::Settings.CustomKeyboard;
-            Renderer::DrawRect2(background, theme.BackgroundMain, theme.BackgroundSecondary);
-            Renderer::DrawRect(background2, theme.BackgroundBorder, false);
-            size_t max = _strKeys.size();
-            int offset = _isIconKeyboard ? 24 : 6;
-            max = min(static_cast<int>(max), _currentPosition + offset);
-            PrivColor::UseClamp(true, clampArea);
+        // Draw custom keyboard (selection list) on the bottom screen
+        else _DrawCustomList(0);
+    }
 
-            for (size_t i = _currentPosition; i < max && i < _strKeys.size(); i++) {
-                _strKeys[i]->ForcePressed(static_cast<int>(i) == _manualKey);
-                _strKeys[i]->Draw();
+    // Draw the selection list. dx shifts the whole panel horizontally (0 = bottom screen; KBLIST_TOP_DX
+    // centers it on the wider top screen). Row x-positions are baked with the matching shift in Populate().
+    void KeyboardImpl::_DrawCustomList(int dx) {
+        static auto &theme = Preferences::Settings.CustomKeyboard;
+        IntRect background(20 + dx, 20, 280, 200);
+        IntRect background2(22 + dx, 22, 276, 196);
+        IntRect clampArea(22 + dx, 25, 270, 190);
+
+        Renderer::DrawRect2(background, theme.BackgroundMain, theme.BackgroundSecondary);
+        Renderer::DrawRect(background2, theme.BackgroundBorder, false);
+        size_t max = _strKeys.size();
+        int offset = _isIconKeyboard ? 24 : 6;
+        max = min(static_cast<int>(max), _currentPosition + offset);
+        PrivColor::UseClamp(true, clampArea);
+
+        for (size_t i = _currentPosition; i < max && i < _strKeys.size(); i++) {
+            bool selected = (static_cast<int>(i) == _manualKey);
+            _strKeys[i]->ForcePressed(selected);
+
+            // Marquee: slide the selected row's name to reveal the rest when it overflows.
+            if (selected && !_isIconKeyboard && _strKeys[i]->Overflow() > 0.f) {
+                if (_listMarqueeKey != _manualKey) { // selection changed -> restart the animation
+                    _listMarqueeKey = _manualKey;
+                    _listMarquee = 0.f;
+                    _listMarqueeRev = false;
+                    _listMarqueeHold.Restart();
+                    _listMarqueeFrame.Restart();
+                }
+
+                // Pause 1s before revealing (forward), 2s at the revealed end (reverse).
+                bool ready = _listMarqueeRev ? _listMarqueeHold.HasTimePassed(Seconds(2))
+                                             : _listMarqueeHold.HasTimePassed(Seconds(1));
+
+                if (ready) {
+                    float dt = _listMarqueeFrame.Restart().AsSeconds();
+                    if (dt > 0.5f) dt = 0.f; // long-frame guard: skip stalls/sleep so the text never lurches
+                    float maxOff = _strKeys[i]->Overflow();
+
+                    if (!_listMarqueeRev) {
+                        _listMarquee += 32.f * dt;
+                        if (_listMarquee >= maxOff) { _listMarquee = maxOff; _listMarqueeRev = true; _listMarqueeHold.Restart(); }
+                    }
+
+                    else {
+                        _listMarquee -= 55.f * dt;
+                        if (_listMarquee <= 0.f) { _listMarquee = 0.f; _listMarqueeRev = false; _listMarqueeHold.Restart(); }
+                    }
+                }
+
+                else _listMarqueeFrame.Restart(); // keep per-frame dt small during the pause
+
+                _strKeys[i]->Draw(_listMarquee);
             }
 
-            PrivColor::UseClamp(false);
+            else {
+                if (selected)
+                    _listMarqueeKey = -1; // selected but fits -> no marquee state
 
-            if (!_displayScrollbar)
-                return;
-
-            // Draw scroll bar
-            const Color &sbBackground = theme.ScrollBarBackground;
-            const Color &sbThumb = theme.ScrollBarThumb;
-
-            // Background
-            int posX = 292;
-            int posY = 25;
-
-            Renderer::DrawLine(posX, posY + 1, 1, sbBackground, _scrollbarSize - 2);
-            Renderer::DrawLine(posX + 1, posY, 1, sbBackground, _scrollbarSize);
-            Renderer::DrawLine(posX + 2, posY + 1, 1,sbBackground, _scrollbarSize - 2);
-            posY += (int)(_scrollPosition);
-
-            // Draw thumb
-            Renderer::DrawLine(posX, posY + 1, 1, sbThumb, _scrollCursorSize - 2);
-            Renderer::DrawLine(posX + 1, posY, 1, sbThumb, _scrollCursorSize);
-            Renderer::DrawLine(posX + 2, posY + 1, 1, sbThumb, _scrollCursorSize - 2);
+                _strKeys[i]->Draw();
+            }
         }
+
+        PrivColor::UseClamp(false);
+
+        if (!_displayScrollbar)
+            return;
+
+        // Draw scroll bar
+        const Color &sbBackground = theme.ScrollBarBackground;
+        const Color &sbThumb = theme.ScrollBarThumb;
+
+        // Background
+        int posX = 292 + dx;
+        int posY = 25;
+
+        Renderer::DrawLine(posX, posY + 1, 1, sbBackground, _scrollbarSize - 2);
+        Renderer::DrawLine(posX + 1, posY, 1, sbBackground, _scrollbarSize);
+        Renderer::DrawLine(posX + 2, posY + 1, 1,sbBackground, _scrollbarSize - 2);
+        posY += (int)(_scrollPosition);
+
+        // Draw thumb
+        Renderer::DrawLine(posX, posY + 1, 1, sbThumb, _scrollCursorSize - 2);
+        Renderer::DrawLine(posX + 1, posY, 1, sbThumb, _scrollCursorSize);
+        Renderer::DrawLine(posX + 2, posY + 1, 1, sbThumb, _scrollCursorSize - 2);
     }
 
     void KeyboardImpl::_ProcessEvent(Event &event) {
@@ -717,8 +775,10 @@ namespace CTRPluginFramework {
                 _canChangeLayout = true;
             }
 
-            if (_customKeyboard && (event.key.code & (Key::Down | Key::Up | Key::Left | Key::Right | Key::A))) {
+            if (_customKeyboard && (event.key.code & (Key::Down | Key::Up | Key::Left | Key::Right | Key::A | Key::L | Key::R))) {
                 keyPressIntended = true;
+                // Only A is single-fire (select). Directional keys and L/R (page jumps) fire on
+                // KeyDown (auto-repeat) below, so they pass 0 here.
                 _HandleManualKeyPress((Key)(event.key.code & Key::A));
                 inputPassedTime = true;
             }
@@ -740,9 +800,10 @@ namespace CTRPluginFramework {
             }
 
             if (_customKeyboard && inputPassedTime) {
-                if (event.key.code & (Key::Down | Key::Up | Key::Left | Key::Right | Key::A)) {
+                // Auto-repeat for navigation: Up/Down step, Left/Right page, L/R jump 3 pages. A doesn't repeat.
+                if (event.key.code & (Key::Down | Key::Up | Key::Left | Key::Right | Key::L | Key::R)) {
                     keyPressIntended = true;
-                    _HandleManualKeyPress((Key)(event.key.code & ~(u32)Key::A));
+                    _HandleManualKeyPress((Key)(event.key.code & (Key::Down | Key::Up | Key::Left | Key::Right | Key::L | Key::R)));
                     inputClock.Restart();
                 }
             }
@@ -785,8 +846,18 @@ namespace CTRPluginFramework {
         if (event.type == Event::TouchMoved) {
             if (!buttons.Contains(event.touch.x, event.touch.y)) {
                 Time delta = _touchTimer.Restart();
-                float moveDistance = (float)(_lastTouch.y - event.touch.y);
-                _inertialVelocity = moveDistance / delta.AsSeconds();
+                // Direct 1:1 drag: the list follows the finger exactly (scr = _scrollSize * _scrollJump,
+                // so dividing the finger's list-pixel travel by _scrollJump moves the content 1:1).
+                float moveDistance = (float)(_lastTouch.y - event.touch.y); // list pixels the finger moved
+                float thumbDelta = moveDistance / _scrollJump;
+                _scrollSize += thumbDelta;
+                _manualScrollUpdate = true; // apply this delta directly (no inertia) while dragging
+
+                // Remember velocity (thumb-space) so releasing gives a gentle flick.
+                float dt = delta.AsSeconds();
+                if (dt > 0.0001f)
+                    _inertialVelocity = thumbDelta / dt;
+
                 _lastTouch = IntVector(event.touch.x, event.touch.y);
             }
         }
@@ -799,9 +870,9 @@ namespace CTRPluginFramework {
         }
     }
 
-    #define INERTIA_SCROLL_FACTOR 0.9f
-    #define INERTIA_ACCELERATION 0.75f
-    #define INERTIA_THRESHOLD 1.0f
+    #define INERTIA_SCROLL_FACTOR 0.85f
+    #define INERTIA_ACCELERATION 0.82f
+    #define INERTIA_THRESHOLD 2.0f
 
     void KeyboardImpl::_UpdateScroll(float delta, bool ignoreTouch) {
         bool isTouchDown = Touch::IsDown() && !ignoreTouch;
@@ -829,7 +900,7 @@ namespace CTRPluginFramework {
 
             _inertialVelocity += (0.98f) * delta;
             _inertialVelocity *= INERTIA_ACCELERATION;
-            _currentPosition = (_scrollPosition * _scrollJump) / 36;
+            _currentPosition = (_scrollPosition * _scrollJump) / (_isIconKeyboard ? 36 : 31);
 
             if (_isIconKeyboard)
                 _currentPosition *= 4;
@@ -1318,21 +1389,53 @@ namespace CTRPluginFramework {
         keys.emplace_back('0', pos);
     }
 
+    // Compact decimal-only pad: 1-9 in a 3x3 grid, a right column for backspace/enter/plus-minus,
+    // and a bottom row with "." and "0" (both normal width). No A-F hex keys. Sized to stay fully
+    // inside the keyboard box (background IntRect(20,20,280,200) -> x:[20,300], y:[20,220]); the
+    // bottom row ends at y=212 so nothing renders outside the box (and leaves no residue on exit).
+    void KeyboardImpl::_DecimalKeyboard(vector<TouchKey> &keys) {
+        const int kw = 52, kh = 40;      // key size (close to the stock 46x46, with visible gaps)
+        const int x0 = 36, y0 = 40;      // top-left origin (centered in the box, below the input line)
+        const int dx = 64, dy = 44;      // column / row pitch
+
+        // Digits 1-9, 3 columns
+        IntRect pos(x0, y0, kw, kh);
+        char c = '1';
+
+        for (int i = 0; i < 9; i++, c++) {
+            keys.emplace_back(c, pos);
+            pos.leftTop.x += dx;
+
+            if (i % 3 == 2) {
+                pos.leftTop.x = x0;
+                pos.leftTop.y += dy;
+            }
+        }
+
+        // Right column: Backspace, Enter, Plus-Minus
+        pos.leftTop.x = x0 + 3 * dx;
+        pos.leftTop.y = y0;
+        keys.emplace_back(KEY_BACKSPACE, Icon::DrawClearSymbol, pos);
+        pos.leftTop.y += dy;
+        keys.emplace_back(KEY_ENTER, Icon::DrawEnterKey, pos);
+        pos.leftTop.y += dy;
+        keys.emplace_back("±", pos);
+
+        // Bottom row: "." then "0" (both normal width)
+        pos.leftTop.x = x0;
+        pos.leftTop.y = y0 + 3 * dy;
+        keys.emplace_back('.', pos);
+        pos.leftTop.x += dx;
+        keys.emplace_back('0', pos);
+    }
+
     void KeyboardImpl::_Decimal(void) {
         _keys = &_DecimalKeys;
 
         if (!_DecimalKeys.empty())
             return;
 
-        _DigitKeyboard(_DecimalKeys);
-
-        // Disable Hex keys
-        KeyIter iter = _DecimalKeys.begin();
-        KeyIter end = iter;
-        advance(end, 6);
-
-        for (; iter != end; ++iter)
-            (*iter).Enable(false);
+        _DecimalKeyboard(_DecimalKeys);
     }
 
     void KeyboardImpl::_Hexadecimal(void) {
@@ -1920,72 +2023,70 @@ namespace CTRPluginFramework {
         }
 
         else {
+            const int n = static_cast<int>(_strKeys.size());
+
+            if (n <= 0)
+                return;
+
+            // Enter the list if nothing is selected yet (Up enters near the bottom, like before).
             if (_manualKey == -1) {
-                if (key & Key::Down) {
-                    int tempKey = _displayScrollbar ? _currentPosition : 0;
+                int start = _displayScrollbar ? _currentPosition : 0;
 
-                    if (!_strKeys[tempKey]->CanUse())
-                        tempKey = 0;
+                if (key & Key::Up)
+                    start = _displayScrollbar ? min(n - 1, _currentPosition + 5) : n - 1;
 
-                    _ChangeManualKey(tempKey);
-                }
-
-                else if (key & Key::Up) {
-                    int tempKey = _displayScrollbar ? min((int)_strKeys.size() - 1, _currentPosition + 5) : _strKeys.size() - 1;
-
-                    if (!_strKeys[tempKey]->CanUse())
-                        tempKey = (int)_strKeys.size() - 1;
-
-                    _ChangeManualKey(tempKey);
-                }
-
-                else return;
+                if (start < 0) start = 0;
+                if (start > n - 1) start = n - 1;
+                _ChangeManualKey(start);
             }
 
-            if (key & (Key::Down | Key::Up)) {
-                if (key & Key::Down) {
-                    int orig = _manualKey;
-                    int tempKey = _manualKey;
+            // Compute the target index for the pressed key.
+            const int orig = _manualKey;
+            int target = orig;
+            const int page = 6; // one visible page
 
-                    do tempKey++;
-                    while (tempKey < static_cast<int>(_strKeys.size()) && !_strKeys[tempKey]->CanUse() && tempKey - orig < 4);
+            if (key & Key::Down)        target = (orig + 1 > n - 1) ? 0     : orig + 1; // wrap to first
+            else if (key & Key::Up)     target = (orig - 1 < 0)     ? n - 1 : orig - 1; // wrap to last
+            else if (key & Key::Right)  target = min(n - 1, orig + page);               // page down (clamp)
+            else if (key & Key::Left)   target = max(0,     orig - page);               // page up (clamp)
+            else if (key & Key::L)      target = max(0,     orig - 3 * page);           // jump up 3 pages
+            else if (key & Key::R)      target = min(n - 1, orig + 3 * page);           // jump down 3 pages
 
-                    if (tempKey >= static_cast<int>(_strKeys.size()) || tempKey - orig >= 4)
-                        tempKey = orig;
+            // Skip disabled entries from the target in the direction of travel (bounded, wrap-safe).
+            if (target != orig && !_strKeys[target]->CanUse()) {
+                int dir = (target > orig) ? 1 : -1;
+                int scan = target;
 
-                    _ChangeManualKey(tempKey);
+                for (int steps = 0; steps < n; steps++) {
+                    scan += dir;
+
+                    if (scan < 0) scan = n - 1;
+                    else if (scan >= n) scan = 0;
+
+                    if (_strKeys[scan]->CanUse()) { target = scan; break; }
+                }
+            }
+
+            if (target != orig)
+                _ChangeManualKey(target);
+
+            // Keep the selection visible for ANY navigation (step / page / first / last).
+            if (_displayScrollbar && _manualKey >= 0) {
+                int keyRow = _manualKey;
+                int positionRow = _currentPosition;
+
+                if (keyRow > positionRow + 7 - 2) {
+                    positionRow = max(0, keyRow - 5);
+                    _scrollSize = ((positionRow * 31.01f) + 15) / _scrollJump - _scrollPosition;
+                    _manualScrollUpdate = true;
+                    _UpdateScroll(0.f, true);
                 }
 
-                else if (key & Key::Up) {
-                    int orig = _manualKey;
-                    int tempKey = _manualKey;
-
-                    do tempKey--;
-                    while (tempKey > 0 && !_strKeys[tempKey]->CanUse() && orig - tempKey < 4);
-
-                    if (tempKey < 0 || orig - tempKey >= 4)
-                        tempKey = orig;
-
-                    _ChangeManualKey(tempKey);
-                }
-
-                if (_displayScrollbar) {
-                    int keyRow = _manualKey;
-                    int positionRow = _currentPosition;
-
-                    if (keyRow > positionRow + 6 - 2) {
-                        positionRow = keyRow - 4;
-                        _scrollSize = ((positionRow * 36.01f) + 15) / _scrollJump - _scrollPosition;
-                        _manualScrollUpdate = true;
-                        _UpdateScroll(0.f, true);
-                    }
-
-                    else if (keyRow < positionRow + 1) {
-                        positionRow = max(keyRow, 0);
-                        _scrollSize = ((positionRow * 36.01f) - 15) / _scrollJump - _scrollPosition;
-                        _manualScrollUpdate = true;
-                        _UpdateScroll(0.f, true);
-                    }
+                else if (keyRow < positionRow + 1) {
+                    positionRow = max(keyRow, 0);
+                    _scrollSize = ((positionRow * 31.01f) - 15) / _scrollJump - _scrollPosition;
+                    _manualScrollUpdate = true;
+                    _UpdateScroll(0.f, true);
                 }
             }
         }

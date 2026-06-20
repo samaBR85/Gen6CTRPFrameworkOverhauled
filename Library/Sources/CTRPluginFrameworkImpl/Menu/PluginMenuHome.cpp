@@ -1,4 +1,5 @@
 #include <Headers.hpp>
+#include <vector>
 
 namespace CTRPluginFramework {
     static u32 g_textXpos[2] = {0};
@@ -291,6 +292,86 @@ namespace CTRPluginFramework {
         }
     }
 
+    // --- 2-column folder layout (hybrid: full-width labels/menu-func rows + paired checkbox toggles) ---
+    // A "toggle" (GameFunc checkbox, selectable) pairs into two columns; everything else spans the full width.
+    static bool IsTwoColToggle(MenuItem *item) {
+        return item->IsEntry() && !item->AsMenuEntryImpl()._flags.isUnselectable
+            && (item->AsMenuEntryImpl().GameFunc != nullptr || item->Flags.gridPair) // checkbox, or forced to pair
+            && !item->Flags.gridFull; // gridFull entries span the whole row instead of pairing
+    }
+
+    // Fill rowOf/colOf (col 0/1) for each item and return the total row count.
+    static int TwoColLayout(MenuFolderImpl &folder, std::vector<int> &rowOf, std::vector<int> &colOf) {
+        int n = static_cast<int>(folder.ItemsCount());
+        rowOf.assign(n, 0);
+        colOf.assign(n, 0);
+        int row = 0, pending = -1;
+
+        for (int i = 0; i < n; i++) {
+            if (IsTwoColToggle(folder[i])) {
+                if (pending < 0) { rowOf[i] = row; colOf[i] = 0; pending = i; }
+                else            { rowOf[i] = row; colOf[i] = 1; pending = -1; row++; }
+            }
+            else { // full-width row (label / menu-func / folder)
+                if (pending >= 0) { row++; pending = -1; }
+                rowOf[i] = row; colOf[i] = 0; row++;
+            }
+        }
+
+        if (pending >= 0) row++;
+        return row;
+    }
+
+    // Grid navigation for a two-column folder: pick the nearest SELECTABLE item in the pressed direction.
+    // dir: 0 = up, 1 = down, 2 = left, 3 = right.
+    static void TwoColMove(int &selector, MenuFolderImpl &folder, int dir) {
+        if (!SelectableEntryCount(folder))
+            return;
+
+        std::vector<int> rowOf, colOf;
+        int rows = TwoColLayout(folder, rowOf, colOf);
+        int n = static_cast<int>(folder.ItemsCount());
+
+        if (selector < 0 || selector >= n)
+            return;
+
+        int curRow = rowOf[selector], curCol = colOf[selector];
+        bool curFull = !IsTwoColToggle(folder[selector]);
+
+        auto at = [&](int r, int c) -> int {
+            for (int i = 0; i < n; i++)
+                if (rowOf[i] == r && colOf[i] == c) return i;
+            return -1;
+        };
+        auto pick = [&](int i) -> bool { return i >= 0 && !IsUnselectableEntry(folder[i]); };
+
+        int target = -1;
+
+        if (dir == 2) { // left: only from the right column
+            if (curCol == 1) { int t = at(curRow, 0); if (pick(t)) target = t; }
+        }
+        else if (dir == 3) { // right: only from the left column of a toggle row
+            if (curCol == 0 && !curFull) { int t = at(curRow, 1); if (pick(t)) target = t; }
+        }
+        else if (dir == 0) { // up: nearest selectable on a row above (prefer same column)
+            for (int r = curRow - 1; r >= 0 && target < 0; r--) {
+                int s = at(r, curCol); if (pick(s)) { target = s; break; }
+                int a = at(r, 0);      if (pick(a)) { target = a; break; }
+                int b = at(r, 1);      if (pick(b)) { target = b; break; }
+            }
+        }
+        else if (dir == 1) { // down
+            for (int r = curRow + 1; r < rows && target < 0; r++) {
+                int s = at(r, curCol); if (pick(s)) { target = s; break; }
+                int a = at(r, 0);      if (pick(a)) { target = a; break; }
+                int b = at(r, 1);      if (pick(b)) { target = b; break; }
+            }
+        }
+
+        if (target >= 0)
+            selector = target;
+    }
+
     void PluginMenuHome::_ProcessEvent(Event& event) {
         static Clock fastScroll;
         static Clock inputClock;
@@ -305,25 +386,33 @@ namespace CTRPluginFramework {
                     switch (event.key.code) {
                         case Key::CPadUp:
                         case Key::DPadUp: {
-                            ScrollUp(_selector, *folder, 1);
+                            if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteUp();
+                            else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 0); // flagged folder: grid up
+                        else ScrollUp(_selector, *folder, _starMode ? 2 : 1); // 2-col favorites: prev row
                             break;
                         }
 
                         case Key::CPadDown:
                         case Key::DPadDown: {
-                            ScrollDown(_selector, *folder, 1);
+                            if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteDown();
+                            else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 1); // flagged folder: grid down
+                        else ScrollDown(_selector, *folder, _starMode ? 2 : 1); // 2-col favorites: next row
                             break;
                         }
 
                         case Key::CPadLeft:
                         case Key::DPadLeft: {
-                            ScrollUp(_selector, *folder, 4);
+                            if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteLeft();
+                            else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 2); // flagged folder: grid left
+                        else ScrollUp(_selector, *folder, _starMode ? 1 : 4); // 2-col favorites: switch column
                             break;
                         }
 
                         case Key::CPadRight:
                         case Key::DPadRight: {
-                            ScrollDown(_selector, *folder, 4);
+                            if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteRight();
+                            else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 3); // flagged folder: grid right
+                        else ScrollDown(_selector, *folder, _starMode ? 1 : 4); // 2-col favorites: switch column
                             break;
                         }
 
@@ -339,28 +428,36 @@ namespace CTRPluginFramework {
                 switch (event.key.code) {
                     case Key::CPadUp:
                     case Key::DPadUp: {
-                        ScrollUp(_selector, *folder, 1);
+                        if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteUp();
+                        else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 0); // flagged folder: grid up
+                        else ScrollUp(_selector, *folder, _starMode ? 2 : 1); // 2-col favorites: prev row
                         fastScroll.Restart();
                         break;
                     }
 
                     case Key::CPadDown:
                     case Key::DPadDown: {
-                        ScrollDown(_selector, *folder, 1);
+                        if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteDown();
+                        else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 1); // flagged folder: grid down
+                        else ScrollDown(_selector, *folder, _starMode ? 2 : 1); // 2-col favorites: next row
                         fastScroll.Restart();
                         break;
                     }
 
                     case Key::CPadLeft:
                     case Key::DPadLeft: {
-                        ScrollUp(_selector, *folder, 4);
+                        if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteLeft();
+                        else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 2); // flagged folder: grid left
+                        else ScrollUp(_selector, *folder, _starMode ? 1 : 4); // 2-col favorites: switch column
                         fastScroll.Restart();
                         break;
                     }
 
                     case Key::CPadRight:
                     case Key::DPadRight: {
-                        ScrollDown(_selector, *folder, 4);
+                        if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteRight();
+                        else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 3); // flagged folder: grid right
+                        else ScrollDown(_selector, *folder, _starMode ? 1 : 4); // 2-col favorites: switch column
                         fastScroll.Restart();
                         break;
                     }
@@ -404,8 +501,11 @@ namespace CTRPluginFramework {
 
         if (folder->ItemsCount() > 0 && event.key.code != Key::Touchpad && (event.type < Event::TouchBegan || event.type > Event::TouchSwipped)) {
             item = folder->_items[_selector];
-            _selectedTextSize = Renderer::GetTextSize(item->name.c_str());
-            _maxScrollOffset = static_cast<float>(_selectedTextSize) - 200.f;
+            // In favorites, measure the short alias (when set) so the marquee reflects what's actually drawn.
+            const string &dn = (_starMode && !item->favAlias.empty()) ? item->favAlias : item->name;
+            _selectedTextSize = Renderer::GetTextSize(dn.c_str());
+            bool twoCol = _starMode || folder->Flags.twoColumn; // narrow visible width in any 2-column view
+            _maxScrollOffset = static_cast<float>(_selectedTextSize) - (twoCol ? 135.f : 200.f);
             _scrollClock.Restart();
             _scrollOffset = 0.f;
             _reverseFlow = false;
@@ -467,6 +567,9 @@ namespace CTRPluginFramework {
         Window::TopWindow.Draw();
         MenuFolderImpl *folder = _starMode ? _starred : _folder;
 
+        // Root menus are centered; the Favorites list is left-aligned (like a sub-folder) for readability.
+        const bool rootLayout = !folder->HasParent() && !_starMode;
+
         // Draw Title
         int posYbak = posY;
 
@@ -495,12 +598,121 @@ namespace CTRPluginFramework {
         // posY here is already past the title+underline, so kBoxBottom - posY is
         // the area below the header only. TopWindow: Window(30,20,340,200) → bottom Y=220.
         // Per-item height ≈ 20px (DrawSysString ~16 + explicit posY+=4).
-        if (!folder->HasParent()) {
+        if (rootLayout) {
             const int kBoxBottom = 220;
             const int kItemH = 20;
             int n = std::min(max, 7);
             int pad = (kBoxBottom - posY - n * kItemH) / 2 - 10;
             if (pad > 0) posY += pad;
+        }
+
+        // Favorites: render as a 2-column grid (more items per screen). Everything here is gated on
+        // _starMode, so the normal/root menu keeps its single-column layout untouched. Marquee runs only
+        // on the selected cell (offset = _scrollOffset), which is the desired behavior for long names.
+        if (_starMode) {
+            const int leftX = posX, rightX = posX + 165; // two columns
+            const int rowH = 20;
+            const int baseY = posY;
+
+            int rowSel = _selector / 2;
+            int firstRow = std::max(0, rowSel - 6);
+            int firstIdx = firstRow * 2;
+            int lastIdx = std::min(max, firstIdx + 14); // 7 rows x 2 columns
+
+            for (int i = firstIdx; i < lastIdx; i++) {
+                MenuItem *item = folder->_items[i];
+                const char *name = (!item->favAlias.empty() ? item->favAlias : item->name).c_str(); // favorites alias
+                const Color &fg = i == _selector ? selected : unselected;
+                float offset = i == _selector ? _scrollOffset : 0.f;
+
+                int col = i & 1;
+                int cellX = col ? rightX : leftX;
+                int cellY = baseY + ((i - firstIdx) / 2) * rowH;
+                int colXLimit = col ? 370 : leftX + 152; // clip long unselected names at the column edge
+
+                if (drawSelector && i == _selector)
+                    Renderer::MenuSelector(cellX - 5, cellY - 3, 160, 20);
+
+                if (item->_type == MenuType::Entry) {
+                    MenuEntryImpl *entry = reinterpret_cast<MenuEntryImpl*>(item);
+                    int yy = cellY;
+
+                    if (entry->GameFunc != nullptr)
+                        Renderer::DrawSysCheckBox(name, cellX, yy, colXLimit, fg, entry->IsActivated(), offset);
+
+                    else {
+                        if (entry->MenuFunc != nullptr && !entry->_flags.isUnselectable)
+                            Icon::DrawSettings(cellX, cellY);
+
+                        Renderer::DrawSysString(name, cellX + 20, yy, colXLimit, fg, offset);
+                    }
+                }
+
+                else {
+                    int yy = cellY;
+                    Icon::DrawFolder(cellX, cellY);
+                    Renderer::DrawSysString(name, cellX + 20, yy, colXLimit, fg, offset);
+                }
+            }
+
+            return;
+        }
+
+        // Per-folder 2-column layout (flagged via SetTwoColumns): full-width rows for labels / menu-func
+        // entries, checkbox toggles paired into two columns. Reduces scrolling on toggle-heavy folders.
+        if (folder->Flags.twoColumn && !rootLayout) {
+            const int leftX = posX, rightX = posX + 165;
+            const int rowH = 20;
+            const int baseY = posY;
+
+            std::vector<int> rowOf, colOf;
+            int rows = TwoColLayout(*folder, rowOf, colOf);
+            int rowsVisible = std::max(1, (220 - baseY) / rowH);
+
+            int selRow = rowOf[_selector];
+            int firstRow = selRow - (rowsVisible - 2);
+            if (firstRow > rows - rowsVisible) firstRow = rows - rowsVisible;
+            if (firstRow < 0) firstRow = 0;
+
+            for (int k = 0; k < max; k++) {
+                int r = rowOf[k];
+                if (r < firstRow || r >= firstRow + rowsVisible)
+                    continue;
+
+                MenuItem *item = folder->_items[k];
+                const char *name = item->name.c_str();
+                const Color &fg = k == _selector ? selected : unselected;
+                float offset = k == _selector ? _scrollOffset : 0.f;
+                bool full = !IsTwoColToggle(item);
+                int cellX = (full || colOf[k] == 0) ? leftX : rightX;
+                int cellY = baseY + (r - firstRow) * rowH;
+                int colXLimit = full ? 360 : (colOf[k] ? 343 : leftX + 152); // right col: ~27px margin off the border
+
+                if (drawSelector && k == _selector)
+                    Renderer::MenuSelector(cellX - 5, cellY - 3, full ? 330 : 160, 20);
+
+                int yy = cellY; // DrawSys* advance posY by ref; keep cellY intact for the grid
+                if (item->_type == MenuType::Entry) {
+                    MenuEntryImpl *entry = reinterpret_cast<MenuEntryImpl*>(item);
+
+                    if (entry->GameFunc != nullptr)
+                        Renderer::DrawSysCheckBox(name, cellX, yy, colXLimit, fg, entry->IsActivated(), offset);
+
+                    else {
+                        if (entry->MenuFunc != nullptr && !entry->_flags.isUnselectable)
+                            Icon::DrawSettings(cellX, cellY);
+
+                        Renderer::DrawSysString(name, cellX + 20, yy, colXLimit, fg, offset);
+                    }
+                }
+
+                else {
+                    Icon::DrawFolder(cellX, cellY);
+                    Renderer::DrawSysString(name, cellX + 20, yy, colXLimit, fg, offset);
+                }
+            }
+
+            return;
         }
 
         int i = std::max(0, _selector - 6);
@@ -521,19 +733,19 @@ namespace CTRPluginFramework {
                 MenuEntryImpl *entry = reinterpret_cast<MenuEntryImpl*>(item);
 
                 if (entry->GameFunc != nullptr)
-                    Renderer::DrawSysCheckBox(name, (!folder->HasParent() ? (370 - Renderer::GetTextSize(name)) / 2 : posX), posY, 350, fg, entry->IsActivated(), offset);
+                    Renderer::DrawSysCheckBox(name, (rootLayout ? (370 - Renderer::GetTextSize(name)) / 2 : posX), posY, 350, fg, entry->IsActivated(), offset);
 
                 else {
                     if (entry->MenuFunc != nullptr && !entry->_flags.isUnselectable)
-                        Icon::DrawSettings((!folder->HasParent() ? (370 - Renderer::GetTextSize(name)) / 2 : posX), posY);
+                        Icon::DrawSettings((rootLayout ? (370 - Renderer::GetTextSize(name)) / 2 : posX), posY);
 
-                    Renderer::DrawSysString(name, (!folder->HasParent() ? ((370 - Renderer::GetTextSize(name)) / 2) + 20 : posX + 20), posY, 350, fg, offset);
+                    Renderer::DrawSysString(name, (rootLayout ? ((370 - Renderer::GetTextSize(name)) / 2) + 20 : posX + 20), posY, 350, fg, offset);
                     posY += 1;
                 }
             }
 
             else {
-                if (!folder->HasParent())
+                if (rootLayout)
                     Renderer::DrawSysString(name, (400 - Renderer::GetTextSize(name)) / 2, posY, 350, fg, offset);
                 else {
                     Icon::DrawFolder(posX, posY);
@@ -598,20 +810,33 @@ namespace CTRPluginFramework {
     }
 
     void PluginMenuHome::_Update(Time delta) {
-        if (_selectedTextSize >= 280 && _scrollClock.HasTimePassed(Seconds(2))) {
-            if (!_reverseFlow && _scrollOffset < _maxScrollOffset)
-                _scrollOffset += 29.f * delta.AsSeconds();
+        MenuFolderImpl *curFolder = _starMode ? _starred : _folder;
+        bool twoCol = _starMode || (curFolder && curFolder->Flags.twoColumn);
+
+        if (_selectedTextSize >= (twoCol ? 140 : 280)) {
+            if (!_reverseFlow) {
+                // 1s pause before revealing, then scroll forward at 29 px/s.
+                if (_scrollClock.HasTimePassed(Seconds(1))) {
+                    if (_scrollOffset < _maxScrollOffset)
+                        _scrollOffset += 29.f * delta.AsSeconds();
+                    else {
+                        _reverseFlow = true;
+                        _scrollClock.Restart(); // start the 2s pause at the revealed end
+                    }
+                }
+            }
 
             else {
-                _scrollOffset -= 55.f * delta.AsSeconds();
+                // 2s pause at the revealed end, then scroll back at 55 px/s.
+                if (_scrollClock.HasTimePassed(Seconds(2))) {
+                    _scrollOffset -= 55.f * delta.AsSeconds();
 
-                if (_scrollOffset <= 0.0f) {
-                    _reverseFlow = false;
-                    _scrollOffset = 0.f;
-                    _scrollClock.Restart();
+                    if (_scrollOffset <= 0.0f) {
+                        _reverseFlow = false;
+                        _scrollOffset = 0.f;
+                        _scrollClock.Restart(); // start the 1s pause before the next reveal
+                    }
                 }
-
-                else _reverseFlow = true;
             }
         }
 
@@ -800,7 +1025,7 @@ namespace CTRPluginFramework {
 
             // Update entry infos
             _selectedTextSize = Renderer::GetTextSize(e->name.c_str());
-            _maxScrollOffset = static_cast<float>(_selectedTextSize) - 200.f;
+            _maxScrollOffset = static_cast<float>(_selectedTextSize) - (_starMode ? 135.f : 200.f); // narrower visible width in the 2-column favorites view
             _scrollClock.Restart();
             _scrollOffset = 0.f;
             _reverseFlow = false;
@@ -887,6 +1112,32 @@ namespace CTRPluginFramework {
             Preferences::MarkDirty(); // favorites list changed -> Data.bin needs saving
         }
     }
+
+    // Reorder favorites: swap the selected item with the item at `target` and mark Data.bin dirty so the
+    // new order persists (WriteFavoritesToFile saves the UID sequence in _items order). The favorites are
+    // drawn as a 2-column grid (even index = left column, odd = right; row = i/2), so the D-Pad direction
+    // maps to the VISUAL neighbour: Up/Down = same column one row away (±2), Left/Right = same row (∓1).
+    void PluginMenuHome::_MoveFavoriteTo(int target) {
+        if (!_starMode)
+            return;
+
+        int count = static_cast<int>(_starred->ItemsCount());
+
+        if (_selector < 0 || _selector >= count)
+            return;
+
+        if (target < 0 || target >= count || target == _selector)
+            return;
+
+        swap(_starred->_items[_selector], _starred->_items[target]);
+        _selector = target;
+        Preferences::MarkDirty();
+    }
+
+    void PluginMenuHome::_MoveFavoriteUp(void)    { _MoveFavoriteTo(_selector - 2); }
+    void PluginMenuHome::_MoveFavoriteDown(void)  { _MoveFavoriteTo(_selector + 2); }
+    void PluginMenuHome::_MoveFavoriteLeft(void)  { if ((_selector & 1) == 1) _MoveFavoriteTo(_selector - 1); } // only from the right column
+    void PluginMenuHome::_MoveFavoriteRight(void) { if ((_selector & 1) == 0) _MoveFavoriteTo(_selector + 1); } // only from the left column
 
     void PluginMenuHome::UnStar(MenuItem *item) {
         MenuFolderImpl *folder = _starMode ? _starred : _folder;

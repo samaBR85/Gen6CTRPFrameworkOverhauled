@@ -35,6 +35,11 @@ namespace CTRPluginFramework {
             void _RenderBottom(void);
             void _Update(Time delta);
             void _StarItem(void);
+            void _MoveFavoriteTo(int target); // reorder favorites (star mode): swap selected with target index (validated)
+            void _MoveFavoriteUp(void);    // grid: swap with the item one row above (same column)
+            void _MoveFavoriteDown(void);  // grid: swap with the item one row below (same column)
+            void _MoveFavoriteLeft(void);  // grid: swap with the item in the left column (same row)
+            void _MoveFavoriteRight(void); // grid: swap with the item in the right column (same row)
             void _TriggerEntry(void);
             void _showStarredBtn_OnClick(void);
             void _controllerBtn_OnClick(void);

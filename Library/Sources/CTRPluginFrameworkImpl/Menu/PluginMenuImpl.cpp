@@ -16,6 +16,7 @@ namespace CTRPluginFramework {
         _appGuide(new GuideReader("AppGuide")),
         _hexEditor(0x00100000),
         _forceOpen(false),
+        _forceClose(false),
         _hexEditorState(true)
 
         {
@@ -270,9 +271,10 @@ namespace CTRPluginFramework {
                 delta = clock.Restart();
 
                 // Close menu
-                if (shouldClose || SystemImpl::WantsToSleep()) {
+                if (shouldClose || _forceClose || SystemImpl::WantsToSleep()) {
                     ProcessImpl::Play(true);
                     _isOpen = false;
+                    _forceClose = false;
                     openManager.Clear();
                     shouldClose = false;
 
@@ -533,6 +535,11 @@ namespace CTRPluginFramework {
     void PluginMenuImpl::ForceOpen(void) {
         if (_runningInstance != nullptr)
             _runningInstance->_forceOpen = true;
+    }
+
+    void PluginMenuImpl::ForceClose(void) {
+        if (_runningInstance != nullptr)
+            _runningInstance->_forceClose = true;
     }
 
     void PluginMenuImpl::UnStar(MenuItem *item) {

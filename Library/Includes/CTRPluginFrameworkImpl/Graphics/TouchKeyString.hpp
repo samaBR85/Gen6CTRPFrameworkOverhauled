@@ -15,7 +15,11 @@ namespace CTRPluginFramework {
             void Enable(bool enable = true);
             void ForcePressed(bool force);
             bool CanUse(void);
-            void Draw(void);
+            // How many pixels of the (untruncated) text overflow the visible box (>0 = needs marquee).
+            float Overflow(void) const;
+            // marquee >= 0 slides the FULL text by that many pixels (only when this row is selected
+            // and overflows). marquee < 0 (default) keeps the normal truncated/centered draw.
+            void Draw(float marquee = -1.f);
             void Update(const bool touchIsDown, const IntVector &touchPos);
             void Scroll(float amount);
             void GetPosition(u16 &posX, float& posY);
@@ -23,7 +27,9 @@ namespace CTRPluginFramework {
             int operator()(void);
 
         private:
-            string _content;
+            string _content;       // truncated to fit the box (normal draw)
+            string _fullContent;   // original, untruncated text (used by the marquee)
+            float _fullWidth = 0.f; // pixel width of _fullContent
             CustomIcon _icon;
             IntRect _uiProperties;
 

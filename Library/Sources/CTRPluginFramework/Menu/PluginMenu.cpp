@@ -112,6 +112,10 @@ namespace CTRPluginFramework {
         PluginMenuImpl::ForceOpen();
     }
 
+    void PluginMenu::Close(void) {
+        PluginMenuImpl::ForceClose();
+    }
+
     void PluginMenu::SynchronizeWithFrame(const bool useSync) {
         _menu->SyncOnFrame = useSync;
     }

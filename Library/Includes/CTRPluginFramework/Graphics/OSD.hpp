@@ -12,6 +12,13 @@ namespace CTRPluginFramework {
     // toast appear as soon as the menu closes instead of seconds later.
     extern bool g_entryToggleNotif;
 
+    // The user's configured "Card stat HIGHER/LOWER" key (Tools > Hotkeys). Mirrors
+    // Preferences::CardStatHotkeys (which persists it in Data.bin) so PLUGIN code — which cannot
+    // include the impl-only Preferences.hpp — can read it. Used ONLY by the Party Summary card
+    // view (PKHeX.cpp ViewPartyInfo) to flip between revealing the party's highest vs lowest value
+    // of the selected stat. Default L.
+    extern u32 g_cardStatHotkey;
+
     // The MenuEntry* of that very "Show ON/OFF notifications" checkbox (stored as void* to avoid a
     // Menu header dependency). _TriggerEntry uses it to (a) update g_entryToggleNotif the instant
     // the checkbox is toggled and (b) give the checkbox a single "Notifications: ON/OFF" toast

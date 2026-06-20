@@ -59,6 +59,7 @@ namespace CTRPluginFramework {
 
             void _RenderTop(void);
             void _RenderBottom(void);
+            void _DrawCustomList(int dx); // draw the selection list at a horizontal offset (0 = bottom screen)
             void _ProcessEvent(Event &event);
             void _UpdateScroll(float delta, bool ignoreTouch);
             void _Update(float delta);
@@ -70,6 +71,7 @@ namespace CTRPluginFramework {
             void _QwertySymbols(void);
             void _QwertyNintendo(void);
             static void _DigitKeyboard(vector<TouchKey> &keys);
+            static void _DecimalKeyboard(vector<TouchKey> &keys); // compact decimal pad (no A-F hex keys)
             void _Decimal(void);
             void _Hexadecimal(void);
 
@@ -142,6 +144,13 @@ namespace CTRPluginFramework {
             float _scrollEnd{0.f};
             IntVector _lastTouch;
             Clock _touchTimer;
+
+            // Marquee for the selected list row whose name overflows the box.
+            float _listMarquee{0.f};
+            bool _listMarqueeRev{false};
+            int _listMarqueeKey{-1};
+            Clock _listMarqueeHold;
+            Clock _listMarqueeFrame;
 
             vector<TouchKeyString*> _strKeys;
     };

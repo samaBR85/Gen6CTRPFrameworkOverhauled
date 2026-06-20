@@ -221,16 +221,19 @@ namespace CTRPluginFramework {
             for (; i < max; i++) {
                 const Color &c = i == _selector ? selected : unselected;
                 MenuItem *item = _folder->_items[i];
+                float offset = 0.f;
 
-                if (i == _selector)
+                if (i == _selector) {
+                    offset = _scrollOffset; // slide the selected row's name to reveal the overflow
                     Renderer::MenuSelector(posX - 5, posY - 3, selW, 20);
+                }
 
                 if (item->_type != MenuType::Folder) {
                     _iconCallback(posX, posY);
-                    Renderer::DrawSysString(item->name.c_str(), posX + 20, posY, xmax, c);
+                    Renderer::DrawSysString(item->name.c_str(), posX + 20, posY, xmax, c, offset);
                 }
 
-                else Renderer::DrawSysFolder(item->name.c_str(), posX, posY, xmax, c);
+                else Renderer::DrawSysFolder(item->name.c_str(), posX, posY, xmax, c, offset);
 
                 posY += 4;
             }
@@ -513,17 +516,22 @@ namespace CTRPluginFramework {
             float namesize = Renderer::GetTextSize(item->name.c_str());
 
             // If name can fit totally in the screen, no need to scroll
-            if (namesize < 280.f)
+            if (namesize <= _marqueeWidth) {
                 _selectedNameSize = 0;
+                _maxScrollOffset = 0.f;
+            }
 
-            _selectedNameSize = static_cast<u32>(namesize);
-            _maxScrollOffset = namesize - 280.f;
+            else {
+                _selectedNameSize = static_cast<u32>(namesize);
+                _maxScrollOffset = namesize - _marqueeWidth;
+            }
+
             _scrollClock.Restart();
             return;
         }
 
-        // If we have nothing to scroll, just exit
-        if (!_selectedNameSize || (!_reverseFlow && !_scrollClock.HasTimePassed(Seconds(2))) || (_reverseFlow && !_scrollClock.HasTimePassed(Seconds(1))))
+        // Nothing to scroll, or still pausing: 1s before revealing (forward), 2s at the revealed end (reverse).
+        if (!_selectedNameSize || (!_reverseFlow && !_scrollClock.HasTimePassed(Seconds(1))) || (_reverseFlow && !_scrollClock.HasTimePassed(Seconds(2))))
             return;
 
         float deltaAsSeconds = delta.AsSeconds();
@@ -533,7 +541,7 @@ namespace CTRPluginFramework {
 
         if (!_reverseFlow) {
             if (_scrollOffset < _maxScrollOffset)
-                _scrollOffset += 29.f * deltaAsSeconds;
+                _scrollOffset += 32.f * deltaAsSeconds;
 
             else {
                 _reverseFlow = true;

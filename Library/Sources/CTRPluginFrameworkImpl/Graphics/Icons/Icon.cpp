@@ -271,11 +271,11 @@ namespace CTRPluginFramework {
     ***************/
     int Icon::DrawAddFavorite(int posX, int posY, bool filled) {
         u8 *img = filled ? AddFavoriteFilled25 : AddFavorite25;
-        return (DrawImg(img, posX, posY, 25, 25));
+        return (DrawImg(img, posX, posY, 25, 25, false)); // keep the baked yellow star (no tint on light themes)
     }
 
     int Icon::DrawFavorite(int posX, int posY) {
-        return (DrawImg(Star15, posX, posY, 15, 15));
+        return (DrawImg(Star15, posX, posY, 15, 15, false)); // keep the baked star color (no tint on light themes)
     }
 
     /*
@@ -291,7 +291,7 @@ namespace CTRPluginFramework {
     ** 15px * 15px
     **************/
     int Icon::DrawFile(int posX, int posY) {
-        return (DrawImg(File15, posX, posY, 15, 15));
+        return (DrawImg(File15, posX, posY, 15, 15, false)); // keep the baked file-icon color (no tint on light themes)
     }
 
     /*

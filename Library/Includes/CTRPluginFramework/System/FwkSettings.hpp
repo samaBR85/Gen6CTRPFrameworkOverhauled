@@ -104,6 +104,13 @@ namespace CTRPluginFramework {
         static FwkSettings &Get(void);
         static PluginHeader *Header;
 
+        // Optional plugin hooks for the theme picker. The plugin owns the theme table; the framework
+        // "Tools" screen builds a "Change Theme" sub-menu (one entry per theme, top-screen, button-
+        // navigated like Hotkeys/Settings) from these. Leave ThemeCount null/zero for no entry.
+        static int  (*ThemeCount)(void);          // number of themes
+        static const char *(*ThemeName)(int idx); // menu label for theme idx (name + color preview)
+        static void (*ApplyThemeByIndex)(int idx);// apply + save + notify theme idx
+
         /**
          * \brief Reset all colors to their default values
          */

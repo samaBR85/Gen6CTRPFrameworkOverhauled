@@ -90,6 +90,17 @@ namespace CTRPluginFramework {
              */
             string &Name(void) const;
             /**
+             * \brief Set a short alias shown ONLY in the Favorites list (empty = use the full name).
+             * \param alias The short label to display in Favorites
+             */
+            void SetFavoriteAlias(const string &alias) const;
+            /**
+             * \brief Render this folder's items in a 2-column grid (full-width rows for non-selectable
+             *        labels and menu-func/folder entries; checkbox toggles pair into 2 columns).
+             * \param enable Enable or disable the 2-column layout for this folder
+             */
+            void SetTwoColumns(bool enable) const;
+            /**
              * \brief Get a reference of the string that hold the note of this folder
              * \return A reference of the string
              */

@@ -101,6 +101,7 @@ namespace CTRPluginFramework {
             static u32 FavoriteHotkeys; // menu bind: favorite selected item (default X)
             static u32 InfoHotkeys;     // menu bind: show selected item's INFO note (default Y)
             static u32 KeyboardHotkeys; // menu bind: open selected item's editor (default START)
+            static u32 CardStatHotkeys; // card bind: flip Party-Summary stat jump HIGHER/LOWER (default L); mirrored to OSD::g_cardStatHotkey for the plugin
             static u64 Flags;
             static bool Dirty; // unsaved-changes flag; gates WriteSettings (see MarkDirty)
             static LCDBacklight Backlights[2];

@@ -119,6 +119,18 @@ namespace CTRPluginFramework {
         return (_item->name);
     }
 
+    void MenuEntry::SetFavoriteAlias(const string &alias) const {
+        _item->favAlias = alias;
+    }
+
+    void MenuEntry::SetGridFullWidth(bool enable) const {
+        _item->Flags.gridFull = enable;
+    }
+
+    void MenuEntry::SetGridPaired(bool enable) const {
+        _item->Flags.gridPair = enable;
+    }
+
     string &MenuEntry::Note(void) const {
         return (_item->note);
     }

@@ -104,8 +104,10 @@ namespace CTRPluginFramework {
         const Color &background = _isPressed ? theme.KeyBackgroundPressed : theme.KeyBackground;
         const Color &text = _isPressed ? theme.KeyTextPressed : theme.KeyText;
 
-        // Background
-        Renderer::DrawRect(_uiProperties, background);
+        // Background — 1px inset so the panel background bleeds through as a key separator
+        IntRect inset(_uiProperties.leftTop.x + 1, _uiProperties.leftTop.y + 1,
+                      _uiProperties.size.x - 2, _uiProperties.size.y - 2);
+        Renderer::DrawRect(inset, background);
 
         // Icon
         if (_icon != nullptr)

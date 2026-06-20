@@ -44,6 +44,9 @@ namespace CTRPluginFramework {
             void DrawAt(Target target) const;
             // Select/activate an item by a touch on the BOTTOM screen. Returns a MenuEvent.
             int ProcessTouch(int touchX, int touchY, MenuItem **userchoice);
+            // Visible text width (px) a selected name may use before it starts to slide (marquee).
+            // Default 280 fits the 400px TOP menu; GuideReader lowers it for the BOTTOM screen.
+            void SetMarqueeWidth(float width) { _marqueeWidth = width; }
             bool drawFooter;
 
         private:
@@ -63,6 +66,7 @@ namespace CTRPluginFramework {
             u32 _reverseFlow;
             float _scrollOffset;
             float _maxScrollOffset;
+            float _marqueeWidth{280.f};
 
             void _ScrollUp(int step);
             void _ScrollDown(int step);

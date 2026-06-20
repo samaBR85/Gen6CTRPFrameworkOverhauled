@@ -7,9 +7,10 @@ namespace CTRPluginFramework {
     BMPImage *Preferences::bottomBackgroundImage = nullptr;
 
     u32 Preferences::MenuHotkeys = static_cast<u32>(Key::Select);
-    u32 Preferences::FavoriteHotkeys = static_cast<u32>(Key::X);
-    u32 Preferences::InfoHotkeys = static_cast<u32>(Key::Y);
+    u32 Preferences::FavoriteHotkeys = static_cast<u32>(Key::Y);
+    u32 Preferences::InfoHotkeys = static_cast<u32>(Key::X);
     u32 Preferences::KeyboardHotkeys = static_cast<u32>(Key::Start);
+    u32 Preferences::CardStatHotkeys = static_cast<u32>(Key::L);
     u64 Preferences::Flags = 0;
     bool Preferences::Dirty = false;
     LCDBacklight Preferences::Backlights[2];
@@ -111,6 +112,7 @@ namespace CTRPluginFramework {
             FavoriteHotkeys = header.reserved[0];
             InfoHotkeys     = header.reserved[1];
             KeyboardHotkeys = header.reserved[2];
+            CardStatHotkeys = header.reserved[3];
             Flags = header.flags;
             memcpy(reinterpret_cast<void*>(Backlights), &header.lcdbacklights, sizeof(Backlights));
         }
@@ -120,13 +122,19 @@ namespace CTRPluginFramework {
             MenuHotkeys = Key::Select;
 
         if (FavoriteHotkeys == 0)
-            FavoriteHotkeys = Key::X;
+            FavoriteHotkeys = Key::Y;
 
         if (InfoHotkeys == 0)
-            InfoHotkeys = Key::Y;
+            InfoHotkeys = Key::X;
 
         if (KeyboardHotkeys == 0)
             KeyboardHotkeys = Key::Start;
+
+        if (CardStatHotkeys == 0)
+            CardStatHotkeys = Key::L;
+
+        // Mirror to the public global so plugin code (PKHeX.cpp card view) can read it.
+        g_cardStatHotkey = CardStatHotkeys;
     }
 
     void Preferences::LoadSavedEnabledCheats(void) {
@@ -265,6 +273,7 @@ namespace CTRPluginFramework {
             header.reserved[0] = FavoriteHotkeys;
             header.reserved[1] = InfoHotkeys;
             header.reserved[2] = KeyboardHotkeys;
+            header.reserved[3] = CardStatHotkeys;
             header.flags = Flags;
             memcpy(&header.lcdbacklights, Backlights, sizeof(header.lcdbacklights));
 

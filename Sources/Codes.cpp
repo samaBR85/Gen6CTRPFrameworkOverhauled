@@ -415,16 +415,17 @@ namespace CTRPluginFramework {
 
     void PartyPosition(MenuEntry *entry) {
         vector<string> party(6); // Initialize vector to hold party
+        Color sel = FwkSettings::Get().MenuSelectedItemColor; // theme color so the names read on any background
 
         // Lambda to generate prompt text for party positions
         auto generatePromptText = [&](const vector<string> &party) -> string {
-            string promptText = entry->Name() <<
-                Color::White << "\n\n1: " + party[0] <<
-                Color::White << "\n2: " + party[1] <<
-                Color::White << "\n3: " + party[2] <<
-                Color::White << "\n4: " + party[3] <<
-                Color::White << "\n5: " + party[4] <<
-                Color::White << "\n6: " + party[5] << "\n";
+            string promptText = string("Choose Party Slot") <<
+                sel << "\n\n1: " + party[0] <<
+                sel << "\n2: " + party[1] <<
+                sel << "\n3: " + party[2] <<
+                sel << "\n4: " + party[3] <<
+                sel << "\n5: " + party[4] <<
+                sel << "\n6: " + party[5] << "\n";
             return promptText;
         };
 
@@ -445,7 +446,7 @@ namespace CTRPluginFramework {
                 updatePointerOffsets(position); // Adjust pointer offsets based on selection
 
                 // Update the menu entry with the newly set position
-                entry->Name() = getLanguage->Get("KB_BATTLE_POSITION") + " " << Color::Gray << Utils::ToString(position, 0);
+                entry->Name() = string("Slot ") << Color::Gray << Utils::ToString(position, 0);
                 MessageBox(CenterAlign(getLanguage->Get("KB_BATTLE_SELECTED_POSITION") + " " + party[position - 1]), DialogType::DialogOk, ClearScreen::Both)();
             }
         }
@@ -789,6 +790,29 @@ namespace CTRPluginFramework {
     static int  infoViewState = 0, // State of the Pokemon info view (0: Enable, 1: Disable)
                 screenDisplay = 0; // Current information screen
 
+    // See Enemy Pokémon Stats: per-element display toggles (mirrors the HUD toggle pattern).
+    // Created + Enabled by CreateEnemyStatsMenu() so the overlay shows everything by default.
+    static MenuEntry *g_esSlot    = nullptr;
+    static MenuEntry *g_esSpecies = nullptr;
+    static MenuEntry *g_esGender  = nullptr;
+    static MenuEntry *g_esLevel   = nullptr;
+    static MenuEntry *g_esMaxHP   = nullptr;
+    static MenuEntry *g_esShiny   = nullptr;
+    static MenuEntry *g_esPkrs    = nullptr;
+    static MenuEntry *g_esNature  = nullptr;
+    static MenuEntry *g_esAbility = nullptr;
+    static MenuEntry *g_esHiddenP = nullptr;
+    static MenuEntry *g_esItem    = nullptr;
+    static MenuEntry *g_esMoves   = nullptr;
+    static MenuEntry *g_esIVs     = nullptr;
+    static MenuEntry *g_esIVTotal = nullptr;
+    static MenuEntry *g_esEVs     = nullptr;
+    static MenuEntry *g_esEVTotal = nullptr;
+
+    // Show an element when its toggle is ON. A null pointer (overlay running before the menu was
+    // built) defaults to showing it, preserving the legacy "show everything" behavior.
+    static inline bool EsOn(MenuEntry *e) { return e == nullptr || e->IsActivated(); }
+
     // The EXP-to-level table is defined in PKHeX.cpp (CTRPluginFramework::PKHeX::growthTable)
     namespace PKHeX { extern const int growthTable[100][6]; }
 
@@ -935,9 +959,9 @@ namespace CTRPluginFramework {
         70,50,50,50,60,70,30,60,40,70,       // 301
         60,60,65,65,50,70,100,45,70,130,     // 311
         170,60,70,70,60,80,60,45,50,80,      // 321
-        50,70,45,75,73,73,90,90,50,110,      // 331
+        50,70,45,75,73,73,70,70,50,110,      // 331 (Lunatone/Solrock HP 70 in Gen 6; buffed to 90 in Gen 7)
         43,63,40,60,66,86,45,75,20,95,       // 341
-        70,60,44,64,20,40,99,75,65,95,       // 351
+        70,60,44,64,20,40,99,65,65,95,       // 351 (Chimecho #358 HP 65 in Gen 6; buffed to 75 in Gen 7)
         50,80,70,90,110,35,55,55,100,43,     // 361
         45,65,95,40,60,80,80,80,80,80,       // 371
         80,100,100,105,100,50,55,75,95,44,   // 381
@@ -954,16 +978,16 @@ namespace CTRPluginFramework {
         70,100,120,100,45,60,75,65,90,110,   // 491
         55,75,95,45,60,45,65,85,41,64,       // 501
         50,75,50,75,50,75,76,116,50,62,      // 511
-        80,45,75,55,70,85,65,67,60,110,      // 521
+        80,45,75,55,70,85,55,67,60,110,      // 521 (Woobat #527 HP 55 in Gen 6; buffed to 65 in Gen 7)
         103,75,85,105,50,75,105,120,75,45,   // 531
         55,75,30,40,60,40,60,45,70,70,       // 541
-        50,60,95,70,105,75,50,70,55,65,      // 551
+        50,60,95,70,105,75,50,70,50,65,      // 551 (Scraggy #559 HP 50 — fix prior typo of 55)
         72,38,58,54,74,55,75,50,80,40,       // 561
         60,55,75,45,60,70,45,65,110,62,      // 571
         75,36,51,71,60,80,55,50,70,69,       // 581
         114,55,100,165,50,70,44,74,40,60,    // 591
         60,35,65,85,55,75,50,60,60,46,       // 601
-        66,76,55,95,80,50,80,109,45,65,      // 611
+        66,76,55,95,70,50,80,109,45,65,      // 611 (Cryogonal #615 HP 70 in Gen 6; buffed to 80 in Gen 7)
         77,59,89,45,65,95,70,100,70,110,     // 621
         85,58,52,72,92,55,85,91,91,91,       // 631
         79,79,100,100,89,125,91,100,71,56,   // 641
@@ -976,6 +1000,9 @@ namespace CTRPluginFramework {
         65,55,95,40,85,126,126,108,50,80,    // 711
         80                                   // 721
     };
+
+    // Forward decl: translucent panel painter (defined with the HUD code further below).
+    static void HudPanel(const Screen &screen, int x, int y, int w, int h, int opacity);
 
     // Callback function to display Pokemon information
     bool ViewInfoCallback(const Screen &screen) {
@@ -1034,6 +1061,10 @@ namespace CTRPluginFramework {
         // the Basic page has a wide left column (long "Ability:" line); the IV/EV page is narrow.
         const int leftX = 5;
 
+        auto draw = [&](const string &s, int x, int y) {
+            screen.DrawSysfont(s, x, y, textColor);
+        };
+
         if (screenDisplay == 0) {
             const int rightX = 155; // Basic | Moves (labels abbreviated, so the column moved left)
             // Left column: basic info
@@ -1071,47 +1102,85 @@ namespace CTRPluginFramework {
                       + (((pokemon->iv32 >> 20) & 1) << 4)
                       + (((pokemon->iv32 >> 25) & 1) << 5);
 
-            // Line 1: [#N] (green = owned in box / red = not) <species gold> <gender>
-            string l1 = (inBox ? Color::LimeGreen : Color::Red) << "[#" << Utils::ToString(slotIndex + 1, 0) << "] " << Color(0xF2, 0xCE, 0x70) << speciesList[pokemon->species - 1];
-            if (!genderSym.empty()) l1 = l1 << " " << genderSym;
-            screen.DrawSysfont(l1, xPos, yPos, textColor);
-            yPos += lineHeight;
+            // Line 1: [#N] (green = owned in box / red = not) <species gold> <gender>. Each part toggles.
+            string l1; bool any1 = false;
+            if (EsOn(g_esSlot)) {
+                l1 = (inBox ? Color::LimeGreen : Color::Red) << "[#" << Utils::ToString(slotIndex + 1, 0) << "]";
+                any1 = true;
+            }
+            if (EsOn(g_esSpecies)) {
+                if (any1) l1 = l1 << " ";
+                l1 = l1 << Color(0xF2, 0xCE, 0x70) << speciesList[pokemon->species - 1];
+                any1 = true;
+            }
+            if (EsOn(g_esGender) && !genderSym.empty()) {
+                if (any1) l1 = l1 << " ";
+                l1 = l1 << genderSym;
+                any1 = true;
+            }
+            if (any1) { draw(l1, xPos, yPos); yPos += lineHeight; }
 
-            // Line 2: Lv.X - HP: Y [star] [pkrs]
-            string l2 = textColor << "Lv." << Utils::ToString(level, 0) << " - HP: " << to_string(maxHP);
-            if (shiny) l2 = l2 << " " << Color(0xF2, 0xCE, 0x70) << "\xE2\x98\x85";
-            if (pkrs) l2 = l2 << " " << Color::Magenta << "pkrs";
-            screen.DrawSysfont(l2, xPos, yPos, textColor);
-            yPos += lineHeight;
+            // Line 2: Lv.X - HP: Y [star] [pkrs]. Each part toggles.
+            string l2; bool any2 = false;
+            if (EsOn(g_esLevel)) {
+                l2 = textColor << "Lv." << Utils::ToString(level, 0);
+                any2 = true;
+            }
+            if (EsOn(g_esMaxHP)) {
+                if (any2) l2 = l2 << " - HP: " << to_string(maxHP);
+                else l2 = textColor << "HP: " << to_string(maxHP);
+                any2 = true;
+            }
+            if (EsOn(g_esShiny) && shiny) {
+                if (any2) l2 = l2 << " ";
+                l2 = l2 << Color(0xF2, 0xCE, 0x70) << "\xE2\x98\x85";
+                any2 = true;
+            }
+            if (EsOn(g_esPkrs) && pkrs) {
+                if (any2) l2 = l2 << " ";
+                l2 = l2 << Color::Magenta << "pkrs";
+                any2 = true;
+            }
+            if (any2) { draw(l2, xPos, yPos); yPos += lineHeight; }
 
             // Nature (the raised/lowered stat is colored on the IV/EV page)
-            screen.DrawSysfont("Ntr: " << textColor << natureList[pokemon->nature], xPos, yPos, textColor);
-            yPos += lineHeight;
+            if (EsOn(g_esNature)) {
+                draw("Ntr: " << textColor << natureList[pokemon->nature], xPos, yPos);
+                yPos += lineHeight;
+            }
 
             // Ability (cyan + "(HA)" when it is the Hidden Ability)
-            bool hiddenAbility = pokemon->abilityNumber == 4;
-            string abilityLine = "Abt: " << (hiddenAbility ? Color::Cyan : textColor) << abilityList[pokemon->ability - 1];
-            if (hiddenAbility) abilityLine = abilityLine << Color::Cyan << " (HA)";
-            screen.DrawSysfont(abilityLine, xPos, yPos, textColor);
-            yPos += lineHeight;
+            if (EsOn(g_esAbility)) {
+                bool hiddenAbility = pokemon->abilityNumber == 4;
+                string abilityLine = "Abt: " << (hiddenAbility ? Color::Cyan : textColor) << abilityList[pokemon->ability - 1];
+                if (hiddenAbility) abilityLine = abilityLine << Color::Cyan << " (HA)";
+                draw(abilityLine, xPos, yPos);
+                yPos += lineHeight;
+            }
 
             // Hidden Power
-            screen.DrawSysfont("Hid.P: " << Color::White << hiddenPowerTypes[hpSum * 15 / 63], xPos, yPos, textColor);
-            yPos += lineHeight;
+            if (EsOn(g_esHiddenP)) {
+                draw("Hid.P: " << Color::White << hiddenPowerTypes[hpSum * 15 / 63], xPos, yPos);
+                yPos += lineHeight;
+            }
 
             // Item (label spelled out, per user preference)
-            screen.DrawSysfont("Item: " << (pokemon->heldItem == 0 ? Color::Gray : textColor) << (pokemon->heldItem == 0 ? getLanguage->Get("PK_VIEW_NONE") : heldItemList[pokemon->heldItem - 1]), xPos, yPos, textColor);
+            if (EsOn(g_esItem)) {
+                draw("Item: " << (pokemon->heldItem == 0 ? Color::Gray : textColor) << (pokemon->heldItem == 0 ? getLanguage->Get("PK_VIEW_NONE") : heldItemList[pokemon->heldItem - 1]), xPos, yPos);
+            }
 
             // Right column: moves
-            xPos = rightX; yPos = 5;
-            screen.DrawSysfont(headerColor << getLanguage->Get("PK_VIEW_MOVES"), xPos, yPos, textColor);
-            yPos += lineHeight;
-
-            // Loop through and display each move
-            for (int i = 0; i < 4; i++) {
-                string moveDisplay = pokemon->move[i] > 0 ? movesList[pokemon->move[i] - 1] : getLanguage->Get("PK_VIEW_NONE");
-                screen.DrawSysfont(to_string(i + 1) + ": " << (pokemon->move[i] > 0 ? textColor : Color::Gray) << moveDisplay, xPos, yPos, textColor);
+            if (EsOn(g_esMoves)) {
+                xPos = rightX; yPos = 5;
+                draw(headerColor << getLanguage->Get("PK_VIEW_MOVES"), xPos, yPos);
                 yPos += lineHeight;
+
+                // Loop through and display each move
+                for (int i = 0; i < 4; i++) {
+                    string moveDisplay = pokemon->move[i] > 0 ? movesList[pokemon->move[i] - 1] : getLanguage->Get("PK_VIEW_NONE");
+                    draw(to_string(i + 1) + ": " << (pokemon->move[i] > 0 ? textColor : Color::Gray) << moveDisplay, xPos, yPos);
+                    yPos += lineHeight;
+                }
             }
         }
 
@@ -1121,31 +1190,39 @@ namespace CTRPluginFramework {
 
             // Left column: IVs. Stat name colored by nature (green raised / red lowered); value colored by quality.
             xPos = leftX; yPos = 5;
-            screen.DrawSysfont(headerColor << getLanguage->Get("PK_VIEW_IV"), xPos, yPos, textColor);
-            yPos += lineHeight;
-
             int ivTotal = 0;
-            for (int i = 0; i < (int)statNames.size(); i++) {
-                u8 ivValue = (pokemon->iv32 >> (5 * i)) & 0x1F; // Extract IV value
-                ivTotal += ivValue;
-                screen.DrawSysfont(NatureStatColor(i, boost, lower, textColor) << statNames[i] << textColor << ": " << IvColor(ivValue) << to_string(ivValue), xPos, yPos, textColor);
+            for (int i = 0; i < (int)statNames.size(); i++)
+                ivTotal += (pokemon->iv32 >> (5 * i)) & 0x1F;
+
+            if (EsOn(g_esIVs)) {
+                draw(headerColor << getLanguage->Get("PK_VIEW_IV"), xPos, yPos);
                 yPos += lineHeight;
+                for (int i = 0; i < (int)statNames.size(); i++) {
+                    u8 ivValue = (pokemon->iv32 >> (5 * i)) & 0x1F; // Extract IV value
+                    draw(NatureStatColor(i, boost, lower, textColor) << statNames[i] << textColor << ": " << IvColor(ivValue) << to_string(ivValue), xPos, yPos);
+                    yPos += lineHeight;
+                }
             }
-            screen.DrawSysfont("IV: " << (ivTotal == 186 ? Color(0xF2, 0xCE, 0x70) : textColor) << to_string(ivTotal) << textColor << "/186", xPos, yPos, textColor);
+            if (EsOn(g_esIVTotal))
+                draw("IV: " << (ivTotal == 186 ? Color(0xF2, 0xCE, 0x70) : textColor) << to_string(ivTotal) << textColor << "/186", xPos, yPos);
 
             // Right column: EVs. Stat name colored by nature too; value colored by investment; total at the bottom.
             xPos = rightX; yPos = 5;
-            screen.DrawSysfont(headerColor << getLanguage->Get("PK_VIEW_EV"), xPos, yPos, textColor);
-            yPos += lineHeight;
-
             int evTotal = 0;
-            for (int i = 0; i < (int)statNames.size(); i++) {
-                u8 evValue = pokemon->EV[i];
-                evTotal += evValue;
-                screen.DrawSysfont(NatureStatColor(i, boost, lower, textColor) << statNames[i] << textColor << ": " << EvColor(evValue) << to_string(evValue), xPos, yPos, textColor);
+            for (int i = 0; i < (int)statNames.size(); i++)
+                evTotal += pokemon->EV[i];
+
+            if (EsOn(g_esEVs)) {
+                draw(headerColor << getLanguage->Get("PK_VIEW_EV"), xPos, yPos);
                 yPos += lineHeight;
+                for (int i = 0; i < (int)statNames.size(); i++) {
+                    u8 evValue = pokemon->EV[i];
+                    draw(NatureStatColor(i, boost, lower, textColor) << statNames[i] << textColor << ": " << EvColor(evValue) << to_string(evValue), xPos, yPos);
+                    yPos += lineHeight;
+                }
             }
-            screen.DrawSysfont("EV: " << (evTotal > 510 ? Color::Red : textColor) << to_string(evTotal) << textColor << "/510", xPos, yPos, textColor);
+            if (EsOn(g_esEVTotal))
+                draw("EV: " << (evTotal > 510 ? Color::Red : textColor) << to_string(evTotal) << textColor << "/510", xPos, yPos);
         }
 
         return true; // Successful execution of the callback function
@@ -2273,6 +2350,7 @@ namespace CTRPluginFramework {
     static MenuEntry *g_hudMiles  = nullptr;   // Show: Pokémiles
     static MenuEntry *g_hudParty  = nullptr;   // Show: Party count
     static MenuEntry *g_hudXY     = nullptr;   // Show: X/Y pos
+    static MenuEntry *g_hudRepel  = nullptr;   // Show: Repel steps remaining
     static MenuEntry *g_hudPanel  = nullptr;
     static int  g_hudPosition = 0;             // 0..8 anchors (3x3)
     static int  g_hudOpacity  = 50;            // panel opacity 0..100 (step 10), via ordered dither
@@ -2406,6 +2484,13 @@ namespace CTRPluginFramework {
             lines.push_back(Utils::Format("X:%.0f Y:%.0f", posX, posY));
         }
 
+        if (g_hudRepel != nullptr && g_hudRepel->IsActivated()) {
+            u8 repel = 0;
+            // Volatile overworld counter (u8), not stored in the save. Addr from PokemonCheatPlugin (same game build).
+            Process::Read8(AutoGameSet(0x8C7D23A, 0x8C8546E), repel);
+            lines.push_back(Utils::Format("Repel: %u", (unsigned)repel));
+        }
+
         if (lines.empty())
             return false;
 
@@ -2493,6 +2578,9 @@ namespace CTRPluginFramework {
 
         const Screen &top = OSD::GetTopScreen();
         const Screen &bot = OSD::GetBottomScreen();
+        const FwkSettings &st = FwkSettings::Get();
+        Color bg = st.BackgroundMainColor, txt = st.MainTextColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+        Color sel = st.MenuSelectedItemColor, bg2 = st.BackgroundSecondaryColor;
 
         const int GX = 40, GY = 30, CW = 80, CH = 60, PAD = 5; // bottom grid: cells 80x60, origin (40,30)
 
@@ -2540,14 +2628,16 @@ namespace CTRPluginFramework {
 
             wasDown = down;
 
-            // ---- TOP: instructions ----
-            top.DrawRect(0, 0, 400, 240, Color::Black, true);
-            top.DrawSysfont("Choose where the HUD appears", 90, 40, Color::White);
-            top.DrawSysfont("Tap a cell below - it mirrors this screen.", 56, 74, Color(200, 200, 200));
-            top.DrawSysfont("Gold = target.   Press B to cancel.", 80, 104, Color(200, 200, 200));
+            // ---- TOP: instructions (inside the standard window so nothing bleeds outside -> no residue) ----
+            top.DrawRect(30, 20, 340, 200, bg, true);
+            top.DrawRect(30, 20, 340, 200, border, false);
+            top.DrawSysfont(title << "Choose where the HUD appears", 90, 40, title);
+            top.DrawSysfont("Tap a cell below - it mirrors this screen.", 56, 74, txt);
+            top.DrawSysfont("Highlighted = target.   Press B to cancel.", 70, 104, txt);
 
-            // ---- BOTTOM: 3x3 grid ----
-            bot.DrawRect(0, 0, 320, 240, Color::Black, true);
+            // ---- BOTTOM: 3x3 grid (inside the bottom window) ----
+            bot.DrawRect(20, 20, 280, 200, bg, true);
+            bot.DrawRect(20, 20, 280, 200, border, false);
 
             int highlight = (hover >= 0) ? hover : g_hudPosition; // gold follows the finger, else shows current
 
@@ -2556,8 +2646,8 @@ namespace CTRPluginFramework {
                 int cy = GY + (i / 3) * CH;
                 int cellW = CW - PAD, cellH = CH - PAD;
 
-                Color fill = (i == hover)     ? Color(70, 70, 110) : Color(30, 30, 38);
-                Color brd  = (i == highlight) ? Color(255, 203, 5) : Color(180, 180, 180);
+                Color fill = (i == hover)     ? sel   : bg2; // hover = selection accent; normal = secondary bg
+                Color brd  = (i == highlight) ? title : txt; // target/hover = title accent; normal = main text
 
                 bot.DrawRect(cx, cy, cellW, cellH, fill, true);
                 bot.DrawRect(cx, cy, cellW, cellH, brd, false);
@@ -2587,6 +2677,10 @@ namespace CTRPluginFramework {
 
         const Screen &top = OSD::GetTopScreen();
         const Screen &bot = OSD::GetBottomScreen();
+        const FwkSettings &st = FwkSettings::Get();
+        Color bg = st.BackgroundMainColor, txt = st.MainTextColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+        Color sel = st.MenuSelectedItemColor, bg2 = st.BackgroundSecondaryColor;
+        (void)title;
 
         const int TX = 30, TY = 120, TW = 260, TH = 12; // slider track on the bottom screen
         const int orig = g_hudOpacity;
@@ -2618,38 +2712,45 @@ namespace CTRPluginFramework {
                 g_hudOpacity = pct;
             }
 
-            // ---- TOP: live preview over a fake game scene ----
-            top.DrawRect(0, 0, 400, 240, Color(45, 95, 160), true);  // sky / water
-            top.DrawRect(0, 150, 400, 90, Color(70, 140, 70), true); // grass
-            top.DrawRect(0, 144, 400, 8, Color(120, 90, 50), true);  // ground edge
-            top.DrawRect(60, 96, 44, 44, Color(210, 90, 80), true);  // object
-            top.DrawRect(300, 60, 30, 30, Color(225, 205, 95), true);// object
-            top.DrawSysfont("Live preview", 150, 6, Color::White);
+            // ---- TOP: live preview, drawn INSIDE the window (30,20,340,200) so it leaves no residue. The fake
+            // scene + panel show the translucency; absolute screen anchoring isn't mirrored here (that's the
+            // "Set position" screen's job).
+            top.DrawRect(30,  20, 340, 130, Color(45, 95, 160), true); // sky / water
+            top.DrawRect(30, 150, 340,  70, Color(70, 140, 70), true); // grass
+            top.DrawRect(30, 144, 340,   6, Color(120, 90, 50), true); // ground edge
+            top.DrawRect(80, 100,  40,  40, Color(210, 90, 80), true); // object
+            top.DrawRect(320, 60,  28,  28, Color(225, 205, 95), true);// object
+            top.DrawRect(30,  20, 340, 200, border, false);            // window border
+            top.DrawSysfont("Live preview", 160, 26, Color::White);
 
-            int px = 0, py = 0;
-            HudAnchor(g_hudPosition, boxW, boxH, px, py);
+            // HUD info box in the window's bottom-right corner, with a small symmetric margin from the borders.
+            const int M = 12;
+            int px = 30 + 340 - M - boxW; // window right (370) - margin - box width
+            int py = 20 + 200 - M - boxH; // window bottom (220) - margin - box height
             HudPanel(top, px, py, boxW, boxH, g_hudOpacity);
-            top.DrawSysfont(s0, (u32)(px + 4), (u32)(py + 2), Color::White);
-            top.DrawSysfont(s1, (u32)(px + 4), (u32)(py + 2 + 15), Color::White);
+            top.DrawSysfont(s0, px + 4, py + 2,      Color::White);
+            top.DrawSysfont(s1, px + 4, py + 2 + 15, Color::White);
 
-            // ---- BOTTOM: slider control ----
-            bot.DrawRect(0, 0, 320, 240, Color(20, 20, 26), true);
-            bot.DrawSysfont("Panel opacity", 105, 30, Color::White);
-            bot.DrawSysfont(Utils::Format("%d%%", g_hudOpacity), 140, 60, Color(255, 203, 5));
+            // ---- BOTTOM: slider control, inside the bottom window. Window bg uses the theme's "selected text"
+            // color and the slider uses the theme background color, so they contrast by design on any theme. ----
+            bot.DrawRect(20, 20, 280, 200, sel, true);     // window background = MenuSelectedItemColor
+            bot.DrawRect(20, 20, 280, 200, border, false);
+            bot.DrawSysfont(bg << "Panel opacity", 105, 30, bg);
+            bot.DrawSysfont(Utils::Format("%d%%", g_hudOpacity), 140, 60, bg);
 
             // tick marks every 10%
             for (int t = 0; t <= 100; t += 10) {
                 int tx = TX + (t * TW) / 100;
-                bot.DrawRect(tx, TY - 4, 1, TH + 8, Color(120, 120, 130), true);
+                bot.DrawRect(tx, TY - 4, 1, TH + 8, bg, true);
             }
 
             int fillW = (g_hudOpacity * TW) / 100;
-            bot.DrawRect(TX, TY, TW, TH, Color(60, 60, 70), true);       // track base
-            bot.DrawRect(TX, TY, fillW, TH, Color(255, 203, 5), true);   // filled portion
-            bot.DrawRect(TX + fillW - 5, TY - 6, 10, TH + 12, Color::White, true); // knob
+            bot.DrawRect(TX, TY, TW, TH, bg2, true);                     // track base (empty)
+            bot.DrawRect(TX, TY, fillW, TH, bg, true);                   // filled portion = theme background
+            bot.DrawRect(TX + fillW - 5, TY - 6, 10, TH + 12, txt, true); // knob = main text (stands out)
 
-            bot.DrawSysfont("Drag the bar to set opacity.", 60, 178, Color(200, 200, 200));
-            bot.DrawSysfont("A = OK     B = Cancel", 88, 202, Color(200, 200, 200));
+            bot.DrawSysfont("Drag the bar to set opacity.", 60, 178, bg);
+            bot.DrawSysfont("A = OK     B = Cancel", 88, 200, bg);
 
             OSD::SwapBuffers();
         }
@@ -2666,18 +2767,89 @@ namespace CTRPluginFramework {
         }
     }
 
-    MenuFolder *CreateHudMenu(void) {
-        MenuFolder *hud = new MenuFolder("Config HUD", "A small overlay shown over the game (top screen).\n\nTurn it on and pick what it shows and where. Tip: favorite 'Show HUD' (X button) to turn it on/off quickly.");
+    MenuFolder *CreateEnemyStatsMenu(void) {
+        MenuFolder *es = new MenuFolder("Display Enemy Stats", "See a battle opponent's hidden data on the top screen.\n\nFirst arm the overlay with \"Enable Stats\" (it can only be unlocked during a battle - read its info), then pick exactly which stats appear with the toggles below.");
+        es->SetFavoriteAlias("Enemy Stats");
+        es->SetTwoColumns(true); // toggle-heavy folder: render in 2 columns to cut scrolling
 
+        // Master: keeps the one-time ENABLE-in-battle unlock flow (ViewPokemonInfo menu func -> SetGameFunc(TogglePokemonInfo)).
+        *es += new MenuEntry("Enable Stats", nullptr, ViewPokemonInfo, "See the foe's stats in battle.\n\nAt first this toggle is LOCKED (shown with a gear icon) because it can only be armed during a battle.\n\nTo unlock it: enter any battle, select this item, then tap ENABLE on the bottom touch screen - you only need to do this once.\n\nAfter that the toggle is unlocked; tick it to turn the feature on.\n\nIn battle, press ZR to show/hide the overlay, L/R to switch between the enemy's Pokémon, and ZR to flip between the Basic/Moves and IV/EV pages.");
+
+        // Per-element toggles (checkboxes). Names are short (no "Show:") to fit the 2-column layout; the
+        // Favorites alias keeps "Show: X" so the star list stays self-explanatory.
+        g_esSlot    = new MenuEntry("Slot number", HudNoop, "Show the party slot [#N] (green when you already own the species in a box, red when you don't).");
+        g_esSlot->SetFavoriteAlias("Show: Slot #");
+        g_esSpecies = new MenuEntry("Species", HudNoop, "Show the opponent's species name.");
+        g_esSpecies->SetFavoriteAlias("Show: Species");
+        g_esGender  = new MenuEntry("Gender", HudNoop, "Show the gender symbol (blue male / pink female).");
+        g_esGender->SetFavoriteAlias("Show: Gender");
+        g_esLevel   = new MenuEntry("Level", HudNoop, "Show the opponent's level.");
+        g_esLevel->SetFavoriteAlias("Show: Level");
+        g_esMaxHP   = new MenuEntry("Max HP", HudNoop, "Show the opponent's maximum HP.");
+        g_esMaxHP->SetFavoriteAlias("Show: Max HP");
+        g_esShiny   = new MenuEntry("Shiny mark", HudNoop, "Show a gold star when the opponent is shiny.");
+        g_esShiny->SetFavoriteAlias("Show: Shiny mark");
+        g_esPkrs    = new MenuEntry("Pokerus", HudNoop, "Show a 'pkrs' mark when the opponent carries Pokerus.");
+        g_esPkrs->SetFavoriteAlias("Show: Pokerus");
+        g_esNature  = new MenuEntry("Nature", HudNoop, "Show the opponent's Nature.");
+        g_esNature->SetFavoriteAlias("Show: Nature");
+        g_esAbility = new MenuEntry("Ability", HudNoop, "Show the opponent's Ability, marked (HA) when it is the Hidden Ability.");
+        g_esAbility->SetFavoriteAlias("Show: Ability");
+        g_esHiddenP = new MenuEntry("Hidden Power", HudNoop, "Show the opponent's Hidden Power type.");
+        g_esHiddenP->SetFavoriteAlias("Show: Hid.Pwr");
+        g_esItem    = new MenuEntry("Held item", HudNoop, "Show the item the opponent is holding.");
+        g_esItem->SetFavoriteAlias("Show: Held item");
+        g_esMoves   = new MenuEntry("Moves", HudNoop, "Show the opponent's four moves.");
+        g_esMoves->SetFavoriteAlias("Show: Moves");
+        g_esIVs     = new MenuEntry("IVs", HudNoop, "On the IV/EV page, show the six per-stat IVs (color-coded by quality).");
+        g_esIVs->SetFavoriteAlias("Show: IVs");
+        g_esIVTotal = new MenuEntry("IV total", HudNoop, "On the IV/EV page, show the IV total (out of 186).");
+        g_esIVTotal->SetFavoriteAlias("Show: IV total");
+        g_esEVs     = new MenuEntry("EVs", HudNoop, "On the IV/EV page, show the six per-stat EVs (color-coded by investment).");
+        g_esEVs->SetFavoriteAlias("Show: EVs");
+        g_esEVTotal = new MenuEntry("EV total", HudNoop, "On the IV/EV page, show the EV total (out of 510).");
+        g_esEVTotal->SetFavoriteAlias("Show: EV total");
+
+        // Non-selectable section labels matching the in-battle ZR pages (Basic/Moves vs IV/EV).
+        auto pageLbl = [](const char *t) { MenuEntry *e = new MenuEntry(t); e->CanBeSelected(false); return e; };
+
+        *es += pageLbl("Page 01"); // after "Display Stats"
+        MenuEntry *page1[] = { g_esSlot, g_esSpecies, g_esGender, g_esLevel, g_esMaxHP, g_esShiny,
+                               g_esPkrs, g_esNature, g_esAbility, g_esHiddenP, g_esItem, g_esMoves };
+        for (MenuEntry *e : page1) { e->Enable(); *es += e; } // default ON
+
+        *es += pageLbl("Page 02"); // after "Show: Moves"
+        MenuEntry *page2[] = { g_esIVs, g_esEVs, g_esIVTotal, g_esEVTotal }; // column-major: each total below its stat
+        for (MenuEntry *e : page2) { e->Enable(); *es += e; } // default ON
+
+        return es;
+    }
+
+    MenuFolder *CreateHudMenu(void) {
+        MenuFolder *hud = new MenuFolder("Config HUD", "A small overlay shown over the game (top screen).\n\nTurn it on, then pick what it shows and where.\n\nTip: favorite 'Display HUD' (press Y on it) so you can flip the overlay on and off in a tap.");
+
+        // Names are short (no "Show:") for the 2-column layout; the Favorites alias keeps "Show: X".
         g_hudMaster = new MenuEntry("Display HUD", HudNoop, "Master switch for the on-screen overlay.");
-        g_hudMoney  = new MenuEntry("Show: Money", HudNoop, "Show how much money you have.");
-        g_hudClock  = new MenuEntry("Show: Clock", HudNoop, "Show your play time.");
-        g_hudBP     = new MenuEntry("Show: Battle Points", HudNoop, "Show your current Battle Points (BP).");
-        g_hudStatus = new MenuEntry("Show: Status Condition", HudNoop, "Show your lead Pokémon's status during battle (PSN / BRN / SLP / PAR / FRZ).\nOnly visible when in battle.");
-        g_hudMiles  = new MenuEntry("Show: Pokemiles", HudNoop, "Show your Pokemiles.");
-        g_hudParty  = new MenuEntry("Show: Party count", HudNoop, "Show how many Pokemon are in your party.");
-        g_hudXY     = new MenuEntry("Show: X/Y pos", HudNoop, "Show your current map coordinates.");
+        g_hudMaster->SetGridFullWidth(true); // master spans the whole row
+        g_hudMoney  = new MenuEntry("Money", HudNoop, "Show how much money you have.");
+        g_hudMoney->SetFavoriteAlias("Show: Money");
+        g_hudClock  = new MenuEntry("Clock", HudNoop, "Show your play time.");
+        g_hudClock->SetFavoriteAlias("Show: Clock");
+        g_hudBP     = new MenuEntry("Battle Points", HudNoop, "Show your current Battle Points (BP).");
+        g_hudBP->SetFavoriteAlias("Show: Btl.Pts");
+        g_hudStatus = new MenuEntry("Status Condition", HudNoop, "Show your lead Pokémon's status during battle (PSN / BRN / SLP / PAR / FRZ).\nOnly visible when in battle.");
+        g_hudStatus->SetFavoriteAlias("Show: Status");
+        g_hudMiles  = new MenuEntry("Pokemiles", HudNoop, "Show your Pokemiles.");
+        g_hudMiles->SetFavoriteAlias("Show: Pokemiles");
+        g_hudParty  = new MenuEntry("Party count", HudNoop, "Show how many Pokemon are in your party.");
+        g_hudParty->SetFavoriteAlias("Show: Party");
+        g_hudXY     = new MenuEntry("X/Y pos", HudNoop, "Show your current map coordinates.");
+        g_hudXY->SetFavoriteAlias("Show: X/Y pos");
+        g_hudRepel  = new MenuEntry("Repel steps", HudNoop, "Show how many steps of Repel are left (0 = no Repel active).\nNot saved by the game, so it resets to 0 on reload.");
+        g_hudRepel->SetFavoriteAlias("Show: Repel");
         g_hudPanel  = new MenuEntry("Translucent panel", HudNoop, "A dark see-through box behind the text, for readability.");
+        g_hudPanel->SetFavoriteAlias("Panel");
+        g_hudPanel->SetGridFullWidth(true); // panel toggle spans the whole row
 
         *hud += g_hudMaster;
         *hud += g_hudMoney;
@@ -2687,9 +2859,15 @@ namespace CTRPluginFramework {
         *hud += g_hudMiles;
         *hud += g_hudParty;
         *hud += g_hudXY;
+        *hud += g_hudRepel;
         *hud += g_hudPanel;
-        *hud += new MenuEntry("Panel opacity", nullptr, HudSetOpacity, "Set how see-through the panel is (0-100%). Drag the bar; the top screen previews it live.");
-        *hud += new MenuEntry("Set position", nullptr, HudSetPosition, "Choose which corner/area the overlay appears in.");
+        MenuEntry *hudOpac = new MenuEntry("Panel opacity", nullptr, HudSetOpacity, "Set how see-through the panel is (0-100%). Drag the bar; the top screen previews it live.");
+        hudOpac->SetGridPaired(true); // pair side-by-side in the 2-column layout
+        *hud += hudOpac;
+        MenuEntry *hudPos = new MenuEntry("Set position", nullptr, HudSetPosition, "Choose which corner/area the overlay appears in.");
+        hudPos->SetGridPaired(true);
+        *hud += hudPos;
+        hud->SetTwoColumns(true);
 
         return hud;
     }

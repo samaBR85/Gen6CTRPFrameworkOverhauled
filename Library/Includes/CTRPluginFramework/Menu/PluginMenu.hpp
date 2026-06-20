@@ -91,6 +91,11 @@ namespace CTRPluginFramework {
             static void ForceOpen(void);
 
             /**
+             * \brief Forces the closing of the menu (resumes the game), as if the hotkey was pressed
+             */
+            static void Close(void);
+
+            /**
              * \brief If set to true, the plugin's loop will only be executed 1 per top screen's frame
              * \param useSync Whether to wait for the top screen's frame or not
              */

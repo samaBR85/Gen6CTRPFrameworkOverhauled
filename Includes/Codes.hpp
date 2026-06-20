@@ -76,6 +76,9 @@ namespace CTRPluginFramework {
     void CustomKeys(MenuEntry *entry);
     void PatchColorCrash(MenuEntry *entry);
 
+    // See Enemy Pokémon Stats: folder with the master overlay toggle + per-stat "Show:" toggles
+    MenuFolder *CreateEnemyStatsMenu(void);
+
     // HUD overlay (Slice 3): a small optional on-screen display during gameplay
     MenuFolder *CreateHudMenu(void);
     bool HudCallback(const Screen &screen);

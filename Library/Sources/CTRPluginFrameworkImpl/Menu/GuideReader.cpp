@@ -59,6 +59,10 @@ namespace CTRPluginFramework {
         _isOpen = false;
         _image = nullptr;
 
+        // The topic list is drawn on the 320px BOTTOM screen via DrawAt(): file rows start at
+        // x=50 and clip at x=295, so a name wider than ~245px overflows and should slide (marquee).
+        _menu.SetMarqueeWidth(245.f);
+
         if (Directory::Open(_currentDirectory, folderPath) == 0) {
             _currentDirectory.ListFiles(_bmpList, ".bmp");
 
@@ -80,6 +84,9 @@ namespace CTRPluginFramework {
         // Process event
         for (size_t i = 0; i < eventList.size(); i++)
             _ProcessEvent(eventList[i]);
+
+        // Animate the marquee of the selected topic (slides long names so the rest is readable)
+        _menu.Update(delta);
 
         // Draw
         Draw();

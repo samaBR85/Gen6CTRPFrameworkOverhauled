@@ -17,6 +17,8 @@ namespace CTRPluginFramework {
         {
             _content = content;
             _isIcon = false;
+            _fullContent = content; // keep the original so the marquee can reveal the rest
+            _fullWidth = Renderer::GetTextSize(content.c_str());
             _contentLength = Renderer::GetTextSize(_content.c_str());
 
             while ((int)(_contentLength) > ui.size.x) {
@@ -51,7 +53,14 @@ namespace CTRPluginFramework {
         return !(!_enabled || (_isIcon && !_icon.isEnabled) || (!_isIcon && _content.empty()));
     }
 
-    void TouchKeyString::Draw(void) {
+    // Pixels of the full text that don't fit the visible box (left-aligned with a small padding).
+    // The PAD here must match the left padding used by the marquee draw below.
+    float TouchKeyString::Overflow(void) const {
+        const float PAD = 6.f;
+        return _fullWidth - ((float)_uiProperties.size.x - 1.f - PAD);
+    }
+
+    void TouchKeyString::Draw(float marquee) {
         // If key is disabled
         if (!CanUse())
             return;
@@ -64,10 +73,19 @@ namespace CTRPluginFramework {
         Renderer::DrawRect(_uiProperties, background);
 
         if (!_isIcon) {
-            int posX = _posX;
             int posY = ((_uiProperties.size.y - 16) >> 1) + _uiProperties.leftTop.y;
             int maxX = _uiProperties.leftTop.x + _uiProperties.size.x - 1;
-            Renderer::DrawSysString(_content.c_str(), posX, posY, maxX, text);
+
+            // Selected row whose name overflows: slide the FULL text to reveal the rest.
+            if (marquee >= 0.f && _isForcePressed && Overflow() > 0.f) {
+                int left = _uiProperties.leftTop.x + 6; // PAD (matches Overflow)
+                Renderer::DrawSysString(_fullContent.c_str(), left, posY, maxX, text, marquee);
+            }
+
+            else {
+                int posX = _posX;
+                Renderer::DrawSysString(_content.c_str(), posX, posY, maxX, text);
+            }
         }
 
         else Icon::DrawCustomIcon(_icon, _posX, _posY);
