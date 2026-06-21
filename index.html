@@ -14,7 +14,7 @@
   <meta property="og:url" content="https://samabr85.github.io/Gen6CTRPluginFramework/" />
   <meta property="og:title" content="Gen6CTRPluginFramework — Pokémon Gen 6 Plugin for Nintendo 3DS" />
   <meta property="og:description" content="A heavily overhauled 3gx cheat plugin for Pokémon X, Y, Omega Ruby &amp; Alpha Sapphire. Party summary cards, HUD overlay, enemy stats, 25 themes, and a built-in 20-page guide." />
-  <meta property="og:image" content="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/theme_TrainerNavy_default_.png" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/home_v030.png" />
   <meta property="og:image:width" content="400" />
   <meta property="og:image:height" content="240" />
 
@@ -22,7 +22,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Gen6CTRPluginFramework — Pokémon Gen 6 Plugin for Nintendo 3DS" />
   <meta name="twitter:description" content="A heavily overhauled 3gx cheat plugin for Pokémon X, Y, Omega Ruby &amp; Alpha Sapphire. Party summary, HUD overlay, 25 themes, and more." />
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/theme_TrainerNavy_default_.png" />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/home_v030.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -291,6 +291,56 @@
       margin-bottom: .4rem;
     }
     .feature-card p { font-size: .875rem; color: var(--muted); }
+
+    /* ── HERO SHOT ────────────────────────────────────── */
+    .hero-shot {
+      margin-top: 2.75rem;
+      max-width: 300px;
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 48px rgba(0,0,0,.45);
+      display: block;
+    }
+
+    /* ── WHAT'S NEW ───────────────────────────────────── */
+    #whats-new { background: var(--bg); }
+    .wn-badge {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: rgba(78,203,113,.12);
+      border: 1px solid rgba(78,203,113,.3);
+      padding: .2rem .6rem;
+      border-radius: 5px;
+      margin-bottom: .6rem;
+    }
+    .wn-feature { margin-bottom: 3.5rem; }
+    .wn-feature:last-child { margin-bottom: 0; }
+    .wn-feature h3 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      margin-bottom: .5rem;
+    }
+    .wn-feature > p { color: var(--muted); max-width: 760px; margin-bottom: 1.4rem; font-size: .95rem; }
+    .wn-shots {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 1rem;
+    }
+    .wn-shots img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: transform .2s, border-color .2s;
+    }
+    .wn-shots img:hover { transform: scale(1.02); border-color: var(--accent); }
 
     /* ── SCREENSHOTS ──────────────────────────────────── */
     #screenshots { background: var(--bg); }
@@ -606,6 +656,7 @@
     Gen6<span>CTR</span>Plugin
   </a>
   <ul class="nav-links">
+    <li><a href="#whats-new">New in v0.3.0</a></li>
     <li><a href="#features">Features</a></li>
     <li><a href="#screenshots">Screenshots</a></li>
     <li><a href="#themes">Themes</a></li>
@@ -617,13 +668,13 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">Nintendo 3DS Plugin &bull; v0.2.1</div>
+  <div class="hero-badge">Nintendo 3DS Plugin &bull; v0.3.0</div>
   <h1>
     <span class="hl">Gen6</span> CTRPlugin<br/>
     <span class="hl2">Framework</span> Overhauled
   </h1>
   <p class="hero-sub">
-    A heavily overhauled <strong>3gx cheat plugin</strong> for Pokémon Generation 6 on Nintendo 3DS — built for players, not programmers.
+    A heavily overhauled <strong>3gx cheat plugin</strong> for Pokémon Generation 6 on Nintendo 3DS — built for players, not programmers. <strong>v0.3.0</strong> adds dual-screen finders to spawn any Pokémon and grab any item in seconds.
   </p>
   <div class="hero-games">
     <span class="game-tag">⚔️ Pokémon X</span>
@@ -640,13 +691,14 @@
       View on GitHub
     </a>
   </div>
+  <img class="hero-shot" src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/home_v030.png" alt="Gen6CTRPluginFramework v0.3.0 main menu on Pokémon Alpha Sapphire" loading="eager" />
   <div class="hero-stats">
     <div class="stat-item">
       <div class="stat-num" id="total-downloads">–</div>
       <div class="stat-label">Total Downloads</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">v0.2.1</div>
+      <div class="stat-num">v0.3.0</div>
       <div class="stat-label">Latest Version</div>
     </div>
     <div class="stat-item">
@@ -656,6 +708,50 @@
     <div class="stat-item">
       <div class="stat-num">4</div>
       <div class="stat-label">Games Supported</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- WHAT'S NEW -->
+<section id="whats-new">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">New in v0.3.0</div>
+      <h2 class="section-title">Find Anything, in Seconds</h2>
+      <p class="section-sub">Three dual-screen finders turn "I wish I could just get that Pokémon or item" into a few taps — all built in, no internet, no typing long names.</p>
+    </div>
+
+    <div class="wn-feature fade-in">
+      <span class="wn-badge">🔎 Wild Pokémon Spawner</span>
+      <h3>Browse, filter, and spawn any species</h3>
+      <p>The top screen is a live, counted result list; the bottom screen is a filter hub — narrow by name / National Dex #, generation, type (1st <em>and</em> 2nd), traits (evo stage, category, Mega), or just what you already own. Open any result for a full sheet — sprite, types, abilities (including the Hidden one), base stats and the four moves it knows at your chosen level — then pick form, level and Normal/Shiny and spawn it in the wild.</p>
+      <div class="wn-shots">
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/pokemonspawner_01.png" alt="Wild Pokémon Spawner — faceted finder with live filters" loading="lazy" onclick="openLightbox(this)" />
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/pokemonspawner_02.png" alt="Wild Pokémon Spawner — detail sheet and spawn settings" loading="lazy" onclick="openLightbox(this)" />
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/pokemonspawner_03.png" alt="Wild Pokémon Spawner — a wild Pokémon appeared" loading="lazy" onclick="openLightbox(this)" />
+      </div>
+    </div>
+
+    <div class="wn-feature fade-in">
+      <span class="wn-badge">🎒 Add Item to Inventory</span>
+      <h3>Your whole bag, searchable</h3>
+      <p>The same idea for items — Items, Medicines, Berries, TMs &amp; HMs and Key Items in one list, each row showing its icon and how many you already own. Filter by pocket / category, type, or even status (every Burn / Sleep / Poison item — cures, orbs and status-move TMs alike). Pick one, set the amount, and Add to Bag — it lands in the first free slot and never wipes what you have.</p>
+      <div class="wn-shots">
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/additem_01.png" alt="Add Item — the whole bag in one searchable list" loading="lazy" onclick="openLightbox(this)" />
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/additem_03.png" alt="Add Item — the Status filter" loading="lazy" onclick="openLightbox(this)" />
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/additem_05.png" alt="Add Item — quantity and Add to Bag" loading="lazy" onclick="openLightbox(this)" />
+      </div>
+    </div>
+
+    <div class="wn-feature fade-in">
+      <span class="wn-badge">✨ Respawn Legendary</span>
+      <h3>Send a legendary back to its lair</h3>
+      <p>Knocked one out or watched it flee? Respawn Legendary now lists every legendary in your game with its own character sheet and real location — pick it and send it back to where you found it.</p>
+      <div class="wn-shots">
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/respawnlegendary.png" alt="Respawn Legendary — pick a legendary and send it back to its location" loading="lazy" onclick="openLightbox(this)" style="max-width:420px;margin:0 auto;" />
+      </div>
     </div>
   </div>
 </section>
@@ -685,6 +781,11 @@
         <span class="feature-icon">🃏</span>
         <h3>Party Summary Cards</h3>
         <p>View your team's IVs, EVs, Nature, Ability, item, and moves as sortable stat cards with ▲/▼ indicators.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <span class="feature-icon">🔎</span>
+        <h3>Pokémon &amp; Item Finders</h3>
+        <p>Browse and filter every species in a dual-screen Wild Pokémon Spawner — by name, type, generation or traits — then spawn it. Same picker for your whole bag, plus a tidy Legendary respawn list.</p>
       </div>
       <div class="feature-card fade-in">
         <span class="feature-icon">⭐</span>
@@ -786,6 +887,11 @@
         <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/tools_menu.png"
              alt="Tools Menu" loading="lazy" />
         <div class="screenshot-caption">Tools Menu</div>
+      </div>
+      <div class="screenshot-item fade-in" onclick="openLightbox(this)">
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/special_features.png"
+             alt="Pokémon Spawner &amp; Trainer (PKHeX) menu" loading="lazy" />
+        <div class="screenshot-caption">Pokémon Spawner &amp; Trainer (PKHeX)</div>
       </div>
     </div>
   </div>
@@ -899,15 +1005,15 @@
           <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>
           Latest Release
         </div>
-        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.2.1</div>
+        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.3.0</div>
         <div class="dl-meta">
           Released <span>June 20, 2026</span> &bull;
           Platform <span>Nintendo 3DS (3gx)</span> &bull;
           License <span>GNU GPL-3.0</span>
         </div>
         <div class="dl-buttons">
-          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPluginFramework/releases/download/v0.2.1/Gen6CTRPluginFramework-v0.2.1.zip" target="_blank" rel="noopener">
-            ⬇ Download v0.2.1 (.zip)
+          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPluginFramework/releases/download/v0.3.0/Gen6CTRPluginFramework-v0.3.0.zip" target="_blank" rel="noopener">
+            ⬇ Download v0.3.0 (.zip)
           </a>
           <a class="btn-secondary" href="https://github.com/samaBR85/Gen6CTRPluginFramework/releases" target="_blank" rel="noopener">
             All Releases
@@ -921,6 +1027,12 @@
     </div>
 
     <div class="releases-list fade-in">
+      <div class="release-row">
+        <span class="release-tag">v0.3.0</span>
+        <span class="release-date">Jun 20, 2026</span>
+        <span class="release-downloads" id="dl-v030">Loading…</span>
+        <a class="release-link" href="https://github.com/samaBR85/Gen6CTRPluginFramework/releases/download/v0.3.0/Gen6CTRPluginFramework-v0.3.0.zip" target="_blank" rel="noopener">Download</a>
+      </div>
       <div class="release-row">
         <span class="release-tag">v0.2.1</span>
         <span class="release-date">Jun 20, 2026</span>
@@ -1019,21 +1131,25 @@
         release.assets.forEach(asset => { total += asset.download_count; });
       });
 
+      const v030 = data.find(r => r.tag_name === 'v0.3.0');
       const v021 = data.find(r => r.tag_name === 'v0.2.1');
       const v020 = data.find(r => r.tag_name === 'v0.2.0');
 
+      const count030 = v030 ? v030.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count021 = v021 ? v021.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count020 = v020 ? v020.assets.reduce((s, a) => s + a.download_count, 0) : 0;
 
       animateCount('total-downloads', total);
       animateCount('download-count', total);
 
+      const el030 = document.getElementById('dl-v030');
       const el021 = document.getElementById('dl-v021');
       const el020 = document.getElementById('dl-v020');
+      if (el030) el030.textContent = count030 + ' downloads';
       if (el021) el021.textContent = count021 + ' downloads';
       if (el020) el020.textContent = count020 + ' downloads';
     } catch (e) {
-      const els = ['total-downloads','download-count','dl-v021','dl-v020'];
+      const els = ['total-downloads','download-count','dl-v030','dl-v021','dl-v020'];
       els.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = '–';
@@ -1073,7 +1189,7 @@
   let lightboxIndex = 0;
 
   function buildLightboxList() {
-    lightboxItems = Array.from(document.querySelectorAll('.screenshot-item, .theme-card'));
+    lightboxItems = Array.from(document.querySelectorAll('.wn-shots img, .screenshot-item, .theme-card'));
   }
 
   function openLightbox(card) {
@@ -1086,7 +1202,8 @@
   }
 
   function showLightboxAt(index) {
-    const img = lightboxItems[index].querySelector('img');
+    const node = lightboxItems[index];
+    const img = node.tagName === 'IMG' ? node : node.querySelector('img');
     const lb = document.getElementById('lightbox-img');
     lb.style.opacity = '0';
     setTimeout(() => {
