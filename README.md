@@ -16,21 +16,17 @@ CTRPluginFramework; all of that work is gratefully preserved (see Credits).
 
 ## 🆕 New in v0.3.1 — bring your own Poké Mart
 
-**PokéMart Anywhere** turns the item-adder into a real shop. Every row shows its icon, how many you already
-own, and its **price** — and *you* choose how to play.
+**PokéMart Anywhere** turns the item-adder into a real shop: every row shows its icon, how many you own and its
+**price**. Press **START** to pick a mode — **FREE** adds anything, any amount, at no cost, while **PAY** narrows
+the list to items you can actually buy in-game and charges your **Money**. Buy on the spot, or build a **cart**
+and review it all at **Checkout** before you pay (you can never overspend). And **sort** the whole list by name,
+price, type or how many you own.
 
-![PokéMart Anywhere — the whole bag with prices, filters and Sort, in PAY mode](Screenshots/AS/export/pokemart_02.png)
-
-Press **START** to switch modes. **FREE** adds anything, any amount, at no cost (the classic behavior); **PAY**
-is a real Poké Mart — the list narrows to items you can actually buy in-game, and each one costs **Money**.
-
-![PokéMart Anywhere — choose FREE or PAY](Screenshots/AS/export/pokemart_01.png)
-
-In PAY mode, buy on the spot or **build a cart** and review everything at **Checkout** before you pay — and you
-can never overspend.
-
-![PokéMart Anywhere — review the cart and check out](Screenshots/AS/export/pokemart_05.png)
-![PokéMart Anywhere — thank you for your purchase](Screenshots/AS/export/pokemart_06.png)
+<p align="center">
+  <img src="Screenshots/AS/export/pokemart_02.png" width="250" alt="PokéMart Anywhere — prices, filters and Sort in PAY mode" />
+  <img src="Screenshots/AS/export/pokemart_01.png" width="250" alt="PokéMart Anywhere — choose FREE or PAY" />
+  <img src="Screenshots/AS/export/pokemart_05.png" width="250" alt="PokéMart Anywhere — review the cart and check out" />
+</p>
 
 **Also new in v0.3.1**
 
@@ -42,35 +38,31 @@ can never overspend.
 
 ## 🔎 The dual-screen finders
 
-Two more built-in **finders** turn "I wish I could just *get* that Pokémon" into a few taps. Everything is
-built-in — no internet, no typing long names, no wikis.
-
-![The Pokémon Spawner & Trainer (PKHeX) menu](Screenshots/AS/export/special_features.png)
+Two more built-in **finders** turn "I wish I could just *get* that Pokémon" into a few taps — no internet, no
+typing long names, no wikis.
 
 ### 🔎 Wild Pokémon Spawner
 
-Browse **every** wild Pokémon and spawn the one you pick. The top screen is a live, counted list; the bottom
-screen is a filter hub — narrow by **name / National Dex #**, **generation**, **type** (1st *and* 2nd),
-**traits** (evo stage, category, Mega), or just what you already **own** in your boxes.
+Browse **every** wild Pokémon on a live, filtered list — narrow by **name / Dex #**, **generation**, **type**
+(1st *and* 2nd), **traits** (evo stage, category, Mega) or what you already **own**. Open any result for a full
+sheet — sprite, types, abilities (incl. the Hidden one), base stats and the **four moves it knows at your
+level** — then set form, level and **Normal / Shiny** and tap **SPAWN ON THE WILD**. Step into grass, water or
+a cave, and there it is.
 
-![Spawner — faceted dual-screen finder with live filters](Screenshots/AS/export/pokemonspawner_01.png)
-
-Open any result for a full character sheet: sprite, types, abilities (including the Hidden one), evolution
-stage, base stats, and the **four moves it knows at your chosen level**. Set the form and level, choose
-**Normal or Shiny**, and tap **SPAWN ON THE WILD**.
-
-![Spawner — detail sheet with stats, moves and spawn settings](Screenshots/AS/export/pokemonspawner_02.png)
-
-Then just step into grass, water or a cave — and there it is.
-
-![Spawner — "a wild Pokémon appeared!"](Screenshots/AS/export/pokemonspawner_03.png)
+<p align="center">
+  <img src="Screenshots/AS/export/pokemonspawner_01.png" width="250" alt="Spawner — faceted finder with live filters" />
+  <img src="Screenshots/AS/export/pokemonspawner_02.png" width="250" alt="Spawner — detail sheet with stats, moves and spawn settings" />
+  <img src="Screenshots/AS/export/pokemonspawner_03.png" width="250" alt="Spawner — a wild Pokémon appeared" />
+</p>
 
 ### ✨ Respawn Legendary
 
-Knocked one out or watched it flee? Respawn Legendary now lists every legendary in your game with its own
-character sheet and **real location** — pick it and send it back to where you found it.
+Knocked one out or watched it flee? Respawn Legendary lists every legendary in your game with its own character
+sheet and **real location** — pick it and send it back to where you found it.
 
-![Respawn Legendary — pick a legendary and send it back to its location](Screenshots/AS/export/respawnlegendary.png)
+<p align="center">
+  <img src="Screenshots/AS/export/respawnlegendary.png" width="250" alt="Respawn Legendary — pick a legendary and send it back to its location" />
+</p>
 
 > Plus a **completely re-organised menu**, **save-first guard-rails** on the risky cheats, a **theme-aware
 > keyboard**, and lots of polish — see the full changelog in the [release notes](https://github.com/samaBR85/Gen6CTRPluginFramework/releases/latest).
@@ -109,25 +101,25 @@ Everything below exists because it solved an actual annoyance — not because a 
   that flag your team's best and worst. A battle-decision companion that started as a "this can't be possible"
   idea.
 
-  ![View Party Summary — sortable stat card with HIGHER/LOWER markers](Screenshots/AS/export/partysummary_card.png)
+  <img src="Screenshots/AS/export/partysummary_card.png" width="250" alt="View Party Summary — sortable stat card with HIGHER/LOWER markers" />
 - ⭐ **Favorites that actually work for you.** A two-column Favorites list (more on screen, less scrolling),
   **reorder with L + D-Pad** (hold L, tap a direction — because chronological order made re-organizing a pain), and short
   **aliases** shown only in Favorites so the list stays clean and readable.
 
-  ![Favorites — two-column grid with tidy aliases](Screenshots/AS/export/favorites.png)
+  <img src="Screenshots/AS/export/favorites.png" width="250" alt="Favorites — two-column grid with tidy aliases" />
 - 🗂️ **Two-column menus** for the toggle-heavy screens, so you scroll a whole lot less.
 - 📟 **An on-screen HUD.** Show what matters while you play — Money, Clock, Battle Points, Pokémiles, party
   count, map coordinates, Repel steps, your lead's battle status — in a tidy translucent panel you can
   position and fade to taste.
 
-  ![Config HUD — pick what shows on screen](Screenshots/AS/export/config_hud.png)
+  <img src="Screenshots/AS/export/config_hud.png" width="250" alt="Config HUD — pick what shows on screen" />
 - 🔍 **A "See Enemy Pokémon Stats" overlay.** Reads the foe at a glance — gender, shininess, Nature, Ability
   (including Hidden Abilities), Hidden Power, held item, max HP — plus colour-coded IVs and EVs. Pick exactly
   which fields show, and flip pages mid-battle with **ZR**.
 
-  ![Enemy Stats overlay in battle — Basic & Moves page](Screenshots/AS/export/stats_page01.png)
-  ![Enemy Stats overlay in battle — IVs & EVs page](Screenshots/AS/export/stats_page02.png)
-  ![Choose exactly which enemy stats appear](Screenshots/AS/export/display_enemy_stats.png)
+  <img src="Screenshots/AS/export/stats_page01.png" width="250" alt="Enemy Stats overlay — Basic & Moves page" />
+  <img src="Screenshots/AS/export/stats_page02.png" width="250" alt="Enemy Stats overlay — IVs & EVs page" />
+  <img src="Screenshots/AS/export/display_enemy_stats.png" width="250" alt="Choose exactly which enemy stats appear" />
 - 🔔 **Friendly on-screen notifications.** A small toast pops up when you turn a cheat on or off, so you always
   know what's active.
 - ⚠️ **Gentle guard-rails.** The few cheats that can spoil a beginner's save (Unlock Full Dex, Full Fly Map,
@@ -137,7 +129,7 @@ Everything below exists because it solved an actual annoyance — not because a 
   **X** shows its info, **START** opens its editor; tap the gamepad icon to rebind any feature's hotkey — all
   customizable in **Tools > Hotkeys**.
 
-  ![Tools menu — hotkeys, themes, settings and more](Screenshots/AS/export/tools_menu.png)
+  <img src="Screenshots/AS/export/tools_menu.png" width="250" alt="Tools menu — hotkeys, themes, settings and more" />
 - 🎨 **25 colour themes.** Make it yours — Trainer Navy, Poké Ball, Game Boy, Zelda BotW, Cyberpunk, Synthwave,
   Persona 5, Hoenn Dreams, Item Bag, Alpha Sapphire and many more. Switches instantly, remembers your choice,
   and previews its colours right next to each name. (An idea I carried over from another app I made.)
