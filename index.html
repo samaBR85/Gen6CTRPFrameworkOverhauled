@@ -656,7 +656,7 @@
     Gen6<span>CTR</span>Plugin
   </a>
   <ul class="nav-links">
-    <li><a href="#whats-new">New in v0.3.1</a></li>
+    <li><a href="#whats-new">What's New</a></li>
     <li><a href="#features">Features</a></li>
     <li><a href="#screenshots">Screenshots</a></li>
     <li><a href="#themes">Themes</a></li>
@@ -668,13 +668,13 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">Nintendo 3DS Plugin &bull; v0.3.1</div>
+  <div class="hero-badge">Nintendo 3DS Plugin &bull; v0.3.2</div>
   <h1>
     <span class="hl">Gen6</span> CTRPlugin<br/>
     <span class="hl2">Framework</span> Overhauled
   </h1>
   <p class="hero-sub">
-    A heavily overhauled <strong>3gx cheat plugin</strong> for Pokémon Generation 6 on Nintendo 3DS — built for players, not programmers. <strong>v0.3.1</strong> adds <strong>PokéMart Anywhere</strong> — a real in-bag shop with prices, a cart and checkout — on top of the dual-screen finders.
+    A heavily overhauled <strong>3gx cheat plugin</strong> for Pokémon Generation 6 on Nintendo 3DS — built for players, not programmers. It packs <strong>PokéMart Anywhere</strong> — a real in-bag shop with prices, a cart and checkout — on top of the dual-screen finders.
   </p>
   <div class="hero-games">
     <span class="game-tag">⚔️ Pokémon X</span>
@@ -691,14 +691,14 @@
       View on GitHub
     </a>
   </div>
-  <img class="hero-shot" src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/home_v030.png" alt="Gen6CTRPluginFramework v0.3.1 main menu on Pokémon Alpha Sapphire" loading="eager" />
+  <img class="hero-shot" src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPluginFramework/main/Screenshots/AS/export/home_v030.png" alt="Gen6CTRPluginFramework v0.3.2 main menu on Pokémon Alpha Sapphire" loading="eager" />
   <div class="hero-stats">
     <div class="stat-item">
       <div class="stat-num" id="total-downloads">–</div>
       <div class="stat-label">Total Downloads</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">v0.3.1</div>
+      <div class="stat-num">v0.3.2</div>
       <div class="stat-label">Latest Version</div>
     </div>
     <div class="stat-item">
@@ -718,9 +718,9 @@
 <section id="whats-new">
   <div class="container">
     <div class="section-header fade-in">
-      <div class="section-tag">New in v0.3.1</div>
+      <div class="section-tag">What's New</div>
       <h2 class="section-title">Bring Your Own Poké Mart</h2>
-      <p class="section-sub">v0.3.1 turns the item-adder into a real shop — prices, a cart and a checkout — plus list sorting and rock-solid sleep/wake on every full-screen tool. The dual-screen Spawner and Respawn Legendary finders return, too.</p>
+      <p class="section-sub">It turns the item-adder into a real shop — prices, a cart and a checkout — plus list sorting and rock-solid sleep/wake on every full-screen tool. The dual-screen Spawner and Respawn Legendary finders return, too.</p>
     </div>
 
     <div class="wn-feature fade-in">
@@ -1006,15 +1006,15 @@
           <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>
           Latest Release
         </div>
-        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.3.1</div>
+        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.3.2</div>
         <div class="dl-meta">
           Released <span>June 21, 2026</span> &bull;
           Platform <span>Nintendo 3DS (3gx)</span> &bull;
           License <span>GNU GPL-3.0</span>
         </div>
         <div class="dl-buttons">
-          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPluginFramework/releases/download/v0.3.1/Gen6CTRPluginFramework-v0.3.1.zip" target="_blank" rel="noopener">
-            ⬇ Download v0.3.1 (.zip)
+          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPluginFramework/releases/download/v0.3.2/Gen6CTRPluginFramework-v0.3.2.zip" target="_blank" rel="noopener">
+            ⬇ Download v0.3.2 (.zip)
           </a>
           <a class="btn-secondary" href="https://github.com/samaBR85/Gen6CTRPluginFramework/releases" target="_blank" rel="noopener">
             All Releases
@@ -1028,6 +1028,12 @@
     </div>
 
     <div class="releases-list fade-in">
+      <div class="release-row">
+        <span class="release-tag">v0.3.2</span>
+        <span class="release-date">Jun 21, 2026</span>
+        <span class="release-downloads" id="dl-v032">Loading…</span>
+        <a class="release-link" href="https://github.com/samaBR85/Gen6CTRPluginFramework/releases/download/v0.3.2/Gen6CTRPluginFramework-v0.3.2.zip" target="_blank" rel="noopener">Download</a>
+      </div>
       <div class="release-row">
         <span class="release-tag">v0.3.1</span>
         <span class="release-date">Jun 21, 2026</span>
@@ -1138,11 +1144,13 @@
         release.assets.forEach(asset => { total += asset.download_count; });
       });
 
+      const v032 = data.find(r => r.tag_name === 'v0.3.2');
       const v031 = data.find(r => r.tag_name === 'v0.3.1');
       const v030 = data.find(r => r.tag_name === 'v0.3.0');
       const v021 = data.find(r => r.tag_name === 'v0.2.1');
       const v020 = data.find(r => r.tag_name === 'v0.2.0');
 
+      const count032 = v032 ? v032.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count031 = v031 ? v031.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count030 = v030 ? v030.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count021 = v021 ? v021.assets.reduce((s, a) => s + a.download_count, 0) : 0;
@@ -1151,16 +1159,18 @@
       animateCount('total-downloads', total);
       animateCount('download-count', total);
 
+      const el032 = document.getElementById('dl-v032');
       const el031 = document.getElementById('dl-v031');
       const el030 = document.getElementById('dl-v030');
       const el021 = document.getElementById('dl-v021');
       const el020 = document.getElementById('dl-v020');
+      if (el032) el032.textContent = count032 + ' downloads';
       if (el031) el031.textContent = count031 + ' downloads';
       if (el030) el030.textContent = count030 + ' downloads';
       if (el021) el021.textContent = count021 + ' downloads';
       if (el020) el020.textContent = count020 + ' downloads';
     } catch (e) {
-      const els = ['total-downloads','download-count','dl-v031','dl-v030','dl-v021','dl-v020'];
+      const els = ['total-downloads','download-count','dl-v032','dl-v031','dl-v030','dl-v021','dl-v020'];
       els.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = '–';
