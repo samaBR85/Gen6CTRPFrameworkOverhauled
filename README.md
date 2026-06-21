@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.3.0
+# Gen6CTRPluginFrameworkOverhauled — v0.3.1
 
 A heavily overhauled 3gx plugin for Pokémon X, Y, Omega Ruby, and Alpha Sapphire on the Nintendo 3DS.
 
@@ -12,12 +12,38 @@ CTRPluginFramework; all of that work is gratefully preserved (see Credits).
 > 🎯 **This release focuses on Pokémon Alpha Sapphire.** Tailored content for **Pokémon X**, **Y**
 > and **Omega Ruby** is already in the works — stay tuned!
 
-![Gen6CTRPluginFrameworkOverhauled — the v0.3.0 main menu on Pokémon Alpha Sapphire](Screenshots/AS/export/home_v030.png)
+![Gen6CTRPluginFrameworkOverhauled — the main menu on Pokémon Alpha Sapphire](Screenshots/AS/export/home_v030.png)
 
-## 🆕 New in v0.3.0 — find anything, in seconds
+## 🆕 New in v0.3.1 — bring your own Poké Mart
 
-The headline of this release is three dual-screen **finders** that turn "I wish I could just *get* that
-Pokémon / item" into a few taps. Everything is built-in — no internet, no typing long names, no wikis.
+**PokéMart Anywhere** turns the item-adder into a real shop. Every row shows its icon, how many you already
+own, and its **price** — and *you* choose how to play.
+
+![PokéMart Anywhere — the whole bag with prices, filters and Sort, in PAY mode](Screenshots/AS/export/pokemart_02.png)
+
+Press **START** to switch modes. **FREE** adds anything, any amount, at no cost (the classic behavior); **PAY**
+is a real Poké Mart — the list narrows to items you can actually buy in-game, and each one costs **Money**.
+
+![PokéMart Anywhere — choose FREE or PAY](Screenshots/AS/export/pokemart_01.png)
+
+In PAY mode, buy on the spot or **build a cart** and review everything at **Checkout** before you pay — and you
+can never overspend.
+
+![PokéMart Anywhere — review the cart and check out](Screenshots/AS/export/pokemart_05.png)
+![PokéMart Anywhere — thank you for your purchase](Screenshots/AS/export/pokemart_06.png)
+
+**Also new in v0.3.1**
+
+- 🔃 **Sort the bag** — order the list by name, price, type or how many you own, ascending or descending.
+- 🌙 **Sleep-safe full-screen tools.** Closing the lid while the Spawner, PokéMart, Party Summary or any other
+  full-screen view is open no longer leaves a black screen on wake.
+- 🖼️ **Screenshots can keep your overlays** — capture the HUD, enemy stats and notifications too (Tools ›
+  Screenshot › *Include overlays*).
+
+## 🔎 The dual-screen finders
+
+Two more built-in **finders** turn "I wish I could just *get* that Pokémon" into a few taps. Everything is
+built-in — no internet, no typing long names, no wikis.
 
 ![The Pokémon Spawner & Trainer (PKHeX) menu](Screenshots/AS/export/special_features.png)
 
@@ -38,20 +64,6 @@ stage, base stats, and the **four moves it knows at your chosen level**. Set the
 Then just step into grass, water or a cave — and there it is.
 
 ![Spawner — "a wild Pokémon appeared!"](Screenshots/AS/export/pokemonspawner_03.png)
-
-### 🎒 Add Item to Inventory
-
-The same idea for your **whole bag** — Items, Medicines, Berries, TMs & HMs and Key Items in one searchable
-list, each row showing its icon and **how many you already own**. Filter by **pocket / category**, **type**,
-or even **status** (find every Burn / Sleep / Poison item — cures, orbs and status-move TMs alike).
-
-![Add Item — the whole bag in one searchable list](Screenshots/AS/export/additem_01.png)
-![Add Item — the Status filter (cure / inflict / teach)](Screenshots/AS/export/additem_03.png)
-
-Pick an item, set the amount, and **ADD TO BAG** — it lands in the first free slot and **never wipes** what
-you already have.
-
-![Add Item — quantity and Add to Bag](Screenshots/AS/export/additem_05.png)
 
 ### ✨ Respawn Legendary
 
@@ -84,13 +96,13 @@ If you're new to homebrew but you love these games: that's who this is for. Welc
 
 Everything below exists because it solved an actual annoyance — not because a checklist said so.
 
-- 📖 **A built-in App Guide.** 20 short, friendly pages that teach you the plugin *from inside the plugin*,
+- 📖 **A built-in App Guide.** 21 short, friendly pages that teach you the plugin *from inside the plugin*,
   sequenced to your real journey through the game — what to do first, what each feature is for, and when it'll
   actually help you. It reads like a guided adventure, not a manual.
 - ℹ️ **An INFO (i) note on every single function.** Highlight anything and press the info **(i)** button (or
   **X**) for a plain, beginner-friendly explanation of what it does and how to use it. No guessing, no wikis.
-- 🔎 **Dual-screen finders for Pokémon and items.** The **Wild Pokémon Spawner**, **Add Item to Inventory** and
-  **Respawn Legendary** — browse, filter and grab exactly what you want. *(New in v0.3.0 — [see above](#-new-in-v030--find-anything-in-seconds).)*
+- 🔎 **Dual-screen finders for Pokémon and items.** The **Wild Pokémon Spawner**, **PokéMart Anywhere** and
+  **Respawn Legendary** — browse, filter and grab exactly what you want. *(See the highlights above.)*
 - 📊 **View Party Summary — sortable stat cards.** See your team's real hidden numbers (stats, IVs, EVs,
   Nature, Ability, item, moves) as cards. Move a selector over a stat with **Up/Down**, press **A** to jump
   to the teammate with the **HIGHER** (or **LOWER**) value, flip the mode with **L**, and read ▲/▼ markers
@@ -217,7 +229,7 @@ exist.
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
 **This fork**
-- Fork, overhaul and v0.3.0 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 / v0.3.1 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

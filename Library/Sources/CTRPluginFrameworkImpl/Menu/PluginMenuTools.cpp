@@ -534,6 +534,8 @@ namespace CTRPluginFramework {
         // Screenshots menu
         _screenshotMenu.Append(new MenuEntryTools("Config", ScreenshotMenuCallback, Icon::DrawSettings));
         _screenshotMenu.Append((g_screenshotEntry = new MenuEntryTools("Screenshot: " << Color::LimeGreen << KeysToString(Screenshot::Hotkeys) << "\x18, " << Color::Orange << "Both screens", Screenshot_Enabler, true)));
+        // Include the plugin's on-screen overlays (HUD, See-Enemy-Stats, notifications) in the saved image.
+        _screenshotMenu.Append(new MenuEntryTools("Include overlays (HUD, stats, notifications)", [] {Screenshot::IncludeOverlays = !Screenshot::IncludeOverlays;}, true, Screenshot::IncludeOverlays));
 
         // Hotkeys page — all 4 menu key binds grouped together (open the rebind screen on select)
         _hotkeysMenu.Append(new MenuEntryTools("Open/Close Menu (default Select)", MenuHotkeyModifier, Icon::DrawGameController));

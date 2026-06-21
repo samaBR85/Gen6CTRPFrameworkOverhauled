@@ -11,6 +11,10 @@ namespace CTRPluginFramework {
         return (SystemImpl::IsCitra);
     }
 
+    bool System::IsSleeping(void) {
+        return (SystemImpl::IsSleeping());   // true once the lid is closing (WANTSTOSLEEP) or asleep (SLEEPING)
+    }
+
     LanguageId System::GetSystemLanguage(void) {
         return (static_cast<LanguageId>(SystemImpl::Language));
     }

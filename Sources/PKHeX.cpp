@@ -1197,6 +1197,7 @@ namespace CTRPluginFramework {
 
             while (true) {
                 Controller::Update();
+                if (System::IsSleeping()) break;             // bail out so the menu can release the game + handle sleep
 
                 // Select closes the plugin and returns straight to the game (from either mode).
                 if (Controller::IsKeyPressed(Key::Select)) {

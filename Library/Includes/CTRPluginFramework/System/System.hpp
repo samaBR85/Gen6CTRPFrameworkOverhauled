@@ -34,6 +34,14 @@ namespace CTRPluginFramework {
             static bool IsCitra(void);
 
             /**
+             * @brief Check if the console is entering or in sleep mode (lid closed).
+             * Custom blocking render loops should break out when this returns true so the
+             * framework menu can release the game and handle the sleep/wake handshake.
+             * \return true if the system wants to sleep or is sleeping
+             */
+            static bool IsSleeping(void);
+
+            /**
              *
              * \brief Get the system's language (user defined)
              * \return The language of the system

@@ -244,6 +244,11 @@ namespace CTRPluginFramework {
         if (Screenshot::OSDCallback(isBottom, addr, addrB, stride, format))
             return;
 
+        // Raw (untranslated) framebuffer VA — the same value the pre-overlay capture reads. The post-overlay
+        // capture below must use THIS (not the GetBuffer()-translated address, which is physical when
+        // CachedDrawMode is off and fails Process::CheckAddress). It aliases the same RAM the overlays draw into.
+        void *rawAddr = addr;
+
         // Convert to actual addresses and check validity
         if (WritesToPrevFB) {
             previousFBAddr[isBottom][swap ? 1 : 0][0] = addr;
@@ -266,8 +271,12 @@ namespace CTRPluginFramework {
             Result res = OnTopScreenFrame();
 
             // No osd when game is paused
-            if (ProcessImpl::IsPaused || res)
+            if (ProcessImpl::IsPaused || res) {
+                // With IncludeOverlays on, the shared post-overlay capture below is unreachable on this
+                // early-return path, so capture here too (keeps menu/paused screenshots working).
+                Screenshot::OSDCallbackPost(isBottom, rawAddr, stride, format);
                 return;
+            }
         }
 
         else {
@@ -336,6 +345,11 @@ namespace CTRPluginFramework {
         }
 
         Unlock();
+
+        // Post-overlay screenshot capture: overlays (HUD, enemy stats, notifications) are now composited into
+        // the framebuffer. Read via rawAddr (the valid VA), which aliases the same RAM as the translated addr.
+        // No-op unless a screenshot with IncludeOverlays is in flight for this screen.
+        Screenshot::OSDCallbackPost(isBottom, rawAddr, stride, format);
 
         if (settings.CachedDrawMode) {
             svcFlushProcessDataCache(CUR_PROCESS_HANDLE, reinterpret_cast<u32>(addr), isBottom ? stride * 320 : stride * 400);

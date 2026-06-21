@@ -1,4 +1,5 @@
 #include <optional>
+#include <algorithm>
 #include "Parser.hpp"
 #include "Codes.hpp"
 #include "PKHeX.hpp"
@@ -1656,6 +1657,7 @@ namespace CTRPluginFramework {
 
         while (true) {
             Controller::Update();
+            if (System::IsSleeping()) return false;          // bail out so the menu can release the game + handle sleep
             if (Controller::IsKeyPressed(Key::Select)) {
                 while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
                 PluginMenu::Close(); closePlugin = true; break;
@@ -1767,6 +1769,7 @@ namespace CTRPluginFramework {
 
         while (true) {
             Controller::Update();
+            if (System::IsSleeping()) return false;          // bail out so the menu can release the game + handle sleep
             // SELECT closes the plugin straight to the game (like View Party Summary).
             if (Controller::IsKeyPressed(Key::Select)) {
                 while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
@@ -2007,6 +2010,7 @@ namespace CTRPluginFramework {
 
         while (true) {
             Controller::Update();
+            if (System::IsSleeping()) break;                 // bail out so the menu can release the game + handle sleep
             // SELECT closes the plugin straight to the game (like View Party Summary).
             if (Controller::IsKeyPressed(Key::Select)) {
                 while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
@@ -2220,6 +2224,7 @@ namespace CTRPluginFramework {
 
         while (true) {
             Controller::Update();
+            if (System::IsSleeping()) break;                 // bail out so the menu can release the game + handle sleep
             if (dirty) { SpawnerRecompute(results); clampCursor(); dirty = false; }
 
             // SELECT closes the plugin straight to the game (like View Party Summary).
@@ -2500,6 +2505,144 @@ namespace CTRPluginFramework {
         }
     }
 
+    // ===== "PokéMart Anywhere": PAY/FREE mode + shopping cart (session-global; remembered across re-opens) =====
+    static int g_bagPayMode = 0;                 // 0 = FREE (add at no cost), 1 = PAY (Poké Mart: items cost Money)
+    // List sort (view pref; kept separate from g_bf so "Reset all" doesn't clear it; remembered across re-opens)
+    static int  g_bagSortKey  = 0;               // 0 Default, 1 Name, 2 Price, 3 Type, 4 Owned
+    static bool g_bagSortDesc = false;
+    struct BagCartLine { u16 id; u8 pocket; u16 qty; u16 unit; };
+    static BagCartLine g_cart[50];
+    static int g_cartCount = 0;
+
+    static int  BagCartTotal(void) { int t = 0; for (int i = 0; i < g_cartCount; i++) t += (int)g_cart[i].qty * (int)g_cart[i].unit; return t; }
+    static void BagCartAdd(int id, int pocket, int qty, int unit) {
+        for (int i = 0; i < g_cartCount; i++)
+            if (g_cart[i].id == (u16)id && g_cart[i].pocket == (u8)pocket) { int q = (int)g_cart[i].qty + qty; if (q > 999) q = 999; g_cart[i].qty = (u16)q; return; }
+        if (g_cartCount < 50) { g_cart[g_cartCount].id = (u16)id; g_cart[g_cartCount].pocket = (u8)pocket; g_cart[g_cartCount].qty = (u16)qty; g_cart[g_cartCount].unit = (u16)unit; g_cartCount++; }
+    }
+    static u32  BagReadMoney(void)   { u32 m = 0; Process::Read32(AutoGameSet(0x8C6A6AC, 0x8C71DC0), m); return m; }
+    static void BagWriteMoney(u32 m) { if (m > 9999999) m = 9999999; Process::Write32(AutoGameSet(0x8C6A6AC, 0x8C71DC0), m); }
+
+    // START modal: a custom dual-screen chooser (top = explainer, bottom = red PAY box / blue FREE box).
+    // Sets g_bagPayMode; the caller compares before/after to know whether to recompute the list.
+    static void BagPayFreeModal(void) {
+        const Screen &top = OSD::GetTopScreen();
+        const Screen &bot = OSD::GetBottomScreen();
+        const FwkSettings &st = FwkSettings::Get();
+        Color bg = st.BackgroundMainColor, txt = st.MainTextColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+        Color red(0xCC, 0x33, 0x33), blue(0x2F, 0x6F, 0xD0), white = Color::White;
+
+        while (Controller::IsKeyDown(Key::Start)) { Controller::Update(); OSD::SwapBuffers(); }
+        bool wasDown = false, armed = false; UIntVector lp = Touch::GetPosition();
+        while (true) {
+            Controller::Update();
+            if (System::IsSleeping()) break;                 // bail out so the menu can release the game + handle sleep
+            int pick = -1;
+            if (Controller::IsKeyPressed(Key::B)) break;
+            if (Controller::IsKeyPressed(Key::Left))  pick = 1;   // PAY
+            if (Controller::IsKeyPressed(Key::Right)) pick = 0;   // FREE
+            bool down = Touch::IsDown(); UIntVector tp = down ? Touch::GetPosition() : lp; if (down) lp = tp;
+            bool tap = armed && !down && wasDown; if (!down) armed = true; wasDown = down;
+            if (tap && SpawnerInBox(lp, 40, 110, 110, 84)) pick = 1;
+            if (tap && SpawnerInBox(lp, 170, 110, 110, 84)) pick = 0;
+
+            top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
+            top.DrawSysfont(title << "PokeMart Anywhere", 44, 28, title);
+            top.DrawRect(44, 46, 312, 1, title, true);
+            const char *L[] = {
+                "PAY  -  a real Poke Mart. The list shows",
+                "only items you can actually buy in-game,",
+                "and each costs Money (buy now, or build a",
+                "cart and check out). For the canonical",
+                "experience, play in PAY.", "",
+                "FREE  -  add any item, any amount, for free",
+                "(the classic behavior).", "",
+                "Switch any time with START." };
+            for (int i = 0; i < (int)(sizeof(L) / sizeof(L[0])); i++) top.DrawSysfont(txt << L[i], 44, 56 + i * 14, txt);
+
+            bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
+            // centered on the box center (x=160)
+            auto cen = [&](const Screen &sc, const string &s, int cx, int y, const Color &c) {
+                int w = (int)OSD::GetTextWidth(true, s); sc.DrawSysfont(c << s, cx - w / 2, y, c);
+            };
+            cen(bot, "Choose a mode", 160, 32, title);
+            cen(bot, "Tap a box, or use Left / Right", 160, 52, txt);
+            cen(bot, "B = cancel", 160, 70, txt);
+            // PAY (box center x=95) / FREE (box center x=225), 20px gap, labels centered
+            bot.DrawRect(40, 110, 110, 84, red, true);  bot.DrawRect(40, 110, 110, 84, g_bagPayMode == 1 ? white : border, false);
+            cen(bot, "PAY", 95, 140, white);  cen(bot, "costs Money", 95, 160, white);
+            bot.DrawRect(170, 110, 110, 84, blue, true); bot.DrawRect(170, 110, 110, 84, g_bagPayMode == 0 ? white : border, false);
+            cen(bot, "FREE", 225, 140, white); cen(bot, "no charge", 225, 160, white);
+
+            OSD::SwapBuffers();
+            if (pick >= 0) { g_bagPayMode = pick; while (Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } break; }
+        }
+        while (Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); }
+    }
+
+    // Checkout screen: review the cart, then PAY (debits Money, fills the bag) or Clear Cart. B = back to the list.
+    // Money is checked before any debit, so it can never go negative.
+    static void BagCheckout(void) {
+        const Screen &top = OSD::GetTopScreen();
+        const Screen &bot = OSD::GetBottomScreen();
+        const FwkSettings &st = FwkSettings::Get();
+        Color bg = st.BackgroundMainColor, txt = st.MainTextColor, title = st.WindowTitleColor;
+        Color border = st.BackgroundBorderColor, bg2 = st.BackgroundSecondaryColor;
+        Color green(0x3C, 0xB3, 0x71), red(0xCC, 0x33, 0x33);
+
+        while (Controller::IsKeyDown(Key::A) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); }
+        bool wasDown = false, armed = false; UIntVector lp = Touch::GetPosition();
+        int scroll = 0; const int ROWS = 8; string flash; int flashT = 0;
+        while (true) {
+            Controller::Update();
+            if (System::IsSleeping()) break;                 // bail out so the menu can release the game + handle sleep
+            if (Controller::IsKeyPressed(Key::B)) break;
+            if (Controller::IsKeyPressed(Key::Down) && scroll < g_cartCount - ROWS) scroll++;
+            if (Controller::IsKeyPressed(Key::Up)   && scroll > 0) scroll--;
+            bool down = Touch::IsDown(); UIntVector tp = down ? Touch::GetPosition() : lp; if (down) lp = tp;
+            bool tap = armed && !down && wasDown; if (!down) armed = true; wasDown = down;
+            u32 money = BagReadMoney(); int total = BagCartTotal();
+
+            if (tap && g_cartCount > 0 && SpawnerInBox(lp, 30, 150, 150, 34)) {
+                if ((int)money >= total) {
+                    BagWriteMoney(money - (u32)total);
+                    for (int i = 0; i < g_cartCount; i++) BagAddToPocket(g_cart[i].pocket, g_cart[i].id, g_cart[i].qty);
+                    g_cartCount = 0; BagReadInventory();
+                    MessageBox(string("Thank you for your purchase!\n\n- PokeMart\n\nSpent: $") + to_string(total), DialogType::DialogOk, ClearScreen::Both)();
+                    break;
+                } else { flash = "Not enough money!"; flashT = 120; while (Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } armed = false; wasDown = false; }
+            }
+            if (tap && SpawnerInBox(lp, 190, 150, 100, 34)) { g_cartCount = 0; while (Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } break; }
+
+            top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
+            top.DrawSysfont(title << "Checkout", 42, 26, title);
+            { string m = string("Money: $") + to_string(money); int w = (int)OSD::GetTextWidth(true, m); top.DrawSysfont(txt << m, 362 - w, 28, txt); }
+            top.DrawRect(42, 44, 316, 1, title, true);
+            if (g_cartCount == 0) top.DrawSysfont(txt << "Your cart is empty.", 120, 110, txt);
+            else for (int i = 0; i < ROWS; i++) {
+                int ri = scroll + i; if (ri >= g_cartCount) break; int y = 50 + i * 16; BagCartLine &c = g_cart[ri];
+                top.DrawSysfont(txt << bagItemName[c.id], 44, y, txt);
+                string r = string("x") + to_string(c.qty) + "   $" + to_string((int)c.qty * (int)c.unit);
+                int w = (int)OSD::GetTextWidth(true, r); top.DrawSysfont(txt << r, 360 - w, y, txt);
+            }
+            { string tt = string("TOTAL:  $") + to_string(total); int w = (int)OSD::GetTextWidth(true, tt); top.DrawSysfont(title << tt, 360 - w, 198, title); }
+
+            bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
+            bot.DrawSysfont(title << "Checkout", 40, 30, title);
+            bot.DrawSysfont(txt << (string("Items in cart: ") + to_string(g_cartCount)), 40, 62, txt);
+            bot.DrawSysfont(txt << (string("Total:  $") + to_string(total)), 40, 84, txt);
+            bot.DrawSysfont(((int)money >= total ? green : red) << (string("Money:  $") + to_string(money)), 40, 106, txt);
+            if (flashT > 0) { flashT--; bot.DrawSysfont(red << flash, 40, 128, red); }
+            bot.DrawRect(30, 150, 150, 34, g_cartCount > 0 ? green : bg2, true); bot.DrawRect(30, 150, 150, 34, border, false);
+            { string s = string("PAY  $") + to_string(total); int w = (int)OSD::GetTextWidth(true, s); bot.DrawSysfont(bg << s, 105 - w / 2, 158, bg); }
+            bot.DrawRect(190, 150, 100, 34, bg2, true); bot.DrawRect(190, 150, 100, 34, border, false);
+            { string s = "Clear Cart"; int w = (int)OSD::GetTextWidth(true, s); bot.DrawSysfont(txt << s, 240 - w / 2, 158, txt); }
+            bot.DrawSysfont(txt << "B - back to the list", 40, 196, txt);
+            OSD::SwapBuffers();
+        }
+        while (Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); }
+    }
+
     static bool BagAny(const bool *a, int n) { for (int i = 0; i < n; i++) if (a[i]) return true; return false; }
     static void BagResetCategory(void) {
         for (int i = 0; i < 5; i++) { g_bf.grpAll[i] = false; for (int j = 0; j < 12; j++) g_bf.grp[i][j] = false; }
@@ -2525,6 +2668,7 @@ namespace CTRPluginFramework {
             if (ver == 1 && !isXY) continue;       // XY-only item, not on this version
             if (ver == 2 && isXY) continue;        // ORAS-only item
             if (g_bf.invOnly && g_invCount[id] == 0) continue;
+            if (g_bagPayMode == 1 && !bagItemBuyable[id]) continue;   // PAY: only canonically money-buyable items
             if (!g_bf.text.empty()) {
                 string nm = SpawnerLower(bagItemName[id]);
                 if (nm.find(g_bf.text) == string::npos && to_string(id).find(g_bf.text) == string::npos) continue;
@@ -2535,6 +2679,18 @@ namespace CTRPluginFramework {
             if (catActive && !(g_bf.grpAll[pk] || g_bf.grp[pk][bagItemGroup[id]])) continue;
             if (aFlavor) { if (pk != 2 || !g_bf.flavor[bagBerryFlavor[id]]) continue; }
             out.push_back((u16)id);
+        }
+        // optional sort (stable_sort keeps the natural order for ties; Default = no sort)
+        if (g_bagSortKey != 0) {
+            int key = g_bagSortKey; bool desc = g_bagSortDesc;
+            std::stable_sort(out.begin(), out.end(), [key, desc](u16 a, u16 b) {
+                if (key == 1) { int c = SpawnerLower(bagItemName[a]).compare(SpawnerLower(bagItemName[b])); return desc ? (c > 0) : (c < 0); }
+                long ka, kb;
+                if (key == 2)      { ka = bagItemCost[a];  kb = bagItemCost[b];  }
+                else if (key == 3) { ka = bagItemType[a];  kb = bagItemType[b];  }
+                else               { ka = g_invCount[a];   kb = g_invCount[b];   }  // Owned
+                return desc ? (ka > kb) : (ka < kb);
+            });
         }
     }
 
@@ -2549,7 +2705,7 @@ namespace CTRPluginFramework {
         vector<u16> results; BagRecompute(results);
         int cursor = 0, scroll = 0;
         const int ROWS = 7, ROWH = 18, LISTY = 48;
-        enum { P_NONE = 0, P_CAT, P_STATUS, P_TYPE };
+        enum { P_NONE = 0, P_CAT, P_STATUS, P_TYPE, P_SORT };
         int panel = P_NONE, catTab = 0;
         bool addMode = false, dirty = false;
         int marqId = -1, marqStart = 0, marqTick = 0, marqDelay = 0; // description marquee state
@@ -2569,14 +2725,6 @@ namespace CTRPluginFramework {
             iconCacheId[slot] = id;
             return &iconCache[slot];
         };
-        auto clampCursor = [&]() {
-            if (results.empty()) { cursor = 0; scroll = 0; return; }
-            if (cursor < 0) cursor = 0;
-            if (cursor >= (int)results.size()) cursor = (int)results.size() - 1;
-            if (cursor < scroll) scroll = cursor;
-            if (cursor >= scroll + ROWS) scroll = cursor - ROWS + 1;
-            if (scroll < 0) scroll = 0;
-        };
         auto chip = [&](int x, int y, int w, int h, const string &label, bool on, const Color &accent) {
             bot.DrawRect(x, y, w, h, on ? accent : bg2, true);
             bot.DrawRect(x, y, w, h, on ? title : border, false);
@@ -2589,6 +2737,21 @@ namespace CTRPluginFramework {
             bot.DrawSysfont((on ? bg : txt) << label, 38, y + 4, txt);
             int vw = (int)OSD::GetTextWidth(true, val); int vx = 284 - vw; if (vx < 120) vx = 120;
             bot.DrawSysfont((on ? bg : sel) << val, vx, y + 4, sel);
+        };
+        // a button at any x/width (for the half-width Status/Type row)
+        auto hubBtnAt = [&](int x, int y, int w, const string &label, const string &val, bool on) {
+            bot.DrawRect(x, y, w, 22, on ? sel : bg2, true);
+            bot.DrawRect(x, y, w, 22, on ? title : border, false);
+            bot.DrawSysfont((on ? bg : txt) << label, x + 8, y + 4, txt);
+            int vw = (int)OSD::GetTextWidth(true, val); int vx = x + w - 6 - vw;
+            bot.DrawSysfont((on ? bg : sel) << val, vx, y + 4, sel);
+        };
+        // a centered action button (Reset all / Cart)
+        auto actBtn = [&](int x, int y, int w, const string &label, const Color &fill, const Color &fg) {
+            bot.DrawRect(x, y, w, 22, fill, true);
+            bot.DrawRect(x, y, w, 22, border, false);
+            int tw = (int)OSD::GetTextWidth(true, label);
+            bot.DrawSysfont(fg << label, x + (w - tw) / 2, y + 4, fg);
         };
         auto countSel = [&](const bool *a, int from, int to, int &first) -> int {
             int c = 0; first = -1;
@@ -2604,7 +2767,8 @@ namespace CTRPluginFramework {
 
         while (true) {
             Controller::Update();
-            if (dirty) { BagRecompute(results); clampCursor(); dirty = false; }
+            if (System::IsSleeping()) break;                 // bail out so the menu can release the game + handle sleep
+            if (dirty) { BagRecompute(results); cursor = 0; scroll = 0; dirty = false; }   // snap to the first row on any filter/mode change
 
             if (Controller::IsKeyPressed(Key::Select)) {
                 while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
@@ -2615,7 +2779,11 @@ namespace CTRPluginFramework {
                 if (Controller::IsKeyPressed(Key::A) && !results.empty()) {
                     addId = results[cursor]; addPocket = bagItemPocket[addId]; addQty = 1; added = false; addOk = true; addMode = true;
                 }
-                if (Controller::IsKeyPressed(Key::Start)) { BagResetFilters(); dirty = true; }
+                if (Controller::IsKeyPressed(Key::Start)) {        // START now opens the PAY/FREE mode chooser
+                    int prev = g_bagPayMode; BagPayFreeModal();
+                    if (g_bagPayMode != prev) dirty = true;
+                    armed = false; wasDown = false;               // drop any touch carried over from the modal
+                }
             } else if (addPocket <= 2) {
                 // ADD mode: D-pad adjusts the quantity (Left/Right +-1, Up/Down +-10, L/R +-50)
                 int d = 0;
@@ -2662,9 +2830,10 @@ namespace CTRPluginFramework {
                     if (ic && ic->IsLoaded()) ic->Draw(top, 40, y + 1);
                     Color rc = cur ? sel : txt;
                     top.DrawSysfont(rc << bagItemName[id], 62, y + 2, rc);
-                    // right side: how many you own (xN) + the pocket name
+                    // right side: how many you own (xN) + the price ($) when the item has one, else the pocket
                     string rtag = (g_invCount[id] > 0 ? (string("x") + to_string(g_invCount[id]) + "  ") : "")
-                                  + bagPocketNames[bagItemPocket[id]];
+                                  + (bagItemCost[id] > 0 ? (string("$") + to_string(bagItemCost[id]))
+                                                         : string(bagPocketNames[bagItemPocket[id]]));
                     int pw = (int)OSD::GetTextWidth(true, rtag);
                     top.DrawSysfont(rc << rtag, 360 - pw, y + 2, rc);
                 }
@@ -2674,6 +2843,7 @@ namespace CTRPluginFramework {
                 top.DrawRect(42, 175, 316, 1, border, true);
                 string tag = string(bagPocketNames[pk]) + "  -  " + BagGroupName(pk, bagItemGroup[id]);
                 if (bagItemType[id]) tag += string("  -  ") + spawnerTypeNames[bagItemType[id]];
+                if (bagItemCost[id] > 0) tag += string("  -  $") + to_string(bagItemCost[id]);
                 top.DrawSysfont(title << tag, 42, 178, title);
                 const char *d = bagItemDesc[id];
                 const int STRIPW = 316;
@@ -2732,38 +2902,76 @@ namespace CTRPluginFramework {
                     bot.DrawSysfont(txt << (addPocket == 3 ? "TM/HM - added as one (reusable)" : "Key Item - added as one"), 40, 110, txt);
                 }
 
-                if (tap && SpawnerInBox(lastPos, 40, 140, 240, 30)) {
-                    addOk = BagAddToPocket(addPocket, addId, consumable ? (int)addQty : 1);
-                    if (addOk) BagReadInventory();   // refresh the list's owned counts
-                    added = true;
-                    while (Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } armed = false; wasDown = false;
+                int unit = bagItemCost[addId];
+                int qtyN = consumable ? (int)addQty : 1;
+                if (g_bagPayMode == 1) {
+                    // ---- PAY (Poké Mart): show Total + Money, then ADD CART / PAY NOW ----
+                    u32 money = BagReadMoney(); int lineTotal = unit * qtyN;
+                    { string t = string("Total: $") + to_string(lineTotal); int w = (int)OSD::GetTextWidth(true, t); bot.DrawSysfont(title << t, 290 - w, 30, title); }
+                    { string m = string("Money: $") + to_string(money);     int w = (int)OSD::GetTextWidth(true, m); bot.DrawSysfont(txt << m, 290 - w, 48, txt); }
+
+                    if (tap && SpawnerInBox(lastPos, 40, 140, 116, 30)) {        // ADD CART
+                        BagCartAdd(addId, addPocket, qtyN, unit);
+                        while (Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); }
+                        addMode = false; armed = false; wasDown = false;
+                    }
+                    bot.DrawRect(40, 140, 116, 30, bg2, true); bot.DrawRect(40, 140, 116, 30, border, false);
+                    { string s = "ADD CART"; int sw = (int)OSD::GetTextWidth(true, s); bot.DrawSysfont(txt << s, 98 - sw / 2, 147, txt); }
+
+                    if (tap && SpawnerInBox(lastPos, 164, 140, 116, 30)) {       // PAY NOW
+                        while (Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } armed = false; wasDown = false;
+                        if (g_cartCount > 0) {                                   // already a cart -> add this, go to checkout
+                            BagCartAdd(addId, addPocket, qtyN, unit);
+                            BagCheckout(); addMode = false;
+                        } else {                                                // express buy of just this item
+                            u32 mny = BagReadMoney();
+                            if ((int)mny >= lineTotal) {
+                                BagWriteMoney(mny - (u32)lineTotal);
+                                BagAddToPocket(addPocket, addId, qtyN); BagReadInventory();
+                                MessageBox(string("Thank you for your purchase!\n\n- PokeMart\n\nSpent: $") + to_string(lineTotal), DialogType::DialogOk, ClearScreen::Both)();
+                                addMode = false;
+                            } else { added = true; addOk = false; }             // reuse message line below
+                        }
+                    }
+                    bot.DrawRect(164, 140, 116, 30, sel, true); bot.DrawRect(164, 140, 116, 30, border, false);
+                    { string s = "PAY NOW"; int sw = (int)OSD::GetTextWidth(true, s); bot.DrawSysfont(bg << s, 222 - sw / 2, 147, bg); }
+
+                    if (added && !addOk) bot.DrawSysfont(Color(0xCC, 0x33, 0x33) << "Not enough money!", 92, 178, txt);
+                    bot.DrawSysfont(txt << "B - back to the list", 92, 196, txt);
+                } else {
+                    // ---- FREE: plain ADD TO BAG (no charge) ----
+                    if (tap && SpawnerInBox(lastPos, 40, 140, 240, 30)) {
+                        addOk = BagAddToPocket(addPocket, addId, qtyN);
+                        if (addOk) BagReadInventory();   // refresh the list's owned counts
+                        added = true;
+                        while (Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } armed = false; wasDown = false;
+                    }
+                    bot.DrawRect(40, 140, 240, 30, sel, true); bot.DrawRect(40, 140, 240, 30, border, false);
+                    { string s = "ADD TO BAG"; int sw = (int)OSD::GetTextWidth(true, s); bot.DrawSysfont(bg << s, 160 - sw / 2, 147, bg); }
+                    if (added) {
+                        string m = addOk ? (string("Added ") + (consumable ? to_string((int)addQty) + "x " : "") + bagItemName[addId] + "!")
+                                         : string("That pocket looks full.");
+                        int mw = (int)OSD::GetTextWidth(true, m); if (mw > 270) mw = 270;
+                        bot.DrawSysfont(title << m, 160 - mw / 2, 176, title);
+                    }
+                    bot.DrawSysfont(txt << "B - back to the list", 92, 196, txt);
                 }
-                bot.DrawRect(40, 140, 240, 30, sel, true); bot.DrawRect(40, 140, 240, 30, border, false);
-                { string s = "ADD TO BAG"; int sw = (int)OSD::GetTextWidth(true, s); bot.DrawSysfont(bg << s, 160 - sw / 2, 147, bg); }
-                if (added) {
-                    string m = addOk ? (string("Added ") + (consumable ? to_string((int)addQty) + "x " : "") + bagItemName[addId] + "!")
-                                     : string("That pocket looks full.");
-                    int mw = (int)OSD::GetTextWidth(true, m); if (mw > 270) mw = 270;
-                    bot.DrawSysfont(title << m, 160 - mw / 2, 176, title);
-                }
-                bot.DrawSysfont(txt << "B - back to the list", 92, 196, txt);
             }
             else if (panel == P_NONE) {
                 bot.DrawSysfont(title << "Filters", 38, 24, title);
                 bot.DrawRect(40, 40, 90, 1, title, true);
                 int f;
-                // In-Inventory toggle
-                if (tap && SpawnerInBox(lastPos, 30, 44, 260, 26)) { g_bf.invOnly = !g_bf.invOnly; dirty = true; }
-                hubBtn(44, "In-Inventory", g_bf.invOnly ? "ON" : "any", g_bf.invOnly);
-                // Name / #
-                if (tap && SpawnerInBox(lastPos, 30, 74, 260, 26)) {
+                // Row 1: In-Inventory + Name/# (half-width each)
+                if (tap && SpawnerInBox(lastPos, 30, 44, 126, 24)) { g_bf.invOnly = !g_bf.invOnly; dirty = true; }
+                hubBtnAt(30, 44, 126, "In bag", g_bf.invOnly ? "ON" : "any", g_bf.invOnly);
+                if (tap && SpawnerInBox(lastPos, 164, 44, 126, 24)) {
                     Keyboard kb("Search by name or item #"); string s = g_bf.text;
                     if (kb.Open(s, g_bf.text) == 0) { g_bf.text = SpawnerLower(s); dirty = true; }
                     while (Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } armed = false; wasDown = false;
                 }
-                hubBtn(74, "Name / #", g_bf.text.empty() ? "any" : g_bf.text);
-                // Pocket / category
-                if (tap && SpawnerInBox(lastPos, 30, 104, 260, 26)) panel = P_CAT;
+                hubBtnAt(164, 44, 126, "Name / #", g_bf.text.empty() ? "any" : g_bf.text, !g_bf.text.empty());
+                // Row 2: Pocket / category (full)
+                if (tap && SpawnerInBox(lastPos, 30, 74, 260, 26)) panel = P_CAT;
                 {
                     int tot = 0, fp = -1, fg = -1; bool allp = false;
                     for (int p = 0; p < 5; p++) {
@@ -2773,15 +2981,30 @@ namespace CTRPluginFramework {
                     for (int v = 1; v <= 5; v++) if (g_bf.flavor[v]) tot++;
                     string val = tot == 0 ? "any" : (allp ? (string("All ") + bagPocketNames[fp]) : string(BagGroupName(fp, fg)));
                     if (tot > 1) val += "+" + to_string(tot - 1);
-                    hubBtn(104, "Pocket / category", val);
+                    hubBtn(74, "Pocket / category", val, tot > 0);
                 }
-                // Status
-                if (tap && SpawnerInBox(lastPos, 30, 134, 260, 26)) panel = P_STATUS;
-                { int c = countSel(g_bf.status, 1, 6, f); hubBtn(134, "Status", c == 0 ? "any" : (string(bagStatusNames[f]) + (c > 1 ? "+" + to_string(c - 1) : ""))); }
-                // Type
-                if (tap && SpawnerInBox(lastPos, 30, 164, 260, 26)) panel = P_TYPE;
-                { int c = countSel(g_bf.type, 1, 18, f); hubBtn(164, "Type", c == 0 ? "any" : (string(spawnerTypeNames[f]) + (c > 1 ? "+" + to_string(c - 1) : ""))); }
-                bot.DrawSysfont(txt << "A add    B exit    START reset", 52, 198, txt);
+                // Row 3: Status + Type (half-width each)
+                if (tap && SpawnerInBox(lastPos, 30, 104, 126, 26)) panel = P_STATUS;
+                { int c = countSel(g_bf.status, 1, 6, f); hubBtnAt(30, 104, 126, "Status", c == 0 ? "any" : (string(bagStatusNames[f]) + (c > 1 ? "+" + to_string(c - 1) : "")), c > 0); }
+                if (tap && SpawnerInBox(lastPos, 164, 104, 126, 26)) panel = P_TYPE;
+                { int c = countSel(g_bf.type, 1, 18, f); hubBtnAt(164, 104, 126, "Type", c == 0 ? "any" : (string(spawnerTypeNames[f]) + (c > 1 ? "+" + to_string(c - 1) : "")), c > 0); }
+                // Row 4: Sort + Reset all (half-width each)
+                if (tap && SpawnerInBox(lastPos, 30, 134, 126, 26)) panel = P_SORT;
+                { const char *kn[] = { "off", "Name", "Price", "Type", "Owned" };
+                  string sv = g_bagSortKey == 0 ? "off" : (string(kn[g_bagSortKey]) + (g_bagSortDesc ? " desc" : " asc"));
+                  hubBtnAt(30, 134, 126, "Sort", sv, g_bagSortKey != 0); }
+                if (tap && SpawnerInBox(lastPos, 164, 134, 126, 22)) { BagResetFilters(); dirty = true; }
+                actBtn(164, 134, 126, "Reset all", bg2, txt);
+                // Row 5: Cart/Checkout (full width, only in PAY with a non-empty cart)
+                if (g_bagPayMode == 1 && g_cartCount > 0) {
+                    if (tap && SpawnerInBox(lastPos, 30, 164, 260, 22)) { BagCheckout(); armed = false; wasDown = false; }
+                    actBtn(30, 164, 260, string("CART ") + to_string(g_cartCount) + "   $" + to_string(BagCartTotal()), Color(0x3C, 0xB3, 0x71), bg);
+                }
+                // current-mode badge (top-right) + hint
+                { string mb = g_bagPayMode == 1 ? "Mode: PAY" : "Mode: FREE";
+                  Color mc = g_bagPayMode == 1 ? Color(0xCC, 0x33, 0x33) : Color(0x2F, 0x6F, 0xD0);
+                  int w = (int)OSD::GetTextWidth(true, mb); bot.DrawSysfont(mc << mb, 290 - w, 26, mc); }
+                bot.DrawSysfont(txt << "A add   B exit   START: PAY/FREE", 44, 198, txt);
             }
             else if (panel == P_STATUS) {
                 bot.DrawSysfont(title << "Status  (cure / inflict / teach)", 30, 24, title);
@@ -2804,6 +3027,20 @@ namespace CTRPluginFramework {
                 }
                 if (tap && SpawnerInBox(lastPos, 28, 196, 98, 20)) { for (int i = 0; i < 19; i++) g_bf.type[i] = false; dirty = true; }
                 chip(28, 196, 98, 20, "Reset", false, sel);
+                if (tap && SpawnerInBox(lastPos, 198, 196, 98, 20)) panel = P_NONE;
+                chip(198, 196, 98, 20, "< Back", false, sel);
+            }
+            else if (panel == P_SORT) {
+                bot.DrawSysfont(title << "Sort the list", 38, 24, title);
+                const char *kn[] = { "Default", "Name (A-Z)", "Price", "Type", "Owned" };
+                for (int k = 0; k < 5; k++) {   // single-select (radio)
+                    int col = k % 2, row = k / 2, x = 36 + col * 128, y = 50 + row * 38;
+                    if (tap && SpawnerInBox(lastPos, x, y, 120, 30)) { g_bagSortKey = k; dirty = true; }
+                    chip(x, y, 120, 30, kn[k], g_bagSortKey == k, sel);
+                }
+                // ascending / descending (no effect on Default; shown dim then)
+                if (tap && SpawnerInBox(lastPos, 36, 162, 254, 24)) { g_bagSortDesc = !g_bagSortDesc; dirty = true; }
+                chip(36, 162, 254, 24, g_bagSortDesc ? "Order:  Descending" : "Order:  Ascending", g_bagSortKey != 0, sel);
                 if (tap && SpawnerInBox(lastPos, 198, 196, 98, 20)) panel = P_NONE;
                 chip(198, 196, 98, 20, "< Back", false, sel);
             }
@@ -4033,6 +4270,7 @@ namespace CTRPluginFramework {
 
         while (true) {
             Controller::Update();
+            if (System::IsSleeping()) break;                 // bail out so the menu can release the game + handle sleep
 
             if (Controller::IsKeyPressed(Key::B))
                 break; // cancel (selected stays -1)
@@ -4139,6 +4377,7 @@ namespace CTRPluginFramework {
 
         while (true) {
             Controller::Update();
+            if (System::IsSleeping()) break;                 // bail out so the menu can release the game + handle sleep
 
             if (Controller::IsKeyPressed(Key::A)) { confirmed = true; break; }
             if (Controller::IsKeyPressed(Key::B)) { g_hudOpacity = orig; break; }

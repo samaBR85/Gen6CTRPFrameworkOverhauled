@@ -4,7 +4,8 @@ namespace CTRPluginFramework {
     #define TIMED 4
 
     bool Screenshot::IsEnabled = false;
-    u32 Screenshot::Hotkeys = Key::Start;
+    bool Screenshot::IncludeOverlays = false;
+    u32 Screenshot::Hotkeys = Key::ZR; // ZR (not ZL — ZL is Fast Walk's hold-to-30fps)
     u32 Screenshot::Screens = SCREENSHOT_BOTH;
     Time Screenshot::Timer;
     string Screenshot::Path;
@@ -44,6 +45,58 @@ namespace CTRPluginFramework {
         while (__strex(addr, val));
     }
 
+    // Copy the current screen's framebuffer into ImgBuffer and, once both screens are captured, wake the
+    // save task. Shared by the pre-overlay (OSDCallback) and post-overlay (OSDCallbackPost) paths. The
+    // per-screen SCREENSHOT_TOP/BOTTOM bit is cleared after copying, so a second call for the same screen
+    // (e.g. begin then post) is a harmless no-op.
+    void Screenshot::DoCapture(u32 isBottom, void *addr, int stride, int format) {
+        if (!(_mode & SCREENSHOT_BOTH))
+            return;
+
+        u32 fbSize = ((isBottom ? 320 : 400) * stride) >> 2;
+
+        // Top screen handling
+        if ((_mode & SCREENSHOT_TOP) && !isBottom) {
+            // Copy image data to buffer
+            if (Process::CheckAddress((u32)addr)) {
+                copy(static_cast<u32*>(addr), static_cast<u32*>(addr) + fbSize, reinterpret_cast<u32*>(&ImgBuffer->top[0]));
+                ImgBuffer->topFormat = format & 7;
+                ImgBuffer->topStride = stride;
+                _mode &= ~SCREENSHOT_TOP;
+            }
+        }
+
+        if ((_mode & SCREENSHOT_BOTTOM) && isBottom) {
+            if (Process::CheckAddress((u32)addr)) {
+                // Copy image data to buffer
+                copy(static_cast<u32*>(addr), static_cast<u32*>(addr) + fbSize, reinterpret_cast<u32*>(&ImgBuffer->bottom[0]));
+                ImgBuffer->bottomFormat = format & 7;
+                ImgBuffer->bottomStride = stride;
+                _mode &= ~SCREENSHOT_BOTTOM;
+            }
+        }
+
+        // Wake up thread if we're done with all the preparations
+        if ((_mode & SCREENSHOT_BOTH) == 0) {
+            __strex__(&isReady, 1);
+            _task.Start();
+
+            if (!(_mode & TIMED))
+                OSDImpl::WaitingForScreenshot = false;
+
+            _mode |= 8;
+        }
+    }
+
+    // Post-overlay capture point (end of CallbackCommon / paused early-return). When IncludeOverlays is on,
+    // this reads the framebuffer AFTER the OSD overlays have been composited into it.
+    void Screenshot::OSDCallbackPost(u32 isBottom, void *addr, int stride, int format) {
+        if (!IsEnabled || !IncludeOverlays)
+            return;
+
+        DoCapture(isBottom, addr, stride, format);
+    }
+
     bool Screenshot::OSDCallback(u32 isBottom, void *addr, void *addrB, int stride, int format) {
         if (!IsEnabled)
             return IsEnabled;
@@ -53,42 +106,10 @@ namespace CTRPluginFramework {
             OSDImpl::WaitingForScreenshot = _mode & SCREENSHOT_BOTTOM;
         }
 
-        // If we need to do a screenshot
-        if (_mode & SCREENSHOT_BOTH) {
-            u32 fbSize = ((isBottom ? 320 : 400) * stride) >> 2;
-
-            // Top screen handling
-            if ((_mode & SCREENSHOT_TOP) && !isBottom) {
-                // Copy image data to buffer
-                if (Process::CheckAddress((u32)addr)) {
-                    copy(static_cast<u32*>(addr), static_cast<u32*>(addr) + fbSize, reinterpret_cast<u32*>(&ImgBuffer->top[0]));
-                    ImgBuffer->topFormat = format & 7;
-                    ImgBuffer->topStride = stride;
-                    _mode &= ~SCREENSHOT_TOP;
-                }
-            }
-
-            if ((_mode & SCREENSHOT_BOTTOM) && isBottom) {
-                if (Process::CheckAddress((u32)addr)) {
-                    // Copy image data to buffer
-                    copy(static_cast<u32*>(addr), static_cast<u32*>(addr) + fbSize, reinterpret_cast<u32*>(&ImgBuffer->bottom[0]));
-                    ImgBuffer->bottomFormat = format & 7;
-                    ImgBuffer->bottomStride = stride;
-                    _mode &= ~SCREENSHOT_BOTTOM;
-                }
-            }
-
-            // Wake up thread if we're done with all the preparations
-            if ((_mode & SCREENSHOT_BOTH) == 0) {
-                __strex__(&isReady, 1);
-                _task.Start();
-
-                if (!(_mode & TIMED))
-                    OSDImpl::WaitingForScreenshot = false;
-
-                _mode |= 8;
-            }
-        }
+        // Pre-overlay capture (clean game frame). When IncludeOverlays is set, the copy is deferred to
+        // OSDCallbackPost() so the overlays drawn later this frame end up in the image.
+        if (!IncludeOverlays)
+            DoCapture(isBottom, addr, stride, format);
 
         if (isBottom && _display) {
             ScreenImpl::Bottom->Acquire((int)addr, (u32)addrB, stride, format);
