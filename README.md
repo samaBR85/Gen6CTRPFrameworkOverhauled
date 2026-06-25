@@ -191,7 +191,7 @@ A short history, newest last — no detail, just the shape of it:
 
 ## 📥 Installing
 1. Update to the latest [Luma3DS](https://github.com/LumaTeam/Luma3DS/releases/latest).
-2. Download the latest [release](https://github.com/samaBR85/Gen6CTRPluginFramework/releases/latest).
+2. Download the latest [release](https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/latest).
 3. Extract the `.zip` to the **root of your SD card**, keeping its folder layout. It adds two folders:
    - `luma/` — the plugin itself, at `luma/plugins/000400000011C500/Gen6CTRPluginFramework.3gx` (along with the built-in App Guide and Game Guide).
    - `Gen6CTRPluginFramework/` — the plugin's data, including the **language files** (English, French, German, Italian, Japanese, Spanish). The plugin loads its language from here, so don't skip it. (Your `Theme.txt` and `HUD.txt` settings are created in this folder automatically on first run.)
