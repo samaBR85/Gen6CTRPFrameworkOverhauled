@@ -226,6 +226,8 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
    - `luma/` — o plugin em si, em `luma/plugins/000400000011C500/Gen6CTRPluginFramework.3gx` (junto com o App Guide e o Game Guide embutidos).
    - `Gen6CTRPluginFramework/` — os dados do plugin, incluindo os **arquivos de idioma** (Inglês, Francês, Alemão, Italiano, Japonês, Espanhol). **Essa pasta fica na raiz do SD, ao lado de `luma/` — *não* dentro dela.** O plugin carrega o idioma daqui, então não pule essa pasta. (Seus `Theme.txt` e `HUD.txt` são criados nessa pasta automaticamente no primeiro uso.)
 4. Garanta que `Gen6CTRPluginFramework.3gx` seja o único arquivo `.3gx` do título.
+5. Abra o menu do Rosalina (`L+Down+Select`) e deixe o **Plugin Loader** em **[ENABLED]**.
+6. Inicie seu jogo Gen 6 — o Luma3DS carrega o plugin na inicialização. Pressione **Select** no jogo pra abrir o menu, e então abra o **App Guide**.
 
 > **Nota:** O pacote de idioma precisa ficar dentro da pasta `Gen6CTRPluginFramework` na **raiz do SD**. Garanta que o caminho seja exatamente:
 > `SD:/Gen6CTRPluginFramework/Language/<Idioma>.txt`
