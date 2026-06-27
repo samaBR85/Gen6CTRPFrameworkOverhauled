@@ -586,12 +586,15 @@ namespace CTRPluginFramework {
                 posX = 30; posY = 22;
             }
 
-            // Draw input (bold)
+            // Draw input (bold). DrawSysString takes posY by reference and advances it one text line
+            // (+16) before returning, so capture the text's Y first and anchor the caret to it -
+            // otherwise the caret renders a full line too low (the reported misalignment).
+            int caretY = posY;
             Renderer::DrawSysString(_userInput.c_str(), posX, posY, 290, theme.Input, _offset, nullptr, Render::FontDrawMode::BOLD);
 
-            // Draw cursor
+            // Draw cursor (anchored to the text line, not the post-advance posY)
             if (_showCursor && _blinkingClock.GetElapsedTime() < Seconds(0.5f))
-                Renderer::DrawLine(_cursorPositionOnScreen + posX, posY - 1, 1, theme.Cursor, 16);
+                Renderer::DrawLine(_cursorPositionOnScreen + posX, caretY - 1, 1, theme.Cursor, 16);
 
             // Digit layout
             if (_layout != Layout::QWERTY) {

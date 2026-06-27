@@ -1,6 +1,7 @@
 #include <CTRPluginFramework.hpp>
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 #include "Helpers.hpp"
 #include "Parser.hpp"
 
@@ -186,23 +187,28 @@ namespace CTRPluginFramework {
     int speciesID = 0;
 
     int IterateSpeciesList(Species &output, const string &input) {
+        // Lowercase mirror of speciesList, built once per session (not rebuilt every keystroke).
+        static vector<string> lowerNames;
+        if (lowerNames.empty()) {
+            lowerNames.reserve(721);
+            for (const char *name : speciesList) {
+                lowerNames.emplace_back(name);
+                string &t = lowerNames.back();
+                transform(t.begin(), t.end(), t.begin(), ::tolower);
+            }
+        }
+
         output.name.clear();
         output.matchValue.clear(); // Ensure matchValue is also cleared
         string lowerInput = input;
         transform(lowerInput.begin(), lowerInput.end(), lowerInput.begin(), ::tolower);
-        int idx = 0;
 
-        for (const string &name : speciesList) {
-            string lowerName = name;
-            transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
-
+        for (int idx = 0; idx < (int)lowerNames.size(); ++idx) {
             // Check if the lowercased input is a prefix
-            if (lowerName.find(lowerInput) == 0) {
-                output.name.push_back(name);
+            if (lowerNames[idx].find(lowerInput) == 0) {
+                output.name.push_back(speciesList[idx]);
                 output.matchValue.push_back(idx);
             }
-
-            ++idx;
         }
 
         return output.matchValue.size();
@@ -223,23 +229,29 @@ namespace CTRPluginFramework {
     int abilityName = 0;
 
     int IterateAbilityList(Ability &output, const string &input) {
+        // Lowercase mirror of abilityList, built once per session (not rebuilt every keystroke).
+        static vector<string> lowerNames;
+        if (lowerNames.empty()) {
+            lowerNames.reserve(191);
+            for (const char *name : abilityList) {
+                lowerNames.emplace_back(name);
+                string &t = lowerNames.back();
+                transform(t.begin(), t.end(), t.begin(), ::tolower);
+            }
+        }
+
         output.name.clear();
         output.matchValue.clear(); // Ensure matchValue is also cleared
         string lowerInput = input;
         transform(lowerInput.begin(), lowerInput.end(), lowerInput.begin(), ::tolower);
-        int idx = 0;
+        const int limit = AutoGame(188, 191);
 
-        for (const string &name : abilityList) {
-            string lowerName = name;
-            transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
-
+        for (int idx = 0; idx < (int)lowerNames.size(); ++idx) {
             // Check if the lowercased input is a prefix
-            if (lowerName.find(lowerInput) == 0 && idx < AutoGame(188, 191)) {
-                output.name.push_back(name);
+            if (idx < limit && lowerNames[idx].find(lowerInput) == 0) {
+                output.name.push_back(abilityList[idx]);
                 output.matchValue.push_back(idx);
             }
-
-            ++idx;
         }
 
         return output.matchValue.size();
@@ -260,31 +272,34 @@ namespace CTRPluginFramework {
     int heldItemName = 0;
 
     int IterateItemList(HeldItem &output, const string &input) {
-        static const vector<int> ignored = {112, 113, 114, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 425, 426, 621, 806, 807, 808, 809, 810, 811, 812, 813, 814, 815, 816, 817, 818, 819, 820, 821, 822, 823, 824, 825, 826, 827, 828, 829, 830, 831, 832, 833, 834, 836, 837, 838, 839, 847, 858, 860, 861, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871, 872, 873, 874, 875, 876, 877, 884, 885, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898, 899, 900, 901, 902, 926, 927, 928, 929, 930, 931};
+        static const unordered_set<int> ignored = {112, 113, 114, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 425, 426, 621, 806, 807, 808, 809, 810, 811, 812, 813, 814, 815, 816, 817, 818, 819, 820, 821, 822, 823, 824, 825, 826, 827, 828, 829, 830, 831, 832, 833, 834, 836, 837, 838, 839, 847, 858, 860, 861, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871, 872, 873, 874, 875, 876, 877, 884, 885, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898, 899, 900, 901, 902, 926, 927, 928, 929, 930, 931};
+        // Lowercase mirror of heldItemList, built once per session (not rebuilt every keystroke).
+        static vector<string> lowerNames;
+        if (lowerNames.empty()) {
+            lowerNames.reserve(775);
+            for (const char *item : heldItemList) {
+                lowerNames.emplace_back(item);
+                string &t = lowerNames.back();
+                transform(t.begin(), t.end(), t.begin(), ::tolower);
+            }
+        }
+
         output.name.clear();
         output.matchValue.clear(); // Ensure matchValue is cleared
-
         string lowerInput = input;
         transform(lowerInput.begin(), lowerInput.end(), lowerInput.begin(), ::tolower);
-        int idx = 0;
+        const int limit = AutoGameSet(717, 775);
 
-        for (const string &item : heldItemList) {
+        for (int idx = 0; idx < (int)lowerNames.size(); ++idx) {
             // Skip if it's in the ignored list
-            if (find(ignored.begin(), ignored.end(), idx) != ignored.end()) {
-                ++idx;
+            if (ignored.count(idx))
                 continue;
-            }
-
-            string lowerItem = item;
-            transform(lowerItem.begin(), lowerItem.end(), lowerItem.begin(), ::tolower);
 
             // Check if the lowercased input is a prefix
-            if (lowerItem.find(lowerInput) == 0 && idx < AutoGameSet(717, 775)) {
-                output.name.push_back(item);
+            if (idx < limit && lowerNames[idx].find(lowerInput) == 0) {
+                output.name.push_back(heldItemList[idx]);
                 output.matchValue.push_back(idx);
             }
-
-            ++idx;
         }
 
         return output.matchValue.size();
@@ -305,31 +320,34 @@ namespace CTRPluginFramework {
     int moveName = 0;
 
     int IterateMoveList(Moves &output, const string &input) {
-        static const vector<int> ignored = {622, 623, 624, 625, 626, 627, 628, 629, 630, 631, 632, 633, 634, 635, 636, 637, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649, 650, 651, 652, 653, 654, 655, 656, 657, 658, 695, 696, 697, 698, 699, 700, 701, 702, 703, 719, 723, 724, 725, 726, 727, 728};
+        static const unordered_set<int> ignored = {622, 623, 624, 625, 626, 627, 628, 629, 630, 631, 632, 633, 634, 635, 636, 637, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649, 650, 651, 652, 653, 654, 655, 656, 657, 658, 695, 696, 697, 698, 699, 700, 701, 702, 703, 719, 723, 724, 725, 726, 727, 728};
+        // Lowercase mirror of movesList, built once per session (not rebuilt every keystroke).
+        static vector<string> lowerNames;
+        if (lowerNames.empty()) {
+            lowerNames.reserve(621);
+            for (const char *move : movesList) {
+                lowerNames.emplace_back(move);
+                string &t = lowerNames.back();
+                transform(t.begin(), t.end(), t.begin(), ::tolower);
+            }
+        }
+
         output.name.clear();
         output.matchValue.clear(); // Ensure matchValue is cleared
-
         string lowerInput = input;
         transform(lowerInput.begin(), lowerInput.end(), lowerInput.begin(), ::tolower);
-        int idx = 0;
+        const int limit = AutoGameSet(617, 621);
 
-        for (const string &move : movesList) {
+        for (int idx = 0; idx < (int)lowerNames.size(); ++idx) {
             // Skip if it's in the ignored list
-            if (find(ignored.begin(), ignored.end(), idx) != ignored.end()) {
-                ++idx;
+            if (ignored.count(idx))
                 continue;
-            }
-
-            string lowerMove = move;
-            transform(lowerMove.begin(), lowerMove.end(), lowerMove.begin(), ::tolower);
 
             // Check if the lowercased input is a prefix
-            if (lowerMove.find(lowerInput) == 0 && idx < AutoGameSet(617, 621)) {
-                output.name.push_back(move);
+            if (idx < limit && lowerNames[idx].find(lowerInput) == 0) {
+                output.name.push_back(movesList[idx]);
                 output.matchValue.push_back(idx);
             }
-
-            ++idx;
         }
 
         return output.matchValue.size();

@@ -23,6 +23,8 @@ All credit for those functions goes to PabloMK7
 #define PATH_JAPANESE_TEXT      "E:/Gen6CTRPluginFramework/Language/Japanese.txt"
 #define PATH_THEME_SETTINGS     "E:/Gen6CTRPluginFramework/Theme.txt"
 #define PATH_HUD_SETTINGS       "E:/Gen6CTRPluginFramework/HUD.txt"
+#define PATH_TELE_ALIASES       "E:/Gen6CTRPluginFramework/TeleAliases.txt"
+#define PATH_MY_TELEPORT        "MyTeleport.txt"   // relative -> resolves to the plugin folder (/luma/plugins/<TID>/), game-independent, survives updates
 #define GITHUB                  "github.com/biometrix76/Gen6CTRPluginFramework"
 
 namespace CTRPluginFramework {

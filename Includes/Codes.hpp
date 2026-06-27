@@ -60,6 +60,8 @@ namespace CTRPluginFramework {
     void ActionMusic(MenuEntry *entry);
     void ApplyMusic(MenuEntry *entry);
     void Teleportation(MenuEntry *entry);
+    void ZoneFinder(MenuEntry *entry); // TEMP DEBUG: locate the live current-map RAM address
+    void LoadMyTeleport(void);    // load HERE binds + custom teleport SPOTs from the plugin folder (MyTeleport.txt)
     void FlyMapInSummary(MenuEntry *entry);
     void UnlockFullFlyMap(MenuEntry *entry);
     void RenameAnyPokemon(MenuEntry *entry);

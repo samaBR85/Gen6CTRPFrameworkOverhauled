@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.3.3
+# Gen6CTRPluginFrameworkOverhauled — v0.4.2
 
 **English** · [Português](README.pt-BR.md)
 
@@ -10,7 +10,7 @@ It's a `.3gx` plugin you drop onto your 3DS that adds a menu over your Pokémon 
 anywhere, edit your team, read your rival mid-battle, play a few mini-games, and a hundred small comforts in between.
 
 The twist: **it was built to be understood.** Every feature is named in plain language, every option has an info
-button that explains it, and there's a 22-page guide *inside* the plugin that walks you through it all. If you love
+button that explains it, and there's a 23-page guide *inside* the plugin that walks you through it all. If you love
 these games but have never touched homebrew, you're exactly who this is for.
 
 You open everything with **SELECT**, and the menu appears over your game:
@@ -164,6 +164,31 @@ and lead's status right on screen while you play.
   <img src="Screenshots/v0.3.3/export/25_hud_ingame.png" width="330" alt="The HUD overlaid on the overworld" />
 </p>
 
+### Travel anywhere
+
+**Teleportation** can drop you at any town, route or landmark in Hoenn — and, with a little teaching, exactly where
+*you* like to stand. Pick a destination, then **HOLD L** and step into any door to warp there. The bottom screen
+sorts every place into tabs — **All**, **Towns**, **Other** (Caves / Forests / Landmarks / Mirage Spots, as
+sub-menus), **Routes** (101–134) and **Map**. **A** teleports, **Y** flips between the picture grid and a plain list,
+and **X** jumps the selection to wherever you're standing right now.
+
+<p align="center">
+  <img src="Screenshots/v0.4.1/export/teleport_grid.png" width="330" alt="Teleportation — the location grid with tabs and the button legend below" />
+  <img src="Screenshots/v0.4.1/export/teleport_routes.png" width="330" alt="The Routes tab — Route 101 with its picture, ready to save a warp point" />
+</p>
+
+Two buttons make it your own: stand exactly where you want to arrive, then **Start = save warp point** (your precise
+landing tile — this is also what makes a **route** teleportable) or **ZL = tag area** (teaches **X** the hidden
+sub-maps it doesn't recognise yet). The **Map** tab is a living mini-map you *walk* with the D-Pad — town to route to
+town, just like the real journey — and pressing **Y** there swaps it for a single picture-grid of *every* place
+(towns + routes, no labels), laid out roughly like Hoenn and filterable by the chips along the bottom (tap more than
+one). Everything you save lands in a hand-editable **MyTeleport.txt** in the plugin folder, and it survives updates.
+
+<p align="center">
+  <img src="Screenshots/v0.4.1/export/teleport_map.png" width="330" alt="The Map tab — Mauville City centred, its connecting routes shown as tiles around it" />
+  <img src="Screenshots/v0.4.1/export/teleport_overview.png" width="330" alt="The Map tab's Y overview — a picture-grid of every place with filter chips below" />
+</p>
+
 ### Make it yours
 
 Twenty-five color **themes** restyle the whole interface — menus, buttons, even the in-game keyboard — with a
@@ -175,7 +200,7 @@ preview swatch beside each name and your choice remembered between sessions. Pin
   <img src="Screenshots/v0.3.3/export/27_appguide.png" width="330" alt="The built-in App Guide reader" />
 </p>
 
-And if you ever feel lost, the **App Guide** (22 pages, written like a guided adventure rather than a manual) and an
+And if you ever feel lost, the **App Guide** (23 pages, written like a guided adventure rather than a manual) and an
 **info (i) note on every single function** are always one button away.
 
 ## 📜 How it grew
@@ -188,6 +213,9 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.3.2** — capture the plugin's own UI in screenshots; favorites/cheats/hotkeys survive a plugin update.
 - **v0.3.3** — **In-Battle Tools** (Enemy Helper, Change Party Stats), the visual **PC Box ++** editor, and the
   **Mini Game Corner**.
+- **v0.4.2** — **Teleportation** reborn: a two-screen place picker with a navigable **Map** and a full picture-grid
+  overview, your own saved **warp points** (the hand-editable `MyTeleport.txt`), and tidier plugin folders under
+  **Assets/**.
 
 ## 📥 Installing
 1. Update to the latest [Luma3DS](https://github.com/LumaTeam/Luma3DS/releases/latest).
@@ -238,6 +266,8 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Item / TM / HM icons** — from the [PokéAPI sprites](https://github.com/PokeAPI/sprites) repository.
 - **Pokédex, type, ability & move data** — [Pokémon Showdown](https://github.com/smogon/pokemon-showdown) and
   [PokéAPI](https://pokeapi.co); **item names** from [PKHeX](https://github.com/kwsch/PKHeX/) (kwsch).
+- **Location & route images** — the Teleport map/route thumbnails and the area-connection data are from the
+  [ORAS Wiki](https://oraswiki.com/locations/).
 - All Pokémon images and names are **© Nintendo / Game Freak / The Pokémon Company.** These community mirrors
   are used only to build this free, non-commercial fan tool.
 
@@ -250,7 +280,7 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.3.3 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.4.2 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

@@ -1,4 +1,3 @@
-#include <optional>
 #include <algorithm>
 #include "Parser.hpp"
 #include "Codes.hpp"
@@ -10,6 +9,7 @@
 #include "BagItemMeta.hpp"   // pocket/group/type/desc/flavor for the Bag item-finder filters + strip
 #include "HeldItemList.hpp"  // gHeldItemIds[] - curated holdable items (for the PokeMart "Holdable" marker)
 #include "BagItemTags.hpp"   // gBagItemTags[]/gBagItemTagName[] - effect tags for the PokeMart Effect filter
+#include "TeleportData.hpp"  // kLocCat/kLocConn/kMap - teleport categories, exits, connection graph
 
 namespace CTRPluginFramework {
     static int selectedIcon = 0;
@@ -826,13 +826,7 @@ namespace CTRPluginFramework {
 
     // Derive a Pokemon's level from its species growth rate and current EXP
     static int GetPokemonLevel(u16 species, u32 exp) {
-        int type = 0; // Growth-rate index (0-5)
-
-        for (size_t t = 0; t < growthType.size(); ++t)
-            if (find(growthType[t].begin(), growthType[t].end(), (int)species) != growthType[t].end()) {
-                type = (int)t;
-                break;
-            }
+        int type = (species < 808 && growthGroupOf[species] != 0xFF) ? growthGroupOf[species] : 0; // Growth-rate index (0-5)
 
         // Highest level whose EXP threshold is still <= the current EXP
         for (int l = 100; l >= 1; --l)
@@ -1795,7 +1789,7 @@ namespace CTRPluginFramework {
             // refresh caches
             int key = n * 2 + (spawnerShiny ? 1 : 0);
             if (key != spriteKey) {
-                sprite.LoadFromFile(string("Spawner/") + (spawnerShiny ? "shiny" : "normal") + "/" + SpawnerPad3(n) + ".bmp");
+                sprite.LoadFromFile(string("Assets/Spawner/") + (spawnerShiny ? "shiny" : "normal") + "/" + SpawnerPad3(n) + ".bmp");
                 spriteKey = key;
             }
             if ((int)level != mvLevel) { mvCount = SpawnerMovesAt(n, (int)level, mvIdx); mvLevel = (int)level; }
@@ -1999,7 +1993,7 @@ namespace CTRPluginFramework {
         auto getIcon = [&](int dex) -> Image* {
             for (int i = 0; i < ICACHE; i++) if (iconCacheId[i] == dex) return &iconCache[i];
             int slot = iconRR; iconRR = (iconRR + 1) % ICACHE;
-            iconCache[slot].LoadFromFile(string("LegendaryIcons/") + SpawnerPad3(dex) + ".bmp");
+            iconCache[slot].LoadFromFile(string("Assets/LegendaryIcons/") + SpawnerPad3(dex) + ".bmp");
             iconCacheId[slot] = dex;
             return &iconCache[slot];
         };
@@ -2050,7 +2044,7 @@ namespace CTRPluginFramework {
             }
 
             if (dex != spriteKey) {
-                sprite.LoadFromFile(string("Spawner/normal/") + SpawnerPad3(dex) + ".bmp");
+                sprite.LoadFromFile(string("Assets/Spawner/normal/") + SpawnerPad3(dex) + ".bmp");
                 spriteKey = dex;
             }
 
@@ -2176,7 +2170,7 @@ namespace CTRPluginFramework {
         auto getIcon = [&](int dex) -> Image* {
             for (int i = 0; i < ICACHE; i++) if (iconCacheId[i] == dex) return &iconCache[i];
             int slot = iconRR; iconRR = (iconRR + 1) % ICACHE;
-            iconCache[slot].LoadFromFile(string("SpawnerList/normal/") + SpawnerPad3(dex) + ".bmp");
+            iconCache[slot].LoadFromFile(string("Assets/SpawnerList/normal/") + SpawnerPad3(dex) + ".bmp");
             iconCacheId[slot] = dex;
             return &iconCache[slot];
         };
@@ -2793,7 +2787,7 @@ namespace CTRPluginFramework {
         auto getIcon = [&](int id) -> Image* {
             for (int i = 0; i < ICACHE; i++) if (iconCacheId[i] == id) return &iconCache[i];
             int slot = iconRR; iconRR = (iconRR + 1) % ICACHE;
-            iconCache[slot].LoadFromFile(string("BagSprites/list/") + SpawnerPad3(id) + ".bmp");
+            iconCache[slot].LoadFromFile(string("Assets/BagSprites/list/") + SpawnerPad3(id) + ".bmp");
             iconCacheId[slot] = id;
             return &iconCache[slot];
         };
@@ -2954,7 +2948,7 @@ namespace CTRPluginFramework {
             if (addMode) {
                 bot.DrawSysfont(title << "Add to bag", 40, 26, title);
                 bot.DrawRect(40, 44, 130, 1, title, true);
-                if (addId != bigIconId) { bigIcon.LoadFromFile(string("BagSprites/big/") + SpawnerPad3(addId) + ".bmp"); bigIconId = addId; }
+                if (addId != bigIconId) { bigIcon.LoadFromFile(string("Assets/BagSprites/big/") + SpawnerPad3(addId) + ".bmp"); bigIconId = addId; }
                 bot.DrawRect(40, 52, 40, 40, Color::White, true); bot.DrawRect(40, 52, 40, 40, border, false);
                 if (bigIcon.IsLoaded()) bigIcon.Draw(bot, 40 + (40 - bigIcon.Width()) / 2, 52 + (40 - bigIcon.Height()) / 2);
                 bot.DrawSysfont(title << bagItemName[addId], 92, 56, title);
@@ -3597,12 +3591,120 @@ namespace CTRPluginFramework {
         }
     }
 
+    // ---- target encoding shared by the Teleport UI and MyTeleport.txt: target < ROUTE_BASE = location idx;
+    //      ROUTE_BASE+R = Hoenn route R; SEC_BASE+s = an "Other" section folder (UI only, never persisted) ----
+    static const int ROUTE_BASE = 2000, SEC_BASE = 3000;
+
+    // MyTeleport.txt (in the PLUGIN FOLDER via a relative path; survives updates; edit by hand):
+    //   HERE <mapId> <place>               -> X "you are here" learns this sub-map id
+    //   SPOT <place> <value> <dir> <x> <y> -> custom teleport drop point (overrides the dev default; 1 per place)
+    struct HereBind { int mapId; int target; };
+    struct TeleSpot { int target; int value; int dir; int x; int y; };
+    static vector<HereBind> gHere;
+    static vector<TeleSpot> gSpots;
+
+    static string teleToken(int target) {           // stable text token for the file
+        if (target >= ROUTE_BASE && target < SEC_BASE) return "Route_" + to_string(101 + (target - ROUTE_BASE));
+        const int NLOC = (int)(sizeof(kParsedLocations) / sizeof(kParsedLocations[0]));
+        if (target >= 0 && target < NLOC) return string(kParsedLocations[target].key);
+        return "?";
+    }
+    static int teleTokenTarget(const string &tok) {  // text token -> target (or -1)
+        if (tok.size() > 6 && tok.compare(0, 6, "Route_") == 0) {
+            int n = 0; for (size_t i = 6; i < tok.size(); i++) if (tok[i] >= '0' && tok[i] <= '9') n = n * 10 + (tok[i] - '0');
+            int R = n - 101; return (R >= 0 && R < kRouteCount) ? ROUTE_BASE + R : -1;
+        }
+        const int NLOC = (int)(sizeof(kParsedLocations) / sizeof(kParsedLocations[0]));
+        for (int i = 0; i < NLOC; i++) if (tok == kParsedLocations[i].key) return i;
+        return -1;
+    }
+
+    static void SaveMyTeleport(void) {
+        if (File::Exists(PATH_MY_TELEPORT) == 0) File::Create(PATH_MY_TELEPORT);
+        File file(PATH_MY_TELEPORT);
+        LineWriter writer(file);
+        writer << "# Gen6 Teleport - your binds & spots. In the plugin folder; survives updates. Edit freely." << LineWriter::endl();
+        writer << "# HERE <mapId> <place>   |   SPOT <place> <value> <dir> <x> <y>" << LineWriter::endl();
+        writer << Utils::Format("COUNT %d", (int)(gHere.size() + gSpots.size())) << LineWriter::endl();
+        for (size_t i = 0; i < gHere.size(); i++)
+            writer << Utils::Format("HERE %d ", gHere[i].mapId) << teleToken(gHere[i].target) << LineWriter::endl();
+        for (size_t i = 0; i < gSpots.size(); i++)
+            writer << "SPOT " << teleToken(gSpots[i].target) << Utils::Format(" %d %d %d %d", gSpots[i].value, gSpots[i].dir, gSpots[i].x, gSpots[i].y) << LineWriter::endl();
+        writer.Flush();
+        writer.Close();
+    }
+
+    void LoadMyTeleport(void) {
+        gHere.clear(); gSpots.clear();
+        if (File::Exists(PATH_MY_TELEPORT) != 1) return;
+        File file(PATH_MY_TELEPORT);
+        LineReader reader(file);
+        string line;
+        auto nextTok = [](const string &s, size_t &i, string &out) -> bool {
+            while (i < s.size() && (s[i] == ' ' || s[i] == '\t')) i++;
+            size_t st = i; while (i < s.size() && s[i] != ' ' && s[i] != '\t' && s[i] != '\r') i++;
+            if (i == st) return false; out = s.substr(st, i - st); return true;
+        };
+        auto toInt = [](const string &s) -> int { int v = 0, sg = 1; size_t i = 0; if (i < s.size() && s[i] == '-') { sg = -1; i++; } for (; i < s.size() && s[i] >= '0' && s[i] <= '9'; i++) v = v * 10 + (s[i] - '0'); return v * sg; };
+        while (reader(line)) {
+            if (line.empty() || line[0] == '#') continue;
+            size_t i = 0; string kw; if (!nextTok(line, i, kw)) continue;
+            if (kw == "HERE") {
+                string a, b; if (nextTok(line, i, a) && nextTok(line, i, b)) { int t = teleTokenTarget(b); if (t >= 0) { HereBind h; h.mapId = toInt(a); h.target = t; gHere.push_back(h); } }
+            } else if (kw == "SPOT") {
+                string p, v, d, x, y;
+                if (nextTok(line, i, p) && nextTok(line, i, v) && nextTok(line, i, d) && nextTok(line, i, x) && nextTok(line, i, y)) {
+                    int t = teleTokenTarget(p); if (t >= 0) { TeleSpot s; s.target = t; s.value = toInt(v); s.dir = toInt(d); s.x = toInt(x); s.y = toInt(y); gSpots.push_back(s); }
+                }
+            }
+        }
+    }
+
+    static void AddHere(int mapId, int target) {     // 1 bind per mapId (update-or-insert)
+        for (size_t i = 0; i < gHere.size(); i++) if (gHere[i].mapId == mapId) { gHere[i].target = target; SaveMyTeleport(); return; }
+        HereBind h; h.mapId = mapId; h.target = target; gHere.push_back(h); SaveMyTeleport();
+    }
+    static bool AddSpot(int target, int value, int dir, int x, int y) {   // 1 SPOT per target; returns true if it REPLACED one
+        for (size_t i = 0; i < gSpots.size(); i++) if (gSpots[i].target == target) { gSpots[i].value = value; gSpots[i].dir = dir; gSpots[i].x = x; gSpots[i].y = y; SaveMyTeleport(); return true; }
+        TeleSpot s; s.target = target; s.value = value; s.dir = dir; s.x = x; s.y = y; gSpots.push_back(s); SaveMyTeleport(); return false;
+    }
+    static bool HasSpot(int target) { for (size_t i = 0; i < gSpots.size(); i++) if (gSpots[i].target == target) return true; return false; }
+    static bool HasTag(int target)  { for (size_t i = 0; i < gHere.size();  i++) if (gHere[i].target  == target) return true; return false; }
+
+    // "to-do" badge for a list entry: what the player hasn't set yet (empty once both Tag + Warp are done).
+    // Standard locations already ship with both - a dev-default warp in kParsedLocations AND value-table
+    // recognition for X - so they never carry a badge. Only ROUTES lack both until the player sets them.
+    static string teleTodo(int target) {
+        const int NLOC = (int)(sizeof(kParsedLocations) / sizeof(kParsedLocations[0]));
+        bool isLoc   = (target >= 0 && target < NLOC);
+        bool isRoute = (target >= ROUTE_BASE && target < ROUTE_BASE + kRouteCount);
+        if (!isLoc && !isRoute) return "";
+        bool hasTag  = isLoc || HasTag(target);    // locations: recognized by the value table
+        bool hasWarp = isLoc || HasSpot(target);   // locations: always have the dev-default drop point
+        string s;
+        if (!hasTag)  s += "+tag";
+        if (!hasWarp) { if (!s.empty()) s += " "; s += "+warp"; }
+        return s;
+    }
+
+    // teleport drop point for a target: custom SPOT if set, else the dev default (locations only). false = route with no spot.
+    static bool ResolveSpot(int target, int &val, int &dir, int &x, int &y) {
+        for (size_t i = 0; i < gSpots.size(); i++) if (gSpots[i].target == target) { val = gSpots[i].value; dir = gSpots[i].dir; x = gSpots[i].x; y = gSpots[i].y; return true; }
+        const int NLOC = (int)(sizeof(kParsedLocations) / sizeof(kParsedLocations[0]));
+        if (target >= 0 && target < NLOC) { val = kParsedLocations[target].value; dir = kParsedLocations[target].direction; x = (int)kParsedLocations[target].x; y = (int)kParsedLocations[target].y; return true; }
+        return false;
+    }
+
+    // resolved spot for the active teleport (written each frame by ApplyLocation while L is held at a door)
+    static int sTeleVal = 0, sTeleDir = 0, sTeleX = 0, sTeleY = 0;
+
     struct TeleportAddress {
-        u32 value16; // Where to write location ID
+        u32 value16; // Where to write location ID (warp request buffer)
         u32 check16; // Where to read 0x5544
         u32 dir8; // Direction byte
         u32 posX; // Float
         u32 posY; // Float
+        u32 mapId16; // live CURRENT map id (player struct, dir8-2) — reliable for "you are here"
     };
 
     static inline TeleportAddress GetTeleportAddress(GameSeries gs) {
@@ -3612,7 +3714,8 @@ namespace CTRPluginFramework {
                 0x8803C20, // check16
                 0x8C67192, // dir8
                 0x8C671A0, // posX
-                0x8C671A8  // posY
+                0x8C671A8, // posY
+                0x8C67190  // mapId16 (dir8-2; analogous to ORAS — UNTESTED on XY)
             };
         }
 
@@ -3622,7 +3725,8 @@ namespace CTRPluginFramework {
                 0x8803C20,
                 0x8C6E886,
                 0x8C6E894,
-                0x8C6E89C
+                0x8C6E89C,
+                0x8C6E884  // mapId16 — HW-confirmed: Mauville=278, Slateport=265, Petalburg=259, Granite=78
             };
         }
     }
@@ -3637,20 +3741,119 @@ namespace CTRPluginFramework {
 
         if (entry->Hotkeys[0].IsDown()) {
             if (Process::Read16(A.check16, check) && check == 0x5544) {
-                const size_t base = (currGameSeries == GameSeries::XY) ? 0 : 27;
-                const size_t idx  = base + static_cast<size_t>(sPlaceIndex);
-
-                if (idx < gLocations.size()) {
-                    const Locations& L = gLocations[idx];
-
-                    if (Process::Write16(A.value16, static_cast<u16>(L.value))) {
-                        if (Process::Write8(A.dir8, static_cast<u8>(L.direction))) {
-                            Process::WriteFloat(A.posX, sCoords[0]);
-                            Process::WriteFloat(A.posY, sCoords[1]);
-                        }
+                // sTele* = the resolved drop point (custom SPOT if set, else the dev default), set at commit time.
+                if (Process::Write16(A.value16, static_cast<u16>(sTeleVal))) {
+                    if (Process::Write8(A.dir8, static_cast<u8>(sTeleDir))) {
+                        Process::WriteFloat(A.posX, static_cast<float>(sTeleX));
+                        Process::WriteFloat(A.posY, static_cast<float>(sTeleY));
                     }
                 }
             }
+        }
+    }
+
+    // ── TEMP DEBUG: Zone Finder — memory-diff scanner to PIN the live "current map id" address.
+    // No public RAM doc lists it for this build, and Hartie95's same-build plugin doesn't expose it,
+    // so we find it empirically: scan windows around the field-player / warp / trainer structs; after a
+    // baseline (A) it lists every u16 that CHANGED vs baseline AND looks like an id (<0x800), flagging
+    // the STABLE ones (constant while standing). The current map id = the entry that appears when you
+    // cross into a new zone AND stays stable within a zone. Remove this entry once the address is locked.
+    void ZoneFinder(MenuEntry *entry) {
+        (void)entry;
+        const Screen &top = OSD::GetTopScreen();
+        const Screen &bot = OSD::GetBottomScreen();
+        const FwkSettings &st = FwkSettings::Get();
+        Color bg = st.BackgroundMainColor, txt = st.MainTextColor, title = st.WindowTitleColor;
+        Color border = st.BackgroundBorderColor, sel = st.MenuSelectedItemColor, bg2 = st.BackgroundSecondaryColor;
+        auto hx = [](u32 v) -> string { const char *H = "0123456789ABCDEF"; if (!v) return "0"; string s; while (v) { s = string(1, H[v & 15]) + s; v >>= 4; } return s; };
+
+        // Wide per-edition scan windows {base, u16 count}: player-wide / warp / trainer / save-runtime. Wide so the
+        // COARSE (place) id is likely covered; CopyMemory + per-u16 tracking are cheap.
+        struct Win { u32 base; int n; };
+        const int NW = 4, CAP = 1100;
+        Win wins[NW];
+        bool xyUntested = (currGameSeries == GameSeries::XY);
+        if (xyUntested) { wins[0] = {0x8C67100u, 512}; wins[1] = {0x8803B80u, 128}; wins[2] = {0x8C79C00u, 160}; wins[3] = {0x8C66C00u, 256}; }
+        else            { wins[0] = {0x8C6E800u, 512}; wins[1] = {0x8803B80u, 128}; wins[2] = {0x8C81300u, 160}; wins[3] = {0x8C71C00u, 256}; }
+        static u32 addr[CAP]; int N = 0;
+        for (int w = 0; w < NW; w++) for (int i = 0; i < wins[w].n && N < CAP; i++) addr[N++] = wins[w].base + (u32)i * 2;
+
+        // PERSISTENT across open/close: the OSD loop FREEZES the game (player can't move), so the hunt is a
+        // sequence of discrete samples - open, snapshot, close, walk, reopen. NOTHING resets on entry (the old
+        // version reset per entry and "forgot" the baseline when reopened to move).
+        static u16 base16[CAP]; static bool constant[CAP]; static bool inited = false;
+        if (!inited) { for (int i = 0; i < CAP; i++) { base16[i] = 0; constant[i] = false; } inited = true; }
+        static bool haveBase = false; static int sZfMode = 0; static int folds = 0; static int spot = 0;
+        u16 cur[CAP];
+        string msg; int msgTtl = 0;
+        auto toast = [&](const string &m) { msg = m; msgTtl = 130; };
+        const TeleportAddress AA = GetTeleportAddress(currGameSeries);
+
+        while (Controller::IsKeyDown(Key::A)) { Controller::Update(); OSD::SwapBuffers(); }
+
+        while (true) {
+            Controller::Update();
+            if (System::IsSleeping()) break;
+            if (Controller::IsKeyPressed(Key::Select)) { while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); } PluginMenu::Close(); break; }
+            if (Controller::IsKeyPressed(Key::B)) break;
+
+            { int off = 0; for (int w = 0; w < NW; w++) { Process::CopyMemory(&cur[off], (const void*)wins[w].base, (u32)wins[w].n * 2); off += wins[w].n; } }
+
+            if (Controller::IsKeyPressed(Key::Y)) { sZfMode ^= 1; haveBase = false; folds = 0; toast(sZfMode ? "COARSE mode (place id)" : "DIFF mode (map id)"); }
+            // A = baseline (first sub-map of a place). Persists across open/close.
+            if (Controller::IsKeyPressed(Key::A)) { for (int i = 0; i < N; i++) { base16[i] = cur[i]; constant[i] = true; } haveBase = true; folds = 0; spot++; toast(sZfMode ? "Baseline: sub-map #1 of this city" : "Baseline set (spot " + to_string(spot) + ")"); }
+            // COARSE: L = fold ANOTHER sub-map of the SAME city -> drop every addr that changed (keeps the constant ones).
+            if (sZfMode == 1 && Controller::IsKeyPressed(Key::L) && haveBase) { for (int i = 0; i < N; i++) if (cur[i] != base16[i]) constant[i] = false; folds++; toast("Folded sub-map (#" + to_string(folds + 1) + ")"); }
+            if (Controller::IsKeyPressed(Key::X)) { haveBase = false; folds = 0; toast("Cleared"); }
+
+            bool coarse = (sZfMode == 1);
+
+            // ============== TOP
+            top.DrawRect(30, 20, 340, 200, bg, true);
+            top.DrawRect(30, 20, 340, 200, border, false);
+            top.DrawSysfont(title << string(coarse ? "Zone Finder - COARSE (place id)" : "Zone Finder - DIFF (map id)"), 42, 26, title);
+            top.DrawRect(42, 44, 316, 1, title, true);
+
+            if (!haveBase) {
+                if (!coarse) {
+                    top.DrawSysfont(txt << string("A: baseline here. Then CLOSE the plugin,"), 42, 54, txt);
+                    top.DrawSysfont(txt << string("walk to another zone, REOPEN -> diff lists."), 42, 72, txt);
+                    top.DrawSysfont(txt << string("Y: switch to COARSE (place id) mode."), 42, 90, txt);
+                } else {
+                    top.DrawSysfont(txt << string("A: baseline (1st sub-map of a city)."), 42, 52, txt);
+                    top.DrawSysfont(txt << string("Each OTHER sub-map of the SAME city:"), 42, 70, txt);
+                    top.DrawSysfont(txt << string("  close -> walk there -> reopen -> L (fold)."), 42, 86, txt);
+                    top.DrawSysfont(txt << string("Then a DIFFERENT city: just LOOK (no L)."), 42, 104, txt);
+                    top.DrawSysfont(txt << string("The id that appears = the place id."), 42, 122, txt);
+                }
+            } else {
+                top.DrawSysfont(txt << string(coarse ? ("Place id candidates (sub-maps seen: " + to_string(folds + 1) + ")") : "Changed vs baseline  (addr  base -> now):"), 42, 52, txt);
+                int row = 0;
+                for (int i = 0; i < N && row < 13; i++) {
+                    if (coarse && !constant[i]) continue;
+                    if (base16[i] == cur[i]) continue;
+                    if (cur[i] >= 0x800 && base16[i] >= 0x800) continue;   // not an id (floats/pointers)
+                    string ln = "0x" + hx(addr[i]) + "  " + to_string(base16[i]) + " -> " + to_string(cur[i]);
+                    top.DrawSysfont(sel << ln, 46, 66 + row * 11, sel);
+                    row++;
+                }
+                if (row == 0) top.DrawSysfont(txt << string(coarse ? "(same city: fold more, then leave to another)" : "(no change - close, move, reopen)"), 46, 66, txt);
+            }
+
+            // ============== BOTTOM
+            bot.DrawRect(20, 20, 280, 200, bg, true);
+            bot.DrawRect(20, 20, 280, 200, border, false);
+            u16 fineId = 0; Process::Read16(AA.mapId16, fineId);
+            bot.DrawSysfont(txt << string("live map @0x" + hx(AA.mapId16) + " = " + to_string(fineId) + " (0x" + hx(fineId) + ")"), 30, 36, txt);
+            bot.DrawSysfont(txt << string(!haveBase ? "no baseline yet (press A)" : (coarse ? ("COARSE: baseline + " + to_string(folds) + " folds") : "DIFF: baseline set")), 30, 54, txt);
+            if (xyUntested) bot.DrawSysfont(txt << string("(XY addresses UNTESTED)"), 30, 72, txt);
+            if (!coarse) bot.DrawSysfont(txt << string("A: baseline   X: clear   Y: COARSE mode"), 30, 148, txt);
+            else { bot.DrawSysfont(txt << string("A: new city   L: fold sub-map   X: clear"), 30, 148, txt);
+                   bot.DrawSysfont(txt << string("Y: back to DIFF mode"), 30, 164, txt); }
+            bot.DrawSysfont(txt << string("B: back    Select: close plugin"), 30, 182, txt);
+            if (msgTtl > 0) { msgTtl--; int w = (int)OSD::GetTextWidth(true, msg) + 14; bot.DrawRect(160 - w / 2, 100, w, 18, bg2, true); bot.DrawRect(160 - w / 2, 100, w, 18, title, false); bot.DrawSysfont(sel << msg, 160 - (int)OSD::GetTextWidth(true, msg) / 2, 103, sel); }
+
+            OSD::SwapBuffers();
         }
     }
 
@@ -3659,34 +3862,620 @@ namespace CTRPluginFramework {
         if (gLocations.empty())
             BuildLocalizedLocations();
 
-        vector<string> options;
-        options.reserve((currGameSeries == GameSeries::XY) ? 27 : 36);
         const size_t base  = (currGameSeries == GameSeries::XY) ? 0 : 27;
-        const size_t count = (currGameSeries == GameSeries::XY) ? 27 : 36;
+        const int    count = (currGameSeries == GameSeries::XY) ? 27 : 36;
+        if (count <= 0) return;
 
-        // Build the menu list fresh each time
-        for (size_t i = 0; i < count; ++i) {
-            const size_t idx = base + i;
+        const Screen &top = OSD::GetTopScreen();
+        const Screen &bot = OSD::GetBottomScreen();
+        const FwkSettings &st = FwkSettings::Get();
+        Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+        Color title = st.WindowTitleColor, border = st.BackgroundBorderColor, sel = st.MenuSelectedItemColor;
+        string ttl = entry->Name();
+        static const char *SEC_NAME[4] = { "Caves", "Forests", "Landmarks", "Mirage Spots" };   // ROUTE_BASE/SEC_BASE are file-scope (shared with MyTeleport.txt)
 
-            if (idx < gLocations.size())
-                options.push_back(gLocations[idx].name);
-        }
+        auto pad2 = [](int n) -> string { string s = to_string(n); return s.size() < 2 ? "0" + s : s; };
+        auto fitText = [&](string s, int maxw) -> string {
+            while (!s.empty() && (int)OSD::GetTextWidth(true, s) > maxw) s.pop_back();
+            return s;
+        };
+        auto locName = [&](int g) -> string {   // location idx, or SEC_BASE+s / ROUTE_BASE+R for non-location targets
+            if (g >= SEC_BASE)   { int s = g - SEC_BASE; return (s >= 0 && s < 4) ? string(SEC_NAME[s]) : string("?"); }
+            if (g >= ROUTE_BASE) { int R = g - ROUTE_BASE; return (R >= 0 && R < kRouteCount) ? string(kRoutes[R]) : string("?"); }
+            return (size_t)g < gLocations.size() ? gLocations[g].name : string("?");
+        };
+        auto gridPath = [&](int g) -> string { return "Assets/Teleport/grid/" + pad2(g) + ".bmp"; };
 
-        Keyboard keyboard;
-        int chosen = keyboard.Setup(entry->Name() + ":", true, options, sPlaceIndex);
+        // ---- category model: -1=All, 0=Towns, 1=Other(caves/forests/landmarks/mirage), 3=Map ----
+        static const char *CAT_SHORT[5] = { "All", "Towns", "Other", "Routes", "Map" };
+        static const char *CAT_FULL[4]  = { "Towns & Cities", "Other", "Routes", "Map" };
+        static const char *DABBR[8]     = { "N", "S", "E", "W", "NE", "NW", "SE", "SW" };
+        auto iabs = [](int v) -> int { return v < 0 ? -v : v; };
 
-        if (chosen != -1) {
-            sPlaceIndex = chosen;
+        vector<int> cats; cats.push_back(-1);
+        for (int c = 0; c < 2; c++) { for (int i = 0; i < count; i++) if (kLocCat[base + i] == c) { cats.push_back(c); break; } }
+        if (currGameSeries != GameSeries::XY && kRouteCount > 0) cats.push_back(2);   // Routes (Hoenn) tab, in the old Mirage slot
+        for (int i = 0; i < count; i++) if (kMap[base + i].count) { cats.push_back(3); break; }
+        const int NCH = (int)cats.size(), CHW = 280 / NCH, CHY = 24, CHH = 22;
+        static int sTeleCat = -1;
+        int catI = 0; for (int i = 0; i < NCH; i++) if (cats[i] == sTeleCat) catI = i;
+        auto curCat = [&]() -> int { return cats[catI]; };
 
-            // Save coords for the chosen place
-            const size_t idx = base + static_cast<size_t>(sPlaceIndex);
-            if (idx < gLocations.size()) {
-                sCoords[0] = gLocations[idx].x;
-                sCoords[1] = gLocations[idx].y;
+        // filtered display rows: target = location idx / ROUTE_BASE+R / SEC_BASE+s (all selectable). hdr unused (kept for layout).
+        struct PRow { int target; const char *hdr; };
+        static int sOtherSec = -1;   // "Other" drill-down: -1 = section menu (folders); 0..3 = inside that section
+        vector<PRow> filt; vector<int> gsel;   // gsel = filt indices that are selectable (for the packed grid view)
+        auto rebuild = [&]() {
+            filt.clear(); gsel.clear(); int c = curCat();
+            if (c == 1) {                        // Other = a 2-level menu
+                if (sOtherSec < 0) {             //   level 0: one selectable folder per non-empty section
+                    for (int s = 0; s < 4; s++) {
+                        bool any = false; for (int i = 0; i < count; i++) if (kLocCat[base + i] == 1 && kLocSec[base + i] == s) { any = true; break; }
+                        if (any) filt.push_back({ SEC_BASE + s, nullptr });
+                    }
+                } else {                         //   level 1: the locations of the chosen section
+                    for (int i = 0; i < count; i++) if (kLocCat[base + i] == 1 && kLocSec[base + i] == sOtherSec) filt.push_back({ (int)base + i, nullptr });
+                }
+            } else if (c == 2) {                 // Routes: every Hoenn route as a bindable/teleportable target
+                for (int R = 0; R < kRouteCount; R++) filt.push_back({ ROUTE_BASE + R, nullptr });
+            } else {
+                for (int i = 0; i < count; i++) if (c == -1 || kLocCat[base + i] == c) filt.push_back({ (int)base + i, nullptr });
+            }
+            for (int i = 0; i < (int)filt.size(); i++) if (filt[i].target >= 0) gsel.push_back(i);
+        };
+        rebuild();
+
+        int cursor = 0;
+        auto firstSel = [&]() -> int { for (int i = 0; i < (int)filt.size(); i++) if (filt[i].target >= 0) return i; return 0; };
+        auto curTgt  = [&]() -> int { return (cursor >= 0 && cursor < (int)filt.size()) ? filt[cursor].target : -1; };
+        auto findRow = [&](int tgt) -> int { for (int i = 0; i < (int)filt.size(); i++) if (filt[i].target == tgt) return i; return -1; };
+        auto gposOf  = [&]() -> int { for (int i = 0; i < (int)gsel.size(); i++) if (gsel[i] == cursor) return i; return 0; };
+        auto skipHdr = [&](int d) { int n = (int)filt.size(), g = 0; while (n > 0 && filt[cursor].target < 0 && g++ < n) cursor = (cursor + d + n) % n; };
+
+        int sel0 = sPlaceIndex; if (sel0 < 0 || sel0 >= count) sel0 = 0;
+        int selAbs = (int)base + sel0;          // highlighted ABSOLUTE idx (persisted)
+        cursor = firstSel(); { int r = findRow(selAbs); if (r >= 0) cursor = r; }
+
+        int view = 1;                            // 0 = grid, 1 = detail/list - DEFAULT detail
+        const int PER = 8, COLS = 4;
+
+        Image gridImg[8]; int loadedKey = -1;
+        Image bigImg; int bigKey = -1; int mqFrame = 0;   // mqFrame = detail-view "Exits" marquee timer
+        string xMsg; int xMsgTtl = 0;                      // X "you are here" transient message
+        int pendingBindId = -1;                            // last unlisted map id from X, awaiting a teach/bind (Start)
+        auto hex = [](int v) -> string { const char *H = "0123456789ABCDEF"; if (!v) return "0"; string s; while (v) { s = string(1, H[v & 15]) + s; v >>= 4; } return s; };
+        auto setXMsg = [&](const string &m) { xMsg = m; xMsgTtl = 120; };
+        // free geographic Map: persisted cursor (absolute idx, independent of the grid) + a small tile cache
+        static int sMapCur = -1;
+        bool validMap = (sMapCur >= (int)base && sMapCur < (int)base + count)
+                     || (sMapCur >= ROUTE_BASE && sMapCur < ROUTE_BASE + kRouteCount);   // a location or a route node
+        if (!validMap) sMapCur = (currGameSeries == GameSeries::XY) ? (int)base : 42;     // default to a central hub (Mauville) on ORAS
+        int mapCur = sMapCur;
+        // gmap tiles: one never-evicted slot per location (indexed by gx-base) so re-centring the map
+        // never re-reads from SD -> kills the per-move 1-2s stutter. Each tile loads at most once per
+        // session (the old 16-slot round-robin thrashed: 15 tiles shown, 36 total -> constant evict+reload).
+        Image mapCache[70]; bool mapTried[70] = { false };   // slots 0..35 = locations, 36..69 = routes
+        auto getMapTile = [&](int gx) -> Image* {     // 56x40 grid-map tiles (locations AND routes)
+            int k = (gx >= ROUTE_BASE) ? (36 + gx - ROUTE_BASE) : (gx - (int)base);
+            if (k < 0 || k >= 70) return nullptr;
+            if (!mapTried[k]) { mapTried[k] = true; mapCache[k].LoadFromFile("Assets/Teleport/gmap/" + pad2(gx) + ".bmp"); }
+            return &mapCache[k];
+        };
+        // Map node neighbours: center = location (kLocLinks) or route target (kRouteLinks). Fills to[]/dir[] (target = loc idx / ROUTE_BASE+R).
+        auto mapNeighbors = [&](int center, int *to, int *dir) -> int {
+            const MapNode *nd = nullptr;
+            if (center >= ROUTE_BASE) { int R = center - ROUTE_BASE; if (R >= 0 && R < kRouteCount) nd = &kRouteLinks[R]; }
+            else if (center >= 0 && center < 63) nd = &kLocLinks[center];
+            int n = 0;
+            if (nd) for (int e = 0; e < nd->count && n < 8; e++) { to[n] = nd->links[e].isRoute ? (ROUTE_BASE + nd->links[e].to) : nd->links[e].to; dir[n] = nd->links[e].dir; n++; }
+            return n;
+        };
+        // Map mode 5x3 grid: cursor node at centre (2,1); its DIRECT neighbours anchored by direction (graph walk —
+        // a location shows the routes leaving it; a route shows the cities/routes it links). dir: 0N 1S 2E 3W 4NE 5NW 6SE 7SW.
+        static const int EDC[8] = { 0, 0, 1, -1, 1, -1, 1, -1 }, EDR[8] = { -1, 1, 0, 0, -1, -1, 1, 1 };
+        auto buildGrid = [&](int center, int cell[3][5]) {
+            for (int r = 0; r < 3; r++) for (int c = 0; c < 5; c++) cell[r][c] = -1;
+            cell[1][2] = center;                                   // cursor (centre, locked)
+            int nto[8], ndir[8]; int nn = mapNeighbors(center, nto, ndir);
+            int used[8] = {0};
+            for (int e = 0; e < nn; e++) {                         // anchor each neighbour in its direction (2nd same-dir -> 1 cell further)
+                int d = ndir[e], step = 1 + used[d];
+                int vc = 2 + EDC[d] * step, vr = 1 + EDR[d] * step;
+                if (vc < 0 || vc > 4 || vr < 0 || vr > 2 || cell[vr][vc] >= 0) continue;
+                cell[vr][vc] = nto[e]; used[d]++;
+            }
+        };
+
+        // ---- overview grid (Y in Map): all 70 imaged tiles (40x28), ~geographic order, multi-select category filter ----
+        // mask bits: 0=Towns 1=Routes 2=Caves 3=Forests 4=Landmarks 5=Mirage; mask 0 = ALL.
+        static int sMapView = 0, sOverIdx = 0, sOverMask = 0;
+        int overScroll = 0;
+        Image miniCache[70]; bool miniTried[70] = { false };
+        auto getMiniTile = [&](int gx) -> Image* {
+            int k = (gx >= ROUTE_BASE) ? (36 + gx - ROUTE_BASE) : (gx - (int)base);
+            if (k < 0 || k >= 70) return nullptr;
+            if (!miniTried[k]) { miniTried[k] = true; miniCache[k].LoadFromFile("Assets/Teleport/mini/" + pad2(gx) + ".bmp"); }
+            return &miniCache[k];
+        };
+        auto overCatBit = [&](int t) -> int {       // 0Towns 1Routes 2Caves 3Forests 4Landmarks 5Mirage
+            if (t >= ROUTE_BASE) return 1;
+            if (t >= 0 && t < 63) { if (kLocCat[t] == 0) return 0; int s = kLocSec[t]; return (s == 0) ? 2 : (s == 1) ? 3 : (s == 2) ? 4 : 5; }
+            return 0;
+        };
+        vector<int> overList;
+        auto rebuildOver = [&]() {
+            overList.clear();
+            for (int i = 0; i < kOverviewCount; i++) { int t = kOverviewTiles[i];
+                if (sOverMask == 0 || (sOverMask & (1 << overCatBit(t)))) overList.push_back(t); }
+            if (overList.empty()) overList.push_back(kOverviewTiles[0]);
+            if (sOverIdx >= (int)overList.size()) sOverIdx = (int)overList.size() - 1;
+            if (sOverIdx < 0) sOverIdx = 0;
+        };
+        auto overFind = [&](int t) -> int { for (int i = 0; i < (int)overList.size(); i++) if (overList[i] == t) return i; return -1; };
+        static const char *OVCHIP[7] = { "ALL", "TOWNS", "ROUTES", "CAVES", "FORESTS", "LANDM.", "MIRAGE" };
+        auto overChip = [&](int i, int &x, int &y, int &w, int &h) {     // 2 rows: ALL/TOWNS/ROUTES, then CAVES/FORESTS/LANDM/MIRAGE
+            h = 20;                                                      // bottom window = x 20..300 (280 wide)
+            if (i < 3) { w = 88; x = 24 + i * 92; y = 112; }
+            else       { w = 66; x = 24 + (i - 3) * 70; y = 138; }
+        };
+        rebuildOver();
+
+        int hU = 0, hD = 0, hL = 0, hR = 0;
+        auto rep = [&](Key k, int &h) -> bool {
+            if (!Controller::IsKeyDown(k)) { h = 0; return false; }
+            int v = ++h; const int DELAY = 15, RATE = 3;
+            return v == 1 || (v > DELAY && (v - DELAY) % RATE == 0);
+        };
+        int listScroll = 0, heldDir = 0, repeatTimer = 0;
+        const int LROWS = 8, LROWH = 19, LISTY = 54;
+
+        UIntVector lastPos = Touch::GetPosition();
+        bool wasDown = false, armed = false;
+
+        while (Controller::IsKeyDown(Key::A) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); }
+
+        bool chosen = false; int commitAbs = -1;
+        while (true) {
+            Controller::Update();
+            if (System::IsSleeping()) break;
+
+            if (Controller::IsKeyPressed(Key::Select)) {
+                while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                PluginMenu::Close();
+                break;
+            }
+            if (Controller::IsKeyPressed(Key::B)) {
+                if (curCat() == 1 && sOtherSec >= 0) {   // inside an "Other" section -> back to the section menu
+                    sOtherSec = -1; rebuild(); cursor = firstSel();
+                    { int r = findRow(selAbs); if (r >= 0) cursor = r; }
+                    listScroll = 0; loadedKey = -1;
+                } else break;
             }
 
-            MessageBox(CenterAlign(getLanguage->Get("NOTE_TELEPORT_KEY")), DialogType::DialogOk, ClearScreen::Both)();
-            entry->SetGameFunc(ApplyLocation);
+            // ---- L/R (shoulders) or a tapped chip cycles the category, in every mode ----
+            bool catChanged = false;
+            if (Controller::IsKeyPressed(Key::L)) { catI = (catI + NCH - 1) % NCH; catChanged = true; }
+            if (Controller::IsKeyPressed(Key::R)) { catI = (catI + 1) % NCH; catChanged = true; }
+            bool down = Touch::IsDown();
+            UIntVector tp = down ? Touch::GetPosition() : lastPos;
+            if (down) lastPos = tp;
+            bool tap = armed && !down && wasDown;
+            if (!down) armed = true;
+            wasDown = down;
+            if (tap) for (int i = 0; i < NCH; i++) {
+                int cx = 20 + i * CHW;
+                if ((int)tp.x >= cx && (int)tp.x < cx + CHW && (int)tp.y >= CHY && (int)tp.y < CHY + CHH) {
+                    if (catI != i) { catI = i; catChanged = true; } break; }
+            }
+            if (catChanged) {
+                sTeleCat = curCat();
+                if (curCat() != 3) {                 // place categories: rebuild the filtered list
+                    if (curCat() == 1) sOtherSec = -1;   // Other: always land on the section menu
+                    rebuild(); cursor = firstSel();   // (the Map keeps its own persistent cursor)
+                    { int r = findRow(selAbs); if (r >= 0) cursor = r; }
+                    loadedKey = -1; view = 1;        // land on the detail view; Y toggles to the thumbnail grid
+                }
+            }
+
+            // ---- X = "you are here": read the player's current map id and jump the selection to it ----
+            if (Controller::IsKeyPressed(Key::X)) {
+                const TeleportAddress A = GetTeleportAddress(currGameSeries);
+                u16 here = 0; int found = -1;
+                // Read the live CURRENT map id from the player struct (mapId16=0x8C6E884 ORAS). It lives in the
+                // SAME id-space as our teleport values, so match it straight against gLocations[].value. (We used
+                // to read value16=0x8803BCA, the warp-request buffer, which goes stale off a warp tile -> only
+                // matched on PokéCenter/door pads. The player-struct id is reliable everywhere.)
+                if (Process::Read16(A.mapId16, here)) {
+                    // 1) learned HERE binds (taught + saved to MyTeleport.txt) win first - any sub-map / route the user bound
+                    for (size_t k = 0; k < gHere.size(); k++) if (gHere[k].mapId == (int)here) { found = gHere[k].target; break; }
+                    // 2) our table value + the few hardcoded sub-map aliases (locations only)
+                    if (found < 0) {
+                        int probe = (int)here;
+                        static const struct { int from, to; } kMapAlias[] = { { 8, 0xE8 } }; // Dewford beach/sub-map -> Dewford Town
+                        for (const auto &al : kMapAlias) if (probe == al.from) { probe = al.to; break; }
+                        for (int i = 0; i < count; i++) if (gLocations[(size_t)base + i].value == probe) { found = (int)base + i; break; }
+                    }
+                }
+                if (found >= 0) {
+                    if (found >= ROUTE_BASE && found < SEC_BASE) {                 // a route
+                        if (curCat() == 3) { mapCur = found; sMapCur = found; }    // Map: re-centre the grid on the player's route (stay on Map)
+                        else {                                                     // other tabs: jump to the Routes tab + select it
+                            for (int i = 0; i < NCH; i++) if (cats[i] == 2) { catI = i; break; }
+                            sTeleCat = 2; rebuild(); loadedKey = -1; view = 1; cursor = firstSel();
+                            { int r = findRow(found); if (r >= 0) cursor = r; }
+                        }
+                    } else {
+                        selAbs = found; sel0 = found - (int)base;
+                        if (curCat() == 3) { mapCur = found; sMapCur = found; }    // Map: re-centre the grid on the player
+                        else {                                                     // place tab: jump the cursor (switch to All if needed)
+                            int r = findRow(found);
+                            if (r >= 0) cursor = r;
+                            else { catI = 0; sTeleCat = -1; sOtherSec = -1; rebuild(); loadedKey = -1; cursor = firstSel(); r = findRow(found); if (r >= 0) cursor = r; }
+                        }
+                    }
+                    if (curCat() == 3 && sMapView == 1) {                          // overview: select the player's tile (clear filter if it hid it)
+                        if (sOverMask && overFind(found) < 0) { sOverMask = 0; rebuildOver(); }
+                        int p = overFind(found); if (p >= 0) sOverIdx = p;
+                    }
+                    pendingBindId = -1;
+                    setXMsg("Here: " + locName(found));
+                } else { pendingBindId = (int)here; setXMsg("map 0x" + hex((int)here) + " - pick place, ZL = tag"); }
+            }
+
+            // ---- ZL = Tag area: teach X that the CURRENT sub-map = the highlighted place/route (saved to MyTeleport.txt) ----
+            if (Controller::IsKeyPressed(Key::ZL)) {
+                int tg = (curCat() == 3) ? mapCur : curTgt();
+                if (tg >= 0 && tg < SEC_BASE) {           // a location or route (not a section folder)
+                    const TeleportAddress A = GetTeleportAddress(currGameSeries);
+                    u16 mid = 0; Process::Read16(A.mapId16, mid);
+                    AddHere((int)mid, tg);
+                    pendingBindId = -1;
+                    setXMsg("Tagged here (0x" + hex((int)mid) + ") -> " + locName(tg));
+                }
+            }
+            // ---- Start = Save Warp Point: save your CURRENT position as the highlighted target's teleport drop point (+ tag). 1 per target. ----
+            if (Controller::IsKeyPressed(Key::Start)) {
+                int tg = (curCat() == 3) ? mapCur : curTgt();
+                if (tg >= 0 && tg < SEC_BASE) {
+                    const TeleportAddress A = GetTeleportAddress(currGameSeries);
+                    u16 mid = 0; u8 dir = 0; u32 rawX = 0, rawY = 0;
+                    Process::Read16(A.mapId16, mid); Process::Read8(A.dir8, dir);
+                    Process::Read32(A.posX, rawX); Process::Read32(A.posY, rawY);
+                    float fx = *reinterpret_cast<float*>(&rawX), fy = *reinterpret_cast<float*>(&rawY);
+                    bool replaced = AddSpot(tg, (int)mid, (int)dir, (int)fx, (int)fy);
+                    AddHere((int)mid, tg);
+                    setXMsg((replaced ? "Warp point replaced: " : "Warp point set: ") + locName(tg));
+                }
+            }
+
+            // ====================================================================== input
+            if (curCat() == 3) {
+                if (currGameSeries != GameSeries::XY && Controller::IsKeyPressed(Key::Y)) {   // Y: graph <-> overview grid
+                    if (sMapView == 0) { sMapView = 1; rebuildOver(); int p = overFind(mapCur); sOverIdx = (p >= 0) ? p : 0; }
+                    else { sMapView = 0; mapCur = overList[sOverIdx]; sMapCur = mapCur; }
+                    while (Controller::IsKeyDown(Key::Y)) { Controller::Update(); OSD::SwapBuffers(); }
+                }
+              if (sMapView == 1) {
+                // -------- OVERVIEW: all imaged tiles, ~geographic order, filtered by the chips --------
+                if (sOverIdx >= (int)overList.size()) sOverIdx = (int)overList.size() - 1;
+                if (Controller::IsKeyPressed(Key::A)) {
+                    int t = overList[sOverIdx];
+                    if (t >= ROUTE_BASE && !HasSpot(t)) setXMsg("No warp point yet - Start on the route");
+                    else { chosen = true; commitAbs = t; break; }
+                }
+                int ncol = kOverviewCols, nn = (int)overList.size();
+                if (rep(Key::Left, hL)  && sOverIdx > 0) sOverIdx--;
+                if (rep(Key::Right, hR) && sOverIdx < nn - 1) sOverIdx++;
+                if (rep(Key::Up, hU)    && sOverIdx - ncol >= 0) sOverIdx -= ncol;
+                if (rep(Key::Down, hD)  && sOverIdx + ncol <= nn - 1) sOverIdx += ncol;
+                mapCur = overList[sOverIdx]; sMapCur = mapCur;
+                if (tap) for (int i = 0; i < 7; i++) { int cx, cy, cw, ch; overChip(i, cx, cy, cw, ch);   // tap a filter chip
+                    if ((int)tp.x >= cx && (int)tp.x < cx + cw && (int)tp.y >= cy && (int)tp.y < cy + ch) {
+                        if (i == 0) sOverMask = 0; else sOverMask ^= (1 << (i - 1));
+                        rebuildOver(); overScroll = 0; mapCur = overList[sOverIdx]; sMapCur = mapCur; break; }
+                }
+              } else {
+                // -------- MAP: grid-cell cursor (move to the tile shown in the pressed direction) --------
+                if (Controller::IsKeyPressed(Key::A)) {
+                    if (mapCur >= ROUTE_BASE && !HasSpot(mapCur)) setXMsg("No warp point yet - Start on the route");
+                    else { chosen = true; commitAbs = mapCur; break; }
+                }
+                int want = -1;
+                if (Controller::IsKeyPressed(Key::Up)) want = 0;
+                else if (Controller::IsKeyPressed(Key::Down)) want = 1;
+                else if (Controller::IsKeyPressed(Key::Right)) want = 2;
+                else if (Controller::IsKeyPressed(Key::Left)) want = 3;
+                if (want >= 0) {
+                    int cell[3][5]; buildGrid(mapCur, cell);
+                    int best = -1, bestD = 999;
+                    for (int r = 0; r < 3; r++) for (int c = 0; c < 5; c++) {
+                        if (cell[r][c] < 0 || cell[r][c] == mapCur) continue;
+                        int dc = c - 2, dr = r - 1;
+                        bool ok = (want == 0) ? (dr < 0) : (want == 1) ? (dr > 0) : (want == 2) ? (dc > 0) : (dc < 0);
+                        if (!ok) continue;
+                        int dist = (want <= 1) ? (iabs(dr) * 5 + iabs(dc)) : (iabs(dc) * 5 + iabs(dr)); // prefer same column/row
+                        if (best < 0 || dist < bestD) { best = cell[r][c]; bestD = dist; }
+                    }
+                    if (best >= 0) { mapCur = best; sMapCur = mapCur; if (best < ROUTE_BASE) { selAbs = best; sel0 = best - (int)base; } }
+                }
+              }
+            } else {
+                // -------- GRID / LIST --------
+                if (Controller::IsKeyPressed(Key::Y)) {
+                    view ^= 1;
+                    if (view == 1) { listScroll = cursor - LROWS / 2;
+                                     if (listScroll > (int)filt.size() - LROWS) listScroll = (int)filt.size() - LROWS;
+                                     if (listScroll < 0) listScroll = 0; }
+                    while (Controller::IsKeyDown(Key::Y)) { Controller::Update(); OSD::SwapBuffers(); }
+                }
+                if (Controller::IsKeyPressed(Key::A) && curTgt() >= 0) {
+                    int tg = curTgt();
+                    if (tg >= SEC_BASE) {             // "Other" section folder -> drill in (not a teleport)
+                        sOtherSec = tg - SEC_BASE; rebuild(); cursor = firstSel(); listScroll = 0; loadedKey = -1;
+                    } else if (tg >= ROUTE_BASE && !HasSpot(tg)) {   // route with no captured spot -> can't teleport yet
+                        setXMsg("No warp point yet - stand there + Start to save");
+                    } else { chosen = true; commitAbs = tg; break; }
+                }
+                int n = (int)filt.size();
+                if (view == 0) {                    // GRID: navigate the packed selectable list (gsel), skipping headers
+                    int ng = (int)gsel.size();
+                    if (ng > 0) {
+                        int gp = gposOf();
+                        bool kl = rep(Key::Left, hL), kr = rep(Key::Right, hR), ku = rep(Key::Up, hU), kd = rep(Key::Down, hD);
+                        if (kl && gp > 0) gp--;
+                        if (kr && gp < ng - 1) gp++;
+                        if (ku && gp - COLS >= 0) gp -= COLS;
+                        if (kd && gp + COLS <= ng - 1) gp += COLS;
+                        cursor = gsel[gp];
+                    }
+                } else if (n > 0) {                 // LIST nav (Up/Down; Left/Right = page); skip non-selectable headers
+                    int dir = Controller::IsKeyDown(Key::Down) ? 1 : (Controller::IsKeyDown(Key::Up) ? -1 : 0);
+                    if (dir) { bool fire = false;
+                        if (dir != heldDir) { heldDir = dir; repeatTimer = 16; fire = true; }
+                        else if (--repeatTimer <= 0) { repeatTimer = 4; fire = true; }
+                        if (fire) { cursor = (cursor + dir + n) % n; skipHdr(dir); }
+                    } else heldDir = 0;
+                    if (Controller::IsKeyPressed(Key::Right)) { cursor = (cursor + LROWS < n) ? cursor + LROWS : n - 1; skipHdr(1); }
+                    if (Controller::IsKeyPressed(Key::Left))  { cursor = (cursor - LROWS >= 0) ? cursor - LROWS : 0;     skipHdr(-1); }
+                    if (cursor < listScroll) listScroll = cursor;
+                    if (cursor >= listScroll + LROWS) listScroll = cursor - LROWS + 1;
+                    if (listScroll > n - LROWS) listScroll = n - LROWS;
+                    if (listScroll < 0) listScroll = 0;
+                }
+                if (curTgt() >= 0) { selAbs = curTgt(); sel0 = selAbs - (int)base; }
+            }
+
+            // ====================================================================== TOP
+            top.DrawRect(30, 20, 340, 200, bg, true);
+            top.DrawRect(30, 20, 340, 200, border, false);
+
+            if (curCat() == 3 && sMapView == 1) {
+                // ---- OVERVIEW: dense ~geographic grid of all imaged tiles (40x28), no labels, scrolls with the cursor ----
+                top.DrawSysfont(title << (ttl + " - All"), 42, 26, title);
+                top.DrawRect(42, 44, 316, 1, title, true);
+                const int OC = kOverviewCols, TW = 40, TH = 28, PX = 48, PY = 33, GX0 = 34, GY0 = 50, VR = 5;
+                int nn = (int)overList.size(), rows = (nn + OC - 1) / OC, curRow = sOverIdx / OC;
+                if (curRow < overScroll) overScroll = curRow;
+                if (curRow >= overScroll + VR) overScroll = curRow - VR + 1;
+                if (overScroll > rows - VR) overScroll = rows - VR;
+                if (overScroll < 0) overScroll = 0;
+                for (int vr = 0; vr < VR; vr++) for (int c = 0; c < OC; c++) {
+                    int idx = (overScroll + vr) * OC + c; if (idx >= nn) continue;
+                    int gx = overList[idx], x = GX0 + c * PX, y = GY0 + vr * PY;
+                    Image *im = getMiniTile(gx);
+                    if (im && im->IsLoaded()) im->Draw(top, x, y); else top.DrawRect(x, y, TW, TH, bg2, true);
+                    if (idx == sOverIdx) { top.DrawRect(x - 2, y - 2, TW + 4, TH + 4, title, false);
+                                           top.DrawRect(x - 1, y - 1, TW + 2, TH + 2, title, false); }
+                }
+                if (overScroll > 0)         top.DrawSysfont(title << "^", 360, GY0, title);
+                if (overScroll + VR < rows) top.DrawSysfont(title << "v", 360, GY0 + (VR - 1) * PY, title);
+            } else if (curCat() == 3) {
+                // ---- fixed 5x3 grid: cursor centre, its connections anchored by direction, the rest geographic ----
+                top.DrawSysfont(title << (ttl + " - Map"), 42, 26, title);
+                top.DrawRect(42, 44, 316, 1, title, true);
+                const int COLS = 5, ROWS = 3, TW = 56, TH = 40, PX = 66, PY = 56, GX0 = 40, GY0 = 56;
+                int cellLoc[3][5]; buildGrid(mapCur, cellLoc);
+                auto slotX = [&](int c) -> int { return GX0 + c * PX; };
+                auto slotY = [&](int r) -> int { return GY0 + r * PY; };
+                auto cellOf = [&](int gi, int &oc, int &orr) -> bool {
+                    for (int r = 0; r < ROWS; r++) for (int c = 0; c < COLS; c++) if (cellLoc[r][c] == gi) { oc = c; orr = r; return true; }
+                    return false;
+                };
+                // links: cursor -> each neighbour that's on the grid (L-shaped DrawRect, drawn under the tiles)
+                { int nto[8], ndir[8]; int nn = mapNeighbors(mapCur, nto, ndir); int oc = 0, orr = 0;
+                  int ax = slotX(2) + TW / 2, ay = slotY(1) + TH / 2;
+                  for (int e = 0; e < nn; e++) if (cellOf(nto[e], oc, orr)) {
+                      int bx = slotX(oc) + TW / 2, by = slotY(orr) + TH / 2;
+                      int x0 = ax < bx ? ax : bx; top.DrawRect(x0, ay, (ax < bx ? bx - ax : ax - bx) + 2, 2, border, true);
+                      int y0 = ay < by ? ay : by; top.DrawRect(bx, y0, 2, (ay < by ? by - ay : ay - by) + 2, border, true);
+                  } }
+                for (int r = 0; r < ROWS; r++) for (int c = 0; c < COLS; c++) {   // tiles (every slot is fully inside the window)
+                    int gi = cellLoc[r][c]; if (gi < 0) continue;
+                    int x = slotX(c), y = slotY(r);
+                    Image *im = getMapTile(gi);
+                    if (im && im->IsLoaded()) { top.DrawRect(x - 1, y - 1, TW + 2, TH + 2, border, false); im->Draw(top, x, y); }
+                    else { top.DrawRect(x, y, TW, TH, bg2, true); top.DrawRect(x, y, TW, TH, border, false); }
+                    if (gi == mapCur) { top.DrawRect(x - 2, y - 2, TW + 4, TH + 4, sel, false); top.DrawRect(x - 3, y - 3, TW + 6, TH + 6, sel, false); }
+                }
+                { string nm = fitText(locName(mapCur), 200);
+                  top.DrawSysfont(sel << nm, slotX(2) + (TW - (int)OSD::GetTextWidth(true, nm)) / 2, slotY(1) + TH + 1, sel); }
+            } else if (view == 0) {
+                int ng = (int)gsel.size();
+                const char *cf = (curCat() < 0) ? "All" : CAT_FULL[curCat()];
+                top.DrawSysfont(title << (string(cf) + " (" + to_string(ng) + ")"), 42, 26, title);
+                int pages = (ng + PER - 1) / PER; if (pages < 1) pages = 1;
+                int gp = gposOf();
+                int page = ng ? gp / PER : 0;
+                string pg = "Pg " + to_string(page + 1) + "/" + to_string(pages);
+                top.DrawSysfont(txt << pg, 362 - (int)OSD::GetTextWidth(true, pg), 28, txt);
+                top.DrawRect(42, 44, 316, 1, title, true);
+
+                int key = curCat() * 100 + page;
+                if (key != loadedKey) {
+                    loadedKey = key;
+                    for (int k = 0; k < PER; k++) { int gi = page * PER + k;
+                        if (gi < ng) gridImg[k].LoadFromFile(gridPath(filt[gsel[gi]].target)); else gridImg[k].Clear(); }
+                }
+                const int GX0 = 30, GY0 = 50, CW = 85, TW = 76, TH = 52, CHh = 84;
+                for (int k = 0; k < PER; k++) {
+                    int gi = page * PER + k; if (gi >= ng) break;
+                    int gx = filt[gsel[gi]].target, col = k % COLS, row = k / COLS;
+                    int cellx = GX0 + col * CW, celly = GY0 + row * CHh, tx = cellx + (CW - TW) / 2, ty = celly + 2;
+                    if (gridImg[k].IsLoaded()) { top.DrawRect(tx - 1, ty - 1, TW + 2, TH + 2, border, false); gridImg[k].Draw(top, tx, ty); }
+                    else { top.DrawRect(tx, ty, TW, TH, bg2, true); top.DrawRect(tx, ty, TW, TH, border, false); }
+                    bool cur = (gsel[gi] == cursor);
+                    string nm = fitText(locName(gx), CW - 2);
+                    top.DrawSysfont((cur ? sel : txt) << nm, cellx + (CW - (int)OSD::GetTextWidth(true, nm)) / 2, ty + TH + 4, cur ? sel : txt);
+                    if (cur) { top.DrawRect(tx - 2, ty - 2, TW + 4, TH + 4, sel, false); top.DrawRect(tx - 3, ty - 3, TW + 6, TH + 6, sel, false); }
+                }
+            } else {
+                int gx = curTgt(); if (gx < 0) gx = selAbs;
+                bool isLoc   = (gx >= 0 && gx < ROUTE_BASE);     // location: image + exits
+                bool isRoute = (gx >= ROUTE_BASE && gx < SEC_BASE); // route: image + set-spot hint
+                bool hasImg  = isLoc || isRoute;                 // both have a thumbnail; section folders don't
+                string nm = locName(gx);
+                string tt = (gx >= SEC_BASE) ? (ttl + " - Other")
+                          : (curCat() == 1 && sOtherSec >= 0 && isLoc) ? (string(SEC_NAME[sOtherSec]) + " > " + nm)   // breadcrumb inside a section
+                          : (ttl + ": " + nm);
+                top.DrawSysfont(title << tt, 42, 26, title);
+                top.DrawRect(42, 44, 316, 1, title, true);
+                const int BW = 300, BH = 150, BX = 30 + (340 - BW) / 2, BY = 50;
+                top.DrawRect(BX - 1, BY - 1, BW + 2, BH + 2, border, false);
+                if (hasImg) {
+                    if (gx != bigKey) { bigKey = gx; mqFrame = 0; bigImg.LoadFromFile("Assets/Teleport/big/" + pad2(gx) + ".bmp"); }
+                    if (bigImg.IsLoaded()) { int sw = bigImg.Width(), sh = bigImg.Height(); bigImg.Draw(top, BX + (BW - sw) / 2, BY + (BH - sh) / 2); }
+                    else { top.DrawRect(BX, BY, BW, BH, bg2, true); top.DrawSysfont(txt << nm, BX + (BW - (int)OSD::GetTextWidth(true, nm)) / 2, BY + BH / 2 - 6, txt); }
+                    if (isLoc) {
+                        const TeleConn &cc = kLocConn[gx];
+                        if (cc.count) {
+                            string ex = "Exits:  ";
+                            for (int i = 0; i < cc.count; i++) { if (i) ex += "   "; ex += cc.exits[i]; }
+                            const int RX = 40, RW = 320, RY = BY + BH + 5;          // marquee region [40,360]
+                            int tw = (int)OSD::GetTextWidth(true, ex);
+                            if (tw <= RW) top.DrawSysfont(txt << ex, RX, RY, txt);
+                            else {                                                  // scroll: ~1s hold, ~1px/frame, ~2s hold
+                                const int HOLD1 = 30, HOLD2 = 60, SPEED = 1;
+                                int over = tw - RW, scr = over / SPEED, total = HOLD1 + scr + HOLD2, f = mqFrame % total;
+                                int off = (f < HOLD1) ? 0 : (f < HOLD1 + scr) ? (f - HOLD1) * SPEED : over;
+                                top.DrawSysfont(txt << ex, RX - off, RY, txt);
+                                top.DrawRect(31, RY - 1, RX - 31, 14, bg, true);            // mask left margin
+                                top.DrawRect(RX + RW, RY - 1, 369 - (RX + RW), 14, bg, true); // mask right margin
+                                top.DrawRect(30, 20, 340, 200, border, false);              // restore window border
+                            }
+                        }
+                    } else {                                  // route: spot status / hint under the image
+                        const char *rh = HasSpot(gx) ? "A: teleport here   (Start: re-set warp)" : "stand on it, then Start = save warp point";
+                        top.DrawSysfont(txt << rh, 40, BY + BH + 5, txt);
+                    }
+                } else {                                  // section folder: a text card (no image)
+                    top.DrawRect(BX, BY, BW, BH, bg2, true);
+                    top.DrawSysfont(title << nm, BX + (BW - (int)OSD::GetTextWidth(true, nm)) / 2, BY + BH / 2 - 18, title);
+                    const char *sub = "A: open this section";
+                    top.DrawSysfont(txt << sub, BX + (BW - (int)OSD::GetTextWidth(true, sub)) / 2, BY + BH / 2 + 4, txt);
+                }
+            }
+
+            // ====================================================================== BOTTOM
+            bot.DrawRect(20, 20, 280, 200, bg, true);
+            bot.DrawRect(20, 20, 280, 200, border, false);
+            for (int i = 0; i < NCH; i++) {               // category chip row (every mode)
+                int cx = 20 + i * CHW; bool on = (i == catI);
+                bot.DrawRect(cx, CHY, CHW - 2, CHH, on ? sel : bg2, true);
+                bot.DrawRect(cx, CHY, CHW - 2, CHH, on ? title : border, false);
+                string lbl = fitText(CAT_SHORT[cats[i] + 1], CHW - 4);
+                bot.DrawSysfont((on ? bg : txt) << lbl, cx + (CHW - 2 - (int)OSD::GetTextWidth(true, lbl)) / 2, CHY + 5, txt);
+            }
+            if (curCat() == 3 && sMapView == 1) {         // OVERVIEW bottom: big name + filter chips + help
+                int t = overList[sOverIdx];
+                string nm = locName(t);
+                bot.DrawSysfont(sel << nm, 160 - (int)OSD::GetTextWidth(true, nm) / 2, 62, sel);
+                { string td = teleTodo(t); if (!td.empty()) bot.DrawSysfont(border << td, 160 - (int)OSD::GetTextWidth(true, td) / 2, 86, border); }
+                for (int i = 0; i < 7; i++) { int x, y, w, h; overChip(i, x, y, w, h);
+                    bool onq = (i == 0) ? (sOverMask == 0) : (sOverMask & (1 << (i - 1)));
+                    bot.DrawRect(x, y, w, h, onq ? sel : bg2, true);
+                    bot.DrawRect(x, y, w, h, onq ? title : border, false);
+                    string lb = fitText(OVCHIP[i], w - 4);
+                    bot.DrawSysfont((onq ? bg : txt) << lb, x + (w - (int)OSD::GetTextWidth(true, lb)) / 2, y + 4, txt);
+                }
+                const char *h1 = "D-Pad: move   A: teleport   X: here";
+                const char *h2 = "tap chips: filter    Y: map    B: back";
+                bot.DrawSysfont(txt << h1, 160 - (int)OSD::GetTextWidth(true, h1) / 2, 170, txt);
+                bot.DrawSysfont(txt << h2, 160 - (int)OSD::GetTextWidth(true, h2) / 2, 190, txt);
+            } else if (curCat() == 3) {                   // map: cursor info + its connections legend
+                int nto[8], ndir[8]; int nn = mapNeighbors(mapCur, nto, ndir);
+                string nm = locName(mapCur);
+                bot.DrawSysfont(sel << nm, 160 - (int)OSD::GetTextWidth(true, nm) / 2, 56, sel);
+                if (nn == 0) { const char *nr = "(no links)";
+                    bot.DrawSysfont(txt << nr, 160 - (int)OSD::GetTextWidth(true, nr) / 2, 78, txt); }
+                for (int e = 0; e < nn && e < 5; e++) {
+                    string ln = string(DABBR[ndir[e]]) + ": " + locName(nto[e]);
+                    bot.DrawSysfont(txt << fitText(ln, 264), 30, 76 + e * 16, txt);
+                }
+                const char *h1 = "D-Pad: move   A: teleport   X: here";
+                const char *h2 = "L/R: category   Y: all-map   B: back";
+                bot.DrawSysfont(txt << h1, 160 - (int)OSD::GetTextWidth(true, h1) / 2, 184, txt);
+                bot.DrawSysfont(txt << h2, 160 - (int)OSD::GetTextWidth(true, h2) / 2, 200, txt);
+            } else if (view == 0) {                       // grid: destination + hints
+                string nm = (curTgt() >= 0) ? locName(curTgt()) : string("-");
+                bot.DrawSysfont(sel << nm, 160 - (int)OSD::GetTextWidth(true, nm) / 2, 78, sel);
+                { string td = (curTgt() >= 0) ? teleTodo(curTgt()) : string();   // dim "+tag/+warp" still pending
+                  if (!td.empty()) bot.DrawSysfont(border << td, 160 - (int)OSD::GetTextWidth(true, td) / 2, 96, border); }
+                const char *h1 = "A: teleport     X: you are here";
+                const char *h2 = "Start: save warp point    ZL: tag area";
+                const char *h3 = "Y: list   L/R: category   B: back";
+                bot.DrawSysfont(txt << h1, 160 - (int)OSD::GetTextWidth(true, h1) / 2, 130, txt);
+                bot.DrawSysfont(txt << h2, 160 - (int)OSD::GetTextWidth(true, h2) / 2, 150, txt);
+                bot.DrawSysfont(txt << h3, 160 - (int)OSD::GetTextWidth(true, h3) / 2, 184, txt);
+            } else {                                      // list (with non-selectable section headers)
+                if (listScroll < 0) listScroll = 0;
+                for (int i = 0; i < LROWS; i++) {
+                    int ri = listScroll + i; if (ri >= (int)filt.size()) break;
+                    int y = LISTY + i * LROWH;
+                    if (filt[ri].target < 0) {            // section header: dim, non-selectable
+                        bot.DrawSysfont(border << (string("- ") + filt[ri].hdr + " -"), 30, y, border);
+                        continue;
+                    }
+                    bool cur = (ri == cursor);
+                    if (cur) bot.DrawRect(26, y - 2, 268, LROWH, bg2, true);
+                    bot.DrawSysfont((cur ? sel : txt) << locName(filt[ri].target), 38, y, cur ? sel : txt);
+                    { string td = teleTodo(filt[ri].target);            // dim "+tag/+warp" of what's still unset
+                      if (!td.empty()) { int tw = (int)OSD::GetTextWidth(true, td);
+                          bot.DrawSysfont((cur ? txt : border) << td, 284 - tw, y, cur ? txt : border); } }
+                }
+                if (listScroll > 0) bot.DrawSysfont(txt << "^", 286, LISTY, txt);
+                if (listScroll + LROWS < (int)filt.size()) bot.DrawSysfont(txt << "v", 286, LISTY + (LROWS - 1) * LROWH, txt);
+                { const char *lg = "+tag / +warp = not set yet";
+                  bot.DrawSysfont(border << lg, 160 - (int)OSD::GetTextWidth(true, lg) / 2, 204, border); }
+            }
+
+            if (xMsgTtl > 0) {          // X "you are here" transient banner (over the bottom screen)
+                xMsgTtl--;
+                int w = (int)OSD::GetTextWidth(true, xMsg) + 14;
+                bot.DrawRect(160 - w / 2, 100, w, 18, bg2, true);
+                bot.DrawRect(160 - w / 2, 100, w, 18, title, false);
+                bot.DrawSysfont(sel << xMsg, 160 - (int)OSD::GetTextWidth(true, xMsg) / 2, 103, sel);
+            } else if (pendingBindId >= 0) {   // persistent teach prompt: live updates with the highlighted place
+                int absSel = (curCat() == 3) ? mapCur : curTgt();
+                string bn = fitText("ZL = tag 0x" + hex(pendingBindId) + " -> " + (absSel >= 0 ? locName(absSel) : string("-")), 270);
+                int w = (int)OSD::GetTextWidth(true, bn) + 14;
+                bot.DrawRect(160 - w / 2, 100, w, 18, bg2, true);
+                bot.DrawRect(160 - w / 2, 100, w, 18, title, false);
+                bot.DrawSysfont(title << bn, 160 - (int)OSD::GetTextWidth(true, bn) / 2, 103, title);
+            }
+
+            mqFrame++;                 // advances the detail-view "Exits" marquee
+            OSD::SwapBuffers();
+        }
+
+        if (chosen && commitAbs >= 0) {
+            int v = 0, d = 0, x = 0, y = 0;
+            if (ResolveSpot(commitAbs, v, d, x, y)) {           // custom SPOT if set, else the dev default (routes need a SPOT)
+                sTeleVal = v; sTeleDir = d; sTeleX = x; sTeleY = y;
+                if (commitAbs < ROUTE_BASE) sPlaceIndex = commitAbs - (int)base;   // remember the location cursor
+                while (Controller::IsKeyDown(Key::A)) { Controller::Update(); OSD::SwapBuffers(); } // drain A before the dialog
+                MessageBox(CenterAlign(getLanguage->Get("NOTE_TELEPORT_KEY")), DialogType::DialogOk, ClearScreen::Both)();
+                entry->SetGameFunc(ApplyLocation);
+            }
         }
     }
 
@@ -4124,6 +4913,7 @@ namespace CTRPluginFramework {
     static MenuEntry *g_hudParty  = nullptr;   // Show: Party count
     static MenuEntry *g_hudXY     = nullptr;   // Show: X/Y pos
     static MenuEntry *g_hudRepel  = nullptr;   // Show: Repel steps remaining
+    static MenuEntry *g_hudMapId  = nullptr;   // Show: current (fine) map id - debug / zone cataloging
     static MenuEntry *g_hudPanel  = nullptr;
     static int  g_hudPosition = 0;             // 0..8 anchors (3x3)
     static int  g_hudOpacity  = 50;            // panel opacity 0..100 (step 10), via ordered dither
@@ -4136,6 +4926,7 @@ namespace CTRPluginFramework {
     // 9 positions, reading order: 0=TL 1=TC 2=TR 3=ML 4=C 5=MR 6=BL 7=BC 8=BR
     static void HudAnchor(int pos, int w, int h, int &x, int &y) {
         const int SW = 400, SH = 240, M = 6; // top screen + margin
+        const int BOTM = 16;                 // extra lift for the bottom row, so the HUD clears the game's area-name banner
 
         if (pos < 0 || pos > 8)
             pos = 4; // safety -> center
@@ -4143,7 +4934,7 @@ namespace CTRPluginFramework {
         const int col = pos % 3;
         const int row = pos / 3;
         const int xs[3] = { M, (SW - w) / 2, SW - w - M };
-        const int ys[3] = { M, (SH - h) / 2, SH - h - M };
+        const int ys[3] = { M, (SH - h) / 2, SH - h - M - BOTM };
 
         x = xs[col];
         y = ys[row];
@@ -4262,6 +5053,12 @@ namespace CTRPluginFramework {
             // Volatile overworld counter (u8), not stored in the save. Addr from PokemonCheatPlugin (same game build).
             Process::Read8(AutoGameSet(0x8C7D23A, 0x8C8546E), repel);
             lines.push_back(Utils::Format("Repel: %u", (unsigned)repel));
+        }
+
+        if (g_hudMapId != nullptr && g_hudMapId->IsActivated()) {
+            u16 mid = 0;
+            Process::Read16(AutoGameSet(0x8C67190, 0x8C6E884), mid);   // XY, ORAS - current (fine) map id
+            lines.push_back(Utils::Format("Map #%u (0x%X)", (unsigned)mid, (unsigned)mid));
         }
 
         if (lines.empty())
@@ -4625,6 +5422,8 @@ namespace CTRPluginFramework {
         g_hudXY->SetFavoriteAlias("Show: X/Y pos");
         g_hudRepel  = new MenuEntry("Repel steps", HudNoop, "Show how many steps of Repel are left (0 = no Repel active).\nNot saved by the game, so it resets to 0 on reload.");
         g_hudRepel->SetFavoriteAlias("Show: Repel");
+        g_hudMapId  = new MenuEntry("Map id", HudNoop, "Show the current map id, live (debug / for cataloging zones for 'you are here').");
+        g_hudMapId->SetFavoriteAlias("Show: Map id");
         g_hudPanel  = new MenuEntry("Translucent panel", HudNoop, "A dark see-through box behind the text, for readability.");
         g_hudPanel->SetFavoriteAlias("Panel");
         g_hudPanel->SetGridFullWidth(true); // panel toggle spans the whole row
@@ -4638,6 +5437,7 @@ namespace CTRPluginFramework {
         *hud += g_hudParty;
         *hud += g_hudXY;
         *hud += g_hudRepel;
+        *hud += g_hudMapId;
         *hud += g_hudPanel;
         MenuEntry *hudOpac = new MenuEntry("Panel opacity", nullptr, HudSetOpacity, "Set how see-through the panel is (0-100%). Drag the bar; the top screen previews it live.");
         hudOpac->SetGridPaired(true); // pair side-by-side in the 2-column layout

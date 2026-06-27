@@ -59,20 +59,25 @@ namespace CTRPluginFramework {
         unsigned int _g;
         unsigned int _b;
         unsigned int _a;
-        float forealpha = (float)color.a / 255.f;
-        float minusForeAlpha = 1.f - forealpha;
 
         switch (mode) {
-            case BlendMode::Alpha:
-                _r = (forealpha * (float)color.r) + ((float)r * minusForeAlpha);
-                _g = (forealpha * (float)color.g) + ((float)g * minusForeAlpha);
-                _b = (forealpha * (float)color.b) + ((float)b * minusForeAlpha);
+            case BlendMode::Alpha: {
+                // Integer fixed-point alpha blend (was a float divide + 3 float mults per call).
+                // DrawGlyph calls this for every anti-aliased glyph pixel -> thousands of times per
+                // frame, so this is a real hot path. "/ 255u" by a constant compiles to a multiply +
+                // shift (ARMv6 has no integer-divide instruction). Visually identical to the float
+                // path: the result can differ by at most 1/255 on the faintest AA pixels.
+                const unsigned int fa = color.a, mfa = 255u - color.a;
+                _r = (fa * color.r + mfa * r) / 255u;
+                _g = (fa * color.g + mfa * g) / 255u;
+                _b = (fa * color.b + mfa * b) / 255u;
                 _a = color.a * a;
                 ret.r = std::min(_r, 255u);
                 ret.g = std::min(_g, 255u);
                 ret.b = std::min(_b, 255u);
                 ret.a = std::min(_a, 255u);
                 break;
+            }
             case BlendMode::Add:
                 _r = a * r / 255 + 255 * color.r / 255;
                 _g = a * g / 255 + 255 * color.g / 255;

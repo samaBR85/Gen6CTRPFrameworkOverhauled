@@ -122,9 +122,7 @@ libctrpf.a : Build
 	@cp -r $(CURDIR)/Includes/* $(CURDIR)/libctrpf/include/
 	@rm -rf Build
 	@echo "libctrpf directory structure created successfully."
-	@echo "Compressing libctrpf folder into ZIP"
-	@7z a -tzip $(CURDIR)/libctrpf.zip $(CURDIR)/libctrpf*
-	@echo "libctrpf folder compressed into ZIP"
+	@command -v 7z >/dev/null 2>&1 && { echo "Compressing libctrpf folder into ZIP"; 7z a -tzip $(CURDIR)/libctrpf.zip $(CURDIR)/libctrpf*; echo "libctrpf folder compressed into ZIP"; } || echo "7z not found on PATH - skipping libctrpf.zip (not required for plugin builds)"
 
 #---------------------------------------------------------------------------------
 clean:

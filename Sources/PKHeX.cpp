@@ -989,10 +989,7 @@ namespace CTRPluginFramework {
 
         // Level from EXP using the species' growth rate (same growthType/growthTable the Level editor uses).
         static int LevelFromExp(u16 species, u32 exp) {
-            int type = 0;
-
-            for (size_t t = 0; t < growthType.size(); ++t)
-                if (find(growthType[t].begin(), growthType[t].end(), (int)species) != growthType[t].end()) { type = (int)t; break; }
+            int type = (species < 808 && growthGroupOf[species] != 0xFF) ? growthGroupOf[species] : 0;
 
             int lvl = 1;
             for (int l = 1; l <= 100; l++) {
@@ -1333,7 +1330,7 @@ namespace CTRPluginFramework {
                     if (sp != partySpriteKey) {
                         partySpriteKey = sp;
                         if (sp >= 1 && sp <= 721) {
-                            string p = "Spawner/normal/";
+                            string p = "Assets/Spawner/normal/";
                             if (sp < 100) p += "0";
                             if (sp < 10)  p += "0";
                             p += to_string((int)sp) + ".bmp";
@@ -1430,10 +1427,33 @@ namespace CTRPluginFramework {
         // drawn with the 32px BoxIcons; BOTTOM = the focused slot's card + controls.
         //   D-Pad move | L/R box | A set edit target | X move/swap | Y clone | Start find | B back | Select close
         static void BoxIconPath(string &p, u16 sp, bool shiny, const char *root) {
-            p = root; p += shiny ? "shiny/" : "normal/";
+            p = "Assets/"; p += root; p += shiny ? "shiny/" : "normal/";
             if (sp < 100) p += "0";
             if (sp < 10)  p += "0";
             p += to_string((int)sp) + ".bmp";
+        }
+
+        // Bag-item sprite path: BagSprites/big/NNN.bmp (id zero-padded to 3). Single source of truth for
+        // the pad logic that used to be copy-pasted inline in the item pickers and the Loot/Wheel/Hub games.
+        static string BagIconPath(int id) {
+            string p = "Assets/BagSprites/big/";
+            if (id < 100) p += "0";
+            if (id < 10)  p += "0";
+            p += to_string(id) + ".bmp";
+            return p;
+        }
+
+        // Shared mini-game/OSD utilities. These were copy-pasted as byte-identical local lambdas in every
+        // Fun* game (and a couple of other OSD screens); lifted here so the logic lives once. Behaviour is
+        // identical to the old locals - they captured nothing game-specific.
+        static string commafy(int v) {
+            string s = to_string(v < 0 ? 0 : v), o; int c = 0;
+            for (int i = (int)s.size() - 1; i >= 0; --i) { o = string(1, s[i]) + o; if (++c % 3 == 0 && i > 0) o = "," + o; }
+            return o;
+        }
+        static Color RGB(u32 c) { return Color((u8)(c >> 16), (u8)(c >> 8), (u8)c); }
+        static void drainKeys() {
+            while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); }
         }
 
         // ============================ Rich custom editors (PC Box ++) ============================
@@ -1486,7 +1506,8 @@ namespace CTRPluginFramework {
                     top.DrawSysfont(sel << g_statShort[s], sx0 + s * sdx, 110, sel);
                     top.DrawSysfont(c   << to_string(stt[s]), sx0 + s * sdx, 130, c);
                 }
-                top.DrawSysfont(txt << "Green = raised stat, red = lowered (10% each).", 42, 170, txt);
+                top.DrawSysfont(txt << "Green = raised stat,", 42, 162, txt);
+                top.DrawSysfont(txt << "red = lowered (10% each).", 42, 180, txt);
 
                 // BOTTOM: scrollable nature list with a compact effect tag per row.
                 bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
@@ -2058,7 +2079,7 @@ namespace CTRPluginFramework {
         // Draw the focused item's detail on the top screen: big sprite + name + (pocket) + effect description.
         static void DrawItemDetail(const Screen &top, u16 id, Image &spr, int &sprKey, Color sel, Color txt, Color border, bool showPocket) {
             static const char *POCKET[5] = {"Items", "Medicines", "Berries", "TMs & HMs", "Key Items"};
-            if (id != sprKey) { sprKey = id; string p = "BagSprites/big/"; if (id < 100) p += "0"; if (id < 10) p += "0"; p += to_string((int)id) + ".bmp"; spr.LoadFromFile(p); }
+            if (id != sprKey) { sprKey = id; spr.LoadFromFile(BagIconPath((int)id)); }
             const int FX = 44, FY = 52;
             top.DrawRect(FX, FY, 44, 44, Color::White, true); top.DrawRect(FX, FY, 44, 44, border, false);
             if (spr.IsLoaded()) { int sw = spr.Width(), sh = spr.Height(); spr.Draw(top, FX + (44 - sw) / 2, FY + (44 - sh) / 2); }
@@ -2129,7 +2150,7 @@ namespace CTRPluginFramework {
                 if (count == 0) top.DrawSysfont(txt << "No items match these filters.", 96, 100, txt);
                 else {
                     u16 id = list[cursor];
-                    if (id != sprKey) { sprKey = id; string p = "BagSprites/big/"; if (id < 100) p += "0"; if (id < 10) p += "0"; p += to_string((int)id) + ".bmp"; spr.LoadFromFile(p); }
+                    if (id != sprKey) { sprKey = id; spr.LoadFromFile(BagIconPath((int)id)); }
                     top.DrawRect(42, 173, 316, 1, border, true);
                     if (spr.IsLoaded()) spr.Draw(top, 46, 176);
                     string tag = (id < 801 && bagItemPocket[id] < 5) ? string(POCKET[bagItemPocket[id]]) : string("");
@@ -2379,9 +2400,7 @@ namespace CTRPluginFramework {
                 {"Pokemon Y",        "Y",  "Y",        25, 0xD23C3C, "Gen 6", "Kalos", "Oct 2013", "Paired with X (mascot Yveltal).",     "Version-exclusive Megas differ."},
                 {"Omega Ruby",       "OR", "Omega R.",  27, 0xCC3B2E, "Gen 6", "Hoenn", "Nov 2014", "Remake of Ruby. Primal Groudon,",     "DexNav, and Soaring on Latios."},
                 {"Alpha Sapphire",   "AS", "Alpha S.",  26, 0x2A5CAA, "Gen 6", "Hoenn", "Nov 2014", "Remake of Sapphire. Primal Kyogre;",  "paired with Omega Ruby."},
-            };
-            auto RGB = [](u32 c) { return Color((u8)(c >> 16), (u8)(c >> 8), (u8)c); };
-            auto lumDark = [](u32 c) { return ((((c >> 16) & 0xFF) * 30 + ((c >> 8) & 0xFF) * 59 + (c & 0xFF) * 11) / 100) > 150; };
+            };            auto lumDark = [](u32 c) { return ((((c >> 16) & 0xFF) * 30 + ((c >> 8) & 0xFF) * 59 + (c & 0xFF) * 11) / 100) > 150; };
 
             // Optional real cover art: drop OriginGames/<tag>.bmp (e.g. X.bmp, OR.bmp) sized 58x62 on the SD.
             Image cov[8];
@@ -2864,6 +2883,61 @@ namespace CTRPluginFramework {
                         if (Controller::IsKeyPressed(Key::R)) { editCat = (editCat + 1) % 5; editField = 0; editTop = 0; n = BOX_CATS[editCat].count; }
                         if (KeyRep(Key::Up))   editField = (editField + n - 1) % n;
                         if (KeyRep(Key::Down)) editField = (editField + 1) % n;
+                        // D-pad Left/Right = quick change of the selected Main-tab field (auto-repeat).
+                        // Mirrors the Y shiny-toggle pattern: GetPokemon -> mutate -> SetPokemon -> refresh card.
+                        if (editCat == 0) {
+                            bool kl = KeyRep(Key::Left), kr = KeyRep(Key::Right); // call both so auto-repeat counters stay live
+                            int dir = kr ? 1 : (kl ? -1 : 0);
+                            if (dir != 0) {
+                                u32 ep = (u32)(uintptr_t)editScratch; PK6 sp;
+                                if (GetPokemon(ep, &sp) && sp.species >= 1 && sp.species <= 721) {
+                                    bool changed = true;
+                                    switch (editField) {
+                                        case 3: { // Level (recompute EXP via growthGroupOf/growthTable)
+                                            int lv = LevelFromExp(sp.species, sp.exp) + dir;
+                                            if (lv < 1) lv = 1; if (lv > 100) lv = 100;
+                                            int g = (sp.species < 808 && growthGroupOf[sp.species] != 0xFF) ? growthGroupOf[sp.species] : 0;
+                                            sp.exp = (u32)growthTable[lv - 1][g];
+                                            break;
+                                        }
+                                        case 4: AssignNature(&sp, ((int)sp.nature + 25 + dir) % 25); break; // 0..24 wrap
+                                        case 5: { // Gender: only when not fixed for the species; toggle M<->F
+                                            bool fixed = false; for (const auto &f : genderCannotChange) if (sp.species == f) { fixed = true; break; }
+                                            if (fixed) { changed = false; setStatus("Gender is fixed for this species"); }
+                                            else { int g = (sp.fatefulEncounterGenderForm >> 1) & 3; AssignGender(&sp, (g == 1) ? 0 : 1); }
+                                            break;
+                                        }
+                                        case 6: { // Form 0..n-1 (per species)
+                                            int n = (int)formList(sp.species).size();
+                                            if (n > 1) { int f = sp.fatefulEncounterGenderForm >> 3; AssignForm(&sp, (f + n + dir) % n); }
+                                            else { changed = false; setStatus("No alternate forms"); }
+                                            break;
+                                        }
+                                        case 8: { const int c = 191; int a = sp.ability; if (a < 1 || a > c) a = 1; // Ability 1..191 wrap
+                                                  AssignAbility(&sp, ((a - 1 + c + dir) % c) + 1); break; }
+                                        case 9: { int v = (int)sp.originalTrainerFriendship + dir; if (v < 0) v = 0; if (v > 255) v = 255; // 0..255 clamp
+                                                  sp.originalTrainerFriendship = (u8)v; AdjustFriendship(&sp, v); break; } // keep OT (shown) + HT in sync
+                                        case 10: { static const int LC[9] = {1,2,3,4,5,7,8,9,10}; // Language: valid codes (skip 6)
+                                                   int idx = 0; for (int i = 0; i < 9; i++) if (LC[i] == sp.language) { idx = i; break; }
+                                                   idx = (idx + 9 + dir) % 9; SpecifyLanguage(&sp, LC[idx]); break; }
+                                        case 11: MakeShiny(&sp, !IsShiny(&sp)); break;        // Shiny toggle
+                                        case 12: MarkAsEgg(&sp, !((sp.iv32 >> 30) & 1)); break; // Egg toggle
+                                        case 13: if (sp.infected) SetPokerusStatus(&sp, 0, 0); else SetPokerusStatus(&sp, 4, 2); break; // Pokerus toggle
+                                        case 14: { vector<int> ids; for (const Nations &c : countryList) if (c.name) ids.push_back(c.id); // Country: cycle valid ids
+                                                   if (!ids.empty()) { int idx = 0; for (size_t i = 0; i < ids.size(); i++) if (ids[i] == sp.country) { idx = (int)i; break; }
+                                                       idx = (idx + (int)ids.size() + dir) % (int)ids.size(); SetCountry(&sp, ids[idx]); }
+                                                   else changed = false; break; }
+                                        case 15: { int cr = sp.consoleRegion; if (cr < 1 || cr > 6) cr = 1; // Console Region 1..6 wrap
+                                                   cr = ((cr - 1 + 6 + dir) % 6) + 1; SetConsoleRegion(&sp, cr); break; }
+                                        default: changed = false; break; // Species/Nickname/Nicknamed?/Held Item -> A opens its picker
+                                    }
+                                    if (changed) {
+                                        SetPokemon(ep, &sp); cardKey = -1;
+                                        setStatus(string(BOX_CATS[0].fields[editField].label) + ": " + BoxFieldValue(sp, 0, editField));
+                                    }
+                                }
+                            }
+                        }
                         if (Controller::IsKeyPressed(Key::A)) {
                             editEntry.Name() = BOX_CATS[editCat].fields[editField].label;
                             gPartyMode = false; dataPointer = (u32)(uintptr_t)editScratch; // edit the working copy
@@ -2958,16 +3032,16 @@ namespace CTRPluginFramework {
                             if (r == editField) {
                                 bot.DrawRect(26, y - 2, 268, 18, bg2, true);
                                 bot.DrawSysfont(sel   << lab, 34, y, sel);
-                                bot.DrawSysfont(title << val, 290 - (int)OSD::GetTextWidth(true, val), y, title);
+                                bot.DrawSysfont(title << val, 280 - (int)OSD::GetTextWidth(true, val), y, title);
                             } else {
                                 bot.DrawSysfont(txt << lab, 34, y, txt);
-                                bot.DrawSysfont(txt << val, 290 - (int)OSD::GetTextWidth(true, val), y, txt);
+                                bot.DrawSysfont(txt << val, 280 - (int)OSD::GetTextWidth(true, val), y, txt);
                             }
                         }
                         if (editTop > 0)         bot.DrawSysfont(txt << "^", 286, 50, txt);
                         if (editTop + VIS < n)   bot.DrawSysfont(txt << "v", 286, 196, txt);
                     }
-                    string eh = "A edit  L/R tab  X tools  Y shiny  B back";
+                    string eh = "A edit  L/R tab  X tools  B back";
                     bot.DrawSysfont(txt << eh, 20 + (280 - (int)OSD::GetTextWidth(true, eh)) / 2, 204, txt);
                 }
 
@@ -3060,8 +3134,6 @@ namespace CTRPluginFramework {
             auto setFlash = [&](const string &s) { flash = s; flashTtl = 110; };
             Image spr; int sprKey = -1;
             bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
-
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
             drainKeys();
 
             while (true) {
@@ -3390,14 +3462,12 @@ namespace CTRPluginFramework {
                 return cnt ? (sum + cnt / 2) / cnt : 0;
             };
             int avg = partyAvg();
-
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
             drainKeys();
 
             bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
             Image spr; int sprKey = -1;
-            Image cover; cover.LoadFromFile("FunStuff/DICE_card.bmp");   // bigger cover for the 88x88 frame (before the first roll)
-            if (!cover.IsLoaded()) cover.LoadFromFile("FunStuff/DICE.bmp"); // fall back to the small grid tile
+            Image cover; cover.LoadFromFile("Assets/FunStuff/DICE_card.bmp");   // bigger cover for the 88x88 frame (before the first roll)
+            if (!cover.IsLoaded()) cover.LoadFromFile("Assets/FunStuff/DICE.bmp"); // fall back to the small grid tile
 
             int state = 0;                 // 0 = ready/result, 1 = rolling
             int spinSp = (int)rnd(721) + 1;// species shown on the reel
@@ -3554,19 +3624,15 @@ namespace CTRPluginFramework {
             const Color good(0x1B, 0x7A, 0x3A), bad(0xC0, 0x39, 0x2B);
             bool close = false;
             static u32 rng = 0x68E31DA4; u32 ticks = 0;
-            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };
-            auto commafy = [](int v) { string s = to_string(v < 0 ? 0 : v), o; int c = 0; for (int i = (int)s.size() - 1; i >= 0; --i) { o = string(1, s[i]) + o; if (++c % 3 == 0 && i > 0) o = "," + o; } return o; };
-            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
-            auto iconPath = [](int id) { string p = "BagSprites/big/"; if (id < 100) p += "0"; if (id < 10) p += "0"; p += to_string(id) + ".bmp"; return p; };
+            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
+            auto iconPath = [](int id) { return BagIconPath(id); };
 
             struct Tier { const char *name; int cost; u32 col; };
             static const Tier TIERS[3] = {
                 {"Common",   200, 0x5DA130},
                 {"Rare",     600, 0x2E6CC4},
                 {"Premium", 1500, 0xC8902E},
-            };
-            auto RGB = [](u32 c) { return Color((u8)(c >> 16), (u8)(c >> 8), (u8)c); };
-            auto bright = [](u32 c) { return ((((c >> 16) & 0xFF) * 30 + ((c >> 8) & 0xFF) * 59 + (c & 0xFF) * 11) / 100) > 150; };
+            };            auto bright = [](u32 c) { return ((((c >> 16) & 0xFF) * 30 + ((c >> 8) & 0xFF) * 59 + (c & 0xFF) * 11) / 100) > 150; };
 
             // ONE pool of all loot-eligible priced items. EXCLUDE TM/HM (pocket 3) and Key Items (pocket 4) so a
             // loot drop can never hand out a story/progression item; only Items/Medicines/Berries (0/1/2). Tiers no
@@ -3574,13 +3640,11 @@ namespace CTRPluginFramework {
             static int fpool[400]; int nf = 0;
             for (int i = 0; i < bagItemCount && nf < 400; i++) { int id = bagItemList[i]; if (id <= 0 || id >= 801) continue; int pk = bagItemPocket[id]; if (pk != 0 && pk != 1 && pk != 2) continue; if (bagItemCost[id] <= 0) continue; fpool[nf++] = id; }
 
-            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
-            drainKeys();
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();            drainKeys();
 
             Image ico; int icoKey = -1;
             // 88x88 tier chest art for the mystery box: FunStuff/LOOT_0..2.bmp (Common/Rare/Premium). Fallback = colored box + "?".
-            Image lootImg[3]; for (int i = 0; i < 3; i++) lootImg[i].LoadFromFile("FunStuff/LOOT_" + to_string(i) + ".bmp");
+            Image lootImg[3]; for (int i = 0; i < 3; i++) lootImg[i].LoadFromFile("Assets/FunStuff/LOOT_" + to_string(i) + ".bmp");
             int tier = 0, btn = 0;
             bool opened = false; int wonId = 0; // opened == an item is revealed and PENDING a claim (SELL / ADD TO BAG)
             string flash; int flashTtl = 0;
@@ -3733,9 +3797,7 @@ namespace CTRPluginFramework {
             const Color good(0x1B, 0x7A, 0x3A), bad(0xC0, 0x39, 0x2B);
             bool close = false;
             static u32 rng = 0x9E3779B1; u32 ticks = 0;
-            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };
-            auto commafy = [](int v) { string s = to_string(v < 0 ? 0 : v), o; int c = 0; for (int i = (int)s.size() - 1; i >= 0; --i) { o = string(1, s[i]) + o; if (++c % 3 == 0 && i > 0) o = "," + o; } return o; };
-            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
+            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
 
             // collect the player's valid party species (your side draws from these)
             int party[6], nParty = 0;
@@ -3743,9 +3805,7 @@ namespace CTRPluginFramework {
               if (base) for (int i = 0; i < 6; i++) { PK6 pk; u32 p = base + i * 0x104; bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk); if (ok && pk.species >= 1 && pk.species <= 721) party[nParty++] = pk.species; } }
             static const char *STAT[6] = {"HP", "Atk", "Def", "SpA", "SpD", "Spe"};
 
-            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
-            drainKeys();
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();            drainKeys();
 
             Image sprL, sprR; int keyL = -1, keyR = -1;
             int statIdx = 1, bet = 500;
@@ -3864,11 +3924,7 @@ namespace CTRPluginFramework {
             const bool isORAS = (currGameSeries == GameSeries::ORAS);
             bool close = false;
             static u32 rng = 0x9E3779B1; u32 ticks = 0;
-            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };
-            auto commafy = [](int v) { string s = to_string(v < 0 ? 0 : v), o; int c = 0; for (int i = (int)s.size() - 1; i >= 0; --i) { o = string(1, s[i]) + o; if (++c % 3 == 0 && i > 0) o = "," + o; } return o; };
-            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
-            auto RGB = [](u32 c) { return Color((u8)(c >> 16), (u8)(c >> 8), (u8)c); };
-            auto bright = [](u32 c) { return ((((c >> 16) & 0xFF) * 30 + ((c >> 8) & 0xFF) * 59 + (c & 0xFF) * 11) / 100) > 150; };
+            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };            auto bright = [](u32 c) { return ((((c >> 16) & 0xFF) * 30 + ((c >> 8) & 0xFF) * 59 + (c & 0xFF) * 11) / 100) > 150; };
 
             enum Kind { K_CASH, K_ITEM, K_SPAWN, K_JACK, K_LOSE, K_CURSE };
             struct Seg { Kind kind; int mult; const char *label; u32 col; int weight; };   // mult = x(bet) for cash/jackpot/lose
@@ -3903,14 +3959,12 @@ namespace CTRPluginFramework {
             };
             int avg = partyAvg();
 
-            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
-            drainKeys();
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();            drainKeys();
 
             // 60x60 wheel-segment icons FunStuff/WHEEL_0..5.bmp (index = Kind); fallback = colored box + label.
-            Image wheelImg[6]; for (int i = 0; i < 6; i++) wheelImg[i].LoadFromFile("FunStuff/WHEEL_" + to_string(i) + ".bmp");
+            Image wheelImg[6]; for (int i = 0; i < 6; i++) wheelImg[i].LoadFromFile("Assets/FunStuff/WHEEL_" + to_string(i) + ".bmp");
             Image rIco; int rIcoKey = -1;   // result sprite: the won ITEM (bag icon) or the SPAWN Pokemon
-            auto iconPath = [](int id) { string p = "BagSprites/big/"; if (id < 100) p += "0"; if (id < 10) p += "0"; p += to_string(id) + ".bmp"; return p; };
+            auto iconPath = [](int id) { return BagIconPath(id); };
 
             int cur = 0;                 // center segment under the pointer
             int state = 0;               // 0 = idle/result, 1 = spinning
@@ -4058,20 +4112,14 @@ namespace CTRPluginFramework {
             const Color good(0x1B, 0x7A, 0x3A), bad(0xC0, 0x39, 0x2B);
             bool close = false;
             static u32 rng = 0x1F123BB5; u32 ticks = 0;
-            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };
-            auto commafy = [](int v) { string s = to_string(v < 0 ? 0 : v), o; int c = 0; for (int i = (int)s.size() - 1; i >= 0; --i) { o = string(1, s[i]) + o; if (++c % 3 == 0 && i > 0) o = "," + o; } return o; };
-            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
-            auto RGB = [](u32 c) { return Color((u8)(c >> 16), (u8)(c >> 8), (u8)c); };
-
+            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
             struct Sym { const char *s; u32 col; };   // fallback text/color if the BMP icon is missing
             static const Sym SYM[6] = { {"7", 0xD4AF37}, {"BALL", 0xCC3B2E}, {"CHRY", 0xC0392B}, {"PIKA", 0xE0B000}, {"STAR", 0x7038F8}, {"BELL", 0x16A085} };
 
-            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
-            drainKeys();
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();            drainKeys();
 
             // 64x64 reel icons (Game Corner set): FunStuff/SLOT_0..5.bmp (0=7=jackpot). Fallback = colored box + tag.
-            Image slotImg[6]; for (int i = 0; i < 6; i++) slotImg[i].LoadFromFile("FunStuff/SLOT_" + to_string(i) + ".bmp");
+            Image slotImg[6]; for (int i = 0; i < 6; i++) slotImg[i].LoadFromFile("Assets/FunStuff/SLOT_" + to_string(i) + ".bmp");
 
             int reel[3] = {0, 2, 4};
             int bet = 100, payout = 0;
@@ -4181,18 +4229,14 @@ namespace CTRPluginFramework {
             const Color good(0x1B, 0x7A, 0x3A), bad(0xC0, 0x39, 0x2B);
             bool close = false;
             static u32 rng = 0xB5297A4D; u32 ticks = 0;
-            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };
-            auto commafy = [](int v) { string s = to_string(v < 0 ? 0 : v), o; int c = 0; for (int i = (int)s.size() - 1; i >= 0; --i) { o = string(1, s[i]) + o; if (++c % 3 == 0 && i > 0) o = "," + o; } return o; };
-            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
-            auto iconPath = [](int id) { string p = "BagSprites/big/"; if (id < 100) p += "0"; if (id < 10) p += "0"; p += to_string(id) + ".bmp"; return p; };
+            auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
+            auto iconPath = [](int id) { return BagIconPath(id); };
 
             // pool of priced items (cost > 0)
             static int pool[600]; int nPool = 0;
             for (int i = 0; i < bagItemCount && nPool < 600; i++) { int id = bagItemList[i]; if (id > 0 && id < 801 && bagItemCost[id] > 0) pool[nPool++] = id; }
 
-            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
-            drainKeys();
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();            drainKeys();
 
             Image icoA, icoB; int keyA = -1, keyB = -1;
             int curId = nPool ? pool[rnd(nPool)] : 0, nextId = 0;
@@ -4318,9 +4362,7 @@ namespace CTRPluginFramework {
             bool close = false;
             static u32 rng = 0xC2B2AE35; u32 ticks = 0;
             auto rnd = [&](u32 n) { rng = rng * 1103515245u + 12345u; return n ? ((rng >> 16) % n) : 0u; };
-            auto rnd32 = [&]() -> u32 { rng = rng * 1103515245u + 12345u; u32 a = rng; rng = rng * 1103515245u + 12345u; return (a & 0xFFFF0000u) | (rng >> 16); };
-            auto commafy = [](int v) { string s = to_string(v < 0 ? 0 : v), o; int c = 0; for (int i = (int)s.size() - 1; i >= 0; --i) { o = string(1, s[i]) + o; if (++c % 3 == 0 && i > 0) o = "," + o; } return o; };
-            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
+            auto rnd32 = [&]() -> u32 { rng = rng * 1103515245u + 12345u; u32 a = rng; rng = rng * 1103515245u + 12345u; return (a & 0xFFFF0000u) | (rng >> 16); };            auto ctrX = [&](const string &s) { return 30 + (340 - (int)OSD::GetTextWidth(true, s)) / 2; };
 
             const int FEE = 2000;
             const u32 boxBase = AutoGameSet((u32)0x8C861C8, (u32)0x8C9E134);
@@ -4328,9 +4370,7 @@ namespace CTRPluginFramework {
 
             // exp for an exact level: invert LevelFromExp's growthType/growthTable (no new data).
             auto expForLevel = [&](u16 sp, int lvl) -> u32 {
-                int type = 0;
-                for (size_t t = 0; t < growthType.size(); ++t)
-                    if (find(growthType[t].begin(), growthType[t].end(), (int)sp) != growthType[t].end()) { type = (int)t; break; }
+                int type = (sp < 808 && growthGroupOf[sp] != 0xFF) ? growthGroupOf[sp] : 0;
                 if (lvl < 1) lvl = 1; if (lvl > 100) lvl = 100;
                 return (u32)growthTable[lvl - 1][type];
             };
@@ -4389,9 +4429,7 @@ namespace CTRPluginFramework {
                 pk.originalTrainerFriendship = 70;
             };
 
-            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
-            drainKeys();
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();            drainKeys();
 
             int boxSel = 0, mode = 0;   // boxSel 0-indexed (display +1); mode 0 RANDOM/1 COMP/2 MATCH/3 GAUNTLET
             static const char *MODEN[4] = {"RANDOM", "COMPETITIVE", "MATCH TEAM", "GAUNTLET"};
@@ -4532,19 +4570,14 @@ namespace CTRPluginFramework {
             Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
             Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
             const Color good(0x1B, 0x7A, 0x3A);   // readable green for the Money value (matches the other minigames)
-            auto RGB = [](u32 c) { return Color((u8)(c >> 16), (u8)(c >> 8), (u8)c); };
             auto bright = [](u32 c) { return ((((c >> 16) & 0xFF) * 30 + ((c >> 8) & 0xFF) * 59 + (c & 0xFF) * 11) / 100) > 150; };
-            auto commafy = [](int v) { string s = to_string(v < 0 ? 0 : v), o; int c = 0; for (int i = (int)s.size() - 1; i >= 0; --i) { o = string(1, s[i]) + o; if (++c % 3 == 0 && i > 0) o = "," + o; } return o; };
-
             int cursor = 0;
-            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
-            drainKeys();
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();            drainKeys();
 
             // Optional per-game art: drop FunStuff/<tag>.bmp (50x54, 24-bit) on the SD - e.g. DICE.bmp, LOOT.bmp.
             // If present it replaces the colored tile; if missing, the tile falls back to a colored box + tag text.
             Image cov[7];
-            for (int i = 0; i < 7; i++) cov[i].LoadFromFile(string("FunStuff/") + FUN_GAMES[i].tag + ".bmp");
+            for (int i = 0; i < 7; i++) cov[i].LoadFromFile(string("Assets/FunStuff/") + FUN_GAMES[i].tag + ".bmp");
 
             auto launch = [&](int i) -> bool {   // returns true if the game asked to close the plugin (FIGHT!)
                 bool close = false;
@@ -4703,12 +4736,8 @@ namespace CTRPluginFramework {
             int scroll = 0;    // detail-list scroll (rows)
             int focus = 0;     // item row focus
             string flash; int flashTtl = 0;
-            auto setFlash = [&](const string &s) { flash = s; flashTtl = 110; };
-            auto commafy = [](int v) { string s = to_string(v < 0 ? 0 : v), o; int c = 0; for (int i = (int)s.size() - 1; i >= 0; --i) { o = string(1, s[i]) + o; if (++c % 3 == 0 && i > 0) o = "," + o; } return o; };
-            Image spr; int sprKey = -1;
+            auto setFlash = [&](const string &s) { flash = s; flashTtl = 110; };            Image spr; int sprKey = -1;
             bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
-
-            auto drainKeys = [&]() { while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); } };
             drainKeys();
 
             // Greedy word-wrap into a (color,line) list.
@@ -5193,11 +5222,10 @@ namespace CTRPluginFramework {
             auto processLevel = [&](PK6 &data) -> bool {
                 if (KeyboardHandler<u8>::Set(entry->Name() + " (1-100):", true, false, 3, level, 0, 1, 100, Callback<u8>)) {
                     // Update level based on growth rates
-                    for (const auto &rate : growthType) {
-                        if (find(rate.begin(), rate.end(), data.species) != rate.end()) {
-                            AssignExperience(&data, level, distance(growthType.begin(), find(growthType.begin(), growthType.end(), rate)));
-                            return true; // Successfully processed
-                        }
+                    int g = (data.species < 808) ? growthGroupOf[data.species] : 0xFF;
+                    if (g != 0xFF) {
+                        AssignExperience(&data, level, g);
+                        return true; // Successfully processed
                     }
                 }
 
