@@ -8,7 +8,7 @@
     "sheet": "gen6ctrpf.t3x",
     "sheetURL": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.t3x",
     "version": 4,
-    "revision": 5
+    "revision": 6
   },
   "storeContent": [
     {
@@ -28,7 +28,7 @@
         {
           "type": "downloadRelease",
           "repo": "samaBR85/Gen6CTRPFrameworkOverhauled",
-          "file": "Gen6CTRPluginFramework.zip",
+          "file": "Gen6CTRPluginFramework-unistore.zip",
           "output": "sdmc:/gen6ctrpf.zip",
           "message": "Downloading the latest Gen6 CTRPF Overhauled (~90 MB)..."
         },
