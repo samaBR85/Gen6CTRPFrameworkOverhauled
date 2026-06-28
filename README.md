@@ -225,6 +225,23 @@ A short history, newest last — no detail, just the shape of it:
 
 > 💻 **Also works on Citra emulator** — see the [On Citra](#on-citra) section below.
 
+### ⚡ Easiest: install & update via Universal-Updater (QR code)
+
+If you have [Universal-Updater](https://github.com/Universal-Team/Universal-Updater) on your 3DS, you can install
+**and** keep the plugin updated without a PC:
+
+<p align="center">
+  <img src="unistore/gen6ctrpf-qr.png" width="160" alt="Universal-Updater UniStore QR code" />
+</p>
+
+1. Open **Universal-Updater** → tap the **gear (Settings)** → **Select UniStore** → **+** → **Scan QR Code** and point it at the code above.
+2. Open the **Gen6 CTRPF Overhauled** entry → run **Download (latest)**.
+3. It downloads the latest release (~90 MB) and extracts everything to your SD card root automatically — all four games + the language pack. Done.
+
+Re-run **Download (latest)** anytime to grab the newest version. *(3DS hardware only — Universal-Updater isn't available on Citra; use the manual steps below for Citra.)*
+
+### Manual install
+
 1. Update to the latest [Luma3DS](https://github.com/LumaTeam/Luma3DS/releases/latest).
 2. Download the latest [release](https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/latest).
 3. Extract the `.zip` to the **root of your SD card**, keeping its folder layout. It adds two folders:
