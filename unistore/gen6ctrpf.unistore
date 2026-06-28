@@ -5,28 +5,22 @@
     "description": "Pokemon X/Y/OR/AS plugin - spawner, PokeMart anywhere, PC Box++, in-battle tools, teleport, mini-games, 25 themes, 7 languages.",
     "url": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.unistore",
     "file": "gen6ctrpf.unistore",
-    "version": 3,
-    "revision": 2
+    "version": 4,
+    "revision": 3
   },
   "storeContent": [
     {
       "info": {
         "title": "Gen6 CTRPF Overhauled",
-        "author": "samaBR85 (base: biometrix76)",
+        "author": "samaBR85",
         "description": "Installs the plugin and its data folder to the SD root for all four Gen 6 games (X / Y / Omega Ruby / Alpha Sapphire). One .3gx auto-detects the game. Save the game in-plugin to keep changes.",
-        "version": "0.5.0",
-        "category": ["Cheats"],
+        "category": ["game"],
         "console": ["3DS"],
-        "title_ids": [
-          "0004000000055D00",
-          "0004000000055E00",
-          "000400000011C400",
-          "000400000011C500"
-        ],
-        "wiki": "https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/wiki",
-        "last_updated": "2026-06-28"
+        "last_updated": "2026-06-28 at 16:00 (UTC)",
+        "license": "gpl-3.0",
+        "version": "0.5.0"
       },
-      "Download (latest)": [
+      "Download": [
         {
           "type": "downloadRelease",
           "repo": "samaBR85/Gen6CTRPFrameworkOverhauled",
