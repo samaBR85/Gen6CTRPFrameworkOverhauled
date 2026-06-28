@@ -711,7 +711,7 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">Nintendo 3DS &amp; Azahar &bull; v0.5.0</div>
+  <div class="hero-badge">Nintendo 3DS &amp; Azahar &bull; v0.6.0</div>
   <h1>
     <span class="hl">Gen6</span> CTRPlugin<br/>
     <span class="hl2">Framework</span> Overhauled
@@ -742,7 +742,7 @@
       <div class="stat-label" data-i18n="stat_dl">Total Downloads</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">v0.5.0</div>
+      <div class="stat-num">v0.6.0</div>
       <div class="stat-label" data-i18n="stat_version">Latest Version</div>
     </div>
     <div class="stat-item">
@@ -993,6 +993,11 @@
     </div>
     <div class="screenshots-grid">
       <div class="screenshot-item fade-in" onclick="openLightbox(this)">
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/Screenshots/v0.6.0/o_power_center.png"
+             alt="O-Power Center — the visual O-Power panel" loading="lazy" />
+        <div class="screenshot-caption">O-Power Center (new in v0.6.0)</div>
+      </div>
+      <div class="screenshot-item fade-in" onclick="openLightbox(this)">
         <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/Screenshots/v0.3.3/export/01_menu.png"
              alt="The main menu over the game" loading="lazy" />
         <div class="screenshot-caption">The main menu</div>
@@ -1116,7 +1121,11 @@
     </div>
     <ul class="history-list fade-in" style="max-width:680px;margin:0 auto;list-style:none;padding:0;">
       <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
-        <span style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;flex:0 0 56px;">v0.5.0</span>
+        <span style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;flex:0 0 56px;">v0.6.0</span>
+        <span style="color:var(--text);" data-i18n="hist_060">The O-Power Center — a visual panel for all 18 O-Powers and the charge gauge (one-tap Refill, Max All, and a Keep toggle for no recharge wait).</span>
+      </li>
+      <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
+        <span style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;flex:0 0 56px;">v0.5.0</span>
         <span style="color:var(--text);" data-i18n="hist_050">Multi-game release — tailored content (guides + assets) for all four Gen 6 titles (X, Y, Omega Ruby, Alpha Sapphire), a full Kalos teleport map, and the whole UI in 7 languages.</span>
       </li>
       <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
@@ -1204,15 +1213,15 @@
           <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>
           Latest Release
         </div>
-        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.5.0</div>
+        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.6.0</div>
         <div class="dl-meta">
-          Released <span>June 26, 2026</span> &bull;
+          Released <span>June 28, 2026</span> &bull;
           Platform <span>Nintendo 3DS (3gx)</span> &bull;
           License <span>GNU GPL-3.0</span>
         </div>
         <div class="dl-buttons">
-          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.5.0/Gen6CTRPluginFramework-v0.5.0.zip" target="_blank" rel="noopener">
-            ⬇ Download v0.5.0 (.zip)
+          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.6.0/Gen6CTRPluginFramework-v0.6.0.zip" target="_blank" rel="noopener">
+            ⬇ Download v0.6.0 (.zip)
           </a>
           <a class="btn-secondary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases" target="_blank" rel="noopener">
             All Releases
@@ -1226,6 +1235,12 @@
     </div>
 
     <div class="releases-list fade-in">
+      <div class="release-row">
+        <span class="release-tag">v0.6.0</span>
+        <span class="release-date">Jun 28, 2026</span>
+        <span class="release-downloads" id="dl-v060">Loading…</span>
+        <a class="release-link" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.6.0/Gen6CTRPluginFramework-v0.6.0.zip" target="_blank" rel="noopener">Download</a>
+      </div>
       <div class="release-row">
         <span class="release-tag">v0.5.0</span>
         <span class="release-date">Jun 26, 2026</span>
@@ -1391,6 +1406,7 @@
         release.assets.forEach(asset => { total += asset.download_count; });
       });
 
+      const v060 = data.find(r => r.tag_name === 'v0.6.0');
       const v050 = data.find(r => r.tag_name === 'v0.5.0');
       const v033 = data.find(r => r.tag_name === 'v0.3.3');
       const v032 = data.find(r => r.tag_name === 'v0.3.2');
@@ -1399,6 +1415,7 @@
       const v021 = data.find(r => r.tag_name === 'v0.2.1');
       const v020 = data.find(r => r.tag_name === 'v0.2.0');
 
+      const count060 = v060 ? v060.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count050 = v050 ? v050.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count033 = v033 ? v033.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count032 = v032 ? v032.assets.reduce((s, a) => s + a.download_count, 0) : 0;
@@ -1410,6 +1427,7 @@
       animateCount('total-downloads', total);
       animateCount('download-count', total);
 
+      const el060 = document.getElementById('dl-v060');
       const el050 = document.getElementById('dl-v050');
       const el033 = document.getElementById('dl-v033');
       const el032 = document.getElementById('dl-v032');
@@ -1417,6 +1435,7 @@
       const el030 = document.getElementById('dl-v030');
       const el021 = document.getElementById('dl-v021');
       const el020 = document.getElementById('dl-v020');
+      if (el060) el060.textContent = count060 + ' downloads';
       if (el050) el050.textContent = count050 + ' downloads';
       if (el033) el033.textContent = count033 + ' downloads';
       if (el032) el032.textContent = count032 + ' downloads';
@@ -1425,7 +1444,7 @@
       if (el021) el021.textContent = count021 + ' downloads';
       if (el020) el020.textContent = count020 + ' downloads';
     } catch (e) {
-      const els = ['total-downloads','download-count','dl-v050','dl-v033','dl-v032','dl-v031','dl-v030','dl-v021','dl-v020'];
+      const els = ['total-downloads','download-count','dl-v060','dl-v050','dl-v033','dl-v032','dl-v031','dl-v030','dl-v021','dl-v020'];
       els.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = '–';
@@ -1558,6 +1577,7 @@
     hist_030: "Os localizadores de tela dupla (Wild Pokémon Spawner, Respawn Legendary) e o App Guide.",
     hist_031: "PokéMart Anywhere — uma loja real na bag com preços, carrinho e checkout — mais ordenar a bag.",
     hist_032: "Capturar a própria UI do plugin; favoritos, cheats e hotkeys sobrevivem a uma atualização.",
+    hist_060: "O O-Power Center — um painel visual de todos os 18 O-Powers e do medidor de cargas (Refill com um toque, Max All, e um toggle Keep pra não esperar recarga).",
     hist_050: "Versão multi-jogo — conteúdo dedicado (guias + assets) para os quatro títulos Gen 6 (X, Y, Omega Ruby, Alpha Sapphire), um mapa de teleporte completo de Kalos, e toda a UI em 7 idiomas.",
     hist_042: "O Teletransporte renasceu — um seletor de lugares em duas telas com um Map navegável e um grid-overview de todos os lugares, seus próprios warp points salvos (MyTeleport.txt), e as pastas do plugin organizadas em Assets/.",
     hist_033: "In-Battle Tools (Enemy Helper, Change Party Stats), o editor visual PC Box ++, e o Mini Game Corner.",
