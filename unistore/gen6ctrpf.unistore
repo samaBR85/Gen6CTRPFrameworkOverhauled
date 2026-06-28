@@ -1,0 +1,55 @@
+{
+  "storeInfo": {
+    "title": "Gen6 CTRPF Overhauled",
+    "author": "samaBR85",
+    "description": "Pokemon X/Y/OR/AS plugin - spawner, PokeMart anywhere, PC Box++, in-battle tools, teleport, mini-games, 25 themes, 7 languages.",
+    "url": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.unistore",
+    "file": "gen6ctrpf.unistore",
+    "sheet": "gen6ctrpf.t3x",
+    "sheetURL": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.t3x",
+    "version": 3,
+    "revision": 1
+  },
+  "storeContent": [
+    {
+      "info": {
+        "title": "Gen6 CTRPF Overhauled",
+        "author": "samaBR85 (base: biometrix76)",
+        "description": "Installs the plugin and its data folder to the SD root for all four Gen 6 games (X / Y / Omega Ruby / Alpha Sapphire). One .3gx auto-detects the game. Save the game in-plugin to keep changes.",
+        "version": "0.5.0",
+        "category": ["Cheats"],
+        "console": ["3DS"],
+        "icon_index": 0,
+        "title_ids": [
+          "0004000000055D00",
+          "0004000000055E00",
+          "000400000011C400",
+          "000400000011C500"
+        ],
+        "wiki": "https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/wiki",
+        "last_updated": "2026-06-28"
+      },
+      "Download (latest)": [
+        {
+          "type": "downloadRelease",
+          "repo": "samaBR85/Gen6CTRPFrameworkOverhauled",
+          "file": "Gen6CTRPluginFramework.zip",
+          "output": "sdmc:/gen6ctrpf.zip",
+          "message": "Downloading the latest Gen6 CTRPF Overhauled (~90 MB)..."
+        },
+        {
+          "type": "extractFile",
+          "file": "sdmc:/gen6ctrpf.zip",
+          "input": "",
+          "output": "sdmc:/",
+          "message": "Extracting plugin + data to the SD root..."
+        },
+        {
+          "type": "deleteFile",
+          "file": "sdmc:/gen6ctrpf.zip",
+          "message": "Cleaning up..."
+        }
+      ]
+    }
+  ]
+}
