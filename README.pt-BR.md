@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.6.1
+# Gen6CTRPluginFrameworkOverhauled — v0.6.2
 
 [English](README.md) · **Português**
 
@@ -223,6 +223,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.5.0** — **multi-jogo**: conteúdo dedicado para os quatro títulos Gen 6 (X, Y, Omega Ruby, Alpha Sapphire), um mapa de teleporte completo de Kalos, e a UI em **7 idiomas**.
 - **v0.6.0** — o **O-Power Center**: um painel visual de todos os 18 O-Powers e do medidor de cargas (Refill com um toque, Max All, e um toggle Keep pra não esperar recarga).
 - **v0.6.1** — **RNG Tracking**: leia o RNG do jogo ao vivo no HUD (TSV, current seed, frame, egg seed) pra shiny hunting e RNG abuse — além de novos campos de HUD (item segurado, encontros, passos da sessão), **Max DexNav Search Lv.**, **Health & Mana**, e o **Language** movido pra Tools.
+- **v0.6.2** — **RNG Tracking++**: a **initial seed** agora é capturada ao vivo no console (pro 3DSRNGTool realmente prever seus shinies), o **frame** é a contagem absoluta de advances, um contador **Target frame** com dica de paridade acerta o timing, um toggle **Freeze** segura o HUD inteiro pra copiar os valores, o RNG de selvagem **TinyMT** (estado + advances) aparece no formato copy‑ready `[3][2]/[1][0]`, e mais o **TRV** — tudo num layout estilo PokeReader.
 
 ## 📥 Instalando
 
@@ -309,6 +310,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - [dragonfyre173](https://github.com/dragonfyre173) — o overlay de visualização de dados em jogo
 - [JourneyOver](https://github.com/JourneyOver) et al. — o extenso [banco de códigos ActionReplay](https://github.com/JourneyOver/CTRPF-AR-CHEAT-CODES)
 - [Alexander Hartmann](https://github.com/Hartie95) — a base de XY & ORAS deste plugin
+- [3DSRNGTool](https://github.com/wwwwwwzx/3DSRNGTool) (wwwwwwzx) e [PokeReader](https://github.com/zaksabeast/PokeReader) (zaksabeast) — as referências de RNG de Gen 6 por trás do **RNG Tracking** (leitura ao vivo de seed / frame / TID·SID e a técnica de captura da initial seed)
 
 **Fontes de imagem & dados** (para o Spawner, o localizador de itens e os dados da Pokédex)
 - **Sprites de Pokémon** — os sprites do Spawner e os ícones de Lendários são reduzidos do conjunto de sprites X/Y do
@@ -331,7 +333,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.6.1 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.6.2 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença

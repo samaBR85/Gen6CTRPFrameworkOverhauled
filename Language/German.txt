@@ -451,6 +451,10 @@ NOTE_HUD_ITEM :: Zeigt das getragene Item deines ersten Pokémon im HUD ('-' wen
 NOTE_HUD_ENC :: Zählt die in dieser Sitzung begonnenen Kämpfe - praktisch für die Schillernd-Jagd.\n\nDrücke das Editor-Tastenkürzel (Standard START) auf diesem Eintrag zum Zurücksetzen.
 NOTE_HUD_STEPS :: Zählt die in dieser Sitzung gelaufenen Schritte.\n\nDrücke das Editor-Tastenkürzel (Standard START) auf diesem Eintrag zum Zurücksetzen.
 MENU_HUD_RNGHDR :: RNG Tracking
+MENU_HUD_FREEZE :: Freeze
+FAV_HUD_FREEZE :: Freeze
+NOTE_HUD_FREEZE :: Hält alle HUD-Werte fest (ein Snapshot), damit du sie abschreiben kannst — wie die X+Y-Sperre in PokeReader. Aus = wieder live.
+HUD_FROZEN_TAG :: — EINGEFROREN —
 MENU_HUD_SEED :: Initial seed
 FAV_HUD_SEED :: Initial seed
 MENU_HUD_FRAME :: Current seed
@@ -460,15 +464,38 @@ FAV_HUD_ADV :: Frame
 HUD_SEED :: iSeed: %08X
 HUD_FRAME :: cSeed: %08X
 HUD_ADV :: Frame: %lu
-NOTE_HUD_SEED :: Der "Initial Seed" beim Start lässt sich auf dem 3DS nicht live auslesen (zeigt ----). Lies stattdessen "Current seed" und lass ihn von 3DSTimeFinder / 3DSRNGTool am PC finden.
+NOTE_HUD_SEED :: Der "initial seed" deines Spiels - die Zahl hinter jedem Zufallsergebnis dieser Sitzung. Wird nach einem Soft-Reset erfasst (zeigt vorher ----). Gib ihn in 3DSRNGTool am PC ein, um ein Shiny zu planen.
 NOTE_HUD_FRAME :: Der RNG-Wert gerade jetzt (der "current seed"). Er ändert sich, wenn das Spiel weiterzählt, und bleibt stehen, wenn du stehst.
-NOTE_HUD_ADV :: Die aktuelle RNG-"Frame" (wie weit sie seit Beobachtungsbeginn gezählt hat). Beim RNG triffst du eine Ziel-Frame.
+NOTE_HUD_ADV :: Der RNG-"frame" - die absolute Zahl der Advances seit dem initial seed. RNG-Jäger timen ihre Aktion auf einen Ziel-Frame. Zeigt ----, bis der Seed erfasst ist.
 MENU_HUD_EGG :: Egg seed
 FAV_HUD_EGG :: Egg seed
 HUD_EGG :: Egg: %08X
 HUD_SEED_PENDING :: iSeed: ----
 NOTE_HUD_EGG :: Der "Egg Seed" - der RNG-Schnappschuss des Spielstands, für Zucht- / Pensions-RNG (z. B. PKSeed). Aktualisiert beim Speichern.
-MENU_HUD_TSV :: TSV
-FAV_HUD_TSV :: TSV
-HUD_TSV :: TSV: %u
-NOTE_HUD_TSV :: Dein "TSV" (Trainer Shiny Value). Ein Ei oder Treffen ist für dich schillernd, wenn sein PSV passt. Wichtig fürs RNG.
+MENU_HUD_TSV :: TSV / TRV
+FAV_HUD_TSV :: TSV / TRV
+HUD_TSV :: TSV:%u TRV:%X
+NOTE_HUD_TSV :: Dein "TSV" (Trainer Shiny Value) und "TRV" in einer Zeile. Ein Ei oder Encounter ist für dich schillernd, wenn sein PSV zum TSV passt. Für RNG brauchst du den TSV; TRV ist ein Gen-8+-Extra.
+MENU_HUD_TRV :: TRV
+FAV_HUD_TRV :: TRV
+HUD_TRV :: TRV: %X
+NOTE_HUD_TRV :: Dein "TRV" (Trainer Random Value) - die unteren 4 Bit von TID^SID. Eine Ergänzung zum TSV, die manche RNG-Tools verlangen.
+MENU_HUD_TINYST :: TinyMT state
+FAV_HUD_TINYST :: TinyMT state
+HUD_TINYST :: [3]%08X [2]%08X
+HUD_TINYST2 :: [1]%08X [0]%08X
+NOTE_HUD_TINYST :: Der Live-TinyMT-Status (4 Wörter) - der zweite RNG, der wilde Begegnungen, Synchronisation, versteckte Fähigkeit und Horden bestimmt. Gib ihn an 3DSRNGTool für Wild-RNG.
+MENU_HUD_TINYADV :: TinyMT adv
+FAV_HUD_TINYADV :: TinyMT adv
+HUD_TINYADV :: tAdv: %lu
+NOTE_HUD_TINYADV :: Wie weit der Wild-Begegnungs-RNG (TinyMT) seit Beobachtungsbeginn vorgerückt ist. Damit timest du ein wildes Ziel.
+HUD_ADV_PENDING :: Frame: ----
+MENU_HUD_TARGET :: Target frame
+FAV_HUD_TARGET :: Target frame
+HUD_TARGET :: Tgt:%+ld %s
+HUD_TARGET_PENDING :: Tgt: ----
+HUD_PARITY_OK :: ok
+HUD_PARITY_NO :: FLIP
+HUD_TARGET_SET :: Target: %lu
+NOTE_HUD_TARGET :: Lege den Ziel-Frame fest, den 3DSRNGTool dir gegeben hat (drück die Editor-Taste, Standard START, auf diesem Eintrag). Das HUD zeigt, wie viele Frames noch fehlen und ob die Parität passt, damit du ihn mit Select triffst.
+HUD_TARGET_PROMPT :: Ziel-Frame:

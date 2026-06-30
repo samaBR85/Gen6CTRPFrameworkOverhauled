@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.6.1
+# Gen6CTRPluginFrameworkOverhauled — v0.6.2
 
 **English** · [Português](README.pt-BR.md)
 
@@ -222,6 +222,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.5.0** — **multi-game**: tailored content for all four Gen 6 titles (X, Y, Omega Ruby, Alpha Sapphire), a full Kalos teleport map, and the UI in **7 languages**.
 - **v0.6.0** — the **O-Power Center**: a visual panel for all 18 O-Powers and the charge gauge (one-tap Refill, Max All, and a Keep toggle for no recharge wait).
 - **v0.6.1** — **RNG Tracking**: read your game's RNG live on the HUD (TSV, current seed, frame, egg seed) for shiny hunting and RNG abuse — plus new HUD fields (held item, encounters, session steps), **Max DexNav Search Lv.**, **Health & Mana**, and **Language** moved into Tools.
+- **v0.6.2** — **RNG Tracking++**: the on‑device **initial seed** is now captured live (so 3DSRNGTool can actually predict your shinies), **frame** is the true advance count, a **Target frame** countdown with a parity hint nails the timing, a **Freeze** toggle holds the whole HUD still to copy values down, the **TinyMT** wild‑encounter RNG (state + advances) shows in copy‑ready `[3][2]/[1][0]` form, plus **TRV** — all in a PokeReader‑style layout.
 
 ## 📥 Installing
 
@@ -308,6 +309,7 @@ This project stands on a long line of volunteer work — from the very first anc
 - [dragonfyre173](https://github.com/dragonfyre173) — the in-game data viewer overlay
 - [JourneyOver](https://github.com/JourneyOver) et al. — the extensive [ActionReplay code database](https://github.com/JourneyOver/CTRPF-AR-CHEAT-CODES)
 - [Alexander Hartmann](https://github.com/Hartie95) — the XY & ORAS foundation of this plugin
+- [3DSRNGTool](https://github.com/wwwwwwzx/3DSRNGTool) (wwwwwwzx) and [PokeReader](https://github.com/zaksabeast/PokeReader) (zaksabeast) — the Gen 6 RNG references behind **RNG Tracking** (live seed / frame / TID·SID reads and the initial-seed capture technique)
 
 **Image & data sources** (for the Spawner, item finder and Pokédex data)
 - **Pokémon sprites** — the Spawner sprites and Legendary icons are downscaled from the
@@ -330,7 +332,7 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.6.1 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.6.2 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

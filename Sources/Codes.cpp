@@ -10,6 +10,7 @@
 #include "HeldItemList.hpp"  // gHeldItemIds[] - curated holdable items (for the PokeMart "Holdable" marker)
 #include "BagItemTags.hpp"   // gBagItemTags[]/gBagItemTagName[] - effect tags for the PokeMart Effect filter
 #include "TeleportData.hpp"  // kLocCat/kLocConn/kMap - teleport categories, exits, connection graph
+#include "Rng.hpp"           // Mt19937 (Gen6, untempered) + TinyMt - live RNG Tracking HUD fields
 
 namespace CTRPluginFramework {
     static int selectedIcon = 0;
@@ -5201,6 +5202,11 @@ namespace CTRPluginFramework {
     static MenuEntry *g_hudFrame  = nullptr;   // RNG: current seed (live MT Status word)
     static MenuEntry *g_hudAdv    = nullptr;   // RNG: frame counter (live, relative)
     static MenuEntry *g_hudEgg    = nullptr;   // RNG: egg / save seed (Main MT snapshot, static)
+    static MenuEntry *g_hudSeed   = nullptr;   // RNG: initial seed (captured by the boot code-patch; "----" until a reseed)
+    static MenuEntry *g_hudFreeze = nullptr;   // RNG: Freeze - holds the whole HUD display still (PokeReader's "Lock X+Y")
+    static MenuEntry *g_hudTinySt = nullptr;   // RNG: TinyMT state (4 words; wild-encounter RNG)
+    static MenuEntry *g_hudTinyAdv= nullptr;   // RNG: TinyMT advances (relative, since tracking started)
+    static MenuEntry *g_hudTarget = nullptr;   // RNG: target-frame helper (set via START; shows frames remaining + parity)
     static int  g_hudPosition = 0;             // 0..8 anchors (3x3)
     static int  g_hudOpacity  = 50;            // panel opacity 0..100 (step 10), via ordered dither
 
@@ -5211,16 +5217,27 @@ namespace CTRPluginFramework {
     static int  s_lastTX = 0, s_lastTY = 0;
     static bool s_haveTile = false;
 
-    // RNG Tracking (Gen 6). Live MT addresses from the 3DSRNGTool source (Util/NTRSeedAPI.cs) - same address space as
-    // our other Process::Read calls. The MT struct holds [u16 Index @ +0][u32 Status (_mt[Index]) @ +4]; the Index
-    // advances 0..623 on every MT call, then twists back to 0:
-    //   MT state : AutoGameSet(0x8C52848 XY, 0x8C59E44 ORAS)   (Index @ +0, Status @ +4)
-    //   Egg seed : AutoGameSet(0x8C6A6A4 XY, 0x8C71DB8 ORAS)   (Main MT save snapshot, static)
-    // Advances = relative MT frame since tracking started (accumulate the wrap-aware Index delta). The ABSOLUTE boot
-    // "initial seed" has no static RAM address (3DSRNGTool catches it at a boot code breakpoint) - that's a follow-up.
-    static u16  g_mtLastIdx = 0;   // last MT Index seen
-    static u32  g_mtAdv     = 0;   // relative advances since tracking started (reset on reboot)
-    static bool g_mtHave    = false;
+    // RNG Tracking (Gen 6). Addresses verified against zaksabeast/PokeReader (reader_core) AND the 3DSRNGTool source;
+    // AutoGameSet(kalos=XY, hoenn=ORAS). The MT struct = [u16 Index @ +0][u32 Status array @ +4]:
+    //   MT index    : AutoGameSet(0x8C52848 XY, 0x8C59E44 ORAS)         (0..623, twists back to 0)
+    //   Current seed: AutoGameSet(0x8C5284C XY, 0x8C59E48 ORAS) + idx*4 (the live UNTEMPERED word mt[index])
+    //   Initial seed: AutoGameSet(0x8C52844 XY, 0x8C59E40 ORAS)         (= mt_start - 8; valid only after the boot patch)
+    //   TID/SID     : AutoGameSet(0x8C79C3C XY, 0x8C81340 ORAS)         (TSV = (TID^SID)>>4, TRV = (TID^SID)&0xF)
+    //   Egg/save var: AutoGameSet(0x8C6A6A4 XY, 0x8C71DB8 ORAS)         (Main MT save snapshot, static)
+    //   TinyMT state: AutoGameSet(0x8C52808 XY, 0x8C59E04 ORAS)         (4 words; wild-encounter / Sync / HA RNG)
+    // ABSOLUTE MT frame: a local MT (Mt19937, seeded with the captured initial seed) is stepped forward each tick until
+    // it matches the live word, giving the true advance count since the seed. TinyMT advances are RELATIVE (a local
+    // TinyMt from a live snapshot - no seed needed). Both counters reset on reboot.
+    static Mt19937 s_mt;            // local MT, kept advanced to the last matched live word
+    static u32  s_initSeed  = 0;    // captured initial seed (0 = not captured yet -> fields show "----")
+    static u32  s_mtAbs     = 0;    // absolute MT advances since the seed (the "frame")
+    static u32  s_mtMatched = 0;    // last live word the local MT was advanced to
+    static TinyMt s_tiny;           // local TinyMT, advanced to the last matched live state
+    static u32  s_tinyAdv   = 0;    // relative TinyMT advances since tracking started
+    static bool s_tinyHave  = false;
+    static u32  g_rngTarget = 0;    // user-set target frame (from 3DSRNGTool) for the Target-frame helper (0 = unset)
+    static vector<string> s_frozenLines;   // snapshot of the HUD lines while Freeze is on
+    static bool s_frozenValid = false;     // is s_frozenLines a valid snapshot? (taken on the freeze-on edge)
 
     // No-op GameFunc: these entries exist only as persisted checkboxes (state read in HudCallback)
     static void HudNoop(MenuEntry *entry) {
@@ -5233,6 +5250,16 @@ namespace CTRPluginFramework {
         if (entry == g_hudEnc)        g_encCount  = 0;
         else if (entry == g_hudSteps) g_stepCount = 0;
         OSD::Notify(getLanguage->Get("HUD_RESET_DONE"));
+    }
+
+    // MenuFunc for the "Target frame" entry: the editor hotkey (default START) opens a numeric keyboard to enter the
+    // target frame that 3DSRNGTool gave you. The HUD then shows (target - current frame) + a parity flag.
+    void HudSetTarget(MenuEntry *entry) {
+        (void)entry;
+        Keyboard kb(getLanguage->Get("HUD_TARGET_PROMPT"));
+        u32 v = g_rngTarget;
+        if (kb.Open(v, g_rngTarget) == 0) g_rngTarget = v;
+        OSD::Notify(Utils::Format(getLanguage->Get("HUD_TARGET_SET").c_str(), (unsigned long)g_rngTarget));
     }
 
     // 9 positions, reading order: 0=TL 1=TC 2=TR 3=ML 4=C 5=MR 6=BL 7=BC 8=BR
@@ -5317,18 +5344,54 @@ namespace CTRPluginFramework {
             s_lastTX = tx; s_lastTY = ty; s_haveTile = true;
         }
 
-        // RNG: the MT Index (u16 @ MTOffset) advances 0..623 per MT call, then twists to 0. Accumulate the wrap-aware
-        // delta for a live "advances" counter (relative to when tracking started). Runs while the master is on.
+        // RNG (absolute MT frame): read the captured initial seed; (re)seed the local MT whenever it changes (a new
+        // boot / soft-reset), then step the local MT forward to the live untempered word mt[index] = (mt_start +
+        // index*4), accumulating the advance. The game stores the MT state UNTEMPERED, so the textbook MT reproduces
+        // the live words exactly. Runs while the HUD master is on.
         {
-            u16 idx = 0;
-            Process::Read16(AutoGameSet(0x8C52848, 0x8C59E44), idx);
-            if (idx < 624) {
-                if (g_mtHave) {
-                    int d = (int)idx - (int)g_mtLastIdx;
-                    if (d < 0) d += 624;       // index wrapped on a twist
-                    g_mtAdv += (u32)d;
+            u32 iSeed = 0;
+            Process::Read32(AutoGameSet(0x8C52844, 0x8C59E40), iSeed);
+            if (iSeed != 0 && iSeed != s_initSeed) {     // new seed -> reset the local MT + the frame counter
+                s_mt.init(iSeed);
+                s_initSeed  = iSeed;
+                s_mtAbs     = 0;
+                s_mtMatched = s_mt.current();
+            }
+            if (s_initSeed != 0) {
+                u16 idx = 0;
+                Process::Read16(AutoGameSet(0x8C52848, 0x8C59E44), idx);
+                u32 live = 0;
+                Process::Read32(AutoGameSet(0x8C5284C, 0x8C59E48) + (idx < 624 ? (u32)idx * 4 : 0), live);
+                if (live != s_mtMatched) {               // step forward to the live word (incremental; tiny per frame)
+                    bool matched = false;
+                    for (u32 k = 1; k <= 1000000u; ++k) {
+                        if (s_mt.next() == live) { s_mtAbs += k; s_mtMatched = live; matched = true; break; }
+                    }
+                    if (!matched) {                      // pathological (>1M advances in one tick) -> restore to last good
+                        s_mt.init(s_initSeed);
+                        for (u32 i = 0; i < s_mtAbs; ++i) s_mt.next();
+                    }
                 }
-                g_mtLastIdx = idx; g_mtHave = true;
+            }
+        }
+
+        // RNG (TinyMT, relative): snapshot the live 4-word state once, then advance a local TinyMT to match each tick.
+        // next() is a pure function of the state, so no seed / code hook is needed - this counts advances relative to
+        // when tracking started.
+        {
+            u32 t[4];
+            Process::Read32(AutoGameSet(0x8C52808, 0x8C59E04),       t[0]);
+            Process::Read32(AutoGameSet(0x8C52808, 0x8C59E04) + 0x4, t[1]);
+            Process::Read32(AutoGameSet(0x8C52808, 0x8C59E04) + 0x8, t[2]);
+            Process::Read32(AutoGameSet(0x8C52808, 0x8C59E04) + 0xC, t[3]);
+            if (!s_tinyHave) { s_tiny.copyFrom(t); s_tinyHave = true; }
+            else if (!s_tiny.equals(t)) {
+                TinyMt tmp = s_tiny; bool matched = false;
+                for (u32 k = 1; k <= 1000000u; ++k) {
+                    tmp.next();
+                    if (tmp.equals(t)) { s_tinyAdv += k; s_tiny = tmp; matched = true; break; }
+                }
+                if (!matched) s_tiny.copyFrom(t);        // resync without counting the (impossible) jump
             }
         }
 
@@ -5427,27 +5490,79 @@ namespace CTRPluginFramework {
         if (g_hudSteps != nullptr && g_hudSteps->IsActivated())
             lines.push_back(Utils::Format(getLanguage->Get("HUD_STEPS").c_str(), (unsigned long)g_stepCount));
 
-        if (g_hudTsv != nullptr && g_hudTsv->IsActivated()) {
-            u32 id = 0;
-            Process::Read32(AutoGameSet(0x8C79C3C, 0x8C81340), id);   // [TID u16 @ +0][SID u16 @ +2]
-            u16 tid = (u16)(id & 0xFFFF), sid = (u16)(id >> 16);
-            u16 tsv = (u16)((tid ^ sid) >> 4);                        // Trainer Shiny Value (0..4095)
-            lines.push_back(Utils::Format(getLanguage->Get("HUD_TSV").c_str(), (unsigned)tsv));
+        // RNG fields grouped like PokeReader: MT block (Initial/Current/Frame [+ our Target]) -> TinyMT block (adv/state)
+        // -> save/trainer block (Egg, TSV/TRV). The TinyMT state uses index labels [3][2]/[1][0] (high->low) so it can be
+        // copied verbatim into 3DSRNGTool.
+        if (g_hudSeed != nullptr && g_hudSeed->IsActivated()) {
+            if (s_initSeed != 0)
+                lines.push_back(Utils::Format(getLanguage->Get("HUD_SEED").c_str(), (unsigned)s_initSeed));
+            else
+                lines.push_back(getLanguage->Get("HUD_SEED_PENDING"));  // "iSeed: ----" until a reseed feeds the patch
         }
 
         if (g_hudFrame != nullptr && g_hudFrame->IsActivated()) {
+            u16 idx = 0;
+            Process::Read16(AutoGameSet(0x8C52848, 0x8C59E44), idx);                                  // live MT index
             u32 v = 0;
-            Process::Read32(AutoGameSet(0x8C5284C, 0x8C59E48), v);   // current seed = MT Status word (_mt[Index] @ +4)
+            Process::Read32(AutoGameSet(0x8C5284C, 0x8C59E48) + (idx < 624 ? (u32)idx * 4 : 0), v);   // current seed = mt[index]
             lines.push_back(Utils::Format(getLanguage->Get("HUD_FRAME").c_str(), (unsigned)v));
         }
 
-        if (g_hudAdv != nullptr && g_hudAdv->IsActivated())
-            lines.push_back(Utils::Format(getLanguage->Get("HUD_ADV").c_str(), (unsigned long)g_mtAdv)); // relative MT frame
+        if (g_hudAdv != nullptr && g_hudAdv->IsActivated()) {
+            if (s_initSeed != 0)
+                lines.push_back(Utils::Format(getLanguage->Get("HUD_ADV").c_str(), (unsigned long)s_mtAbs)); // absolute frame
+            else
+                lines.push_back(getLanguage->Get("HUD_ADV_PENDING"));   // "Frame: ----" until the seed is captured
+        }
+
+        if (g_hudTarget != nullptr && g_hudTarget->IsActivated()) {
+            if (s_initSeed != 0 && g_rngTarget != 0) {
+                long rem = (long)g_rngTarget - (long)s_mtAbs;                // + = frames to go; - = already passed
+                bool sameParity = (((g_rngTarget ^ s_mtAbs) & 1u) == 0);    // same parity -> reachable with Select (+2)
+                lines.push_back(Utils::Format(getLanguage->Get("HUD_TARGET").c_str(), rem,
+                                (sameParity ? getLanguage->Get("HUD_PARITY_OK") : getLanguage->Get("HUD_PARITY_NO")).c_str()));
+            } else {
+                lines.push_back(getLanguage->Get("HUD_TARGET_PENDING"));    // "Tgt: ----" (no target set / no seed yet)
+            }
+        }
+
+        if (g_hudTinyAdv != nullptr && g_hudTinyAdv->IsActivated())
+            lines.push_back(Utils::Format(getLanguage->Get("HUD_TINYADV").c_str(), (unsigned long)s_tinyAdv)); // relative TinyMT frame
+
+        if (g_hudTinySt != nullptr && g_hudTinySt->IsActivated()) {
+            u32 t0 = 0, t1 = 0, t2 = 0, t3 = 0;
+            Process::Read32(AutoGameSet(0x8C52808, 0x8C59E04),       t0);   // state[0]
+            Process::Read32(AutoGameSet(0x8C52808, 0x8C59E04) + 0x4, t1);   // state[1]
+            Process::Read32(AutoGameSet(0x8C52808, 0x8C59E04) + 0x8, t2);   // state[2]
+            Process::Read32(AutoGameSet(0x8C52808, 0x8C59E04) + 0xC, t3);   // state[3]
+            lines.push_back(Utils::Format(getLanguage->Get("HUD_TINYST").c_str(),  (unsigned)t3, (unsigned)t2)); // [3] [2]
+            lines.push_back(Utils::Format(getLanguage->Get("HUD_TINYST2").c_str(), (unsigned)t1, (unsigned)t0)); // [1] [0]
+        }
 
         if (g_hudEgg != nullptr && g_hudEgg->IsActivated()) {
             u32 v = 0;
             Process::Read32(AutoGameSet(0x8C6A6A4, 0x8C71DB8), v);   // egg / save seed (Main MT snapshot, static)
             lines.push_back(Utils::Format(getLanguage->Get("HUD_EGG").c_str(), (unsigned)v));
+        }
+
+        if (g_hudTsv != nullptr && g_hudTsv->IsActivated()) {           // TSV + TRV on one line (PokeReader style)
+            u32 id = 0;
+            Process::Read32(AutoGameSet(0x8C79C3C, 0x8C81340), id);     // [TID u16 @ +0][SID u16 @ +2]
+            u16 tid = (u16)(id & 0xFFFF), sid = (u16)(id >> 16);
+            lines.push_back(Utils::Format(getLanguage->Get("HUD_TSV").c_str(),
+                            (unsigned)((tid ^ sid) >> 4), (unsigned)((tid ^ sid) & 0xF)));   // TSV = >>4, TRV = &0xF
+        }
+
+        // Freeze (PokeReader's "Lock X+Y"): one toggle holds the WHOLE HUD display still. The snapshot is taken on the
+        // first frozen frame, so Frame + TinyMT state copied into 3DSRNGTool are all from the same instant. The counters
+        // above keep running live underneath; Freeze is a control and pushes no line of its own.
+        bool frozen = (g_hudFreeze != nullptr && g_hudFreeze->IsActivated());
+        if (!frozen) {
+            s_frozenValid = false;
+        } else {
+            if (!s_frozenValid) { s_frozenLines = lines; s_frozenValid = true; }   // snapshot at freeze-on
+            lines = s_frozenLines;
+            if (!lines.empty()) lines.insert(lines.begin(), getLanguage->Get("HUD_FROZEN_TAG"));
         }
 
         if (lines.empty())
@@ -5834,14 +5949,26 @@ namespace CTRPluginFramework {
         rngHdr->CanBeSelected(false);
         rngHdr->SetGridFullWidth(true);
         rngHdr->UseTopSeparator(Separator::Stippled);
-        g_hudTsv    = new MenuEntry(getLanguage->Get("MENU_HUD_TSV"), HudNoop, getLanguage->Get("NOTE_HUD_TSV"));
-        g_hudTsv->SetFavoriteKey("FAV_HUD_TSV"); g_hudTsv->SetFavoriteAlias(getLanguage->Get("FAV_HUD_TSV"));
+        g_hudSeed   = new MenuEntry(getLanguage->Get("MENU_HUD_SEED"), HudNoop, getLanguage->Get("NOTE_HUD_SEED"));
+        g_hudSeed->SetFavoriteKey("FAV_HUD_SEED"); g_hudSeed->SetFavoriteAlias(getLanguage->Get("FAV_HUD_SEED"));
         g_hudFrame  = new MenuEntry(getLanguage->Get("MENU_HUD_FRAME"), HudNoop, getLanguage->Get("NOTE_HUD_FRAME"));
         g_hudFrame->SetFavoriteKey("FAV_HUD_FRAME"); g_hudFrame->SetFavoriteAlias(getLanguage->Get("FAV_HUD_FRAME"));
         g_hudAdv    = new MenuEntry(getLanguage->Get("MENU_HUD_ADV"), HudNoop, getLanguage->Get("NOTE_HUD_ADV"));
         g_hudAdv->SetFavoriteKey("FAV_HUD_ADV"); g_hudAdv->SetFavoriteAlias(getLanguage->Get("FAV_HUD_ADV"));
+        g_hudTsv    = new MenuEntry(getLanguage->Get("MENU_HUD_TSV"), HudNoop, getLanguage->Get("NOTE_HUD_TSV"));
+        g_hudTsv->SetFavoriteKey("FAV_HUD_TSV"); g_hudTsv->SetFavoriteAlias(getLanguage->Get("FAV_HUD_TSV"));
+        g_hudFreeze = new MenuEntry(getLanguage->Get("MENU_HUD_FREEZE"), HudNoop, getLanguage->Get("NOTE_HUD_FREEZE"));
+        g_hudFreeze->SetFavoriteKey("FAV_HUD_FREEZE"); g_hudFreeze->SetFavoriteAlias(getLanguage->Get("FAV_HUD_FREEZE"));
         g_hudEgg    = new MenuEntry(getLanguage->Get("MENU_HUD_EGG"), HudNoop, getLanguage->Get("NOTE_HUD_EGG"));
         g_hudEgg->SetFavoriteKey("FAV_HUD_EGG"); g_hudEgg->SetFavoriteAlias(getLanguage->Get("FAV_HUD_EGG"));
+        g_hudTinySt = new MenuEntry(getLanguage->Get("MENU_HUD_TINYST"), HudNoop, getLanguage->Get("NOTE_HUD_TINYST"));
+        g_hudTinySt->SetFavoriteKey("FAV_HUD_TINYST"); g_hudTinySt->SetFavoriteAlias(getLanguage->Get("FAV_HUD_TINYST"));
+        g_hudTinyAdv= new MenuEntry(getLanguage->Get("MENU_HUD_TINYADV"), HudNoop, getLanguage->Get("NOTE_HUD_TINYADV"));
+        g_hudTinyAdv->SetFavoriteKey("FAV_HUD_TINYADV"); g_hudTinyAdv->SetFavoriteAlias(getLanguage->Get("FAV_HUD_TINYADV"));
+        // Target frame: checkbox (A = show/hide) WITH a menuFunc — the editor hotkey (default START) opens a keyboard
+        // to enter the target frame from 3DSRNGTool.
+        g_hudTarget = new MenuEntry(getLanguage->Get("MENU_HUD_TARGET"), HudNoop, HudSetTarget, getLanguage->Get("NOTE_HUD_TARGET"));
+        g_hudTarget->SetFavoriteKey("FAV_HUD_TARGET"); g_hudTarget->SetFavoriteAlias(getLanguage->Get("FAV_HUD_TARGET"));
         g_hudPanel  = new MenuEntry(getLanguage->Get("MENU_HUD_PANEL"), HudNoop, getLanguage->Get("NOTE_HUD_PANEL"));
         g_hudPanel->SetFavoriteKey("FAV_HUD_PANEL"); g_hudPanel->SetFavoriteAlias(getLanguage->Get("FAV_HUD_PANEL"));
         g_hudPanel->SetGridFullWidth(true); // panel toggle spans the whole row
@@ -5862,10 +5989,15 @@ namespace CTRPluginFramework {
         *hud += g_hudEnc;
         *hud += g_hudSteps;
         *hud += rngHdr;
-        *hud += g_hudTsv;
-        *hud += g_hudFrame;
-        *hud += g_hudAdv;
-        *hud += g_hudEgg;
+        *hud += g_hudFreeze;    // Freeze        (PokeReader "Lock X+Y" - holds the whole HUD still)
+        *hud += g_hudSeed;      // Initial seed  ┐ MT block
+        *hud += g_hudFrame;     // Current seed  │
+        *hud += g_hudAdv;       // Frame         ┘ (MT advances)
+        *hud += g_hudTarget;    // Target frame   (our countdown + parity)
+        *hud += g_hudTinyAdv;   // TinyMT adv    ┐ TinyMT block
+        *hud += g_hudTinySt;    // TinyMT state  ┘ ([3][2]/[1][0])
+        *hud += g_hudEgg;       // Egg seed      ┐ save / trainer block
+        *hud += g_hudTsv;       // TSV / TRV     ┘ (one line)
         *hud += g_hudPanel;
         MenuEntry *hudOpac = new MenuEntry(getLanguage->Get("MENU_HUD_OPACITY"), nullptr, HudSetOpacity, getLanguage->Get("NOTE_HUD_OPACITY"));
         hudOpac->SetGridPaired(true); // pair side-by-side in the 2-column layout

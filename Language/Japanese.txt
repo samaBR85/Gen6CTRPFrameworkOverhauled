@@ -451,6 +451,10 @@ NOTE_HUD_ITEM :: 先頭のポケモンのもちものをHUDに表示します（
 NOTE_HUD_ENC :: このセッションで開始したバトル数を数えます（色違い厳選に便利）。\n\nこの項目でエディタのショートカット（既定はSTART）を押すとリセットします。
 NOTE_HUD_STEPS :: このセッションで歩いた歩数を数えます。\n\nこの項目でエディタのショートカット（既定はSTART）を押すとリセットします。
 MENU_HUD_RNGHDR :: RNG Tracking
+MENU_HUD_FREEZE :: Freeze
+FAV_HUD_FREEZE :: Freeze
+NOTE_HUD_FREEZE :: HUDのすべての値を静止（スナップショット）させ、書き写せるようにします — PokeReaderのX+Yロックと同じ。オフで再びライブに。
+HUD_FROZEN_TAG :: — 静止中 —
 MENU_HUD_SEED :: Initial seed
 FAV_HUD_SEED :: Initial seed
 MENU_HUD_FRAME :: Current seed
@@ -460,15 +464,38 @@ FAV_HUD_ADV :: Frame
 HUD_SEED :: iSeed: %08X
 HUD_FRAME :: cSeed: %08X
 HUD_ADV :: Frame: %lu
-NOTE_HUD_SEED :: 起動時の「initial seed」は3DS上ではライブで読めません（---- と表示）。代わりに「Current seed」を読み、PCの3DSTimeFinder／3DSRNGToolで特定してください。
+NOTE_HUD_SEED :: ゲームの「initial seed」- このセッションの全ての乱数結果の元になる数値。ソフトリセット後に取得（それまで----）。PCの3DSRNGToolに入力して色違いを狙えます。
 NOTE_HUD_FRAME :: 今の乱数の値（「current seed」）です。ゲームが進むと変化し、止まっていると固定されます。
-NOTE_HUD_ADV :: 現在のRNG「frame」（見始めてからどれだけ進んだか）。RNG厳選では目標フレームに合わせて操作します。
+NOTE_HUD_ADV :: 現在のRNG「frame」- initial seedからの絶対的なadvances数。RNG厳選では目標フレームに合わせて操作します。seed取得まで----。
 MENU_HUD_EGG :: Egg seed
 FAV_HUD_EGG :: Egg seed
 HUD_EGG :: Egg: %08X
 HUD_SEED_PENDING :: iSeed: ----
 NOTE_HUD_EGG :: 「egg seed」。セーブ時の乱数スナップショットで、タマゴ／預け屋のRNG（PKSeedなど）に使います。セーブすると更新されます。
-MENU_HUD_TSV :: TSV
-FAV_HUD_TSV :: TSV
-HUD_TSV :: TSV: %u
-NOTE_HUD_TSV :: あなたの「TSV」（Trainer Shiny Value）。タマゴや遭遇のPSVがこれと一致すると色違いになります。RNG厳選に必要です。
+MENU_HUD_TSV :: TSV / TRV
+FAV_HUD_TSV :: TSV / TRV
+HUD_TSV :: TSV:%u TRV:%X
+NOTE_HUD_TSV :: あなたの「TSV」(Trainer Shiny Value)と「TRV」を一行で。タマゴや遭遇は、そのPSVがTSVと一致するとあなたにとって色違いです。RNGにはTSVが必要；TRVはGen8以降のおまけ。
+MENU_HUD_TRV :: TRV
+FAV_HUD_TRV :: TRV
+HUD_TRV :: TRV: %X
+NOTE_HUD_TRV :: あなたの「TRV」(Trainer Random Value) - TID^SIDの下位4ビット。TSVの相棒で、一部のRNGツールが必要とします。
+MENU_HUD_TINYST :: TinyMT state
+FAV_HUD_TINYST :: TinyMT state
+HUD_TINYST :: [3]%08X [2]%08X
+HUD_TINYST2 :: [1]%08X [0]%08X
+NOTE_HUD_TINYST :: ライブのTinyMT状態（4ワード）- 野生の出現・シンクロ・隠れ特性・群れを決める2つ目のRNG。3DSRNGToolに入れて野生RNGに使えます。
+MENU_HUD_TINYADV :: TinyMT adv
+FAV_HUD_TINYADV :: TinyMT adv
+HUD_TINYADV :: tAdv: %lu
+NOTE_HUD_TINYADV :: 野生出現RNG（TinyMT）が見始めてからどれだけ進んだか。野生の目標を合わせるのに使います。
+HUD_ADV_PENDING :: Frame: ----
+MENU_HUD_TARGET :: Target frame
+FAV_HUD_TARGET :: Target frame
+HUD_TARGET :: Tgt:%+ld %s
+HUD_TARGET_PENDING :: Tgt: ----
+HUD_PARITY_OK :: ok
+HUD_PARITY_NO :: FLIP
+HUD_TARGET_SET :: Target: %lu
+NOTE_HUD_TARGET :: 3DSRNGToolが示した目標フレームを設定します（この項目で編集ホットキー、初期設定はSTART、を押す）。HUDに残りフレーム数とパリティが合うかが表示され、Selectで狙えます。
+HUD_TARGET_PROMPT :: 目標フレーム：

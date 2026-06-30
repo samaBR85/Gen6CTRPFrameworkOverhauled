@@ -472,7 +472,23 @@ namespace CTRPluginFramework {
     // This function is called before main and before the game starts. Useful to do code edits safely
     void PatchProcess(FwkSettings &settings) {
         DetectGame(Process::GetTitleID());
-        IsUpdateSupported(Process::GetVersion());
+        bool supported = IsUpdateSupported(Process::GetVersion());
+        (void)supported;
+
+        // RNG Tracking (v0.6.2): the Gen 6 "initial seed" has no readable RAM address — the game discards it after
+        // seeding the MT. PokeReader's trick (zaksabeast/PokeReader) is to overwrite the NOP at the MT-init site with
+        // `STR r1,[r0,#-4]` (word 0xE5001004), so the game itself persists the seed 4 bytes before the MT struct, at
+        // initial_seed = mt_start - 8 (read live in the HUD). Apply for ANY detected Gen 6 game (DetectGame above set
+        // currGameSeries by Title ID): the exact version integers (X 5232 / Y 5216 / ORAS 7820) are too strict and
+        // skipped the patch on sub-revisions that share the SAME RAM layout — and the layout is already validated by
+        // every other RAM read that works. No crash risk: it's the same single-instruction write PokeReader does.
+        if (currGameSeries != GameSeries::None) {
+            u32 a = AutoGameSet(0x1254F8u, 0x125EC8u);   // MT-init NOP slot: XY 0x1254F8 / ORAS 0x125EC8
+            Process::ProtectMemory(a, 4);                // .text is R-X by default → make the page writable first
+            Process::Patch(a, 0xE5001004u);              // STR r1,[r0,#-4]  (r0 = MT struct base, r1 = seed)
+            svcInvalidateEntireInstructionCache();       // Patch only flushes the data cache → force an i-cache refetch
+        }
+
         // Do NOT set settings.UseGameHidMemory = true here: HW-tested and it breaks the plugin's own input —
         // the plugin loads (toast shows) but the menu hotkey (Select) stops registering, leaving it deaf to
         // buttons. So Controller::InjectKey/InjectTouch cannot reach the game in this build. (v0.6.1 test.)
@@ -797,7 +813,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 6, 1, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 6, 2, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized
