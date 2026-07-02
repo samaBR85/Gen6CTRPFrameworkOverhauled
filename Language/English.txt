@@ -388,6 +388,655 @@ SEARCH_SPECIES :: Species:
 SET_COLOR :: Colored?
 SPAWNER_INVALID :: Invalid species selected
 SPAWNER_SPAWNING :: Spawning:
+# ===== v0.4.x full-UI localization (new keys) =====
+MENU_ONLINE_FEATURES :: Online Features (PSS)
+NOTE_ONLINE_FEATURES :: Online Player Search System extras (O-Powers, profile, shout-outs).
+FAV_ONLINE_FEATURES :: PSS Features
+NOTE_PSS_PROFILE :: Edit your PSS profile: change your icon, message, Nices, Wishes, greet counts, link stats and mini-survey slots.
+FAV_PSS_PROFILE :: PSS Profile
+NOTE_PSS_SHOUT_OUT :: Change your PSS shout-out — the short message others see online.\nOptional color support (up to 12 colored chars).
+FAV_PSS_SHOUT_OUT :: Shout-out
+NOTE_PSS_GAUGE :: Adjust your O-Power gauge.
+FAV_PSS_GAUGE :: O-Power Gauge
+NOTE_PSS_ALL_O_POWERS :: Unlock all 63 O-Powers at once. Save the game and restart to make them permanent.
+FAV_PSS_ALL_O_POWERS :: All O-Powers
+NOTE_PSS_CLEAR_USERS :: Clear your PSS Friends or Acquaintances list.
+FAV_PSS_CLEAR_USERS :: Clear Users
+NOTE_PSS_IGNORE_ICONS :: Tap any PSS profile icon even if it's normally greyed out or locked.
+FAV_PSS_IGNORE_ICONS :: Ignore Icons
+MENU_IN_BATTLE_TOOLS :: In-Battle Tools
+NOTE_IN_BATTLE_TOOLS :: Your in-battle assistant: read the enemy, plan your matchup, and edit your own team mid-fight.\n\n- Change Party Stats: a visual editor for your party's stats, HP/PP, status, held item and moves, live in battle.\n\n- Enemy Helper: a coach card that explains the foe - its Ability, Item, moves, what beats it and how to play it.\n\n- Display Enemy Stats: a top-screen overlay revealing the opponent's hidden data.\n\n- Plus: open your Bag straight from FIGHT, allow more than one Mega per battle, and swap the battle music.\n\nMost of these only work while a battle is actually happening.
+FAV_IN_BATTLE_TOOLS :: Battle Tools
+MENU_CHANGE_PARTY_STATS :: Change Party Stats
+NOTE_CHANGE_PARTY_STATS :: Visual editor for your in-battle party.\n\nTOP: the selected Pokemon's live card (sprite, types, level, HP, status, item, battle stats & stages).\n\nBOTTOM: pick a slot (1-6), then tap Status, Stats, HP/PP, Item, Moves or EXP. L/R switch slot, B back, SELECT exit.\n\nWorks only while you are in a battle.
+FAV_CHANGE_PARTY_STATS :: Party Stats
+MENU_ENEMY_HELPER :: Enemy Helper
+NOTE_ENEMY_HELPER :: Coach card for the enemy Pokemon - a companion to Display Enemy Stats.\n\nTOP: the foe's card (species, types, level, Nature with +/- stat, Hidden Power, Ability, held Item) and 'Hit it with' = the attack types that are super-effective on it (2x or 4x). Under the sprite, 'In Box' / 'Not in Box' tells you whether you already own this species in your PC boxes.\n\nDETAILS tab: what its Ability, Item and 4 Moves do, then two summaries -\n\nMATCHUP = the type chart for this foe. 'Resists' are types it takes reduced damage from (avoid them); 'Immune' are types that do 0 damage (never use). The super-effective side is the 'Hit it with' chips on the top screen.\n\nTIPS (the green lines) = how to play it, read from its real stats and moves. E.g. 'Strong special attacker - raise your Sp. Def' means it will hit you mostly with special moves; 'Carries a status move - bring a status cure' means it can inflict a status condition.\n\nCOMPARE tab: the foe's six stats (HP, Atk, Def, Sp.Atk, Sp.Def, Spe) lined up against your active Pokemon, side by side. Each value is the FULL total - base + IVs + EVs + nature + level - so it's a fair comparison; in every row the higher number shows green and the lower one is dimmed, with a Total at the bottom. A quick read on where you out-muscle the foe, and where it out-muscles you.\n\nITEMS tab: handy PokeMart consumables for this fight; tap or press A to add one to your bag (in PAY mode it costs money, FREE is free).\n\nUp/Down scroll Details (or move between items); L/R switch the enemy slot; X swaps tabs; B back; SELECT exit.\n\nWorks only while you are in a battle.
+NOTE_BATTLE_ACCESS_BAG :: Open your Bag in battle without tapping the bag icon on the bottom screen.\n\nIn battle, HOLD the hotkey and press A on the FIGHT command: instead of opening the Fight menu it opens your Bag.\n\nDefault hotkey: L (configurable).
+FAV_BATTLE_ACCESS_BAG :: Bag in Battle
+NOTE_BATTLE_ALLOW_MEGAS :: Mega-evolve more than one Pokémon per battle.
+FAV_BATTLE_ALLOW_MEGAS :: Allow Megas
+NOTE_BATTLE_MUSIC :: Replace battle background music.\nChoose Wild or Trainer battle type, then pick a track from the game's music library.
+FAV_BATTLE_MUSIC :: Battle Music
+MENU_SPAWNER_TRAINER :: Pokémon Spawner & Trainer (PKHeX)
+NOTE_SPAWNER_TRAINER :: Spawn and catch Pokémon, then edit them, your trainer, bag, money and PC boxes.
+FAV_SPAWNER_TRAINER :: Spawner & PKHeX
+MENU_TRAINER_MONEY :: Trainer & Money
+NOTE_TRAINER_MONEY :: Edit your trainer profile (name, IDs, play time, language) and your money.
+FAV_TRAINER_MONEY :: Trainer/Money
+NOTE_EDITOR_INFO_FOLDER :: Edit your trainer name, Trainer/Secret IDs, play time counter and game display language.
+NOTE_EDITOR_TID_SID :: Change your trainer ID and secret ID. Together they determine which Pokémon appear shiny for you.
+FAV_EDITOR_TID_SID :: TID/SID
+NOTE_EDITOR_IGN :: Change your in-game trainer name (up to 12 characters).
+FAV_EDITOR_IGN :: Trainer Name
+NOTE_EDITOR_TIME_PLAYED :: Edit the play time shown on the save screen (hours, minutes, seconds).
+FAV_EDITOR_TIME_PLAYED :: Play Time
+NOTE_EDITOR_GAME_LANGUAGE :: Change the game's display language. Save and restart after changing.
+FAV_EDITOR_GAME_LANGUAGE :: Game Language
+NOTE_EDITOR_CURRENCY_FOLDER :: Set your Pokédollars, Battle Points and Pokémon Miles.
+NOTE_EDITOR_MONEY :: Set your Pokédollars (up to 9,999,999). Used to buy items in shops.
+FAV_EDITOR_MONEY :: Set Money
+NOTE_EDITOR_BATTLE_POINTS :: Set your Battle Points — earned at the Battle Maison and spent on rare held items (up to 9,999).
+FAV_EDITOR_BATTLE_POINTS :: Set BP
+NOTE_EDITOR_POKE_MILES :: Set your Pokémon Miles — earned by trading and spent on special items via the PokéMileage Club (up to 9,999,999).
+FAV_EDITOR_POKE_MILES :: Set Miles
+MENU_UNLOCKS_ADVANCED :: Unlocks (advanced)
+NOTE_UNLOCKS_ADVANCED :: Permanent save-flag unlocks. Each one warns before applying — SAVE YOUR GAME FIRST.
+FAV_UNLOCKS_ADVANCED :: Unlocks
+NOTE_UNLOCK_BAG_SPECIAL :: BEWARE — SAVE YOUR GAME FIRST!\n\nThis hands you every TM, HM and Key Item at once (Mega Bracelet, bikes, story items and more).\n\nIf you turn it on and then save, your Bag floods with items you won't understand, and it can tangle up your story progress.\n\nNew to the game? Best to skip this — or back up your save before you touch it.\n\nWant just one or two items instead? Use "PokéMart Anywhere" to pick exactly what you want.
+FAV_UNLOCK_BAG_SPECIAL :: TM/HM + Keys
+NOTE_UNLOCK_PC_BOXES :: BEWARE — SAVE YOUR GAME FIRST!\n\nForce-opens all 31 PC storage boxes at once, without filling the previous ones first.\n\nThis is a permanent change once you save. Handy on a finished file; if in doubt, leave it off.
+FAV_UNLOCK_PC_BOXES :: 31 Boxes
+NOTE_UNLOCK_FULL_FLY_MAP :: BEWARE — SAVE YOUR GAME FIRST!\n\nOpens every Fly destination from the very start.\n\nHandy late in the game — but turn it on early and save, and you lose track of where the story has actually taken you: which towns you've reached, and where to head next.\n\nBeginners: best left off until you've finished the main story.
+FAV_UNLOCK_FULL_FLY_MAP :: Full Fly Map
+NOTE_UNLOCK_FULL_DEX :: BEWARE — SAVE YOUR GAME FIRST!\n\nMarks all 721 Pokémon as seen and caught in one tap.\n\nGreat on a finished file — but if you're still playing and you save with this on, you lose the fun of filling the Pokédex yourself, and any sense of what's left to find.\n\nIf in doubt, leave it off.
+FAV_UNLOCK_FULL_DEX :: Full Dex
+NOTE_PC_BOX_FOLDER :: Browse, search and clone Pokémon in your PC boxes.\nExport or import your full save data here too.
+MENU_PC_BOX_PLUS :: PC Box ++
+NOTE_PC_BOX_PLUS :: Visual PC box editor - a 6x5 grid of your boxes with sprites.\n\nGRID: D-Pad move - L/R change box - X move/swap - Y clone - Start find a species - A open the editor.\n\nEDITOR: L/R switch tab (Main/Stats/Moves/Origins/Misc) - D-Pad pick a field - A edit it - B back.
+NOTE_CLONING_FOLDER :: Trade-cloning helpers: back up a Pokemon being offered in a trade, and keep the original after trading.
+FAV_COPY_POKEMON_IN_TRADE :: Copy in Trade
+FAV_KEEP_ORIGINAL_POKEMON :: Keep Original
+NOTE_PC_EXPORT_IMPORT :: Back up your full save data to the SD card, or restore a previous backup. Keeps up to 20 save files.
+FAV_PC_EXPORT_IMPORT :: Export/Import
+MENU_ENCOUNTERS_CATCHING :: Encounters & Catching
+NOTE_ENCOUNTERS_CATCHING :: Control wild encounters, catch anything, and force shininess.
+FAV_ENCOUNTERS_CATCHING :: Encounters
+NOTE_BATTLE_NO_WILD_POKEMON :: Stop random wild Pokémon encounters in grass, caves and water.\nYou can still battle by walking into visible Pokémon.
+FAV_BATTLE_NO_WILD_POKEMON :: No Wild Pkmn
+NOTE_BATTLE_CAPTURE_RATE_100 :: Every thrown Poké Ball catches the target instantly — no shake, no fail, regardless of the species or HP remaining.
+FAV_BATTLE_CAPTURE_RATE_100 :: Capture 100%
+NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Let you catch a trainer's Pokémon in battle.
+FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Catch Trainer
+NOTE_BATTLE_ALWAYS_SHINY :: Every wild and bred Pokémon will be shiny. The sparkle animation plays when it appears.
+FAV_BATTLE_ALWAYS_SHINY :: Always Shiny
+NOTE_BATTLE_DISABLE_SHINY_LOCK :: Allow shininess on normally shiny-locked encounters.
+FAV_BATTLE_DISABLE_SHINY_LOCK :: No Shiny Lock
+MENU_RENAME_ANY :: Rename Any Pokémon
+NOTE_RENAME_ANY :: Let you rename any Pokémon, including those originally from other games (which the game normally blocks).
+FAV_RENAME_ANY :: Rename Any
+NOTE_MISC_LEARN_ANY :: Let any Pokémon learn moves from Move Tutors, ignoring normal compatibility restrictions.
+FAV_MISC_LEARN_ANY :: Learn TM/HM
+FAV_WILD_POKEMON_SPAWNER :: Wild Spawner
+NOTE_RESPAWN_LEGENDARY :: Make a defeated or fled legendary respawn.
+FAV_RESPAWN_LEGENDARY :: Respawn Legend.
+MENU_POKEMART_ANYWHERE :: PokéMart Anywhere
+FAV_POKEMART_ANYWHERE :: PokéMart
+MENU_OVERWORLD_QOL :: Overworld & Quality of Life
+NOTE_OVERWORLD_QOL :: Out-of-battle helpers: text speed, visuals, movement and travel, breeding, and the custom keyboard.\n\nTo use ActionReplay (AR) codes, open the ActionReplay button on the bottom touch screen instead.
+FAV_OVERWORLD_QOL :: Overworld & QoL
+MENU_SCREEN_OVERLAYS :: Screen Overlays
+NOTE_SCREEN_OVERLAYS :: Themes, HUD overlay, on/off notifications and this plugin's own settings (language).
+FAV_SCREEN_OVERLAYS :: Overlays
+MENU_MOVEMENT_TRAVEL :: Movement & Travel
+NOTE_MOVEMENT_TRAVEL :: Move faster, walk through walls, teleport to any location, unlock fly destinations and more.
+FAV_MOVEMENT_TRAVEL :: Mov & Travel
+NOTE_MISC_TELEPORTATION :: Travel instantly to a location — and teach it the spots YOU actually use.\n\nWARP: pick a destination, then HOLD L and step into a door or building to warp there.\n\nTABS (L/R or tap a chip): All · Towns · Other (Caves / Forests / Landmarks / Mirage Spots, as sub-menus) · Routes (101-134) · Map (a connected mini-map you walk with the D-Pad; press Y there for a full picture-grid of every place, filtered by the chips you tap).\nA: teleport   Y: grid/list (or all-map grid in Map)   B: back.\n\nX = YOU ARE HERE: jumps the selection to wherever your character currently is on the map.\n\nZL = TAG AREA: when X reads an unlisted map (a shop, a city section, a route), highlight the correct place and press ZL — it learns that sub-map, so X recognizes it from then on.\n\nStart = SAVE WARP POINT: stand exactly where you want to arrive, then press Start — it saves that point as the place's teleport destination. This makes ROUTES teleportable and lets you change where any teleport drops you (one warp point per place; press again to replace it).\n\nEverything you teach is saved in MyTeleport.txt inside the plugin folder — editable by hand and kept across updates. The built-in destinations stay exactly as they are until you override one.
+FAV_MISC_TELEPORTATION :: Teleport
+NOTE_MISC_FAST_WALK_RUN :: Speed the whole game up to 60fps — everything runs faster, so you walk, run and cycle faster too.\n\nHOLD ZL to drop back to normal speed (30fps) for a moment when you need precision.\n\n(On X/Y it uses a movement-speed patch instead.)
+FAV_MISC_FAST_WALK_RUN :: Fast Walk
+NOTE_MISC_WALK_THROUGH_WALLS :: Enable, then HOLD R to ignore ALL collision: walk through buildings, interior walls and any obstacle.\nIt also snaps you up when crossing onto higher terrain.\n\nWarning: this can occasionally crash the game, so save before using it.
+FAV_MISC_WALK_THROUGH_WALLS :: Walk Thru Walls
+NOTE_MISC_STAY_IN_ACTION :: Keep the fast action-sequence speed active even after the trigger ends.\nThe game stays in 'action mode'.
+FAV_MISC_STAY_IN_ACTION :: Action Mode
+NOTE_MISC_ACTION_MUSIC :: Replace the music played during action/soaring/cycling sequences with any track from the game.
+FAV_MISC_ACTION_MUSIC :: Action Music
+NOTE_MISC_ACCESS_FLY_MAP :: Show the Fly destination map when viewing a Pokémon's summary screen.
+FAV_MISC_ACCESS_FLY_MAP :: Fly via Summary
+MENU_BREEDING :: Breeding
+NOTE_BREEDING :: Speed up Day Care egg mechanics.
+NOTE_MISC_INSTANT_EGG :: Eggs appear in your party from the Day Care immediately instead of requiring steps walked.
+FAV_MISC_INSTANT_EGG :: Instant Egg
+NOTE_MISC_HATCH_NOW :: Eggs hatch on the very next step instead of waiting hundreds of steps.\nPair with Instant D.C Egg.
+FAV_MISC_HATCH_NOW :: Hatch Now
+NOTE_MISC_SUPER_FAST_DIALOGS :: Speed up text and dialog boxes.
+FAV_MISC_SUPER_FAST_DIALOGS :: Fast Dialogs
+MENU_USE_PC_ANYWHERE :: Use PC Anywhere
+NOTE_USE_PC_ANYWHERE :: Open your PC boxes anywhere, with no PC needed.\n\nTurn this on, then tap the OPTIONS icon (the rightmost icon) on the game's bottom touch screen to open your PC on the spot.\n\nWhile this is on, that icon opens the PC instead, so to reach the game's own OPTIONS menu you must press Y and pick OPTIONS from the menu that appears.
+FAV_USE_PC_ANYWHERE :: PC Anywhere
+NOTE_MISC_VIEW_STATS_IN_SUMMARY :: See your own Pokémon's hidden stats on the Summary screen.\n\nTurn this on, then HOLD a hotkey and open the Pokémon's Summary: hold L for IVs, or hold R for EVs.\n\nThe values are already swapped when the Summary opens, so you can release the button once you are inside.\n\nTo go back to the normal stats, leave the Summary and open it again without holding any hotkey.
+HOTKEY_VIEW_IVS :: View IVs
+HOTKEY_VIEW_EVS :: View EVs
+FAV_MISC_VIEW_STATS_IN_SUMMARY :: View IV/EV
+MENU_VISUALS_DISPLAY :: Visuals & Display
+NOTE_VISUALS_DISPLAY :: Overworld appearance: model outlines, weather and your character model.
+FAV_VISUALS_DISPLAY :: Visuals
+NOTE_MISC_NO_OUTLINES :: Remove black outlines on overworld models.
+FAV_MISC_NO_OUTLINES :: No Outlines
+NOTE_MISC_WEATHER :: Force a specific weather condition in certain ORAS routes (Route 113, 119, 120, Jagged Pass, East Hoenn).
+FAV_MISC_WEATHER :: Set Weather
+NOTE_MISC_MODEL_SWAP :: Pick a different overworld character model.\nThe new model only appears after you enter a building or change area.\n\nCustom models have no running animation.
+FAV_MISC_MODEL_SWAP :: Model Swap
+NOTE_CUSTOM_GAME_KEYBOARD_FOLDER :: Add special characters (symbols, accents, Unicode) to the game's on-screen keyboard - handy for Pokémon nicknames, your trainer name and PSS messages.\n\nOpen a keyboard in the game first, then use these tools.
+FAV_CUSTOM_GAME_KEYBOARD :: Game Keyboard
+MENU_BACKUP_RESTORE_KEYBOARD :: Backup / Restore Keyboard
+NOTE_BACKUP_RESTORE_KEYBOARD :: Save your custom keyboard to the SD card or load a saved one back.\n\nOpen a keyboard in-game, then pick Export (save) or Import (load).\n\nFiles are kept in the 'Keyboard' folder on your SD (up to 20).
+FAV_BACKUP_RESTORE_KEYBOARD :: Backup KB
+NOTE_CUSTOM_GAME_KEYBOARD_KEYS :: With a keyboard open in-game, press X to add a character: choose a key slot (1-65), then a Unicode value (in hex).\nPress Y to wipe the keyboard.\n\nThis is where you actually create your custom characters.
+FAV_CUSTOM_GAME_KEYBOARD_KEYS :: Custom Keys
+NOTE_BYPASS_TEXT_RESTRICT :: Turn off the game's name/text filter so it stops blocking 'invalid' characters and words.\n\nTurn this on before typing custom characters.
+FAV_BYPASS_TEXT_RESTRICT :: Bypass Text
+NOTE_PATCH_COLOR_CRASHES :: Stops the game from crashing when it shows colored text.\n\nTurn this on if you use colored characters or codes in names.
+FAV_PATCH_COLOR_CRASHES :: Color Text Fix
+MENU_SHOW_NOTIFICATIONS :: Display On-Screen Notifications
+NOTE_SHOW_NOTIFICATIONS :: Toast on the top screen when you toggle a cheat on/off.
+FAV_SHOW_NOTIFICATIONS :: Notifications
+MENU_PLUGIN_SETTINGS :: Plugin Settings
+NOTE_PLUGIN_SETTINGS :: This plugin's own settings (e.g. language) - not your game options.
+MENU_VIEW_PARTY_SUMMARY :: View Party Summary
+NOTE_VIEW_PARTY_SUMMARY :: View your team's hidden stats (stats, IVs, EVs, nature, ability, item, OT...). Pick a slot to see its full card.\n\nShows your LAST SAVED party — if you changed your team, save the game first.\n\nCard controls:\n\nUp/Down: move the box to pick a stat (HP, Atk, Def, SpA, SpD, Spe).\n\nA: jump to the team member with the HIGHER (or LOWER) value of that stat. If several tie, press A again to cycle through them.\n\nL (rebindable in Tools > Hotkeys): flip between HIGHER and LOWER, shown at the bottom-right of the top screen.\n\nA small triangle left of a stat means this Pokemon has the team's best (up) or worst (down) value of it.\n\nLeft/Right: switch cards. B: back. Select: exit to the game.
+FAV_VIEW_PARTY_SUMMARY :: Party Summary
+MENU_MINI_GAME_CORNER :: ★ Mini Game Corner ★
+NOTE_MINI_GAME_CORNER :: Mini-games for fun: roll for a random wild encounter, open loot boxes, bet your Pokemon on a stat, spin the wheel, play slots and more.\n\nOn the bottom screen, switch between:\n\nFREE TO PLAY: you still get the items, Pokemon and spawns you win, but your money never changes.\n\nSPEND PokeDollars: real money is at stake - games charge an entry/bet and pay out (or take) Pokedollars for real.\n\nYour FREE/PAID choice is remembered between sessions.\n\nHeads up: items you win and any money changes only stick if you SAVE THE GAME afterwards. Loot Box never gives out TMs/HMs or Key Items, so it can't affect your story progress.
+FAV_MINI_GAME_CORNER :: MinGame Corner
+DLG_BAG_CHOOSE_ITEM :: choose an item to add
+DLG_BAG_HOW_MANY :: How many? (1-999):
+DLG_BAG_POCKET_FULL :: That pocket looks full - no free slot found.
+DLG_BAG_ADDED_FMT :: Added %dx %s\nto your %s pocket.
+DLG_DANGER_NO :: NO - keep it off
+DLG_DANGER_YES :: YES - apply it
+DLG_DANGER_HEADING :: BEWARE!\nThis CANNOT be undone\nonce you save.
+DLG_DANGER_APPLY_Q :: Apply it anyway?
+DLG_DANGER_KEYITEMS_BODY :: It dumps every TM, HM and\nKey Item at once, flooding\nyour Bag and your progress.
+DLG_DANGER_DEX_BODY :: It marks every Pokémon as\nseen and caught, so you lose\nfilling the Dex yourself.
+DLG_DANGER_BOXES_BODY :: It force-opens all 31 PC\nboxes, a permanent change\nto your save file.
+DLG_OVERWRITE_HEADING :: OVERWRITE?
+DLG_OVERWRITE_BODY :: The destination slot already\nhas a Pokemon. Cloning will\nreplace it.
+DLG_OVERWRITE_Q :: Overwrite it?
+DLG_SHEET_EMPTY_SLOT :: Empty / invalid slot.\nPick a valid Position first.
+DLG_PARTY_NOT_FOUND :: Could not locate your party in memory.\nLoad a save (and save the game) first.
+DLG_PARTY_EDIT_SAVE_NOTE :: \n\nSAVE the game to keep this change.\nHP/Atk/... refresh after you heal or deposit/withdraw.
+DLG_DISCARD :: DISCARD
+DLG_SAVE :: SAVE
+DLG_MOVES_SAVE_PROMPT :: You changed the moves.\nSave before leaving?
+DLG_RELEARN_SAVE_PROMPT :: You changed the relearn moves.\nSave before leaving?
+DLG_DISCARD_EDITS :: DISCARD edits
+DLG_SAVE_TO_BOX :: SAVE to box
+DLG_KEEP_EDITS_FMT :: Keep your edits to\nBox %d / Slot %d ?
+DLG_COMING_SOON :: \n\nComing soon!
+DLG_BUY_FMT :: Buy %s for %s?
+DLG_ADD_FMT :: Add %s to your bag?
+DLG_BUY_RES_ADDED_FREE :: Added (free)
+DLG_BUY_RES_PURCHASED :: Purchased
+DLG_BUY_RES_NOT_SOLD :: Not sold in PAY mode
+DLG_BUY_RES_NO_MONEY :: Not enough money
+DLG_BUY_RES_BAG_FULL :: Bag is full
+KB_BATTLE_CHOOSE_PARTY_SLOT :: Choose Party Slot
+KB_BATTLE_SLOT :: Slot
+FIND_BOX_SLOT_FMT :: Box %d - Slot %d
+FIND_NOT_IN_BOX_FMT :: %s: not found in any PC box.
+FIND_FOUND_FMT :: %s - found %d:
+FIND_AND_MORE_FMT :: ...and %d more
+ENEMY_LV :: Lv.
+ENEMY_HP :: HP:
+ENEMY_PKRS :: pkrs
+ENEMY_NATURE :: Ntr:
+ENEMY_ABILITY :: Abt:
+ENEMY_HA :: (HA)
+ENEMY_HIDDEN_POWER :: Hid.P:
+ENEMY_ITEM :: Item:
+ENEMY_IV_TOTAL :: IV:
+ENEMY_IV_MAX :: /186
+ENEMY_EV_TOTAL :: EV:
+ENEMY_EV_MAX :: /510
+ENEMY_PAGE_01 :: Page 01
+ENEMY_PAGE_02 :: Page 02
+SPAWN_TAUNT_1 :: You're going down!
+SPAWN_TAUNT_2 :: You'll regret this!
+SPAWN_TAUNT_3 :: Bring it on!
+SPAWN_TAUNT_4 :: Catch me if you can!
+SPAWN_TAUNT_5 :: You're no match for me!
+SPAWN_TAUNT_6 :: Let's settle this!
+SPAWN_TAUNT_7 :: Is that all you've got?
+SPAWN_TAUNT_8 :: Prepare to lose!
+SPAWN_TAUNT_9 :: Come and get me!
+SPAWN_TAUNT_10 :: I won't go easy on you!
+SPAWN_APPEARED :: A wild Pokemon appeared!
+SPAWN_NO_IMAGE :: IMAGE
+SPAWN_NA :: N/A
+SPAWN_LV_FMT :: Lv %d
+SPAWN_SPAWNED :: Spawned!
+SPAWN_STEP_INTO :: Step into grass / water / a cave
+SPAWN_RUN_INTO :: to run into it.
+SPAWN_KEY_AB :: A / B
+SPAWN_KEEP_BROWSING :: keep browsing
+SPAWN_KEY_SELECT :: SELECT
+SPAWN_BACK_TO_GAME :: back to the game
+SPAWN_LEVEL_PROMPT :: Level (1-100)
+SPAWN_ABILITY :: Ability:
+SPAWN_HIDDEN :: Hidden:
+SPAWN_MEGA_EVOLUTION :: Mega Evolution
+SPAWN_MOVES_AT_LV_FMT :: Moves @ Lv %d
+SPAWN_SETTINGS :: Spawn settings
+SPAWN_FORM :: Form
+SPAWN_LEVEL :: Level
+SPAWN_SPRITE :: Sprite
+SPAWN_NORMAL :: Normal
+SPAWN_SHINY :: Shiny
+SPAWN_ON_THE_WILD :: SPAWN ON THE WILD
+SPAWN_BACK_RESULTS :: B  -  back to results
+SPAWN_STAGE_BABY :: Baby
+SPAWN_STAGE_1 :: Stage 1
+SPAWN_STAGE_2 :: Stage 2
+SPAWN_STAGE_3 :: Stage 3
+SPAWN_STAGE_NOEVO :: No evo
+SPAWN_CAT_REGULAR :: Regular
+SPAWN_CAT_LEGEND :: Legend.
+SPAWN_CAT_MYTHICAL :: Mythical
+SPAWN_CAT_PSEUDO :: Pseudo
+SPAWN_CAT_STARTER :: Starter
+SPAWN_CAT_FOSSIL :: Fossil
+SPAWN_ANY :: any
+SPAWN_NONE :: None
+SPAWN_GEN :: Gen
+SPAWN_GEN_CHIP_FMT :: Gen %d
+SPAWN_STAGES_FMT :: %d stages
+SPAWN_STAGE_FMT :: %d stage
+SPAWN_MEGA :: Mega
+SPAWN_NOMEGA :: NoMega
+SPAWN_HUB_TITLE :: Wild Pokemon Spawner
+SPAWN_MATCH_ONE_FMT :: %d match
+SPAWN_MATCH_MANY_FMT :: %d matches
+SPAWN_NO_MATCH :: No Pokemon match these filters.
+SPAWN_WIDEN :: Tap a filter below to widen the search.
+SPAWN_FILTERS :: Filters
+SPAWN_IN_INVENTORY :: In-Inventory
+SPAWN_ON :: ON
+SPAWN_SEARCH_PROMPT :: Search by name or National Dex #
+SPAWN_NAME_NUM :: Name / #
+SPAWN_GENERATION :: Generation
+SPAWN_TYPE :: Type
+SPAWN_TRAITS :: Traits
+SPAWN_HUB_HELP :: A pick    B exit    START reset
+SPAWN_1ST_TYPE :: 1st type
+SPAWN_2ND_TYPE :: 2nd type
+SPAWN_EVO_STAGE :: Evolution stage
+SPAWN_CATEGORY :: Category
+SPAWN_MEGA_HDR :: Mega
+SPAWN_HAS_MEGA :: Has Mega
+SPAWN_NO_MEGA :: No Mega
+FILTER_RESET :: Reset
+FILTER_BACK :: < Back
+MART_POCKET_ITEMS :: Items
+MART_POCKET_MEDICINES :: Medicines
+MART_POCKET_BERRIES :: Berries
+MART_POCKET_TMS_HMS :: TMs & HMs
+MART_POCKET_KEY_ITEMS :: Key Items
+MART_GRP_POKE_BALLS :: Poke Balls
+MART_GRP_EVOLUTION :: Evolution
+MART_GRP_MEGA_STONES :: Mega Stones
+MART_GRP_HOLD_ITEMS :: Hold items
+MART_GRP_TYPE_ITEM :: Type item
+MART_GRP_BATTLE_ITEM :: Battle item
+MART_GRP_TREASURES :: Treasures
+MART_GRP_FOSSILS :: Fossils
+MART_GRP_OTHER :: Other
+MART_GRP_HP_HEAL :: HP heal
+MART_GRP_PP_RESTORE :: PP restore
+MART_GRP_STATUS_CURE :: Status cure
+MART_GRP_REVIVE :: Revive
+MART_GRP_VITAMIN_EXP :: Vitamin/EXP
+MART_GRP_HP_PP_HEAL :: HP/PP heal
+MART_GRP_PINCH_HEAL :: Pinch heal
+MART_GRP_TYPE_RESIST :: Type resist
+MART_GRP_PINCH_BOOST :: Pinch boost
+MART_GRP_EV_FRIEND :: EV/friend
+MART_GRP_PHYSICAL :: Physical
+MART_GRP_SPECIAL :: Special
+MART_GRP_STATUS :: Status
+MART_GRP_TRAVEL_TOOL :: Travel/Tool
+MART_GRP_STORY_EVENT :: Story/Event
+MART_GRP_MEGA_FORM :: Mega/Form
+MART_GRP_MISC :: Misc
+MART_FLAVOR_NONE :: -
+MART_FLAVOR_SPICY :: Spicy
+MART_FLAVOR_DRY :: Dry
+MART_FLAVOR_SWEET :: Sweet
+MART_FLAVOR_BITTER :: Bitter
+MART_FLAVOR_SOUR :: Sour
+MART_STATUS_NONE :: -
+MART_STATUS_POISON :: Poison
+MART_STATUS_PARALYSIS :: Paralysis
+MART_STATUS_SLEEP :: Sleep
+MART_STATUS_BURN :: Burn
+MART_STATUS_FREEZE :: Freeze
+MART_STATUS_CONFUSION :: Confusion
+MART_TAB_ITEMS :: Items
+MART_TAB_MEDS :: Meds
+MART_TAB_BERRY :: Berry
+MART_TAB_TM_HM :: TM/HM
+MART_TAB_KEY :: Key
+MART_MODAL_TITLE :: PokeMart Anywhere
+MART_MODAL_L1 :: PAY  -  a real Poke Mart. The list shows
+MART_MODAL_L2 :: only items you can actually buy in-game,
+MART_MODAL_L3 :: and each costs Money (buy now, or build a
+MART_MODAL_L4 :: cart and check out). For the canonical
+MART_MODAL_L5 :: experience, play in PAY.
+MART_MODAL_L7 :: FREE  -  add any item, any amount, for free
+MART_MODAL_L8 :: (the classic behavior).
+MART_MODAL_L10 :: Switch any time with START.
+MART_CHOOSE_MODE :: Choose a mode
+MART_TAP_BOX :: Tap a box, or use Left / Right
+MART_B_CANCEL :: B = cancel
+MART_PAY :: PAY
+MART_COSTS_MONEY :: costs Money
+MART_FREE :: FREE
+MART_NO_CHARGE :: no charge
+MART_PURCHASE_THANKS_FMT :: Thank you for your purchase!\n\n- PokeMart\n\nSpent: $%d
+MART_NOT_ENOUGH :: Not enough money!
+MART_CHECKOUT :: Checkout
+MART_MONEY_LABEL :: Money: $
+MART_CART_EMPTY :: Your cart is empty.
+MART_TOTAL_CAPS :: TOTAL:  $
+MART_ITEMS_IN_CART_FMT :: Items in cart: %d
+MART_TOTAL_LABEL2 :: Total:  $
+MART_MONEY_LABEL2 :: Money:  $
+MART_PAY_TOTAL :: PAY  $
+MART_CLEAR_CART :: Clear Cart
+MART_BACK_LIST :: B - back to the list
+MART_TITLE :: Bag - add an item
+MART_ITEMS_COUNT_FMT :: %d items
+MART_NO_MATCH :: No items match these filters.
+MART_WIDEN :: Tap a filter below to widen it.
+MART_HOLDABLE :: Holdable
+MART_NO_DESC :: (no description available)
+MART_ADD_TO_BAG_HDR :: Add to bag
+MART_QUANTITY :: Quantity
+MART_QUANTITY_PROMPT :: Quantity (1-999)
+MART_TMHM_ONE :: TM/HM - added as one (reusable)
+MART_KEY_ONE :: Key Item - added as one
+MART_TOTAL_LABEL :: Total: $
+MART_ADD_CART :: ADD CART
+MART_PAY_NOW :: PAY NOW
+MART_ADD_TO_BAG_BTN :: ADD TO BAG
+MART_ADDED_QTY_FMT :: Added %dx %s!
+MART_ADDED_FMT :: Added %s!
+MART_POCKET_FULL_SHORT :: That pocket looks full.
+MART_FILTERS :: Filters
+MART_IN_BAG :: In bag
+MART_ON :: ON
+MART_ANY :: any
+MART_SEARCH_PROMPT :: Search by name or item #
+MART_NAME_NUM :: Name / #
+MART_ALL_FMT :: All %s
+MART_POCKET :: Pocket
+MART_EFFECT :: Effect
+MART_STATUS :: Status
+MART_TYPE :: Type
+MART_SORT :: Sort
+MART_RESET_ALL :: Reset all
+MART_CART_FMT :: CART %d   $%d
+MART_MODE_PAY :: Mode: PAY
+MART_MODE_FREE :: Mode: FREE
+MART_HUB_HELP :: A add   B exit   START: PAY/FREE
+MART_STATUS_PANEL_HDR :: Status  (cure / inflict / teach)
+MART_SORT_PANEL_HDR :: Sort the list
+MART_FLAVOR :: Flavor
+SORT_OFF :: off
+SORT_NAME :: Name
+SORT_PRICE :: Price
+SORT_TYPE :: Type
+SORT_OWNED :: Owned
+SORT_DESC_SUFFIX :: desc
+SORT_ASC_SUFFIX :: asc
+SORT_DEFAULT :: Default
+SORT_NAME_AZ :: Name (A-Z)
+SORT_ORDER_DESC :: Order:  Descending
+SORT_ORDER_ASC :: Order:  Ascending
+LEGEND_WILL_RESPAWN_FMT :: %s will respawn!
+LEGEND_ALREADY_AVAILABLE_FMT :: %s was already available
+LEGEND_LOCATION :: Location
+LEGEND_TITLE :: Legendaries
+LEGEND_IN_YOUR_GAME_FMT :: %d in your game
+LEGEND_RESPAWN_BTN :: RESPAWN AT ITS LOCATION
+TELE_SEC_CAVES :: Caves
+TELE_SEC_FORESTS :: Forests
+TELE_SEC_LANDMARKS :: Landmarks
+TELE_SEC_MIRAGE :: Mirage Spots
+TELE_CAT_ALL :: All
+TELE_CAT_TOWNS :: Towns
+TELE_CAT_OTHER :: Other
+TELE_CAT_ROUTES :: Routes
+TELE_CAT_MAP :: Map
+TELE_CATF_TOWNS :: Towns & Cities
+TELE_CATF_OTHER :: Other
+TELE_CATF_ROUTES :: Routes
+TELE_CATF_MAP :: Map
+TELE_DIR_N :: N
+TELE_DIR_S :: S
+TELE_DIR_E :: E
+TELE_DIR_W :: W
+TELE_DIR_NE :: NE
+TELE_DIR_NW :: NW
+TELE_DIR_SE :: SE
+TELE_DIR_SW :: SW
+TELE_OV_ALL :: ALL
+TELE_OV_TOWNS :: TOWNS
+TELE_OV_ROUTES :: ROUTES
+TELE_OV_CAVES :: CAVES
+TELE_OV_FORESTS :: FORESTS
+TELE_OV_LANDM :: LANDM.
+TELE_OV_MIRAGE :: MIRAGE
+TELE_TITLE_ALL_FMT :: %s - All
+TELE_TITLE_MAP_FMT :: %s - Map
+TELE_TITLE_OTHER_FMT :: %s - Other
+TELE_PAGE_FMT :: Pg %d/%d
+TELE_EXITS :: Exits:
+TELE_ROUTE_HAS_SPOT :: A: teleport here   (Start: re-set warp)
+TELE_ROUTE_NO_SPOT :: stand on it, then Start = save warp point
+TELE_OPEN_SECTION :: A: open this section
+TELE_OV_HINT1 :: D-Pad: move   A: teleport   X: here
+TELE_OV_HINT2 :: tap chips: filter    Y: map    B: back
+TELE_NO_LINKS :: (no links)
+TELE_MAP_HINT2 :: L/R: category   Y: all-map   B: back
+TELE_GRID_HINT1 :: A: teleport     X: you are here
+TELE_GRID_HINT2 :: Start: save warp point    ZL: tag area
+TELE_GRID_HINT3 :: Y: list   L/R: category   B: back
+TELE_LEGEND :: +tag / +warp = not set yet
+TELE_MSG_HERE_FMT :: Here: %s
+TELE_MSG_MAP_FMT :: map 0x%s - pick place, ZL = tag
+TELE_MSG_TAGGED_FMT :: Tagged here (0x%s) -> %s
+TELE_MSG_WARP_REPLACED_FMT :: Warp point replaced: %s
+TELE_MSG_WARP_SET_FMT :: Warp point set: %s
+TELE_MSG_NO_WARP_ROUTE :: No warp point yet - Start on the route
+TELE_MSG_NO_WARP_STAND :: No warp point yet - stand there + Start to save
+TELE_MSG_ZL_TAG_FMT :: ZL = tag 0x%s -> %s
+DLG_NO_KEEP_OFF :: NO - keep it off
+DLG_YES_APPLY :: YES - apply it
+TELE_FLYMAP_WARN_HEAD :: BEWARE!\nThis CANNOT be undone\nonce you save.
+TELE_FLYMAP_WARN_BODY :: It opens every Fly spot at\nonce, so you lose track of\nwhere the story has taken you.
+TELE_FLYMAP_WARN_Q :: Apply it anyway?
+HUD_BP :: BP: %u
+HUD_MILES :: Miles: %lu
+HUD_PARTY :: Party: %d/6
+HUD_XY :: X:%.0f Y:%.0f
+HUD_REPEL :: Repel: %u
+HUD_MAP_ID :: Map #%u (0x%X)
+HUD_POS_TOP_LEFT :: Top-Left
+HUD_POS_TOP_CENTER :: Top-Center
+HUD_POS_TOP_RIGHT :: Top-Right
+HUD_POS_LEFT :: Left
+HUD_POS_CENTER :: Center
+HUD_POS_RIGHT :: Right
+HUD_POS_BOTTOM_LEFT :: Bottom-Left
+HUD_POS_BOTTOM_CENTER :: Bottom-Center
+HUD_POS_BOTTOM_RIGHT :: Bottom-Right
+HUD_POS_TITLE :: Choose where the HUD appears
+HUD_POS_INSTR1 :: Tap a cell below - it mirrors this screen.
+HUD_POS_INSTR2 :: Highlighted = target.   Press B to cancel.
+HUD_POS_TOAST_FMT :: HUD position: %s
+HUD_LIVE_PREVIEW :: Live preview
+HUD_PANEL_OPACITY_HDR :: Panel opacity
+HUD_OPACITY_DRAG :: Drag the bar to set opacity.
+HUD_OK_CANCEL :: A = OK     B = Cancel
+HUD_OPACITY_TOAST :: HUD panel opacity: %d%%
+MENU_ENEMY_STATS :: Display Enemy Stats
+NOTE_ENEMY_STATS :: See a battle opponent's hidden data on the top screen.\n\nFirst arm the overlay with "Enable Stats" (it can only be unlocked during a battle - read its info), then pick exactly which stats appear with the toggles below.
+FAV_ENEMY_STATS :: Enemy Stats
+MENU_ENEMY_ENABLE :: Enable Stats
+NOTE_ENEMY_ENABLE :: See the foe's stats in battle.\n\nAt first this toggle is LOCKED (shown with a gear icon) because it can only be armed during a battle.\n\nTo unlock it: enter any battle, select this item, then tap ENABLE on the bottom touch screen - you only need to do this once.\n\nAfter that the toggle is unlocked; tick it to turn the feature on.\n\nIn battle: ZR flips between the two pages (Basic/Moves and IV/EV), and L/R switch between the enemy's Pokémon.\n\nTo hide the overlay entirely, just turn this Enable Stats toggle back OFF.
+FAV_ENEMY_ENABLE :: Enable Stats
+MENU_ENEMY_SLOT :: Slot number
+NOTE_ENEMY_SLOT :: Show the party slot [#N] (green when you already own the species in a box, red when you don't).
+FAV_ENEMY_SLOT :: Show: Slot #
+MENU_ENEMY_SPECIES :: Species
+NOTE_ENEMY_SPECIES :: Show the opponent's species name.
+FAV_ENEMY_SPECIES :: Show: Species
+MENU_ENEMY_GENDER :: Gender
+NOTE_ENEMY_GENDER :: Show the gender symbol (blue male / pink female).
+FAV_ENEMY_GENDER :: Show: Gender
+MENU_ENEMY_LEVEL :: Level
+NOTE_ENEMY_LEVEL :: Show the opponent's level.
+FAV_ENEMY_LEVEL :: Show: Level
+MENU_ENEMY_MAXHP :: Max HP
+NOTE_ENEMY_MAXHP :: Show the opponent's maximum HP.
+FAV_ENEMY_MAXHP :: Show: Max HP
+MENU_ENEMY_SHINY :: Shiny mark
+NOTE_ENEMY_SHINY :: Show a gold star when the opponent is shiny.
+FAV_ENEMY_SHINY :: Show: Shiny mark
+MENU_ENEMY_PKRS :: Pokerus
+NOTE_ENEMY_PKRS :: Show a 'pkrs' mark when the opponent carries Pokerus.
+FAV_ENEMY_PKRS :: Show: Pokerus
+MENU_ENEMY_NATURE :: Nature
+NOTE_ENEMY_NATURE :: Show the opponent's Nature.
+FAV_ENEMY_NATURE :: Show: Nature
+MENU_ENEMY_ABILITY :: Ability
+NOTE_ENEMY_ABILITY :: Show the opponent's Ability, marked (HA) when it is the Hidden Ability.
+FAV_ENEMY_ABILITY :: Show: Ability
+MENU_ENEMY_HIDDEN_POWER :: Hidden Power
+NOTE_ENEMY_HIDDEN_POWER :: Show the opponent's Hidden Power type.
+FAV_ENEMY_HIDDEN_POWER :: Show: Hid.Pwr
+MENU_ENEMY_HELD_ITEM :: Held item
+NOTE_ENEMY_HELD_ITEM :: Show the item the opponent is holding.
+FAV_ENEMY_HELD_ITEM :: Show: Held item
+MENU_ENEMY_MOVES :: Moves
+NOTE_ENEMY_MOVES :: Show the opponent's four moves.
+FAV_ENEMY_MOVES :: Show: Moves
+MENU_ENEMY_IVS :: IVs
+NOTE_ENEMY_IVS :: On the IV/EV page, show the six per-stat IVs (color-coded by quality).
+FAV_ENEMY_IVS :: Show: IVs
+MENU_ENEMY_IV_TOTAL :: IV total
+NOTE_ENEMY_IV_TOTAL :: On the IV/EV page, show the IV total (out of 186).
+FAV_ENEMY_IV_TOTAL :: Show: IV total
+MENU_ENEMY_EVS :: EVs
+NOTE_ENEMY_EVS :: On the IV/EV page, show the six per-stat EVs (color-coded by investment).
+FAV_ENEMY_EVS :: Show: EVs
+MENU_ENEMY_EV_TOTAL :: EV total
+NOTE_ENEMY_EV_TOTAL :: On the IV/EV page, show the EV total (out of 510).
+FAV_ENEMY_EV_TOTAL :: Show: EV total
+MENU_HUD :: Config HUD
+NOTE_HUD :: Choose what the HUD shows and where it sits (top screen).\n\nThe whole overlay is turned on or off with 'Display HUD', one level up.\n\nTip: favorite 'Display HUD' (press Y on it) to flip it on and off in a tap.
+MENU_HUD_DISPLAY :: Display HUD
+NOTE_HUD_DISPLAY :: Master switch for the on-screen overlay.
+FAV_HUD_DISPLAY :: Display HUD
+MENU_HUD_MONEY :: Money
+NOTE_HUD_MONEY :: Show how much money you have.
+FAV_HUD_MONEY :: Show: Money
+MENU_HUD_CLOCK :: Time Played
+NOTE_HUD_CLOCK :: Show your play time.
+FAV_HUD_CLOCK :: Show: Time Played
+MENU_HUD_INGAME :: In-Game Time
+NOTE_HUD_INGAME :: Show the game's day/night phase from the 3DS clock (Gen 6 uses real time).\nMorning 04:00-10:59\nDay 11:00-17:59\nEvening 18:00-20:59\nNight 21:00-03:59
+FAV_HUD_INGAME :: Show: In-Game Time
+MENU_HUD_REALTIME :: Real Time
+NOTE_HUD_REALTIME :: Show the real console clock (HH:MM) — the same time the game shows on the save screen.
+FAV_HUD_REALTIME :: Show: Real Time
+HUD_TOD_MORNING :: Morning
+HUD_TOD_DAY :: Day
+HUD_TOD_EVENING :: Evening
+HUD_TOD_NIGHT :: Night
+MENU_HUD_BP :: Battle Points
+NOTE_HUD_BP :: Show your current Battle Points (BP).
+FAV_HUD_BP :: Show: Btl.Pts
+MENU_HUD_STATUS :: Status Condition
+NOTE_HUD_STATUS :: Show your lead Pokémon's status during battle (PSN / BRN / SLP / PAR / FRZ).\nOnly visible when in battle.
+FAV_HUD_STATUS :: Show: Status
+MENU_HUD_MILES :: Pokemiles
+NOTE_HUD_MILES :: Show your Pokemiles.
+FAV_HUD_MILES :: Show: Pokemiles
+MENU_HUD_PARTY :: Party count
+NOTE_HUD_PARTY :: Show how many Pokemon are in your party.
+FAV_HUD_PARTY :: Show: Party
+MENU_HUD_XY :: X/Y pos
+NOTE_HUD_XY :: Show your current map coordinates.
+FAV_HUD_XY :: Show: X/Y pos
+MENU_HUD_REPEL :: Repel steps
+NOTE_HUD_REPEL :: Show how many steps of Repel are left (0 = no Repel active).\nNot saved by the game, so it resets to 0 on reload.
+FAV_HUD_REPEL :: Show: Repel
+MENU_HUD_MAP_ID :: Map id
+NOTE_HUD_MAP_ID :: Show the current map id, live (debug / for cataloging zones for 'you are here').
+FAV_HUD_MAP_ID :: Show: Map id
+MENU_HUD_PANEL :: Translucent panel
+NOTE_HUD_PANEL :: A dark see-through box behind the text, for readability.
+FAV_HUD_PANEL :: Panel
+MENU_HUD_OPACITY :: Panel opacity
+NOTE_HUD_OPACITY :: Set how see-through the panel is (0-100%). Drag the bar; the top screen previews it live.
+FAV_HUD_OPACITY :: Panel opacity
+MENU_HUD_SET_POSITION :: Set position
+NOTE_HUD_SET_POSITION :: Choose which corner/area the overlay appears in.
+FAV_HUD_SET_POSITION :: HUD position
+
+# --- Framework UI (bottom buttons + Tools menu & submenus) ---
+FW_FAVORITES :: Favorites
+FW_MAPPER :: Mapper
+FW_GAME_GUIDE :: Game Guide
+FW_SEARCH :: Search
+FW_APP_GUIDE :: App Guide
+FW_ACTIONREPLAY :: ActionReplay
+FW_TOOLS :: Tools
+FW_ABOUT :: About
+FW_HOTKEYS :: Hotkeys
+FW_CHANGE_THEME :: Change Theme
+FW_SETTINGS :: Settings
+FW_LANGUAGE :: Language
+FW_SCREENSHOTS :: Screenshots
+FW_HEXEDITOR :: HexEditor
+FW_RAM_DUMPER :: Gateway RAM Dumper
+FW_MISC :: Miscellaneous
+FW_REBOOT :: Reboot 3DS
+FW_POWEROFF :: Power-off 3DS
+FW_HK_MENU :: Open/Close Menu (default Select)
+FW_HK_FAV :: Favorite item (default Y)
+FW_HK_INFO :: Show item Info (default X)
+FW_HK_EDIT :: Open item Editor (default START)
+FW_HK_CARD :: Card stat HIGHER/LOWER (default L)
+FW_SET_SAVEFAV :: Save Favorites
+FW_SET_LOADFAV :: Load Favorites at Start
+FW_SET_SAVECHEATS :: Save Enabled Cheats
+FW_SET_LOADCHEATS :: Load Enabled Cheats at Start
+FW_SET_FLOATBTN :: Show Floating Menu Button
+FW_SET_BACKLIGHT :: Set Backlight (Experimental)
+FW_SS_CONFIG :: Config
+FW_SS_OVERLAYS :: Include overlays (HUD, stats, notifications)
+FW_SS_CAPTUREUI :: Capture plugin UI (menu & tools)
+FW_MISC_EXPORT :: Export Loaded Game Files
+FW_MISC_DISPLAY :: Display Loaded Game Files
+FW_MISC_CURSOR :: Display Touch Cursor
+FW_MISC_COORDS :: Display Touch Coordinates
+FW_ABOUT_BODY :: Gen6CTRPluginFrameworkOverhauled — an overhauled 3gx plugin for Pokémon X, Y, Omega Ruby and Alpha Sapphire on the Nintendo 3DS.\n\nA beginner-friendly fork that keeps every feature and wraps it in a guided, welcoming experience.\n\nFork & overhaul by:\ngithub.com/samaBR85\n\n----- CREDITS -----\n\nThis stands on a long line of volunteer work — every bit of it deserves recognition.\n\nBased on Gen 6 CTRPluginFramework by biometrix76:\ngithub.com/biometrix76\n\nA continuation of Multi-Pokémon Framework (semaj14 & contributors):\ngithub.com/semaj14\n\nFoundations & tooling:\n- ThePixellizerOSS (3gxtool + CTRPluginFramework):\n  gitlab.com/thepixellizeross\n- PKHeX (kwsch):\n  github.com/kwsch/PKHeX\n- AnalogMan151 (ultraSuMoFramework):\n  github.com/AnalogMan151\n- dragonfyre173 (in-game data viewer):\n  github.com/dragonfyre173\n- JourneyOver (ActionReplay code DB):\n  github.com/JourneyOver\n- Alexander Hartmann / Hartie95 (XY & ORAS base):\n  github.com/Hartie95\n- 3DSRNGTool / wwwwwwzx (Gen 6 RNG reference):\n  github.com/wwwwwwzx/3DSRNGTool\n- PokeReader / zaksabeast (initial-seed capture technique):\n  github.com/zaksabeast/PokeReader\n\n----- IMAGE & DATA SOURCES -----\n\nPokemon sprites (Spawner + Legendary icons) are downscaled from the Pokemon Database X/Y sprite set:\n  pokemondb.net\n\nItem, TM and HM icons come from the PokeAPI sprites repository:\n  github.com/PokeAPI/sprites\n\nPokedex, type, ability, move and item data (including item prices): Pokemon Showdown (smogon/pokemon-showdown) and PokeAPI (pokeapi.co). Item names: PKHeX (kwsch). Poke Mart buy lists were cross-checked against the oraswiki and Bulbapedia shop pages.\n\nTeleport Location & route map images, plus the area-connection data, come from the ORAS Wiki:\n  oraswiki.com/locations\n\nKalos (XY) location images come from Bulbapedia:\n  bulbagarden.net\n\nAll Pokemon images and names are (C) Nintendo / Game Freak / The Pokemon Company. These community mirrors are used only to build this free fan tool.\n\nBundled Game Guides (Professor Oak Challenge) for ORAS and X/Y by Mewlax, via the r/ProfessorOak community.\n\nBuilt in collaboration with Claude (Anthropic).
+FW_GUIDE_HINT1 :: Tap a topic on the bottom screen.
+FW_GUIDE_HINT2 :: It opens here, on the top screen.
+FW_GUIDE_HINT3 :: While reading: Up/Down scroll, B goes back.
 
 # --- O-Power Center (visual panel) ---
 PSS_O_POWER_CENTER :: O-Power Center
@@ -435,8 +1084,6 @@ NOTE_DEXNAV_MAX_SEARCH :: Maxes the DexNav search level of all 721 species (ORAS
 FAV_DEXNAV_MAX_SEARCH :: DexNav Max
 DEXNAV_MAX_DONE :: DexNav search levels maxed!
 DEXNAV_CONFIRM_BODY :: This maxes the DexNav\nsearch level of all 721\nspecies. It's saved to\nyour game and can't\nbe undone.
-
-FW_LANGUAGE :: Language
 MENU_HUD_ITEM :: Held item
 FAV_HUD_ITEM :: Held item
 MENU_HUD_ENC :: Encounters

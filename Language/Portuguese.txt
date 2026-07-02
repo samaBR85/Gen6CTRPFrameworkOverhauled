@@ -952,9 +952,19 @@ FAV_HUD_DISPLAY :: Mostrar HUD
 MENU_HUD_MONEY :: Dinh.
 NOTE_HUD_MONEY :: Mostra quanto dinheiro você tem.
 FAV_HUD_MONEY :: Ver: Dinh.
-MENU_HUD_CLOCK :: Hora
+MENU_HUD_CLOCK :: Tempo de Jogo
 NOTE_HUD_CLOCK :: Mostra seu tempo de jogo.
-FAV_HUD_CLOCK :: Ver: Hora
+FAV_HUD_CLOCK :: Ver: Tempo Jogo
+MENU_HUD_INGAME :: Hora no Jogo
+NOTE_HUD_INGAME :: Mostra a fase de dia/noite do jogo pelo relógio do 3DS (Gen 6 usa a hora real).\nManhã 04:00-10:59\nDia 11:00-17:59\nTarde 18:00-20:59\nNoite 21:00-03:59
+FAV_HUD_INGAME :: Ver: Hora Jogo
+MENU_HUD_REALTIME :: Hora Real
+NOTE_HUD_REALTIME :: Mostra o relógio real do console (HH:MM) — a mesma hora que o jogo mostra na tela de salvamento.
+FAV_HUD_REALTIME :: Ver: Hora Real
+HUD_TOD_MORNING :: Manhã
+HUD_TOD_DAY :: Dia
+HUD_TOD_EVENING :: Tarde
+HUD_TOD_NIGHT :: Noite
 MENU_HUD_BP :: Battle Points
 NOTE_HUD_BP :: Mostra seus Battle Points (BP) atuais.
 FAV_HUD_BP :: Mostrar: BP
@@ -1024,7 +1034,7 @@ FW_MISC_DISPLAY :: Mostrar Arquivos do Jogo
 FW_MISC_CURSOR :: Mostrar Cursor Toque
 FW_MISC_COORDS :: Mostrar Coords. de Toque
 
-FW_ABOUT_BODY :: Gen6CTRPluginFrameworkOverhauled — um plugin 3gx repaginado para Pokémon X, Y, Omega Ruby e Alpha Sapphire no Nintendo 3DS.\n\nUm fork amigável para iniciantes que mantém todos os recursos e os envolve em uma experiência guiada e acolhedora.\n\nFork e repaginação por:\ngithub.com/samaBR85\n\n----- CRÉDITOS -----\n\nIsto se apoia em uma longa linha de trabalho voluntário — cada parte dele merece reconhecimento.\n\nBaseado no Gen 6 CTRPluginFramework de biometrix76:\ngithub.com/biometrix76\n\nUma continuação do Multi-Pokémon Framework (semaj14 e colaboradores):\ngithub.com/semaj14\n\nBases e ferramentas:\n- ThePixellizerOSS (3gxtool + CTRPluginFramework):\n  gitlab.com/thepixellizeross\n- PKHeX (kwsch):\n  github.com/kwsch/PKHeX\n- AnalogMan151 (ultraSuMoFramework):\n  github.com/AnalogMan151\n- dragonfyre173 (visualizador de dados no jogo):\n  github.com/dragonfyre173\n- JourneyOver (banco de códigos ActionReplay):\n  github.com/JourneyOver\n- Alexander Hartmann / Hartie95 (base XY e ORAS):\n  github.com/Hartie95\n\n----- FONTES DE IMAGENS & DADOS -----\n\nOs sprites de Pokemon (ícones do Spawner + Lendários) são reduzidos a partir do conjunto de sprites X/Y do Pokemon Database:\n  pokemondb.net\n\nOs ícones de itens, TMs e HMs vêm do repositório de sprites da PokeAPI:\n  github.com/PokeAPI/sprites\n\nDados de Pokedex, tipos, habilidades, golpes e itens (incluindo preços de itens): Pokemon Showdown (smogon/pokemon-showdown) e PokeAPI (pokeapi.co). Nomes de itens: PKHeX (kwsch). As listas de compra da Poke Mart foram conferidas com as páginas de loja do oraswiki e da Bulbapedia.\n\nAs imagens de Localização de Teleporte e mapas de rotas, além dos dados de conexão entre áreas, vêm do ORAS Wiki:\n  oraswiki.com/locations\n\nAs imagens de localização de Kalos (XY) vêm da Bulbapedia:\n  bulbagarden.net\n\nTodas as imagens e nomes de Pokemon são (C) Nintendo / Game Freak / The Pokemon Company. Esses espelhos da comunidade são usados apenas para construir esta ferramenta gratuita de fãs.\n\nGuias do jogo incluídos (Professor Oak Challenge) para ORAS e X/Y por Mewlax, via a comunidade r/ProfessorOak.\n\nFeito em colaboração com o Claude (Anthropic).
+FW_ABOUT_BODY :: Gen6CTRPluginFrameworkOverhauled — um plugin 3gx repaginado para Pokémon X, Y, Omega Ruby e Alpha Sapphire no Nintendo 3DS.\n\nUm fork amigável para iniciantes que mantém todos os recursos e os envolve em uma experiência guiada e acolhedora.\n\nFork e repaginação por:\ngithub.com/samaBR85\n\n----- CRÉDITOS -----\n\nIsto se apoia em uma longa linha de trabalho voluntário — cada parte dele merece reconhecimento.\n\nBaseado no Gen 6 CTRPluginFramework de biometrix76:\ngithub.com/biometrix76\n\nUma continuação do Multi-Pokémon Framework (semaj14 e colaboradores):\ngithub.com/semaj14\n\nBases e ferramentas:\n- ThePixellizerOSS (3gxtool + CTRPluginFramework):\n  gitlab.com/thepixellizeross\n- PKHeX (kwsch):\n  github.com/kwsch/PKHeX\n- AnalogMan151 (ultraSuMoFramework):\n  github.com/AnalogMan151\n- dragonfyre173 (visualizador de dados no jogo):\n  github.com/dragonfyre173\n- JourneyOver (banco de códigos ActionReplay):\n  github.com/JourneyOver\n- Alexander Hartmann / Hartie95 (base XY e ORAS):\n  github.com/Hartie95\n- 3DSRNGTool / wwwwwwzx (Gen 6 RNG reference):\n  github.com/wwwwwwzx/3DSRNGTool\n- PokeReader / zaksabeast (initial-seed capture technique):\n  github.com/zaksabeast/PokeReader\n\n----- FONTES DE IMAGENS & DADOS -----\n\nOs sprites de Pokemon (ícones do Spawner + Lendários) são reduzidos a partir do conjunto de sprites X/Y do Pokemon Database:\n  pokemondb.net\n\nOs ícones de itens, TMs e HMs vêm do repositório de sprites da PokeAPI:\n  github.com/PokeAPI/sprites\n\nDados de Pokedex, tipos, habilidades, golpes e itens (incluindo preços de itens): Pokemon Showdown (smogon/pokemon-showdown) e PokeAPI (pokeapi.co). Nomes de itens: PKHeX (kwsch). As listas de compra da Poke Mart foram conferidas com as páginas de loja do oraswiki e da Bulbapedia.\n\nAs imagens de Localização de Teleporte e mapas de rotas, além dos dados de conexão entre áreas, vêm do ORAS Wiki:\n  oraswiki.com/locations\n\nAs imagens de localização de Kalos (XY) vêm da Bulbapedia:\n  bulbagarden.net\n\nTodas as imagens e nomes de Pokemon são (C) Nintendo / Game Freak / The Pokemon Company. Esses espelhos da comunidade são usados apenas para construir esta ferramenta gratuita de fãs.\n\nGuias do jogo incluídos (Professor Oak Challenge) para ORAS e X/Y por Mewlax, via a comunidade r/ProfessorOak.\n\nFeito em colaboração com o Claude (Anthropic).
 FW_GUIDE_HINT1 :: Toque em um tópico na tela de baixo.
 FW_GUIDE_HINT2 :: Ele abre aqui, na tela de cima.
 FW_GUIDE_HINT3 :: Ao ler: Cima/Baixo rola, B volta.

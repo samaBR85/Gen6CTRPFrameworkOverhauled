@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.6.2
+# Gen6CTRPluginFrameworkOverhauled — v0.6.3
 
 [English](README.md) · **Português**
 
@@ -224,6 +224,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.6.0** — o **O-Power Center**: um painel visual de todos os 18 O-Powers e do medidor de cargas (Refill com um toque, Max All, e um toggle Keep pra não esperar recarga).
 - **v0.6.1** — **RNG Tracking**: leia o RNG do jogo ao vivo no HUD (TSV, current seed, frame, egg seed) pra shiny hunting e RNG abuse — além de novos campos de HUD (item segurado, encontros, passos da sessão), **Max DexNav Search Lv.**, **Health & Mana**, e o **Language** movido pra Tools.
 - **v0.6.2** — **RNG Tracking++**: a **initial seed** agora é capturada ao vivo no console (pro 3DSRNGTool realmente prever seus shinies), o **frame** é a contagem absoluta de advances, um contador **Target frame** com dica de paridade acerta o timing, um toggle **Freeze** segura o HUD inteiro pra copiar os valores, o RNG de selvagem **TinyMT** (estado + advances) aparece no formato copy‑ready `[3][2]/[1][0]`, e mais o **TRV** — tudo num layout estilo PokeReader.
+- **v0.6.3** — **Ajustes no HUD**: o campo mal nomeado "Clock" virou **Time Played**, com dois campos novos no HUD — **In-Game Time** (a fase de dia/noite do jogo pelo relógio do 3DS, ex. `14:15 - Day`) e **Real Time** (o relógio do console) — e o campo **Party count** agora mostra o tamanho real da sua equipe.
 
 ## 📥 Instalando
 
@@ -333,7 +334,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.6.2 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.6.3 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença

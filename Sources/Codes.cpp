@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <ctime>             // time()/gmtime() - In-Game Time & Real Time HUD fields
 #include "Parser.hpp"
 #include "Codes.hpp"
 #include "PKHeX.hpp"
@@ -5185,7 +5186,9 @@ namespace CTRPluginFramework {
     // The element/master on-off are checkbox MenuEntries (persist via Save Enabled Cheats);
     // their state is READ live in the callback. Position + toggle button persist in HUD.txt.
     static MenuEntry *g_hudMaster = nullptr;
-    static MenuEntry *g_hudClock  = nullptr;   // Show: Clock
+    static MenuEntry *g_hudClock  = nullptr;   // Show: Time Played (in-game play time)
+    static MenuEntry *g_hudInGame = nullptr;   // Show: In-Game Time (day/night phase from the console clock)
+    static MenuEntry *g_hudRealTime = nullptr; // Show: Real Time (wall clock HH:MM, matches the save screen)
     static MenuEntry *g_hudMoney  = nullptr;   // Show: Money
     static MenuEntry *g_hudBP     = nullptr;   // Show: Battle Points
     static MenuEntry *g_hudStatus = nullptr;   // Show: Status Condition
@@ -5411,6 +5414,29 @@ namespace CTRPluginFramework {
             lines.push_back(Utils::Format("%u:%02u:%02u", hrs, mins, secs));
         }
 
+        // In-Game Time / Real Time both derive from the console clock (Gen 6 drives day/night off the system
+        // clock; no separate in-game clock). Read the local wall time once and reuse — same pattern as the
+        // framework's own PluginMenuTools::CurrentTime().
+        if ((g_hudInGame   != nullptr && g_hudInGame->IsActivated()) ||
+            (g_hudRealTime != nullptr && g_hudRealTime->IsActivated())) {
+            time_t _t = time(NULL);
+            struct tm *_lt = gmtime(&_t);
+            int _h = _lt ? _lt->tm_hour : 0, _m = _lt ? _lt->tm_min : 0;
+
+            if (g_hudInGame != nullptr && g_hudInGame->IsActivated()) {
+                // Official Gen 6 (X/Y/OR/AS) time-of-day bands, driven by the 3DS clock (verified: Bulbapedia/PokemonDB).
+                const char *todKey;
+                if (_h >= 4 && _h <= 10)      todKey = "HUD_TOD_MORNING"; // 04:00-10:59 morning
+                else if (_h >= 11 && _h <= 17) todKey = "HUD_TOD_DAY";     // 11:00-17:59 day
+                else if (_h >= 18 && _h <= 20) todKey = "HUD_TOD_EVENING"; // 18:00-20:59 evening
+                else                          todKey = "HUD_TOD_NIGHT";   // 21:00-03:59 night
+                lines.push_back(Utils::Format("%02d:%02d - %s", _h, _m, getLanguage->Get(todKey).c_str()));
+            }
+            if (g_hudRealTime != nullptr && g_hudRealTime->IsActivated()) {
+                lines.push_back(Utils::Format("%02d:%02d", _h, _m));
+            }
+        }
+
         if (g_hudBP != nullptr && g_hudBP->IsActivated()) {
             u16 bp = 0;
             Process::Read16(AutoGameSet(0x8C6A6E0, 0x8C71DE8), bp);
@@ -5445,13 +5471,9 @@ namespace CTRPluginFramework {
         }
 
         if (g_hudParty != nullptr && g_hudParty->IsActivated()) {
-            const u32 partyBase = AutoGameSet(0x81FF744, 0x81FEEC8);
-            int count = 0;
-            for (int i = 0; i < 6; i++) {
-                u16 species = 0;
-                Process::Read16(partyBase + i * 0x1E4 + 0x08, species);
-                if (species > 0 && species <= 721) count++;
-            }
+            // Count the real overworld roster (FindPartyBase scan) — same source as View Party Summary. The old
+            // battle-party base (0x81FF744) is only valid mid-battle, so it read stale data in the overworld.
+            int count = PKHeX::CountParty();
             lines.push_back(Utils::Format(getLanguage->Get("HUD_PARTY").c_str(), count));
         }
 
@@ -5921,6 +5943,10 @@ namespace CTRPluginFramework {
         g_hudMoney->SetFavoriteKey("FAV_HUD_MONEY"); g_hudMoney->SetFavoriteAlias(getLanguage->Get("FAV_HUD_MONEY"));
         g_hudClock  = new MenuEntry(getLanguage->Get("MENU_HUD_CLOCK"), HudNoop, getLanguage->Get("NOTE_HUD_CLOCK"));
         g_hudClock->SetFavoriteKey("FAV_HUD_CLOCK"); g_hudClock->SetFavoriteAlias(getLanguage->Get("FAV_HUD_CLOCK"));
+        g_hudInGame = new MenuEntry(getLanguage->Get("MENU_HUD_INGAME"), HudNoop, getLanguage->Get("NOTE_HUD_INGAME"));
+        g_hudInGame->SetFavoriteKey("FAV_HUD_INGAME"); g_hudInGame->SetFavoriteAlias(getLanguage->Get("FAV_HUD_INGAME"));
+        g_hudRealTime = new MenuEntry(getLanguage->Get("MENU_HUD_REALTIME"), HudNoop, getLanguage->Get("NOTE_HUD_REALTIME"));
+        g_hudRealTime->SetFavoriteKey("FAV_HUD_REALTIME"); g_hudRealTime->SetFavoriteAlias(getLanguage->Get("FAV_HUD_REALTIME"));
         g_hudBP     = new MenuEntry(getLanguage->Get("MENU_HUD_BP"), HudNoop, getLanguage->Get("NOTE_HUD_BP"));
         g_hudBP->SetFavoriteKey("FAV_HUD_BP"); g_hudBP->SetFavoriteAlias(getLanguage->Get("FAV_HUD_BP"));
         g_hudStatus = new MenuEntry(getLanguage->Get("MENU_HUD_STATUS"), HudNoop, getLanguage->Get("NOTE_HUD_STATUS"));
@@ -5977,7 +6003,9 @@ namespace CTRPluginFramework {
         // Screen Overlays folder (added via HudMasterEntry() in Main.cpp, below Notifications). Config HUD keeps
         // only the field toggles + opacity/position.
         *hud += g_hudMoney;
-        *hud += g_hudClock;
+        *hud += g_hudClock;      // Time Played  ┐ three time fields grouped
+        *hud += g_hudInGame;     // In-Game Time │ (day/night phase)
+        *hud += g_hudRealTime;   // Real Time    ┘ (console wall clock)
         *hud += g_hudBP;
         *hud += g_hudStatus;
         *hud += g_hudMiles;

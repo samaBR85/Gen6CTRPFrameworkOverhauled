@@ -813,7 +813,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 6, 2, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 6, 3, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized

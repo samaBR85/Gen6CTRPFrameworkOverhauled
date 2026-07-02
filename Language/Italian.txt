@@ -8,125 +8,125 @@
 # If translating to other languages, ONLY replace texts after "::".
 
 BATTLE :: Lotta
-BATTLE_ACCESS_BAG :: Accedi alla Borsa
-BATTLE_ALLOW_MEGAS :: Permetti più di una Megaevoluzione
-BATTLE_ALWAYS_SHINY :: Sempre cromatico
-BATTLE_CAPTURE_RATE_100 :: Tasso di cattura 100%
-BATTLE_CAPTURE_TRAINER_POKEMON :: Cattura Pokémon di un Allenatore
+BATTLE_ACCESS_BAG :: Borsa
+BATTLE_ALLOW_MEGAS :: 1+ Megaevol.
+BATTLE_ALWAYS_SHINY :: Sempre crom.
+BATTLE_CAPTURE_RATE_100 :: Cattura 100%
+BATTLE_CAPTURE_TRAINER_POKEMON :: Cattura Pokémon altrui
 BATTLE_CONDITION :: Stato
-BATTLE_DISABLE_SHINY_LOCK :: Disattiva Shiny Lock
-BATTLE_EXP_MULTIPLIER :: Moltiplicatore PE
+BATTLE_DISABLE_SHINY_LOCK :: No Shiny Lock
+BATTLE_EXP_MULTIPLIER :: Moltiplic. PE
 BATTLE_HEALTH_AND_MANA :: PS e PP
 BATTLE_IN_BATTLE :: In lotta
-BATTLE_ITEM :: Strumento
+BATTLE_ITEM :: Str.
 BATTLE_MOVES :: Mosse
-BATTLE_MUSIC :: Musica
+BATTLE_MUSIC :: Music
 BATTLE_MUSIC_TYPE_NOTE :: Seleziona il file musicale della lotta da usare
-BATTLE_MUSIC_TYPE_TRAINER :: Allenatore
-BATTLE_MUSIC_TYPE_WILD :: Incontro con Pokémon selvatico
-BATTLE_NO_WILD_POKEMON :: Nessun Pokémon selvatico
+BATTLE_MUSIC_TYPE_TRAINER :: Allen.
+BATTLE_MUSIC_TYPE_WILD :: Selvatico
+BATTLE_NO_WILD_POKEMON :: No Pokémon selv.
 BATTLE_OTHER :: Altro
-BATTLE_PARTY_POSITION :: Posizione squadra:
-BATTLE_RESPAWN_LEGENDARY :: Rigenera Leggendario
-BATTLE_STATS :: Statistiche
-BATTLE_VIEW_POKEMON_INFOS :: Visualizza informazioni Pokémon.
-BATTLE_WILD_POKEMON_SPAWNER :: Generatore Pokémon selvatici
+BATTLE_PARTY_POSITION :: Pos.:
+BATTLE_RESPAWN_LEGENDARY :: Rigenera Leggend.
+BATTLE_STATS :: Stat.
+BATTLE_VIEW_POKEMON_INFOS :: Info Pokémon
+BATTLE_WILD_POKEMON_SPAWNER :: Gen. Pokémon selv.
 CONFIG_LANGUAGE :: Lingua
-CONFIG_LANGUAGE_RESET :: Reimposta
+CONFIG_LANGUAGE_RESET :: Reset
 EDITOR :: PKHeX
-EDITOR_BAG :: Borsa
+EDITOR_BAG :: Bor.
 EDITOR_BAG_BERRIES :: Bacche
-EDITOR_BAG_ITEMS :: Strumenti
-EDITOR_BAG_KEY_ITEMS :: Strumenti chiave
-EDITOR_BAG_MEDICINE :: Strumenti curativi
-EDITOR_BAG_SPECIAL :: MT e MN + Strumenti chiave
+EDITOR_BAG_ITEMS :: Strum.
+EDITOR_BAG_KEY_ITEMS :: Chiave
+EDITOR_BAG_MEDICINE :: Curativi
+EDITOR_BAG_SPECIAL :: MT/MN + Str. chiave
 EDITOR_BAG_TMS_HMS :: MT e MN
 EDITOR_BATTLE_POINTS :: Punti Lotta
 EDITOR_BOX :: Box:
-EDITOR_BOXES_ALREADY_UNLOCKED :: Tutti i Box sono già stati sbloccati!
-EDITOR_BOXES_UNLOCKED :: Tutti i Box sbloccati!
-EDITOR_CLONE_BOX_POSITION :: Quale posizione nel Box
-EDITOR_CLONE_FAILED_DATA :: Impossibile recuperare il Pokémon dalla fonte
-EDITOR_CLONE_FAILED_INIT :: Impossibile avviare la clonazione
-EDITOR_CLONE_FAILED_PASTE :: Impossibile copiare il Pokémon nella destinazione
-EDITOR_CLONE_PASTE_BOX :: Incollare nel Box:
-EDITOR_CLONE_PASTE_BOX_POSITION :: In quale posizione nel Box:
-EDITOR_CLONE_START_BOX :: Copiare da quale Box:
-EDITOR_CLONE_SUCCESS :: Pokémon clonato con successo
-EDITOR_CLONING :: Clonazione
+EDITOR_BOXES_ALREADY_UNLOCKED :: Tutti i Box già sbloccati!
+EDITOR_BOXES_UNLOCKED :: Tutti i Box sbloc.!
+EDITOR_CLONE_BOX_POSITION :: Posizione nel Box
+EDITOR_CLONE_FAILED_DATA :: Impossibile recuperare il Pokémon dalla fonte.
+EDITOR_CLONE_FAILED_INIT :: Avvio clonazione fallito.
+EDITOR_CLONE_FAILED_PASTE :: Impossibile copiare il Pokémon nella destinazione.
+EDITOR_CLONE_PASTE_BOX :: Nel Box:
+EDITOR_CLONE_PASTE_BOX_POSITION :: Posizione nel Box:
+EDITOR_CLONE_START_BOX :: Copia da quale Box:
+EDITOR_CLONE_SUCCESS :: Pokémon clonato!
+EDITOR_CLONING :: Clonaz.
 EDITOR_CLONING_POKEMON :: Clona Pokémon
-EDITOR_CONTEST_BEAUTY :: Bellezza
-EDITOR_CONTEST_COOL :: Fascino
-EDITOR_CONTEST_CUTE :: Grazia
-EDITOR_CONTEST_SHEEN :: Lucentezza
-EDITOR_CONTEST_SMART :: Astuzia
-EDITOR_CONTEST_TOUGH :: Grinta
-EDITOR_COPY_POKEMON_IN_TRADE :: Copia Pokémon nello scambio
+EDITOR_CONTEST_BEAUTY :: Bellez.
+EDITOR_CONTEST_COOL :: Fasc.
+EDITOR_CONTEST_CUTE :: Graz.
+EDITOR_CONTEST_SHEEN :: Lucen.
+EDITOR_CONTEST_SMART :: Astuz.
+EDITOR_CONTEST_TOUGH :: Grint.
+EDITOR_COPY_POKEMON_IN_TRADE :: Copia Pokémon scamb.
 EDITOR_COPY_POKEMON_IN_TRADE_NOTE :: Questo sovrascriverà qualsiasi Pokémon presente nello slot 1 del Box 1. Se hai capito, puoi premere i seguenti tasti rapidi.
 EDITOR_CURRENCY :: Valuta
-EDITOR_GAME_LANGUAGE :: Lingua del gioco
+EDITOR_GAME_LANGUAGE :: Lingua gioco
 EDITOR_IGN :: Nome
 EDITOR_INFO :: Info
-EDITOR_INVALID_POSITION :: Posizione non valida
-EDITOR_KEEP_ORIGINAL_POKEMON :: Mantieni Pokémon originale
+EDITOR_INVALID_POSITION :: Pos. non valida
+EDITOR_KEEP_ORIGINAL_POKEMON :: Mantieni originale
 EDITOR_KEEP_ORIGINAL_POKEMON_NOTE :: Il Pokémon non sarà influenzato se spostato, modificato o sostituito: resterà comunque lì.
-EDITOR_MONEY :: Denaro
+EDITOR_MONEY :: Soldi
 EDITOR_PC :: Editor
 EDITOR_PC_ABILITY :: Abilità
 EDITOR_PC_ANYWHERE :: PC ovunque
 EDITOR_PC_BOX :: Box PC
 EDITOR_PC_BOXES :: 31 Box sbloccati
 EDITOR_PC_COUNTRY :: Paese
-EDITOR_PC_EXPORT_IMPORT :: Esporta e Importa
-EDITOR_PC_FORM :: Forma
+EDITOR_PC_EXPORT_IMPORT :: Esporta/Importa
+EDITOR_PC_FORM :: Form
 EDITOR_PC_FRIENDSHIP :: Amicizia
 EDITOR_PC_GENDER :: Sesso
-EDITOR_PC_HELD_ITEM :: Strumento tenuto
+EDITOR_PC_HELD_ITEM :: Tenuto
 EDITOR_PC_IS_EGG :: Uovo
-EDITOR_PC_IS_NICKNAMED :: Soprannominato
+EDITOR_PC_IS_NICKNAMED :: Soprannom.
 EDITOR_PC_LANGUAGE :: Lingua
-EDITOR_PC_LEVEL :: Livello
-EDITOR_PC_MAIN :: Principale
+EDITOR_PC_LEVEL :: Liv.
+EDITOR_PC_MAIN :: Base
 EDITOR_PC_MISC :: Varie
-EDITOR_PC_MISC_LATEST_OT :: Ultimo possessore (non AO)
+EDITOR_PC_MISC_LATEST_OT :: Ultimo poss. (non AO)
 EDITOR_PC_MISC_OT_NAME :: Nome AO
 EDITOR_PC_MISC_SID :: SID
 EDITOR_PC_MISC_TID :: ID
 EDITOR_PC_MOVES :: Mosse
 EDITOR_PC_MOVES_CURRENT :: Mosse attuali
 EDITOR_PC_NATURE :: Natura
-EDITOR_PC_NICKNAME :: Soprannome
+EDITOR_PC_NICKNAME :: Soprann.
 EDITOR_PC_ORIGINS :: Origini
 EDITOR_PC_ORIGINS_BALL :: Ball
-EDITOR_PC_ORIGINS_EGG_MET_DATE :: Data incontro uovo
-EDITOR_PC_ORIGINS_GAME_FROM :: Gioco di provenienza
-EDITOR_PC_ORIGINS_IS_FATEFUL_ENCOUNTER :: Incontro fatidico
-EDITOR_PC_ORIGINS_MET_DATE :: Data incontro
-EDITOR_PC_ORIGINS_MET_LEVEL :: Livello di incontro
-EDITOR_PC_POSITION :: Posizione
-EDITOR_PC_PP_UPS :: PP Su
-EDITOR_PC_REGION :: Regione 3DS
-EDITOR_PC_RELEARN_MOVES :: Mosse da reimparare
-EDITOR_PC_SHINY :: Cromatico
+EDITOR_PC_ORIGINS_EGG_MET_DATE :: Data uovo
+EDITOR_PC_ORIGINS_GAME_FROM :: Da gioco
+EDITOR_PC_ORIGINS_IS_FATEFUL_ENCOUNTER :: Inc. fatidico
+EDITOR_PC_ORIGINS_MET_DATE :: Incontro
+EDITOR_PC_ORIGINS_MET_LEVEL :: Liv. inc.
+EDITOR_PC_POSITION :: Posiz.
+EDITOR_PC_PP_UPS :: PP-Su
+EDITOR_PC_REGION :: Reg. 3DS
+EDITOR_PC_RELEARN_MOVES :: Mosse reimp.
+EDITOR_PC_SHINY :: Crom.
 EDITOR_PC_SPECIES :: Specie
-EDITOR_PC_STATS :: Statistiche
+EDITOR_PC_STATS :: Stat.
 EDITOR_PC_STATS_ATK :: Att
 EDITOR_PC_STATS_CONTEST :: Gare
 EDITOR_PC_STATS_DEF :: Dif
 EDITOR_PC_STATS_EV :: EV
 EDITOR_PC_STATS_HP :: PS
 EDITOR_PC_STATS_IV :: IV
-EDITOR_PC_STATS_SPA :: Att Sp
-EDITOR_PC_STATS_SPD :: Dif Sp
+EDITOR_PC_STATS_SPA :: ASp
+EDITOR_PC_STATS_SPD :: DSp
 EDITOR_PC_STATS_SPE :: Vel
 EDITOR_PC_VIRUS :: Pokérus
 EDITOR_POKE_MILES :: Pokémiglia
 EDITOR_POSITION :: Posizione:
 EDITOR_TID_SID :: ID e SID
-EDITOR_TIME_PLAYED :: Tempo di gioco
-EDITOR_TRAINER :: Allenatore
+EDITOR_TIME_PLAYED :: Tempo gioco
+EDITOR_TRAINER :: Allen.
 EDITOR_UNLOCK_DEX :: Sblocca
-EDITOR_UNLOCK_FULL_DEX :: Sblocca Pokédex completo
+EDITOR_UNLOCK_FULL_DEX :: Dex completo
 GAME_LOC_AMBRETTE :: Petroglifo
 GAME_LOC_ANCIENT_TOMB :: Tomba Antica
 GAME_LOC_ANISTAR :: Fluxopoli
@@ -139,175 +139,175 @@ GAME_LOC_COURIWAY :: Fractalopoli
 GAME_LOC_CYLLAGE :: Arenipoli
 GAME_LOC_DAY_CARE :: Pensione
 GAME_LOC_DENDEMILLE :: Fractalia
-GAME_LOC_DESERT_RUINS :: Rovine Desertiche
+GAME_LOC_DESERT_RUINS :: Rovine Deserto
 GAME_LOC_DEWFORD_TOWN :: Bluruvia
-GAME_LOC_EVER_GRANDE_CITY :: Porto Alghepoli
-GAME_LOC_FABLED_CAVE :: Grotta Leggendaria
-GAME_LOC_FACTORY :: Fabbrica Poké Ball
+GAME_LOC_EVER_GRANDE_CITY :: Alteomare
+GAME_LOC_FABLED_CAVE :: Grotta Favola
+GAME_LOC_FACTORY :: Fabbrica P. Ball
 GAME_LOC_FALLARBOR_TOWN :: Ciclamipoli
-GAME_LOC_FORTREE_CITY :: Arborupoli
+GAME_LOC_FORTREE_CITY :: Arborville
 GAME_LOC_FRIEND_SAFARI :: Safari Amici
 GAME_LOC_GEOSENGE :: Cromleburgo
 GAME_LOC_GNARLED_DEN :: Antro Contorto
-GAME_LOC_GRANITE_CAVE :: Grotta Pietrosa
+GAME_LOC_GRANITE_CAVE :: Grotta Granito
 GAME_LOC_ISLAND_CAVE :: Grotta Isola
 GAME_LOC_KILOUDE :: Borgo Bozzetto
-GAME_LOC_LAB :: Laboratorio Pokémon
+GAME_LOC_LAB :: Lab. Pokémon
 GAME_LOC_LAVERRE :: Romantopoli
 GAME_LOC_LEAGUE :: Lega Pokémon
-GAME_LOC_LILYCOVE_CITY :: Porto Alghepoli
-GAME_LOC_LITTLEROOT :: Radicofogliopoli
+GAME_LOC_LILYCOVE_CITY :: Mareria
+GAME_LOC_LITTLEROOT :: Casaltea
 GAME_LOC_LUMIOSE :: Luminopoli
-GAME_LOC_MAUVILLE :: Ciclamipoli
+GAME_LOC_MAUVILLE :: Iridopoli
 GAME_LOC_METEOR_FALLS :: Cascate Meteora
 GAME_LOC_MOSSDEEP :: Alghepoli
-GAME_LOC_NAMELESS :: Grotta Senza Nome
-GAME_LOC_NEW_MAUVILLE :: Ciclamipoli Nuova
-GAME_LOC_OLDALE :: Oldale
-GAME_LOC_PACIFIDLOG :: Verdeacque
-GAME_LOC_PETALBURG :: Petalipoli
-GAME_LOC_PETALBURG_WOODS :: Bosco Petalo
-GAME_LOC_PILLAR :: Torre dei Cieli
+GAME_LOC_NAMELESS :: Grotta Senzanome
+GAME_LOC_NEW_MAUVILLE :: Neoiridopoli
+GAME_LOC_OLDALE :: Albanova
+GAME_LOC_PACIFIDLOG :: Tronchidi
+GAME_LOC_PETALBURG :: Ditelridia
+GAME_LOC_PETALBURG_WOODS :: Bosco Ditelridia
+GAME_LOC_PILLAR :: Torre Celeste
 GAME_LOC_RUSTBORO :: Ferrugipoli
-GAME_LOC_RUSTURF :: Tunnel Menferro
+GAME_LOC_RUSTURF :: Galleria Ferral.
 GAME_LOC_SANTALUNE :: Novartopoli
 GAME_LOC_SANTALUNE_FOREST :: Bosco Novartopoli
-GAME_LOC_SCORCHED :: Antro Bruciato
-GAME_LOC_SEA_MAUVILLE :: Ciclamipoli Marittima
-GAME_LOC_SEALED :: Camera Sigillata
-GAME_LOC_SECRET :: Prato Segreto
+GAME_LOC_SCORCHED :: Cripta Bruciata
+GAME_LOC_SEA_MAUVILLE :: Iridopoli Mare
+GAME_LOC_SEALED :: Camere Sigillate
+GAME_LOC_SECRET :: Prati Segreti
 GAME_LOC_SHALOUR :: Yantaropoli
-GAME_LOC_SLATEPORT :: Porto Selcepoli
-GAME_LOC_SNOWBELLE :: Fluxopoli
+GAME_LOC_SLATEPORT :: Muscolo
+GAME_LOC_SNOWBELLE :: Glaciamonti
 GAME_LOC_SOOTOPOLIS :: Ceneride
-GAME_LOC_SPIRIT_DEN :: Antro Spirito Marino
-GAME_LOC_TEAM_FLARE :: Quartier Generale del Team Flare
+GAME_LOC_SPIRIT_DEN :: Antro Marespirito
+GAME_LOC_TEAM_FLARE :: QG Team Flare
 GAME_LOC_TERMINUS_CAVE :: Grotta Climax
-GAME_LOC_UNKNOWN_DUNGEON :: Grotta Ignota
-GAME_LOC_VANIVILLE :: Borgo Bozzetto
+GAME_LOC_UNKNOWN_DUNGEON :: Antro Ignoto
+GAME_LOC_VANIVILLE :: Borgo Vanitas
 GAME_LOC_VERDANTURF :: Verdania
 GAME_LOC_VICTORY_ROAD :: Via Vittoria
 GAME_LOC_VIDEO_STUDIO :: Studio Video
 GAME_TEXT_COLOR_BLUE :: Blu
 GAME_TEXT_COLOR_GREEN :: Verde
 GAME_TEXT_COLOR_LIGHT_BLUE :: Azzurro
-GAME_TEXT_COLOR_ORANGE :: Arancione
+GAME_TEXT_COLOR_ORANGE :: Aranc.
 GAME_TEXT_COLOR_PICK :: Colore:
 GAME_TEXT_COLOR_PINK :: Rosa
 GAME_TEXT_COLOR_PURPLE :: Viola
-GAME_TEXT_COLOR_RED :: Rosso
+GAME_TEXT_COLOR_RED :: Ros
 KB_BATTLE_AFFECTED :: Colpito
-KB_BATTLE_ASLEEP :: Addormentato
-KB_BATTLE_BURNED :: Scottato
+KB_BATTLE_ASLEEP :: Sonno
+KB_BATTLE_BURNED :: Scott.
 KB_BATTLE_EMPTY :: [Vuoto]
-KB_BATTLE_FROZEN :: Congelato
+KB_BATTLE_FROZEN :: Gelo
 KB_BATTLE_HEALTH :: PS
 KB_BATTLE_HEALTH_SET_TO :: PS impostati a:
-KB_BATTLE_ITEM_CHANGED :: Strumento cambiato:
+KB_BATTLE_ITEM_CHANGED :: Str. cambiato:
 KB_BATTLE_MANA :: PP
-KB_BATTLE_MANA_SET_TO :: PP impostati a:
-KB_BATTLE_MOVE :: Mossa
-KB_BATTLE_NO_STATUS_EFFECTS :: Nessuno
-KB_BATTLE_PARALYZED :: Paralizzato
-KB_BATTLE_POISONED :: Avvelenato
+KB_BATTLE_MANA_SET_TO :: PP a:
+KB_BATTLE_MOVE :: Moss
+KB_BATTLE_NO_STATUS_EFFECTS :: Ness
+KB_BATTLE_PARALYZED :: Paralisi
+KB_BATTLE_POISONED :: Veleno
 KB_BATTLE_POSITION :: Posizione:
-KB_BATTLE_SELECTED_POSITION :: Posizione selezionata in lotta:
-KB_BATTLE_STAT_ACCURACY :: Precisione
-KB_BATTLE_STAT_ATTACK :: Attacco
-KB_BATTLE_STAT_BOOSTED :: Aumentato
+KB_BATTLE_SELECTED_POSITION :: Posizione in lotta scelta:
+KB_BATTLE_STAT_ACCURACY :: Precis.
+KB_BATTLE_STAT_ATTACK :: Attac.
+KB_BATTLE_STAT_BOOSTED :: Aument.
 KB_BATTLE_STAT_DEFENSE :: Difesa
 KB_BATTLE_STAT_EVASIVENESS :: Elusione
-KB_BATTLE_STAT_SP_ATTACK :: Attacco Sp.
-KB_BATTLE_STAT_SP_DEFENSE :: Difesa Sp.
-KB_BATTLE_STAT_SPEED :: Velocità
-KB_BATTLE_STAT_UPDATED :: Aggiornato
+KB_BATTLE_STAT_SP_ATTACK :: Att. Sp.
+KB_BATTLE_STAT_SP_DEFENSE :: Dif. Sp.
+KB_BATTLE_STAT_SPEED :: Vel.
+KB_BATTLE_STAT_UPDATED :: Aggior.
 KB_BATTLE_STATS_BASE :: Base
 KB_BATTLE_STATS_BOOST :: Bonus
-KB_BATTLE_STATUS_APPLIED :: Alterazione di stato applicata:
-KB_BATTLE_STATUS_REMOVED :: Alterazione di stato rimossa
+KB_BATTLE_STATUS_APPLIED :: Alterazione applicata:
+KB_BATTLE_STATUS_REMOVED :: Alterazione rimossa
 KB_PSS_BATTLE :: Lotte
-KB_PSS_CLEAR_HISTORY :: Cancella
+KB_PSS_CLEAR_HISTORY :: Canc.
 KB_PSS_GREET_TODAY :: Oggi
-KB_PSS_GREET_TOTAL :: Totale
+KB_PSS_GREET_TOTAL :: Tot.
 KB_PSS_GREETS :: Saluti:
-KB_PSS_HISTORY :: Cronologia:
-KB_PSS_HISTORY_CLEARED :: Cronologia cancellata!
+KB_PSS_HISTORY :: Cronol.:
+KB_PSS_HISTORY_CLEARED :: Lista pulita!
 KB_PSS_ICON :: Icona:
 KB_PSS_IR :: IR
-KB_PSS_LINK :: Collegamento
-KB_PSS_LINK_AMOUNT :: Quantità:
-KB_PSS_LINKS :: Collegamenti:
+KB_PSS_LINK :: Link
+KB_PSS_LINK_AMOUNT :: Quant.:
+KB_PSS_LINKS :: Link:
 KB_PSS_NICES :: Bravo:
 KB_PSS_PROFILE_GREETS :: Saluti
-KB_PSS_PROFILE_HISTORY :: Cronologia
+KB_PSS_PROFILE_HISTORY :: Cronol.
 KB_PSS_PROFILE_ICONS :: Icone
-KB_PSS_PROFILE_LINKS :: Collegamenti
-KB_PSS_PROFILE_MESSAGE :: Messaggio:
+KB_PSS_PROFILE_LINKS :: Link
+KB_PSS_PROFILE_MESSAGE :: Messag.:
 KB_PSS_PROFILE_MESSAGE_2 :: Messaggio
-KB_PSS_PROFILE_MINI_SURVEY :: Mini-sondaggio
+KB_PSS_PROFILE_MINI_SURVEY :: Sondaggio
 KB_PSS_PROFILE_NICES :: Bravo
-KB_PSS_PROFILE_WISHES :: Desideri
-KB_PSS_SELECT_LINK :: Seleziona la destinazione:\n\n
-KB_PSS_SURVEY :: Mini-sondaggi duplicati!
+KB_PSS_PROFILE_WISHES :: Auguri
+KB_PSS_SELECT_LINK :: Seleziona destinaz.:\n\n
+KB_PSS_SURVEY :: Mini-sondaggi copiati!
 KB_PSS_SURVEY_DUPLICATE :: Duplica (Origine):
 KB_PSS_SURVEY_PASTE_TO :: A (Destinazione):
-KB_PSS_TOTAL_LINK :: Totale:
+KB_PSS_TOTAL_LINK :: Tot.:
 KB_PSS_TRADE :: Scambi
 KB_PSS_USER_LIST_ACQUAINTANCES :: Conoscenti
-KB_PSS_USER_LIST_CLEARED :: Elenco giocatori cancellato!
+KB_PSS_USER_LIST_CLEARED :: Elenco cancellato!
 KB_PSS_USER_LIST_FRIENDS :: Amici
-KB_PSS_WIFI :: Wi-Fi
-KB_PSS_WISHES :: Desideri:
+KB_PSS_WIFI :: WiFi
+KB_PSS_WISHES :: Auguri:
 KB_SPAWNER_FORM :: Forma:
-KB_SPAWNER_LEVEL :: Livello:
+KB_SPAWNER_LEVEL :: Liv.:
 MISC :: Varie
-MISC_ACCESS_FLY_MAP :: Accedi alla mappa Volo dal riepilogo
-MISC_ACTION_MUSIC :: Musica d’azione
-MISC_BYPASS_TEXT_RESTRICT :: Ignora restrizioni di testo
-MISC_CUSTOM_GAME_KEYBOARD :: Tastiera personalizzata di gioco
-MISC_CUSTOM_GAME_KEYBOARD_CONFIG :: Configurazione tastiera
-MISC_CUSTOM_GAME_KEYBOARD_CONFIG_ERASED :: Tutti i backup sono stati eliminati.
+MISC_ACCESS_FLY_MAP :: Mappa Volo da riepilogo
+MISC_ACTION_MUSIC :: Mus. azione
+MISC_BYPASS_TEXT_RESTRICT :: Ignora limiti di testo
+MISC_CUSTOM_GAME_KEYBOARD :: Tastiera gioco pers.
+MISC_CUSTOM_GAME_KEYBOARD_CONFIG :: Config. tastiera
+MISC_CUSTOM_GAME_KEYBOARD_CONFIG_ERASED :: Tutti i backup eliminati.
 MISC_CUSTOM_GAME_KEYBOARD_CONFIG_EXPORT :: Esporta
 MISC_CUSTOM_GAME_KEYBOARD_CONFIG_FILE :: Tastiera/
 MISC_CUSTOM_GAME_KEYBOARD_CONFIG_IMPORT :: Importa
 MISC_CUSTOM_GAME_KEYBOARD_CONFIG_LIMIT :: Limite raggiunto! Eliminare i vecchi backup?
-MISC_CUSTOM_GAME_KEYBOARD_CONFIG_NOTE :: Solo per la tastiera di gioco. Questo sostituisce la sezione “Altro”. Assicurati di salvare copie di backup delle tastiere personalizzate per non dover reinserire i valori.
-MISC_CUSTOM_GAME_KEYBOARD_KEYS :: Tasti personalizzati
+MISC_CUSTOM_GAME_KEYBOARD_CONFIG_NOTE :: Solo per la tastiera di gioco. Sostituisce la sezione “Altro”. Assicurati di fare una copia di backup delle tastiere personalizzate per non dover reinserire i valori.
+MISC_CUSTOM_GAME_KEYBOARD_KEYS :: Tasti pers.
 MISC_CUSTOM_GAME_KEYBOARD_KEYS_NOTE :: Premi i tasti rapidi qui sotto per personalizzare i tasti. Premi Y per cancellare la tastiera. Accetta solo valori Unicode, reperibili altrove.
 MISC_CUSTOM_GAME_KEYBOARD_KEYS_UNICODE :: Unicode:
 MISC_CUSTOM_GAME_KEYBOARD_KEYS2 :: Tasti:
 MISC_CUSTOM_GAME_KEYBOARD_NAME :: Nome:
-MISC_CUSTOM_GAME_KEYBOARD_NO_BACKUPS :: Hai 0 backup da cui recuperare!
-MISC_FAST_WALK_RUN :: Camminata e corsa veloci
-MISC_HATCH_NOW :: Schiudi uovo immediatamente
-MISC_INSTANT_EGG :: Uovo Pensione istantaneo
-MISC_LEARN_ANY :: Impara qualsiasi MT e MN
-MISC_MODEL_SWAP :: Scambio modelli
+MISC_CUSTOM_GAME_KEYBOARD_NO_BACKUPS :: Non hai backup da cui recuperare!
+MISC_FAST_WALK_RUN :: Camm./corsa v.
+MISC_HATCH_NOW :: Schiudi uovo subito
+MISC_INSTANT_EGG :: Uovo Pens. ist.
+MISC_LEARN_ANY :: Impara ogni MT/MN
+MISC_MODEL_SWAP :: Camb. mod.
 MISC_MOVEMENT :: Movimento
-MISC_NO_OUTLINES :: Nessun contorno
+MISC_NO_OUTLINES :: No contorni
 MISC_OTHER :: Altro
-MISC_PATCH_COLOR_CRASHES :: Correggi crash dovuti a testo colorato
+MISC_PATCH_COLOR_CRASHES :: Correggi crash testo colore
 MISC_RENAME_POKEMON :: Rinomina Pokémon
-MISC_STAY_IN_ACTION :: Resta in modalità azione
-MISC_SUPER_FAST_DIALOGS :: Dialoghi super veloci
+MISC_STAY_IN_ACTION :: Resta in mod. az.
+MISC_SUPER_FAST_DIALOGS :: Dialoghi sup. vel.
 MISC_TELEPORTATION :: Teletrasporto
-MISC_UNLOCK_MAP :: Sblocca mappa Volo completa
-MISC_VIEW_STATS_IN_SUMMARY :: Visualizza IV ed EV nel riepilogo
+MISC_UNLOCK_MAP :: Sblocca mappa Volo
+MISC_VIEW_STATS_IN_SUMMARY :: IV ed EV nel riepilogo
 MISC_WALK_THROUGH_WALLS :: Attraversa i muri
 MISC_WEATHER :: Meteo
 MISC_WEATHER_EAST_HOENN :: Hoenn Est
-MISC_WEATHER_JAGGED_PASS :: Sentiero Scosceso
+MISC_WEATHER_JAGGED_PASS :: S. Scosceso
 MISC_WEATHER_PRIMAL_WEATHER :: Meteo Primordiale:\n\n Rubino Omega = Sole cocente | Zaffiro Alpha = Pioggia battente
-MISC_WEATHER_RAIN :: Pioggia
-MISC_WEATHER_ROUTE113 :: Percorso 113
-MISC_WEATHER_ROUTE119 :: Percorso 119
-MISC_WEATHER_ROUTE120 :: Percorso 120
+MISC_WEATHER_RAIN :: Piog.
+MISC_WEATHER_ROUTE113 :: Perc. 113
+MISC_WEATHER_ROUTE119 :: Perc. 119
+MISC_WEATHER_ROUTE120 :: Perc. 120
 MISC_WEATHER_SNOW :: Neve
 NOTE_ALREADY_UNLOCKED_MAP :: Mappa Volo completa già sbloccata!
 NOTE_BACKUP_INVALID :: Scelta non valida. Riprova
-NOTE_BACKUP_LIMIT :: Limite raggiunto! Eliminare i vecchi salvataggi?
-NOTE_BACKUP_NONE :: Nessun salvataggio disponibile per il recupero
-NOTE_BACKUPS_ERASED :: Tutti i salvataggi sono stati eliminati
+NOTE_BACKUP_LIMIT :: Limite raggiunto! Eliminare i vecchi backup?
+NOTE_BACKUP_NONE :: Nessun backup disponibile per il recupero
+NOTE_BACKUPS_ERASED :: Tutti i backup sono stati eliminati
 NOTE_CANNOT_CHANGE_GENDER :: Impossibile cambiare il sesso
 NOTE_EDITOR_EXPORT :: Esporta
 NOTE_EDITOR_FAILED_ENCRYPT :: Impossibile crittografare o scrivere i dati!
@@ -332,7 +332,7 @@ NOTE_NO :: No
 NOTE_SHINIFY :: Rendere la specie cromatica?
 NOTE_SPECIES_FEMALE :: Femmina
 NOTE_SPECIES_MALE :: Maschio
-NOTE_TELEPORT_KEY :: Tieni premuto il tasto e entra in un edificio per teletrasportarti
+NOTE_TELEPORT_KEY :: Tieni premuto il tasto ed entra in un edificio per teletrasportarti
 NOTE_TIME_HOURS :: Ore
 NOTE_TIME_MINUTES :: Minuti
 NOTE_TIME_SECONDS :: Secondi
@@ -347,46 +347,746 @@ NOTE_YES :: Sì
 PK_VIEW_ABILITY :: Abilità:
 PK_VIEW_ATK :: Att
 PK_VIEW_DEF :: Dif
-PK_VIEW_DISABLE :: Disattiva
+PK_VIEW_DISABLE :: Disatt.
 PK_VIEW_ENABLE :: Attiva
 PK_VIEW_EV :: [EV]
 PK_VIEW_HP :: PS
-PK_VIEW_INFO :: Visualizzazione info:
-PK_VIEW_ITEM :: Strumento:
+PK_VIEW_INFO :: Info:
+PK_VIEW_ITEM :: Str.:
 PK_VIEW_IV :: [IV]
 PK_VIEW_MOVES :: [Mosse]
 PK_VIEW_NATURE :: Natura:
-PK_VIEW_NONE :: Nessuno
-PK_VIEW_SLOT :: Posto:
-PK_VIEW_SPA :: Att Sp
-PK_VIEW_SPD :: Dif Sp
+PK_VIEW_NONE :: Ness.
+PK_VIEW_SLOT :: Pos.:
+PK_VIEW_SPA :: ASp
+PK_VIEW_SPD :: DSp
 PK_VIEW_SPE :: Vel
 PK_VIEW_SPECIES :: Specie:
 PLAYER_SEARCH_SYSTEM :: Sincrogiocatori
-PLAYER_SEARCH_SYSTEM_CLEAR_USERS_LIST :: Cancella elenco giocatori
-PLAYER_SEARCH_SYSTEM_IGNORE_ICONS :: Ignora icone non cliccabili
-PLAYER_SEARCH_SYSTEM_O_POWER_GAUGE :: Indicatore Potere O
+PLAYER_SEARCH_SYSTEM_CLEAR_USERS_LIST :: Canc. giocatori
+PLAYER_SEARCH_SYSTEM_IGNORE_ICONS :: Ignora icone bloccate
+PLAYER_SEARCH_SYSTEM_O_POWER_GAUGE :: Ind. Potere O
 PLAYER_SEARCH_SYSTEM_PROFILE :: Profilo
 PLAYER_SEARCH_SYSTEM_SHOUT_OUT :: Annuncio
-PLAYER_SEARCH_SYSTEM_UNLOCK_EVERY_O_POWER :: Sblocca tutti i Poteri O
+PLAYER_SEARCH_SYSTEM_UNLOCK_EVERY_O_POWER :: Sblocca i Poteri O
 PLAYER_SEARCH_SYSTEM_UNLOCK_EVERY_O_POWER_NOTE :: Salva la partita e riavvia per applicare le modifiche in modo permanente.
 PLUGIN_ALREADY_DONE :: Già fatto!
-PLUGIN_APPLIED_CHANGES :: Modifiche applicate
-PLUGIN_HOME_MENU :: Ritorno al menu HOME
+PLUGIN_APPLIED_CHANGES :: Modif. applic.
+PLUGIN_HOME_MENU :: Ritorno a HOME
 PLUGIN_KB_CONTINUE :: Continua a digitare ciò che stai cercando.
 PLUGIN_KB_TOO_MANY :: Troppi risultati trovati:
 PLUGIN_KB_TRY_AGAIN :: Purtroppo non abbiamo trovato nulla che\ncorrisponda alla tua ricerca.\n\nRiavvia e riprova
 PLUGIN_KB_TYPE_MORE :: Non hai digitato abbastanza per avviare la ricerca
 PLUGIN_KB_TYPE_SOMETHING :: Digita qualcosa per iniziare la ricerca
-PLUGIN_SETTING :: Configurazione
+PLUGIN_SETTING :: Config.
 PLUGIN_SUCCESS :: Successo!
 SEARCH_ABILITY :: Abilità:
-SEARCH_ITEM :: Strumento:
+SEARCH_ITEM :: Str.:
 SEARCH_MOVE :: Mossa:
 SEARCH_SPECIES :: Specie:
 SET_COLOR :: Colorato?
-SPAWNER_INVALID :: Specie selezionata non valida
-SPAWNER_SPAWNING :: Generazione:
+SPAWNER_INVALID :: Specie non valida
+SPAWNER_SPAWNING :: Genero:
+# ===== v0.4.x full-UI localization (new keys) =====
+MENU_ONLINE_FEATURES :: Funzioni Online (PSS)
+NOTE_ONLINE_FEATURES :: Extra del Sincrogiocatori (Poteri O, profilo, annunci).
+FAV_ONLINE_FEATURES :: Funzioni PSS
+NOTE_PSS_PROFILE :: Modifica il tuo profilo PSS: cambia icona, messaggio, Bravo, Desideri, conteggi saluti, statistiche collegamenti e slot mini-sondaggio.
+FAV_PSS_PROFILE :: Profilo PSS
+NOTE_PSS_SHOUT_OUT :: Cambia il tuo annuncio PSS — il breve messaggio che gli altri vedono online.\nSupporto colore opzionale (fino a 12 caratteri colorati).
+FAV_PSS_SHOUT_OUT :: Annuncio
+NOTE_PSS_GAUGE :: Regola il tuo indicatore Potere O.
+FAV_PSS_GAUGE :: Ind. Potere O
+NOTE_PSS_ALL_O_POWERS :: Sblocca tutti i 63 Poteri O in una volta. Salva la partita e riavvia per renderli permanenti.
+FAV_PSS_ALL_O_POWERS :: Tutti Pot. O
+NOTE_PSS_CLEAR_USERS :: Cancella il tuo elenco di Amici o Conoscenti PSS.
+FAV_PSS_CLEAR_USERS :: Canc. util.
+NOTE_PSS_IGNORE_ICONS :: Tocca qualsiasi icona di profilo PSS anche se di norma è disattivata o bloccata.
+FAV_PSS_IGNORE_ICONS :: Ignora icone
+MENU_IN_BATTLE_TOOLS :: Strum. Lotta
+NOTE_IN_BATTLE_TOOLS :: Il tuo assistente in lotta: leggi il nemico, pianifica lo scontro e modifica la tua squadra a metà combattimento.\n\n- Modifica statistiche squadra: un editor visivo per statistiche, PS/PP, stato, strumento tenuto e mosse della squadra, dal vivo in lotta.\n\n- Aiutante Nemico: una scheda che spiega l'avversario - Abilità, Strumento, mosse, cosa lo batte e come affrontarlo.\n\n- Mostra statistiche nemico: una sovrapposizione sullo schermo superiore che rivela i dati nascosti dell'avversario.\n\n- Inoltre: apri la Borsa direttamente da LOTTA, permetti più di una Megaevoluzione per lotta e cambia la musica di lotta.\n\nLa maggior parte di queste funzioni opera solo durante una lotta vera e propria.
+FAV_IN_BATTLE_TOOLS :: Strum. Lotta
+MENU_CHANGE_PARTY_STATS :: Modif. stat. sq.
+NOTE_CHANGE_PARTY_STATS :: Editor visivo per la tua squadra in lotta.\n\nSOPRA: la scheda dal vivo del Pokémon selezionato (sprite, tipi, livello, PS, stato, strumento, statistiche e modifiche di lotta).\n\nSOTTO: scegli una posizione (1-6), poi tocca Stato, Statistiche, PS/PP, Strumento, Mosse o PE. L/R cambiano posizione, B indietro, SELECT esce.\n\nFunziona solo durante una lotta.
+FAV_CHANGE_PARTY_STATS :: Stat. sq.
+MENU_ENEMY_HELPER :: Aiut. Nemico
+NOTE_ENEMY_HELPER :: Scheda per il Pokémon nemico - in abbinamento a Mostra statistiche nemico.\n\nSOPRA: la scheda dell'avversario (specie, tipi, livello, Natura con statistica +/-, Hidden Power, Abilità, Strumento tenuto) e 'Colpisci con' = i tipi d'attacco superefficaci su di esso (2x o 4x). Sotto lo sprite, 'Nel Box' / 'Non nel Box' ti dice se possiedi già questa specie nei tuoi Box PC.\n\nScheda DETTAGLI: cosa fanno la sua Abilità, lo Strumento e le 4 Mosse, poi due riepiloghi -\n\nSCONTRO = la tabella dei tipi per questo avversario. 'Resiste a' sono i tipi da cui subisce danni ridotti (evitali); 'Immune' sono i tipi che fanno 0 danni (non usarli mai). Il lato superefficace sono le caselle 'Colpisci con' sullo schermo superiore.\n\nCONSIGLI (le righe verdi) = come affrontarlo, dedotti dalle sue statistiche e mosse reali. Es. 'Forte attaccante speciale - aumenta la tua Dif. Sp.' significa che ti colpirà soprattutto con mosse speciali; 'Possiede una mossa di stato - porta una cura di stato' significa che può infliggere un'alterazione di stato.\n\nScheda CONFRONTO: le sei statistiche dell'avversario (PS, Atk, Def, Sp.Atk, Sp.Def, Spe) allineate al tuo Pokémon attivo, fianco a fianco. Ogni valore è il totale COMPLETO - base + IV + EV + natura + livello - per un confronto equo; in ogni riga il numero più alto è verde e quello più basso è attenuato, con un Totale in fondo. Una lettura rapida di dove superi l'avversario e dove ti supera lui.\n\nScheda STRUMENTI: consumabili PokéMart utili per questo scontro; tocca o premi A per aggiungerne uno alla borsa (in modalità PAGA costa denaro, GRATIS è gratuito).\n\nSu/Giù scorrono i Dettagli (o spostano tra gli strumenti); L/R cambiano la posizione nemica; X cambia scheda; B indietro; SELECT esce.\n\nFunziona solo durante una lotta.
+NOTE_BATTLE_ACCESS_BAG :: Apri la Borsa in lotta senza toccare l'icona della borsa sullo schermo inferiore.\n\nIn lotta, TIENI PREMUTO il tasto rapido e premi A sul comando LOTTA: invece di aprire il menu Lotta apre la tua Borsa.\n\nTasto rapido predefinito: L (configurabile).
+FAV_BATTLE_ACCESS_BAG :: Borsa Lotta
+NOTE_BATTLE_ALLOW_MEGAS :: Megaevolvi più di un Pokémon per lotta.
+FAV_BATTLE_ALLOW_MEGAS :: Più Mega
+NOTE_BATTLE_MUSIC :: Sostituisci la musica di sottofondo della lotta.\nScegli il tipo di lotta Selvatica o Allenatore, poi seleziona un brano dalla libreria musicale del gioco.
+FAV_BATTLE_MUSIC :: Musica Lotta
+MENU_SPAWNER_TRAINER :: Generatore Pokémon e Allenatore (PKHeX)
+NOTE_SPAWNER_TRAINER :: Genera e cattura Pokémon, poi modifica loro, il tuo allenatore, la borsa, il denaro e i Box PC.
+FAV_SPAWNER_TRAINER :: Gener. & PKHeX
+MENU_TRAINER_MONEY :: Allen. e Denaro
+NOTE_TRAINER_MONEY :: Modifica il tuo profilo allenatore (nome, ID, tempo di gioco, lingua) e il tuo denaro.
+FAV_TRAINER_MONEY :: Allen./Denaro
+NOTE_EDITOR_INFO_FOLDER :: Modifica il nome allenatore, ID e SID, il contatore del tempo di gioco e la lingua del gioco.
+NOTE_EDITOR_TID_SID :: Cambia il tuo ID e SID allenatore. Insieme determinano quali Pokémon appaiono cromatici per te.
+FAV_EDITOR_TID_SID :: ID/SID
+NOTE_EDITOR_IGN :: Cambia il tuo nome allenatore nel gioco (fino a 12 caratteri).
+FAV_EDITOR_IGN :: Nome allen.
+NOTE_EDITOR_TIME_PLAYED :: Modifica il tempo di gioco mostrato nella schermata di salvataggio (ore, minuti, secondi).
+FAV_EDITOR_TIME_PLAYED :: Tempo g.
+NOTE_EDITOR_GAME_LANGUAGE :: Cambia la lingua del gioco. Salva e riavvia dopo la modifica.
+FAV_EDITOR_GAME_LANGUAGE :: Lingua gioco
+NOTE_EDITOR_CURRENCY_FOLDER :: Imposta i tuoi Pokédollari, Punti Lotta e Pokémiglia.
+NOTE_EDITOR_MONEY :: Imposta i tuoi Pokédollari (fino a 9.999.999). Usati per comprare strumenti nei negozi.
+FAV_EDITOR_MONEY :: Imp. den.
+NOTE_EDITOR_BATTLE_POINTS :: Imposta i tuoi Punti Lotta — guadagnati alla Lega Lotta e spesi per rari strumenti tenuti (fino a 9.999).
+FAV_EDITOR_BATTLE_POINTS :: Imp. BP
+NOTE_EDITOR_POKE_MILES :: Imposta le tue Pokémiglia — guadagnate scambiando e spese per strumenti speciali al Club Pokémiglia (fino a 9.999.999).
+FAV_EDITOR_POKE_MILES :: Imp.Migl.
+MENU_UNLOCKS_ADVANCED :: Sblocchi (avanz.)
+NOTE_UNLOCKS_ADVANCED :: Sblocchi permanenti di flag di salvataggio. Ognuno avvisa prima di applicarsi — SALVA PRIMA LA PARTITA.
+FAV_UNLOCKS_ADVANCED :: Sblocchi
+NOTE_UNLOCK_BAG_SPECIAL :: ATTENZIONE — SALVA PRIMA LA PARTITA!\n\nQuesto ti consegna ogni MT, MN e Strumento chiave in una volta (Megapolsiera, bici, strumenti della storia e altro).\n\nSe lo attivi e poi salvi, la Borsa si riempie di strumenti che non capirai, e può ingarbugliare i tuoi progressi nella storia.\n\nNuovo al gioco? Meglio saltarlo — o fai un backup del salvataggio prima di toccarlo.\n\nVuoi solo uno o due strumenti? Usa "PokéMart Ovunque" per scegliere esattamente ciò che vuoi.
+FAV_UNLOCK_BAG_SPECIAL :: MT/MN+Chiave
+NOTE_UNLOCK_PC_BOXES :: ATTENZIONE — SALVA PRIMA LA PARTITA!\n\nApre forzatamente tutti i 31 Box PC in una volta, senza riempire prima i precedenti.\n\nQuesta è una modifica permanente una volta salvato. Comodo su un file finito; nel dubbio, lascialo disattivato.
+FAV_UNLOCK_PC_BOXES :: 31 Box
+NOTE_UNLOCK_FULL_FLY_MAP :: ATTENZIONE — SALVA PRIMA LA PARTITA!\n\nApre ogni destinazione di Volo fin dall'inizio.\n\nComodo a gioco avanzato — ma attivalo presto e salva, e perderai traccia di dove ti ha portato la storia: quali città hai raggiunto e dove dirigerti dopo.\n\nPrincipianti: meglio lasciarlo disattivato finché non hai finito la storia principale.
+FAV_UNLOCK_FULL_FLY_MAP :: Mappa Volo
+NOTE_UNLOCK_FULL_DEX :: ATTENZIONE — SALVA PRIMA LA PARTITA!\n\nSegna tutti i 721 Pokémon come visti e catturati con un tocco.\n\nOttimo su un file finito — ma se stai ancora giocando e salvi con questo attivo, perdi il divertimento di completare il Pokédex da solo, e ogni idea di cosa resta da trovare.\n\nNel dubbio, lascialo disattivato.
+FAV_UNLOCK_FULL_DEX :: Dex tot.
+NOTE_PC_BOX_FOLDER :: Sfoglia, cerca e clona Pokémon nei tuoi Box PC.\nEsporta o importa anche i tuoi dati di salvataggio completi qui.
+MENU_PC_BOX_PLUS :: Box PC ++
+NOTE_PC_BOX_PLUS :: Editor visivo dei Box PC - una griglia 6x5 dei tuoi Box con sprite.\n\nGRIGLIA: D-Pad sposta - L/R cambia Box - X sposta/scambia - Y clona - Start cerca una specie - A apre l'editor.\n\nEDITOR: L/R cambia scheda (Principale/Statistiche/Mosse/Origini/Varie) - D-Pad scegli un campo - A modifica - B indietro.
+NOTE_CLONING_FOLDER :: Aiutanti per la clonazione via scambio: fai il backup di un Pokémon offerto in uno scambio e mantieni l'originale dopo lo scambio.
+FAV_COPY_POKEMON_IN_TRADE :: Copia Scambio
+FAV_KEEP_ORIGINAL_POKEMON :: Tieni orig.
+NOTE_PC_EXPORT_IMPORT :: Fai il backup dei tuoi dati di salvataggio completi sulla scheda SD, o ripristina un backup precedente. Conserva fino a 20 file di salvataggio.
+FAV_PC_EXPORT_IMPORT :: Esp./Import.
+MENU_ENCOUNTERS_CATCHING :: Incontri e Cattura
+NOTE_ENCOUNTERS_CATCHING :: Controlla gli incontri selvatici, cattura qualsiasi cosa e forza i cromatici.
+FAV_ENCOUNTERS_CATCHING :: Incontri
+NOTE_BATTLE_NO_WILD_POKEMON :: Ferma gli incontri casuali con Pokémon selvatici nell'erba, nelle grotte e in acqua.\nPuoi comunque combattere camminando contro i Pokémon visibili.
+FAV_BATTLE_NO_WILD_POKEMON :: No selvat.
+NOTE_BATTLE_CAPTURE_RATE_100 :: Ogni Poké Ball lanciata cattura il bersaglio all'istante — nessun tremolio, nessun fallimento, a prescindere dalla specie o dai PS rimasti.
+FAV_BATTLE_CAPTURE_RATE_100 :: Cattura 100%
+NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Ti permette di catturare il Pokémon di un Allenatore in lotta.
+FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Catt. Allen.
+NOTE_BATTLE_ALWAYS_SHINY :: Ogni Pokémon selvatico e generato sarà cromatico. L'animazione scintillante si attiva quando appare.
+FAV_BATTLE_ALWAYS_SHINY :: Sempre crom.
+NOTE_BATTLE_DISABLE_SHINY_LOCK :: Permetti i cromatici negli incontri normalmente shiny-locked.
+FAV_BATTLE_DISABLE_SHINY_LOCK :: No Shiny Lock
+MENU_RENAME_ANY :: Rinomina ogni Pokémon
+NOTE_RENAME_ANY :: Ti permette di rinominare qualsiasi Pokémon, inclusi quelli originari di altri giochi (cosa che il gioco normalmente blocca).
+FAV_RENAME_ANY :: Rinom.ogni
+NOTE_MISC_LEARN_ANY :: Permetti a qualsiasi Pokémon di imparare mosse dagli Insegnamosse, ignorando le normali restrizioni di compatibilità.
+FAV_MISC_LEARN_ANY :: Impara MT/MN
+FAV_WILD_POKEMON_SPAWNER :: Gener. selv.
+NOTE_RESPAWN_LEGENDARY :: Fai rigenerare un leggendario sconfitto o fuggito.
+FAV_RESPAWN_LEGENDARY :: Rigen. Legend.
+MENU_POKEMART_ANYWHERE :: PokéMart Ovunque
+FAV_POKEMART_ANYWHERE :: PokéMart
+MENU_OVERWORLD_QOL :: Mappa e Qualità della Vita
+NOTE_OVERWORLD_QOL :: Aiutanti fuori dalla lotta: velocità del testo, grafica, movimento e viaggi, allevamento e tastiera personalizzata.\n\nPer usare i codici ActionReplay (AR), apri il pulsante ActionReplay sullo schermo tattile inferiore.
+FAV_OVERWORLD_QOL :: Mappa & QoL
+MENU_SCREEN_OVERLAYS :: Sovrapp. Sch.
+NOTE_SCREEN_OVERLAYS :: Temi, sovrapposizione HUD, notifiche on/off e le impostazioni di questo plugin (lingua).
+FAV_SCREEN_OVERLAYS :: Sovrapp.
+MENU_MOVEMENT_TRAVEL :: Movim. e Viaggi
+NOTE_MOVEMENT_TRAVEL :: Muoviti più velocemente, attraversa i muri, teletrasportati in qualsiasi luogo, sblocca destinazioni di Volo e altro.
+FAV_MOVEMENT_TRAVEL :: Mov.& Viaggi
+NOTE_MISC_TELEPORTATION :: Viaggia all'istante in un luogo — e insegnagli i punti che usi DAVVERO.\n\nWARP: scegli una destinazione, poi TIENI PREMUTO L ed entra in una porta o edificio per teletrasportarti là.\n\nSCHEDE (L/R o tocca una casella): Tutto · Città · Altro (Grotte / Foreste / Punti d'interesse / Punti Miraggio, come sotto-menu) · Percorsi (101-134) · Mappa (una mini-mappa connessa su cui ti muovi col D-Pad; premi Y lì per una griglia completa di ogni luogo, filtrata dalle caselle che tocchi).\nA: teletrasporto   Y: griglia/lista (o griglia mappa completa in Mappa)   B: indietro.\n\nX = SEI QUI: porta la selezione ovunque si trovi il tuo personaggio sulla mappa.\n\nZL = ETICHETTA AREA: quando X legge una mappa non elencata (un negozio, una sezione di città, un percorso), evidenzia il luogo corretto e premi ZL — impara quella sotto-mappa, così X la riconosce da allora in poi.\n\nStart = SALVA PUNTO WARP: posizionati esattamente dove vuoi arrivare, poi premi Start — salva quel punto come destinazione di teletrasporto del luogo. Questo rende i PERCORSI teletrasportabili e ti permette di cambiare dove ti deposita ogni teletrasporto (un punto warp per luogo; premi di nuovo per sostituirlo).\n\nTutto ciò che insegni è salvato in MyTeleport.txt nella cartella del plugin — modificabile a mano e conservato tra gli aggiornamenti. Le destinazioni integrate restano esattamente come sono finché non ne sovrascrivi una.
+FAV_MISC_TELEPORTATION :: Teletr.
+NOTE_MISC_FAST_WALK_RUN :: Accelera l'intero gioco a 60fps — tutto va più veloce, quindi cammini, corri e pedali più rapidamente.\n\nTIENI PREMUTO ZL per tornare alla velocità normale (30fps) per un momento quando ti serve precisione.\n\n(Su X/Y usa invece una patch di velocità di movimento.)
+FAV_MISC_FAST_WALK_RUN :: Camm.vel.
+NOTE_MISC_WALK_THROUGH_WALLS :: Attiva, poi TIENI PREMUTO R per ignorare OGNI collisione: attraversa edifici, muri interni e qualsiasi ostacolo.\nTi solleva anche quando passi su un terreno più alto.\n\nAttenzione: questo può occasionalmente bloccare il gioco, quindi salva prima di usarlo.
+FAV_MISC_WALK_THROUGH_WALLS :: Attravers. muri
+NOTE_MISC_STAY_IN_ACTION :: Mantieni attiva la velocità rapida delle sequenze d'azione anche dopo la fine del trigger.\nIl gioco resta in 'modalità azione'.
+FAV_MISC_STAY_IN_ACTION :: Mod. azione
+NOTE_MISC_ACTION_MUSIC :: Sostituisci la musica delle sequenze di azione/volo/ciclismo con qualsiasi brano del gioco.
+FAV_MISC_ACTION_MUSIC :: Mus. azione
+NOTE_MISC_ACCESS_FLY_MAP :: Mostra la mappa delle destinazioni di Volo quando guardi il riepilogo di un Pokémon.
+FAV_MISC_ACCESS_FLY_MAP :: Volo riepil.
+MENU_BREEDING :: Allevam.
+NOTE_BREEDING :: Accelera le meccaniche delle uova della Pensione.
+NOTE_MISC_INSTANT_EGG :: Le uova appaiono subito nella tua squadra dalla Pensione invece di richiedere passi camminati.
+FAV_MISC_INSTANT_EGG :: Uovo subito
+NOTE_MISC_HATCH_NOW :: Le uova si schiudono al passo successivo invece di attendere centinaia di passi.\nAbbina a Uovo Pensione istantaneo.
+FAV_MISC_HATCH_NOW :: Schiudi
+NOTE_MISC_SUPER_FAST_DIALOGS :: Accelera il testo e i riquadri di dialogo.
+FAV_MISC_SUPER_FAST_DIALOGS :: Dial. veloci
+MENU_USE_PC_ANYWHERE :: Usa PC Ovunque
+NOTE_USE_PC_ANYWHERE :: Apri i tuoi Box PC ovunque, senza bisogno di un PC.\n\nAttiva questo, poi tocca l'icona OPZIONI (l'icona più a destra) sullo schermo tattile inferiore del gioco per aprire il PC sul posto.\n\nMentre è attivo, quell'icona apre il PC, quindi per raggiungere il menu OPZIONI del gioco devi premere Y e scegliere OPZIONI dal menu che appare.
+FAV_USE_PC_ANYWHERE :: PC Ovunque
+NOTE_MISC_VIEW_STATS_IN_SUMMARY :: Vedi le statistiche nascoste dei tuoi Pokémon nella schermata Riepilogo.\n\nAttiva questo, poi TIENI PREMUTO un tasto rapido e apri il Riepilogo del Pokémon: tieni L per gli IV, o tieni R per gli EV.\n\nI valori sono già scambiati all'apertura del Riepilogo, quindi puoi rilasciare il tasto una volta dentro.\n\nPer tornare alle statistiche normali, esci dal Riepilogo e riaprilo senza tenere alcun tasto rapido.
+HOTKEY_VIEW_IVS :: Vedi IV
+HOTKEY_VIEW_EVS :: Vedi EV
+FAV_MISC_VIEW_STATS_IN_SUMMARY :: Vedi IV/EV
+MENU_VISUALS_DISPLAY :: Grafica e Schermo
+NOTE_VISUALS_DISPLAY :: Aspetto della mappa: contorni dei modelli, meteo e il modello del tuo personaggio.
+FAV_VISUALS_DISPLAY :: Grafica
+NOTE_MISC_NO_OUTLINES :: Rimuovi i contorni neri sui modelli della mappa.
+FAV_MISC_NO_OUTLINES :: No contorni
+NOTE_MISC_WEATHER :: Forza una specifica condizione meteo in certi percorsi di ORAS (Percorso 113, 119, 120, Sentiero Scosceso, Hoenn Est).
+FAV_MISC_WEATHER :: Meteo
+NOTE_MISC_MODEL_SWAP :: Scegli un diverso modello del personaggio sulla mappa.\nIl nuovo modello appare solo dopo che entri in un edificio o cambi area.\n\nI modelli personalizzati non hanno animazione di corsa.
+FAV_MISC_MODEL_SWAP :: Cambia mod
+NOTE_CUSTOM_GAME_KEYBOARD_FOLDER :: Aggiungi caratteri speciali (simboli, accenti, Unicode) alla tastiera a schermo del gioco - comodo per i soprannomi dei Pokémon, il tuo nome allenatore e i messaggi PSS.\n\nApri prima una tastiera nel gioco, poi usa questi strumenti.
+FAV_CUSTOM_GAME_KEYBOARD :: Tastiera
+MENU_BACKUP_RESTORE_KEYBOARD :: Backup / Ripristina Tast.
+NOTE_BACKUP_RESTORE_KEYBOARD :: Salva la tua tastiera personalizzata sulla scheda SD o ricaricane una salvata.\n\nApri una tastiera nel gioco, poi scegli Esporta (salva) o Importa (carica).\n\nI file sono conservati nella cartella 'Keyboard' sulla tua SD (fino a 20).
+FAV_BACKUP_RESTORE_KEYBOARD :: Backup KB
+NOTE_CUSTOM_GAME_KEYBOARD_KEYS :: Con una tastiera aperta nel gioco, premi X per aggiungere un carattere: scegli uno slot tasto (1-65), poi un valore Unicode (in esadecimale).\nPremi Y per cancellare la tastiera.\n\nQui crei davvero i tuoi caratteri personalizzati.
+FAV_CUSTOM_GAME_KEYBOARD_KEYS :: Tasti pers.
+NOTE_BYPASS_TEXT_RESTRICT :: Disattiva il filtro nomi/testo del gioco così smette di bloccare caratteri e parole 'non validi'.\n\nAttiva questo prima di digitare caratteri personalizzati.
+FAV_BYPASS_TEXT_RESTRICT :: No filtro
+NOTE_PATCH_COLOR_CRASHES :: Impedisce al gioco di bloccarsi quando mostra testo colorato.\n\nAttiva questo se usi caratteri o codici colorati nei nomi.
+FAV_PATCH_COLOR_CRASHES :: Fix colore
+MENU_SHOW_NOTIFICATIONS :: Mostra Notifiche a Schermo
+NOTE_SHOW_NOTIFICATIONS :: Avviso sullo schermo superiore quando attivi/disattivi un trucco.
+FAV_SHOW_NOTIFICATIONS :: Notifiche
+MENU_PLUGIN_SETTINGS :: Impost. Plugin
+NOTE_PLUGIN_SETTINGS :: Le impostazioni di questo plugin (es. lingua) - non le opzioni del gioco.
+MENU_VIEW_PARTY_SUMMARY :: Riepilogo Squadra
+NOTE_VIEW_PARTY_SUMMARY :: Vedi le statistiche nascoste della tua squadra (statistiche, IV, EV, natura, abilità, strumento, AO...). Scegli una posizione per vedere la scheda completa.\n\nMostra la tua ULTIMA squadra SALVATA — se hai cambiato squadra, salva prima la partita.\n\nComandi scheda:\n\nSu/Giù: sposta il riquadro per scegliere una statistica (PS, Atk, Def, SpA, SpD, Spe).\n\nA: salta al membro della squadra con il valore PIÙ ALTO (o PIÙ BASSO) di quella statistica. In caso di parità, premi di nuovo A per scorrere tra loro.\n\nL (riassegnabile in Strumenti > Tasti rapidi): alterna tra PIÙ ALTO e PIÙ BASSO, mostrato in basso a destra dello schermo superiore.\n\nUn piccolo triangolo a sinistra di una statistica indica che questo Pokémon ha il valore migliore (su) o peggiore (giù) della squadra.\n\nSinistra/Destra: cambia scheda. B: indietro. Select: esci al gioco.
+FAV_VIEW_PARTY_SUMMARY :: Riep. squadra
+MENU_MINI_GAME_CORNER :: ★ Angolo Minigiochi ★
+NOTE_MINI_GAME_CORNER :: Mini-giochi per divertirsi: tira per un incontro selvatico casuale, apri loot box, scommetti i tuoi Pokémon su una statistica, gira la ruota, gioca alle slot e altro.\n\nSullo schermo inferiore, alterna tra:\n\nGRATIS: ricevi comunque gli strumenti, i Pokémon e le generazioni che vinci, ma il tuo denaro non cambia mai.\n\nSPENDI Pokédollari: il denaro vero è in gioco - i giochi addebitano un ingresso/scommessa e pagano (o prendono) Pokédollari per davvero.\n\nLa tua scelta GRATIS/A PAGAMENTO viene ricordata tra le sessioni.\n\nAttenzione: gli strumenti che vinci e ogni cambio di denaro restano solo se SALVI LA PARTITA dopo. La Loot Box non dà mai MT/MN o Strumenti chiave, quindi non può influenzare i tuoi progressi nella storia.
+FAV_MINI_GAME_CORNER :: Angolo Giochi
+DLG_BAG_CHOOSE_ITEM :: scegli uno strumento da aggiungere
+DLG_BAG_HOW_MANY :: Quanti? (1-999):
+DLG_BAG_POCKET_FULL :: Quella tasca sembra piena - nessuno slot libero trovato.
+DLG_BAG_ADDED_FMT :: Aggiunti %dx %s\nalla tua tasca %s.
+DLG_DANGER_NO :: NO - lascialo disattivato
+DLG_DANGER_YES :: SÌ - applicalo
+DLG_DANGER_HEADING :: ATTENZIONE!\nQuesto NON può essere annullato\nuna volta salvato.
+DLG_DANGER_APPLY_Q :: Applicarlo comunque?
+DLG_DANGER_KEYITEMS_BODY :: Scarica ogni MT, MN e\nStrumento chiave in una volta, riempiendo\nla Borsa e i tuoi progressi.
+DLG_DANGER_DEX_BODY :: Segna ogni Pokémon come\nvisto e catturato, perdendo\nil gusto di completare il Dex da solo.
+DLG_DANGER_BOXES_BODY :: Apre forzatamente tutti i 31 Box\nPC, una modifica permanente\nal tuo file di salvataggio.
+DLG_OVERWRITE_HEADING :: SOVRASCRIVERE?
+DLG_OVERWRITE_BODY :: Lo slot di destinazione ha\ngià un Pokémon. La clonazione lo\nsostituirà.
+DLG_OVERWRITE_Q :: Sovrascriverlo?
+DLG_SHEET_EMPTY_SLOT :: Slot vuoto / non valido.\nScegli prima una Posizione valida.
+DLG_PARTY_NOT_FOUND :: Impossibile localizzare la tua squadra in memoria.\nCarica prima un salvataggio (e salva la partita).
+DLG_PARTY_EDIT_SAVE_NOTE :: \n\nSALVA la partita per mantenere questa modifica.\nPS/Atk/... si aggiornano dopo che curi o depositi/ritiri.
+DLG_DISCARD :: SCARTA
+DLG_SAVE :: SALVA
+DLG_MOVES_SAVE_PROMPT :: Hai cambiato le mosse.\nSalvare prima di uscire?
+DLG_RELEARN_SAVE_PROMPT :: Hai cambiato le mosse da reimparare.\nSalvare prima di uscire?
+DLG_DISCARD_EDITS :: SCARTA modifiche
+DLG_SAVE_TO_BOX :: SALVA nel box
+DLG_KEEP_EDITS_FMT :: Mantenere le tue modifiche a\nBox %d / Slot %d ?
+DLG_COMING_SOON :: \n\nProssimamente!
+DLG_BUY_FMT :: Comprare %s per %s?
+DLG_ADD_FMT :: Aggiungere %s alla tua borsa?
+DLG_BUY_RES_ADDED_FREE :: Aggiunto (gratis)
+DLG_BUY_RES_PURCHASED :: Acquistato
+DLG_BUY_RES_NOT_SOLD :: Non in vendita in modalità PAGA
+DLG_BUY_RES_NO_MONEY :: Denaro insufficiente
+DLG_BUY_RES_BAG_FULL :: Borsa piena
+KB_BATTLE_CHOOSE_PARTY_SLOT :: Scegli posiz. squadra
+KB_BATTLE_SLOT :: Slot
+FIND_BOX_SLOT_FMT :: Box %d - Slot %d
+FIND_NOT_IN_BOX_FMT :: %s: non trovato nei Box PC.
+FIND_FOUND_FMT :: %s - trovati %d:
+FIND_AND_MORE_FMT :: ...e altri %d
+ENEMY_LV :: Lv.
+ENEMY_HP :: PS:
+ENEMY_PKRS :: pkrs
+ENEMY_NATURE :: Nat:
+ENEMY_ABILITY :: Abi:
+ENEMY_HA :: (AN)
+ENEMY_HIDDEN_POWER :: Hid.P:
+ENEMY_ITEM :: Str:
+ENEMY_IV_TOTAL :: IV:
+ENEMY_IV_MAX :: /186
+ENEMY_EV_TOTAL :: EV:
+ENEMY_EV_MAX :: /510
+ENEMY_PAGE_01 :: Pag. 01
+ENEMY_PAGE_02 :: Pag. 02
+SPAWN_TAUNT_1 :: Stai per perdere!
+SPAWN_TAUNT_2 :: Te ne pentirai!
+SPAWN_TAUNT_3 :: Fatti sotto!
+SPAWN_TAUNT_4 :: Prendimi se ci riesci!
+SPAWN_TAUNT_5 :: Non sei all'altezza!
+SPAWN_TAUNT_6 :: Sistemiamo la cosa!
+SPAWN_TAUNT_7 :: Tutto qui?
+SPAWN_TAUNT_8 :: Preparati a perdere!
+SPAWN_TAUNT_9 :: Vieni a prendermi!
+SPAWN_TAUNT_10 :: Non andrò leggero!
+SPAWN_APPEARED :: Pokémon selvatico!
+SPAWN_NO_IMAGE :: IMMAG
+SPAWN_NA :: N/D
+SPAWN_LV_FMT :: Lv %d
+SPAWN_SPAWNED :: Generato!
+SPAWN_STEP_INTO :: Entra nell'erba / acqua / una grotta
+SPAWN_RUN_INTO :: per incontrarlo.
+SPAWN_KEY_AB :: A / B
+SPAWN_KEEP_BROWSING :: continua a vedere
+SPAWN_KEY_SELECT :: SELECT
+SPAWN_BACK_TO_GAME :: torna al gioco
+SPAWN_LEVEL_PROMPT :: Livello (1-100)
+SPAWN_ABILITY :: Abilità:
+SPAWN_HIDDEN :: Nascos:
+SPAWN_MEGA_EVOLUTION :: Megaevoluzione
+SPAWN_MOVES_AT_LV_FMT :: Mosse al Lv %d
+SPAWN_SETTINGS :: Impost. gener.
+SPAWN_FORM :: Form
+SPAWN_LEVEL :: Liv.
+SPAWN_SPRITE :: Sprite
+SPAWN_NORMAL :: Normal
+SPAWN_SHINY :: Crom.
+SPAWN_ON_THE_WILD :: GENERA IN NATURA
+SPAWN_BACK_RESULTS :: B  -  torna ai risult.
+SPAWN_STAGE_BABY :: Baby
+SPAWN_STAGE_1 :: Stadio 1
+SPAWN_STAGE_2 :: Stadio 2
+SPAWN_STAGE_3 :: Stadio 3
+SPAWN_STAGE_NOEVO :: No evo
+SPAWN_CAT_REGULAR :: Comune
+SPAWN_CAT_LEGEND :: Legg.
+SPAWN_CAT_MYTHICAL :: Mister.
+SPAWN_CAT_PSEUDO :: Pseudo
+SPAWN_CAT_STARTER :: Iniz.
+SPAWN_CAT_FOSSIL :: Fossile
+SPAWN_ANY :: tut
+SPAWN_NONE :: Ness
+SPAWN_GEN :: Gen
+SPAWN_GEN_CHIP_FMT :: Gen %d
+SPAWN_STAGES_FMT :: %d stadi
+SPAWN_STAGE_FMT :: %d stadio
+SPAWN_MEGA :: Mega
+SPAWN_NOMEGA :: NoMega
+SPAWN_HUB_TITLE :: Generatore selvatici
+SPAWN_MATCH_ONE_FMT :: %d trovato
+SPAWN_MATCH_MANY_FMT :: %d trovati
+SPAWN_NO_MATCH :: Nessun Pokémon corrisponde a questi filtri.
+SPAWN_WIDEN :: Tocca un filtro qui sotto per ampliare la ricerca.
+SPAWN_FILTERS :: Filtri
+SPAWN_IN_INVENTORY :: In inventario
+SPAWN_ON :: ON
+SPAWN_SEARCH_PROMPT :: Cerca per nome o n. Pokédex Nazionale
+SPAWN_NAME_NUM :: Nome / n.
+SPAWN_GENERATION :: Generazione
+SPAWN_TYPE :: Tipo
+SPAWN_TRAITS :: Tratti
+SPAWN_HUB_HELP :: A scegli    B esci    START reimposta
+SPAWN_1ST_TYPE :: 1° tipo
+SPAWN_2ND_TYPE :: 2° tipo
+SPAWN_EVO_STAGE :: Stadio evolutivo
+SPAWN_CATEGORY :: Categoria
+SPAWN_MEGA_HDR :: Mega
+SPAWN_HAS_MEGA :: Con Mega
+SPAWN_NO_MEGA :: No Mega
+FILTER_RESET :: Reset
+FILTER_BACK :: < Indiet
+MART_POCKET_ITEMS :: Strum.
+MART_POCKET_MEDICINES :: Curativi
+MART_POCKET_BERRIES :: Bacche
+MART_POCKET_TMS_HMS :: MT e MN
+MART_POCKET_KEY_ITEMS :: Str. chiave
+MART_GRP_POKE_BALLS :: Poké Ball
+MART_GRP_EVOLUTION :: Evoluz.
+MART_GRP_MEGA_STONES :: Megapietre
+MART_GRP_HOLD_ITEMS :: Str. tenuti
+MART_GRP_TYPE_ITEM :: Str. tipo
+MART_GRP_BATTLE_ITEM :: Str. lotta
+MART_GRP_TREASURES :: Tesori
+MART_GRP_FOSSILS :: Fossili
+MART_GRP_OTHER :: Altro
+MART_GRP_HP_HEAL :: Cura PS
+MART_GRP_PP_RESTORE :: Ripr. PP
+MART_GRP_STATUS_CURE :: Cura stato
+MART_GRP_REVIVE :: Revival
+MART_GRP_VITAMIN_EXP :: Vitamina/PE
+MART_GRP_HP_PP_HEAL :: Cura PS/PP
+MART_GRP_PINCH_HEAL :: Cura emerg.
+MART_GRP_TYPE_RESIST :: Resist. tipo
+MART_GRP_PINCH_BOOST :: Bonus emerg.
+MART_GRP_EV_FRIEND :: EV/amici.
+MART_GRP_PHYSICAL :: Fisico
+MART_GRP_SPECIAL :: Speciale
+MART_GRP_STATUS :: Stato
+MART_GRP_TRAVEL_TOOL :: Viaggio/Att
+MART_GRP_STORY_EVENT :: Storia/Even
+MART_GRP_MEGA_FORM :: Mega/Forma
+MART_GRP_MISC :: Vari
+MART_FLAVOR_NONE :: -
+MART_FLAVOR_SPICY :: Picc.
+MART_FLAVOR_DRY :: Sec
+MART_FLAVOR_SWEET :: Dolce
+MART_FLAVOR_BITTER :: Amaro
+MART_FLAVOR_SOUR :: Aspr
+MART_STATUS_NONE :: -
+MART_STATUS_POISON :: Veleno
+MART_STATUS_PARALYSIS :: Paralisi
+MART_STATUS_SLEEP :: Sonno
+MART_STATUS_BURN :: Scot
+MART_STATUS_FREEZE :: Gelo
+MART_STATUS_CONFUSION :: Confus.
+MART_TAB_ITEMS :: Strum.
+MART_TAB_MEDS :: Cure
+MART_TAB_BERRY :: Bacch
+MART_TAB_TM_HM :: MT/MN
+MART_TAB_KEY :: Chi
+MART_MODAL_TITLE :: PokéMart Ovunque
+MART_MODAL_L1 :: PAGA  -  un vero PokéMart. L'elenco mostra
+MART_MODAL_L2 :: solo gli strumenti che puoi davvero comprare nel gioco,
+MART_MODAL_L3 :: e ognuno costa Denaro (compra subito, o crea un
+MART_MODAL_L4 :: carrello e paga). Per l'esperienza
+MART_MODAL_L5 :: autentica, gioca in PAGA.
+MART_MODAL_L7 :: GRATIS  -  aggiungi qualsiasi strumento, qualsiasi quantità, gratis
+MART_MODAL_L8 :: (il comportamento classico).
+MART_MODAL_L10 :: Cambia quando vuoi con START.
+MART_CHOOSE_MODE :: Scegli modalità
+MART_TAP_BOX :: Tocca un riquadro, o Sin / Destra
+MART_B_CANCEL :: B = annulla
+MART_PAY :: PAG
+MART_COSTS_MONEY :: costa Denaro
+MART_FREE :: GRAT
+MART_NO_CHARGE :: gratuito
+MART_PURCHASE_THANKS_FMT :: Grazie per il tuo acquisto!\n\n- PokéMart\n\nSpeso: $%d
+MART_NOT_ENOUGH :: Denaro insufficiente!
+MART_CHECKOUT :: Paga
+MART_MONEY_LABEL :: Denaro: $
+MART_CART_EMPTY :: Il tuo carrello è vuoto.
+MART_TOTAL_CAPS :: TOTALE:  $
+MART_ITEMS_IN_CART_FMT :: Nel carrello: %d
+MART_TOTAL_LABEL2 :: Totale:  $
+MART_MONEY_LABEL2 :: Denaro:  $
+MART_PAY_TOTAL :: PAGA  $
+MART_CLEAR_CART :: Svuota
+MART_BACK_LIST :: B - torna all'elenco
+MART_TITLE :: Borsa - aggiungi
+MART_ITEMS_COUNT_FMT :: %d strum.
+MART_NO_MATCH :: Nessuno strumento corrisponde.
+MART_WIDEN :: Tocca un filtro qui sotto per ampliarlo.
+MART_HOLDABLE :: Tenibile
+MART_NO_DESC :: (nessuna descrizione)
+MART_ADD_TO_BAG_HDR :: Alla borsa
+MART_QUANTITY :: Quantità
+MART_QUANTITY_PROMPT :: Quantità (1-999)
+MART_TMHM_ONE :: MT/MN - aggiunto come uno (riutilizzabile)
+MART_KEY_ONE :: Strumento chiave: uno solo
+MART_TOTAL_LABEL :: Totale: $
+MART_ADD_CART :: AGG. CAR.
+MART_PAY_NOW :: PAGA ORA
+MART_ADD_TO_BAG_BTN :: AGG. BORSA
+MART_ADDED_QTY_FMT :: Agg. %dx %s!
+MART_ADDED_FMT :: Agg. %s!
+MART_POCKET_FULL_SHORT :: Tasca piena.
+MART_FILTERS :: Filtri
+MART_IN_BAG :: Borsa
+MART_ON :: ON
+MART_ANY :: tut
+MART_SEARCH_PROMPT :: Cerca per nome o n.
+MART_NAME_NUM :: Nome/n.
+MART_ALL_FMT :: %s tot
+MART_POCKET :: Tasca
+MART_EFFECT :: Effet.
+MART_STATUS :: Stato
+MART_TYPE :: Tipo
+MART_SORT :: Ord.
+MART_RESET_ALL :: Azzera
+MART_CART_FMT :: CAR %d   $%d
+MART_MODE_PAY :: Mod: PAGA
+MART_MODE_FREE :: Mod: FREE
+MART_HUB_HELP :: A aggiungi   B esci   START: PAGA/GRATIS
+MART_STATUS_PANEL_HDR :: Stato  (cura / infliggi / insegna)
+MART_SORT_PANEL_HDR :: Ordina elenco
+MART_FLAVOR :: Gusto
+SORT_OFF :: off
+SORT_NAME :: Nome
+SORT_PRICE :: Prez.
+SORT_TYPE :: Tipo
+SORT_OWNED :: Poss.
+SORT_DESC_SUFFIX :: decr
+SORT_ASC_SUFFIX :: cre
+SORT_DEFAULT :: Predef.
+SORT_NAME_AZ :: Nome (A-Z)
+SORT_ORDER_DESC :: Ordine: Decresc.
+SORT_ORDER_ASC :: Ordine: Cresc.
+LEGEND_WILL_RESPAWN_FMT :: %s tornerà!
+LEGEND_ALREADY_AVAILABLE_FMT :: %s era già disponibile
+LEGEND_LOCATION :: Luogo
+LEGEND_TITLE :: Leggendari
+LEGEND_IN_YOUR_GAME_FMT :: %d nel gioco
+LEGEND_RESPAWN_BTN :: RIGENERA NEL SUO LUOGO
+TELE_SEC_CAVES :: Grott
+TELE_SEC_FORESTS :: Foreste
+TELE_SEC_LANDMARKS :: Luoghi
+TELE_SEC_MIRAGE :: P. Miraggio
+TELE_CAT_ALL :: Tut
+TELE_CAT_TOWNS :: Città
+TELE_CAT_OTHER :: Altro
+TELE_CAT_ROUTES :: Percor
+TELE_CAT_MAP :: Map
+TELE_CATF_TOWNS :: Paesi e Città
+TELE_CATF_OTHER :: Altro
+TELE_CATF_ROUTES :: Percor
+TELE_CATF_MAP :: Map
+TELE_DIR_N :: N
+TELE_DIR_S :: S
+TELE_DIR_E :: E
+TELE_DIR_W :: O
+TELE_DIR_NE :: NE
+TELE_DIR_NW :: NO
+TELE_DIR_SE :: SE
+TELE_DIR_SW :: SO
+TELE_OV_ALL :: TUT
+TELE_OV_TOWNS :: CITTÀ
+TELE_OV_ROUTES :: PERCOR
+TELE_OV_CAVES :: GROTT
+TELE_OV_FORESTS :: FORESTE
+TELE_OV_LANDM :: LUOGHI
+TELE_OV_MIRAGE :: MIRAG.
+TELE_TITLE_ALL_FMT :: %s - Tut
+TELE_TITLE_MAP_FMT :: %s - Map
+TELE_TITLE_OTHER_FMT :: %s - Altro
+TELE_PAGE_FMT :: Pg %d/%d
+TELE_EXITS :: Uscite
+TELE_ROUTE_HAS_SPOT :: A: teletrasporto qui   (Start: re-imposta warp)
+TELE_ROUTE_NO_SPOT :: posizionati lì, poi Start = salva punto warp
+TELE_OPEN_SECTION :: A: apri la sezione
+TELE_OV_HINT1 :: D-Pad: sposta   A: teletrasporto   X: qui
+TELE_OV_HINT2 :: tocca caselle: filtro    Y: mappa    B: indietro
+TELE_NO_LINKS :: (nessuno)
+TELE_MAP_HINT2 :: L/R: categoria   Y: mappa completa   B: indietro
+TELE_GRID_HINT1 :: A: teletrasporto     X: sei qui
+TELE_GRID_HINT2 :: Start: salva punto warp    ZL: etichetta area
+TELE_GRID_HINT3 :: Y: lista   L/R: categoria   B: indietro
+TELE_LEGEND :: +etich/+warp = non impost.
+TELE_MSG_HERE_FMT :: Qui: %s
+TELE_MSG_MAP_FMT :: mappa 0x%s - scegli luogo, ZL = etichetta
+TELE_MSG_TAGGED_FMT :: Etich. qui (0x%s) -> %s
+TELE_MSG_WARP_REPLACED_FMT :: Warp sostituito: %s
+TELE_MSG_WARP_SET_FMT :: Warp impostato: %s
+TELE_MSG_NO_WARP_ROUTE :: Nessun punto warp - Start sul percorso
+TELE_MSG_NO_WARP_STAND :: Nessun punto warp - posizionati lì + Start per salvare
+TELE_MSG_ZL_TAG_FMT :: ZL=etich.0x%s -> %s
+DLG_NO_KEEP_OFF :: NO - lascialo disattivato
+DLG_YES_APPLY :: SÌ - applicalo
+TELE_FLYMAP_WARN_HEAD :: ATTENZIONE!\nQuesto NON può essere annullato\nuna volta salvato.
+TELE_FLYMAP_WARN_BODY :: Apre tutte le destinazioni di Volo in\nun colpo, così perdi traccia di\ndove ti ha portato la storia.
+TELE_FLYMAP_WARN_Q :: Applicare?
+HUD_BP :: BP: %u
+HUD_MILES :: Migl: %lu
+HUD_PARTY :: Squad: %d/6
+HUD_XY :: X:%.0f Y:%.0f
+HUD_REPEL :: Repel: %u
+HUD_MAP_ID :: Map #%u (0x%X)
+HUD_POS_TOP_LEFT :: Alto-Sx
+HUD_POS_TOP_CENTER :: Alto-Centr
+HUD_POS_TOP_RIGHT :: Alto-Dx
+HUD_POS_LEFT :: Sin.
+HUD_POS_CENTER :: Centro
+HUD_POS_RIGHT :: Des.
+HUD_POS_BOTTOM_LEFT :: Basso-Sx
+HUD_POS_BOTTOM_CENTER :: Basso-Centr
+HUD_POS_BOTTOM_RIGHT :: Basso-Dx
+HUD_POS_TITLE :: Scegli dove appare l'HUD
+HUD_POS_INSTR1 :: Tocca una cella qui sotto - rispecchia questo schermo.
+HUD_POS_INSTR2 :: Evidenziata = destinazione.   Premi B per annullare.
+HUD_POS_TOAST_FMT :: Posiz. HUD: %s
+HUD_LIVE_PREVIEW :: Anteprima
+HUD_PANEL_OPACITY_HDR :: Opac. pann.
+HUD_OPACITY_DRAG :: Trascina per opacità.
+HUD_OK_CANCEL :: A = OK    B = Annulla
+HUD_OPACITY_TOAST :: Opacità pann. HUD: %d%%
+MENU_ENEMY_STATS :: Statistiche nemico
+NOTE_ENEMY_STATS :: Vedi i dati nascosti di un avversario in lotta sullo schermo superiore.\n\nPrima attiva la sovrapposizione con "Attiva statistiche" (può essere sbloccata solo durante una lotta - leggi le sue info), poi scegli esattamente quali statistiche appaiono con gli interruttori qui sotto.
+FAV_ENEMY_STATS :: Stat. nem.
+MENU_ENEMY_ENABLE :: Attiva stat.
+NOTE_ENEMY_ENABLE :: Vedi le statistiche dell'avversario in lotta.\n\nAll'inizio questo interruttore è BLOCCATO (mostrato con un'icona a ingranaggio) perché può essere attivato solo durante una lotta.\n\nPer sbloccarlo: entra in una lotta, seleziona questa voce, poi tocca ATTIVA sullo schermo tattile inferiore - basta farlo una sola volta.\n\nDopodiché l'interruttore è sbloccato; spuntalo per attivare la funzione.\n\nIn lotta: ZR alterna tra le due pagine (Base/Mosse e IV/EV), e L/R cambiano tra i Pokémon del nemico.\n\nPer nascondere del tutto la sovrapposizione, basta rimettere su OFF questo interruttore Attiva statistiche.
+FAV_ENEMY_ENABLE :: Attiva stat.
+MENU_ENEMY_SLOT :: Numero slot
+NOTE_ENEMY_SLOT :: Mostra la posizione in squadra [#N] (verde quando possiedi già la specie in un box, rossa quando no).
+FAV_ENEMY_SLOT :: Mos: Slot #
+MENU_ENEMY_SPECIES :: Specie
+NOTE_ENEMY_SPECIES :: Mostra il nome della specie dell'avversario.
+FAV_ENEMY_SPECIES :: Mos: Specie
+MENU_ENEMY_GENDER :: Sesso
+NOTE_ENEMY_GENDER :: Mostra il simbolo del sesso (azzurro maschio / rosa femmina).
+FAV_ENEMY_GENDER :: Mos: Sesso
+MENU_ENEMY_LEVEL :: Liv.
+NOTE_ENEMY_LEVEL :: Mostra il livello dell'avversario.
+FAV_ENEMY_LEVEL :: Mos: Liv.
+MENU_ENEMY_MAXHP :: PS Max
+NOTE_ENEMY_MAXHP :: Mostra i PS massimi dell'avversario.
+FAV_ENEMY_MAXHP :: Mos: PS Max
+MENU_ENEMY_SHINY :: Cromatico
+NOTE_ENEMY_SHINY :: Mostra una stella dorata quando l'avversario è cromatico.
+FAV_ENEMY_SHINY :: Mostra: Cromat.
+MENU_ENEMY_PKRS :: Pokérus
+NOTE_ENEMY_PKRS :: Mostra un marchio 'pkrs' quando l'avversario ha il Pokérus.
+FAV_ENEMY_PKRS :: Mos: Pokérus
+MENU_ENEMY_NATURE :: Natura
+NOTE_ENEMY_NATURE :: Mostra la Natura dell'avversario.
+FAV_ENEMY_NATURE :: Mos: Natura
+MENU_ENEMY_ABILITY :: Abilità
+NOTE_ENEMY_ABILITY :: Mostra l'Abilità dell'avversario, marcata (HA) quando è l'Abilità Nascosta.
+FAV_ENEMY_ABILITY :: Mos: Abilità
+MENU_ENEMY_HIDDEN_POWER :: Hidden Power
+NOTE_ENEMY_HIDDEN_POWER :: Mostra il tipo di Hidden Power dell'avversario.
+FAV_ENEMY_HIDDEN_POWER :: Mos: Hid.Pwr
+MENU_ENEMY_HELD_ITEM :: Strumento
+NOTE_ENEMY_HELD_ITEM :: Mostra lo strumento che l'avversario sta tenendo.
+FAV_ENEMY_HELD_ITEM :: Mostra: Strum.
+MENU_ENEMY_MOVES :: Mosse
+NOTE_ENEMY_MOVES :: Mostra le quattro mosse dell'avversario.
+FAV_ENEMY_MOVES :: Mos: Mosse
+MENU_ENEMY_IVS :: IV
+NOTE_ENEMY_IVS :: Nella pagina IV/EV, mostra i sei IV per statistica (codificati a colori per qualità).
+FAV_ENEMY_IVS :: Mos: IV
+MENU_ENEMY_IV_TOTAL :: Tot. IV
+NOTE_ENEMY_IV_TOTAL :: Nella pagina IV/EV, mostra il totale IV (su 186).
+FAV_ENEMY_IV_TOTAL :: Mos: Tot. IV
+MENU_ENEMY_EVS :: EV
+NOTE_ENEMY_EVS :: Nella pagina IV/EV, mostra i sei EV per statistica (codificati a colori per investimento).
+FAV_ENEMY_EVS :: Mos: EV
+MENU_ENEMY_EV_TOTAL :: Tot. EV
+NOTE_ENEMY_EV_TOTAL :: Nella pagina IV/EV, mostra il totale EV (su 510).
+FAV_ENEMY_EV_TOTAL :: Mos: Tot. EV
+MENU_HUD :: Config HUD
+NOTE_HUD :: Scegli cosa mostra l'HUD e dove (schermo superiore).\n\nL'intera sovrapposizione si attiva o disattiva con 'Mostra HUD', un livello sopra.\n\nConsiglio: aggiungi 'Mostra HUD' ai preferiti (premi Y su di esso) per attivarla e disattivarla con un tocco.
+MENU_HUD_DISPLAY :: Mostra HUD
+NOTE_HUD_DISPLAY :: Interruttore principale per la sovrapposizione a schermo.
+FAV_HUD_DISPLAY :: Mostra HUD
+MENU_HUD_MONEY :: Soldi
+NOTE_HUD_MONEY :: Mostra quanto denaro hai.
+FAV_HUD_MONEY :: Mos: Soldi
+MENU_HUD_CLOCK :: Tempo gioco
+NOTE_HUD_CLOCK :: Mostra il tuo tempo di gioco.
+FAV_HUD_CLOCK :: Mos: Tempo g.
+MENU_HUD_INGAME :: Ora di gioco
+NOTE_HUD_INGAME :: Mostra la fase giorno/notte del gioco in base all'orologio del 3DS (la Gen 6 usa l'ora reale).\nMattino 04:00-10:59\nGiorno 11:00-17:59\nSera 18:00-20:59\nNotte 21:00-03:59
+FAV_HUD_INGAME :: Mos: Ora gioco
+MENU_HUD_REALTIME :: Ora reale
+NOTE_HUD_REALTIME :: Mostra l'orologio reale della console (HH:MM), la stessa ora che il gioco mostra nella schermata di salvataggio.
+FAV_HUD_REALTIME :: Mos: Ora reale
+HUD_TOD_MORNING :: Mattino
+HUD_TOD_DAY :: Giorno
+HUD_TOD_EVENING :: Sera
+HUD_TOD_NIGHT :: Notte
+MENU_HUD_BP :: Punti Lotta
+NOTE_HUD_BP :: Mostra i tuoi Punti Lotta attuali (BP).
+FAV_HUD_BP :: Mostra: BP
+MENU_HUD_STATUS :: Alteraz. stato
+NOTE_HUD_STATUS :: Mostra lo stato del tuo Pokémon di testa durante la lotta (PSN / BRN / SLP / PAR / FRZ).\nVisibile solo in lotta.
+FAV_HUD_STATUS :: Mos: Stato
+MENU_HUD_MILES :: Pokémig.
+NOTE_HUD_MILES :: Mostra le tue Pokémiglia.
+FAV_HUD_MILES :: Mos: Pokémig.
+MENU_HUD_PARTY :: Conta squ.
+NOTE_HUD_PARTY :: Mostra quanti Pokémon ci sono nella tua squadra.
+FAV_HUD_PARTY :: Mos: Squad.
+MENU_HUD_XY :: Pos.X/Y
+NOTE_HUD_XY :: Mostra le tue coordinate attuali sulla mappa.
+FAV_HUD_XY :: Mos: Pos.X/Y
+MENU_HUD_REPEL :: Passi Rep.
+NOTE_HUD_REPEL :: Mostra quanti passi di Repellente restano (0 = nessun Repellente attivo).\nNon salvato dal gioco, quindi si azzera a 0 al ricaricamento.
+FAV_HUD_REPEL :: Mos: Repel.
+MENU_HUD_MAP_ID :: ID map
+NOTE_HUD_MAP_ID :: Mostra l'ID della mappa attuale, dal vivo (debug / per catalogare le zone per 'sei qui').
+FAV_HUD_MAP_ID :: Mos: ID map
+MENU_HUD_PANEL :: Pann. transl.
+NOTE_HUD_PANEL :: Un riquadro scuro semitrasparente dietro il testo, per leggibilità.
+FAV_HUD_PANEL :: Pann.
+MENU_HUD_OPACITY :: Opac. pann.
+NOTE_HUD_OPACITY :: Imposta quanto è trasparente il pannello (0-100%). Trascina la barra; lo schermo superiore lo mostra in anteprima dal vivo.
+FAV_HUD_OPACITY :: Opac. pann.
+MENU_HUD_SET_POSITION :: Imposta pos.
+NOTE_HUD_SET_POSITION :: Scegli in quale angolo/area appare la sovrapposizione.
+FAV_HUD_SET_POSITION :: Posiz. HUD
+
+# --- Framework UI (bottom buttons + Tools menu & submenus) ---
+FW_FAVORITES :: Preferiti
+FW_MAPPER :: Mappa
+FW_GAME_GUIDE :: Guida Gioc
+FW_SEARCH :: Cerca
+FW_APP_GUIDE :: Guida App
+FW_ACTIONREPLAY :: ActionReplay
+FW_TOOLS :: Util.
+FW_ABOUT :: Info
+FW_HOTKEYS :: Tasti
+FW_CHANGE_THEME :: Cambia Tema
+FW_SETTINGS :: Opzioni
+FW_LANGUAGE :: Lingua
+FW_SCREENSHOTS :: Screenshot
+FW_HEXEDITOR :: HexEditor
+FW_RAM_DUMPER :: Gateway RAM Dumper
+FW_MISC :: Varie
+FW_REBOOT :: Riavvia
+FW_POWEROFF :: Spegni 3DS
+FW_HK_MENU :: Apri/Chiudi Menu (default Select)
+FW_HK_FAV :: Preferito (default Y)
+FW_HK_INFO :: Mostra Info (default X)
+FW_HK_EDIT :: Apri Editor (default START)
+FW_HK_CARD :: Statistica SU/GIÙ (default L)
+FW_SET_SAVEFAV :: Salva Pref.
+FW_SET_LOADFAV :: Carica Pref. all'avvio
+FW_SET_SAVECHEATS :: Salva Trucchi Att.
+FW_SET_LOADCHEATS :: Carica Trucchi all'avvio
+FW_SET_FLOATBTN :: Pulsante Menu flott.
+FW_SET_BACKLIGHT :: Retroillum. (Sperim.)
+FW_SS_CONFIG :: Config
+FW_SS_OVERLAYS :: Includi sovrapp. (HUD, stat, notifiche)
+FW_SS_CAPTUREUI :: Cattura UI plugin (menu e tool)
+FW_MISC_EXPORT :: Esporta File Gioco
+FW_MISC_DISPLAY :: Mostra File Gioco
+FW_MISC_CURSOR :: Mostra Cursore Tocco
+FW_MISC_COORDS :: Mostra Coord. Tocco
+FW_ABOUT_BODY :: Gen6CTRPluginFrameworkOverhauled — un plugin 3gx rinnovato per Pokémon X, Y, Omega Ruby e Alpha Sapphire su Nintendo 3DS.\n\nUn fork adatto ai principianti che mantiene ogni funzione e la avvolge in un'esperienza guidata e accogliente.\n\nFork e revisione di:\ngithub.com/samaBR85\n\n----- CREDITI -----\n\nQuesto si basa su una lunga tradizione di lavoro volontario — ogni suo aspetto merita riconoscimento.\n\nBasato su Gen 6 CTRPluginFramework di biometrix76:\ngithub.com/biometrix76\n\nUna continuazione di Multi-Pokémon Framework (semaj14 e collaboratori):\ngithub.com/semaj14\n\nFondamenta e strumenti:\n- ThePixellizerOSS (3gxtool + CTRPluginFramework):\n  gitlab.com/thepixellizeross\n- PKHeX (kwsch):\n  github.com/kwsch/PKHeX\n- AnalogMan151 (ultraSuMoFramework):\n  github.com/AnalogMan151\n- dragonfyre173 (visualizzatore dati in-game):\n  github.com/dragonfyre173\n- JourneyOver (DB codici ActionReplay):\n  github.com/JourneyOver\n- Alexander Hartmann / Hartie95 (base XY e ORAS):\n  github.com/Hartie95\n- 3DSRNGTool / wwwwwwzx (Gen 6 RNG reference):\n  github.com/wwwwwwzx/3DSRNGTool\n- PokeReader / zaksabeast (initial-seed capture technique):\n  github.com/zaksabeast/PokeReader\n\n----- FONTI IMMAGINI E DATI -----\n\nGli sprite Pokémon (icone Spawner + Leggendari) sono ridimensionati dal set di sprite X/Y di Pokemon Database:\n  pokemondb.net\n\nLe icone di strumenti, MT e MN provengono dal repository di sprite PokeAPI:\n  github.com/PokeAPI/sprites\n\nDati di Pokédex, tipi, abilità, mosse e strumenti (inclusi i prezzi): Pokemon Showdown (smogon/pokemon-showdown) e PokeAPI (pokeapi.co). Nomi degli strumenti: PKHeX (kwsch). Le liste di acquisto dei Poke Mart sono state verificate con le pagine negozio di oraswiki e Bulbapedia.\n\nLe immagini delle mappe di luoghi e percorsi del Teletrasporto, più i dati di connessione tra aree, provengono dalla ORAS Wiki:\n  oraswiki.com/locations\n\nLe immagini dei luoghi di Kalos (XY) provengono da Bulbapedia:\n  bulbagarden.net\n\nTutte le immagini e i nomi Pokémon sono (C) Nintendo / Game Freak / The Pokemon Company. Questi mirror della community sono usati solo per costruire questo strumento gratuito per i fan.\n\nGuide di gioco incluse (Professor Oak Challenge) per ORAS e X/Y di Mewlax, tramite la community r/ProfessorOak.\n\nRealizzato in collaborazione con Claude (Anthropic).
+
+Un fork adatto ai principianti che conserva ogni funzione e la avvolge in un'esperienza guidata e accogliente.
+
+Fork e revisione di:
+github.com/samaBR85
+
+----- CREDITI -----
+
+Questo si basa su una lunga serie di lavoro volontario — ogni sua parte merita riconoscimento.
+
+Basato su Gen 6 CTRPluginFramework di biometrix76:
+github.com/biometrix76
+
+Una continuazione di Multi-Pokémon Framework (semaj14 e collaboratori):
+github.com/semaj14
+
+Fondamenta e strumenti:
+- ThePixellizerOSS (3gxtool + CTRPluginFramework):
+  gitlab.com/thepixellizeross
+- PKHeX (kwsch):
+  github.com/kwsch/PKHeX
+- AnalogMan151 (ultraSuMoFramework):
+  github.com/AnalogMan151
+- dragonfyre173 (visualizzatore dati di gioco):
+  github.com/dragonfyre173
+- JourneyOver (database codici ActionReplay):
+  github.com/JourneyOver
+- Alexander Hartmann / Hartie95 (base XY e ORAS):
+  github.com/Hartie95
+
+----- FONTI IMMAGINI & DATI -----
+
+Gli sprite dei Pokemon (icone Spawner + Leggendari) sono ridimensionati dal set di sprite X/Y del Pokemon Database:
+  pokemondb.net
+
+Le icone di strumenti, MT e MN provengono dal repository di sprite PokeAPI:
+  github.com/PokeAPI/sprites
+
+Dati di Pokedex, tipi, abilità, mosse e strumenti (compresi i prezzi degli strumenti): Pokemon Showdown (smogon/pokemon-showdown) e PokeAPI (pokeapi.co). Nomi degli strumenti: PKHeX (kwsch). Le liste di acquisto del Poke Mart sono state verificate con le pagine dei negozi di oraswiki e Bulbapedia.
+
+Le immagini delle Località di Teletrasporto e delle mappe dei percorsi, oltre ai dati di collegamento tra aree, provengono dalla ORAS Wiki:
+  oraswiki.com/locations
+
+Le immagini delle località di Kalos (XY) provengono da Bulbapedia:
+  bulbagarden.net
+
+Tutte le immagini e i nomi dei Pokemon sono (C) Nintendo / Game Freak / The Pokemon Company. Questi mirror della community sono usati solo per realizzare questo strumento fan gratuito.
+
+Guide di gioco incluse (Professor Oak Challenge) per ORAS e X/Y di Mewlax, tramite la community r/ProfessorOak.
+
+Realizzato in collaborazione con Claude (Anthropic).
+FW_GUIDE_HINT1 :: Tocca un argomento sullo schermo in basso.
+FW_GUIDE_HINT2 :: Si apre qui, sullo schermo in alto.
+FW_GUIDE_HINT3 :: Lettura: Su/Giù scorre, B torna indietro.
 
 # --- O-Power Center (visual panel) ---
 PSS_O_POWER_CENTER :: Centro Forza-O
@@ -434,8 +1134,6 @@ NOTE_DEXNAV_MAX_SEARCH :: Porta al massimo il livello di ricerca DexNav di tutte
 FAV_DEXNAV_MAX_SEARCH :: DexNav Max
 DEXNAV_MAX_DONE :: Livelli ricerca DexNav al massimo!
 DEXNAV_CONFIRM_BODY :: Porta al massimo il\nlivello ricerca DexNav\ndi tutte le 721 specie.\nÈ salvato nella partita\ne non si può annullare.
-
-FW_LANGUAGE :: Lingua
 MENU_HUD_ITEM :: Strumento
 FAV_HUD_ITEM :: Strumento
 MENU_HUD_ENC :: Incontri

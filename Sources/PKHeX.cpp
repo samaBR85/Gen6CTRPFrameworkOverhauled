@@ -993,6 +993,21 @@ namespace CTRPluginFramework {
             return 0; // not found
         }
 
+        // Count occupied slots in the overworld party (same source the View Party Summary viewer uses: the
+        // FindPartyBase scan at 0x104 stride + PK6 decode). The HUD "Party count" field calls this so it reads the
+        // real roster instead of the battle-party struct (which is only valid mid-battle). 0 if the party isn't found.
+        int CountParty(void) {
+            u32 base = FindPartyBase();
+            if (!base) return 0;
+            int count = 0;
+            for (int i = 0; i < 6; ++i) {
+                PK6 pk;
+                bool ok = gPartyEncrypted ? GetPokemon(base + i * 0x104, &pk) : GetPokemonRaw(base + i * 0x104, &pk);
+                if (ok && pk.species >= 1 && pk.species <= 721) ++count;
+            }
+            return count;
+        }
+
         // --- Read-back sheet (shown via the Info/Y note on the Position entry) ---------------------------------
 
         // Decode a UTF-16LE field (max 26 bytes / 13 units) from a decrypted PK6 block into a UTF-8 string.

@@ -135,6 +135,7 @@
    namespace PKHeX {
       void Position(MenuEntry *entry);
       void ViewPartyInfo(MenuEntry *entry); // read-only party viewer (root menu, after Battle)
+      int  CountParty(void);                // # of occupied overworld party slots (HUD Party count uses this)
       void BoxBrowserPlus(MenuEntry *entry); // PC Box ++ visual box grid (replaces Position/Clone/Find)
       void PartyBattleEditor(MenuEntry *entry); // Change Party Stats: visual battle-party editor (in-battle)
       void EnemyHelper(MenuEntry *entry);       // Enemy Helper: in-battle coach card for the enemy (in-battle)
