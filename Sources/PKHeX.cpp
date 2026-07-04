@@ -747,6 +747,15 @@ namespace CTRPluginFramework {
         template<class Pokemon>
         void MarkAsEgg(Pokemon data, bool isEgg) {
             SetBitField(data->iv32, 0x40000000u, isEgg, 30);
+            if (isEgg) {
+                // Give the new egg a real "received on <place>" instead of the game's 0/0/2000 "Mystery Zone":
+                // reuse the mon's own met date/location (same {year-2000, month, day} packing) so the egg's origin
+                // matches where the Pokemon came from. Covers both callers (IsEgg editor + D-Pad quick-edit).
+                data->eggDate[0] = data->metDate[0];
+                data->eggDate[1] = data->metDate[1];
+                data->eggDate[2] = data->metDate[2];
+                data->eggLocation = data->metLocation;
+            }
         }
 
         template<class Pokemon>

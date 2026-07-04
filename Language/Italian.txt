@@ -452,7 +452,7 @@ NOTE_UNLOCK_FULL_DEX :: ATTENZIONE — SALVA PRIMA LA PARTITA!\n\nSegna tutti i 
 FAV_UNLOCK_FULL_DEX :: Dex tot.
 NOTE_PC_BOX_FOLDER :: Sfoglia, cerca e clona Pokémon nei tuoi Box PC.\nEsporta o importa anche i tuoi dati di salvataggio completi qui.
 MENU_PC_BOX_PLUS :: Box PC ++
-NOTE_PC_BOX_PLUS :: Editor visivo dei Box PC - una griglia 6x5 dei tuoi Box con sprite.\n\nGRIGLIA: D-Pad sposta - L/R cambia Box - X sposta/scambia - Y clona - Start cerca una specie - A apre l'editor.\n\nEDITOR: L/R cambia scheda (Principale/Statistiche/Mosse/Origini/Varie) - D-Pad scegli un campo - A modifica - B indietro.\n\nSBIRCIATA UOVO: un uovo appare come "?" nella griglia - selezionalo e premi A, poi conferma per sbirciare - i campi si rivelano uno alla volta, Shiny tenuto per ultimo - A salta la rivelazione.
+NOTE_PC_BOX_PLUS :: Editor visivo dei Box PC - una griglia 6x5 dei tuoi Box con sprite.\n\nGRIGLIA: D-Pad sposta - L/R cambia Box - X sposta/scambia - Y clona - Start cerca una specie - A apre l'editor.\n\nEDITOR: L/R cambia scheda (Principale/Statistiche/Mosse/Origini/Varie) - D-Pad scegli un campo - A modifica - B indietro.\n\nSBIRCIA UOVO - rivela il contenuto di un uovo solo quando vuoi:\n\nCrea un uovo: apri un Pokemon con A, nella scheda Principale imposta "Egg?" su Yes, poi premi B per tornare e salvare.\n\nLa casella ora mostra "?" nella griglia.\n\nSeleziona quel "?" e premi A, poi conferma per sbirciare.\n\nI campi si rivelano uno a uno, lo Shiny per ultimo. Premi A per saltare.
 NOTE_CLONING_FOLDER :: Aiutanti per la clonazione via scambio: fai il backup di un Pokémon offerto in uno scambio e mantieni l'originale dopo lo scambio.
 FAV_COPY_POKEMON_IN_TRADE :: Copia Scambio
 FAV_KEEP_ORIGINAL_POKEMON :: Tieni orig.
