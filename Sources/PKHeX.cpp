@@ -2171,6 +2171,14 @@ namespace CTRPluginFramework {
             for (int k = mStart; k < (int)dbl.size(); k++) { win += dbl[k]; if ((int)OSD::GetTextWidth(true, win) > w) { win.erase(win.size() - 1); break; } }
             s.DrawSysfont(col << win, x, y, col);
         }
+        // Short label for a facet's current selection ("any" when unrestricted, "Fire+2" for a multi-select).
+        // Shared by PickerFilterHub's own hub view and any custom hub (e.g. Living Dex) that draws its own
+        // facet buttons but still wants the identical summary text.
+        static string FacetSummary(const PFacet &f) {
+            if (!f.sel) return "any";
+            int c = 0, first = -1; for (int o = 0; o < f.n; o++) if (f.sel & (1u << o)) { c++; if (first < 0) first = o; }
+            string s = f.opts[first]; if (c > 1) s += "+" + to_string(c - 1); return s;
+        }
         // Bottom-screen touch filter hub. panel = -1 hub, else the open facet's chip sub-panel. Returns true if changed.
         static bool PickerFilterHub(const Screen &bot, PFacet *facets, int nF, int &panel, bool tap, const UIntVector &pos) {
             const FwkSettings &st = FwkSettings::Get();
@@ -2188,11 +2196,7 @@ namespace CTRPluginFramework {
                 int vw = (int)OSD::GetTextWidth(true, val); int vx = x + w - 6 - vw; if (vx < x + 8 + (int)OSD::GetTextWidth(true, label) + 4) vx = x + w - 6 - vw;
                 bot.DrawSysfont((on ? bg : sel) << val, vx, y + 4, sel);
             };
-            auto summary = [&](const PFacet &f) -> string {
-                if (!f.sel) return "any";
-                int c = 0, first = -1; for (int o = 0; o < f.n; o++) if (f.sel & (1u << o)) { c++; if (first < 0) first = o; }
-                string s = f.opts[first]; if (c > 1) s += "+" + to_string(c - 1); return s;
-            };
+            auto summary = [&](const PFacet &f) -> string { return FacetSummary(f); };
             bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
             if (panel < 0) {
                 bot.DrawSysfont(title << "Filters", 34, 26, title); bot.DrawRect(28, 44, 120, 1, title, true);
@@ -2225,6 +2229,467 @@ namespace CTRPluginFramework {
                 chip(198, 196, 98, 20, "< Back", false, sel);
             }
             return dirty;
+        }
+
+        // Pick black or white text for legibility against an arbitrary background (used for the dex number on
+        // Living Dex's fixed dark "missing" tile, which must stay readable regardless of the current theme's
+        // own text color - a theme designed for a light window can be near-illegible on a hardcoded dark tile).
+        static Color AutoContrastText(const Color &bg) {
+            int lum = (299 * bg.r + 587 * bg.g + 114 * bg.b) / 1000;
+            return lum > 140 ? Color::Black : Color::White;
+        }
+
+        // Category accent for the Living Dex species card (0=Regular 1=Legendary 2=Mythical 3=Pseudo 4=Starter
+        // 5=Fossil) - same palette Pokemon Spawner's own detail sheet uses, kept local to this file since that
+        // one lives as a static in Codes.cpp (a different translation unit).
+        static Color LivingDexCatColor(int cat) {
+            static const u32 c[6] = { 0x8C94A0, 0xE0A81E, 0xE066AA, 0x3F86C9, 0x4FB06E, 0xA9824E };
+            if (cat < 0 || cat > 5) cat = 0;
+            u32 v = c[cat];
+            return Color((u8)((v >> 16) & 0xFF), (u8)((v >> 8) & 0xFF), (u8)(v & 0xFF));
+        }
+
+        // Full species info card (top screen only) shown when A is pressed on a Living Dex grid tile - same
+        // fields/layout as Pokemon Spawner's detail sheet (sprite, name/#, category, types, abilities, evo/
+        // mega, base stats, moves at Lv 1), reusing that feature's own existing 88px sprites so no new sprite
+        // assets are created. Always at level 1 (no spawn/level controls here - this is read-only info).
+        static void LivingDexSpeciesCard(const Screen &top, u16 n, bool shiny) {
+            static Image sprite; static int spriteKey = -1;
+            const FwkSettings &st = FwkSettings::Get();
+            Color bg = st.BackgroundMainColor, txt = st.MainTextColor, title = st.WindowTitleColor,
+                  border = st.BackgroundBorderColor, sel = st.MenuSelectedItemColor;
+
+            top.DrawRect(30, 20, 340, 200, bg, true);
+            top.DrawRect(30, 20, 340, 200, border, false);
+
+            string head = string(speciesList[n - 1]) + "  -  #" + Utils::Format("%03d", n);
+            top.DrawSysfont(title << head, 42, 26, title);
+            int cat = spawnerCategory[n];
+            string catNm = spawnerCatNames[cat];
+            int cw = (int)OSD::GetTextWidth(true, catNm) + 12;
+            top.DrawRect(366 - cw, 26, cw, 18, LivingDexCatColor(cat), true);
+            top.DrawSysfont(Color::White << catNm, 366 - cw + 6, 27, Color::White);
+
+            top.DrawRect(44, 48, 88, 88, Color::White, true);
+            top.DrawRect(44, 48, 88, 88, border, false);
+            int key = n * 2 + (shiny ? 1 : 0);
+            if (key != spriteKey) {
+                sprite.LoadFromFile(string("Assets/Spawner/") + (shiny ? "shiny" : "normal") + "/" + Utils::Format("%03d", n) + ".bmp");
+                spriteKey = key;
+            }
+            if (sprite.IsLoaded()) {
+                int sw = sprite.Width(), sh = sprite.Height();
+                sprite.Draw(top, 44 + (88 - sw) / 2, 48 + (88 - sh) / 2);
+            }
+
+            int rx = 148;
+            DrawTypeChips(top, n, rx, 50);
+
+            int a0 = spawnerAbil0[n], a1 = spawnerAbil1[n], ah = spawnerAbilH[n];
+            string abil = getLanguage->Get("SPAWN_ABILITY") + " " + (a0 != 255 ? abilityList[a0] : "-");
+            if (a1 != 255 && a1 != a0) abil += string(" / ") + abilityList[a1];
+            top.DrawSysfont(txt << abil, rx, 72, txt);
+            if (ah != 255) top.DrawSysfont(txt << (getLanguage->Get("SPAWN_HIDDEN") + " " + abilityList[ah]), rx, 90, txt);
+            string em = spawnerEvoNames[spawnerEvoStage[n]];
+            if (spawnerHasMega[n]) em += string(" | ") + getLanguage->Get("SPAWN_MEGA_EVOLUTION");
+            top.DrawSysfont(sel << em, rx, 110, sel);
+
+            static const char *snm[6] = { "HP", "Atk", "Def", "SpA", "SpD", "Spe" };
+            int total = 0;
+            for (int i = 0; i < 6; i++) {
+                int v = gBaseStats[n - 1][i]; total += v;
+                int sx = 46 + i * 46;
+                top.DrawSysfont(txt << snm[i], sx, 138, txt);
+                top.DrawSysfont(title << to_string(v), sx, 154, title);
+            }
+            top.DrawSysfont(txt << "BST", 46 + 6 * 46, 138, txt);
+            top.DrawSysfont(title << to_string(total), 46 + 6 * 46, 154, title);
+
+            int mvIdx[4], mvCount = 0;
+            {
+                int start = spawnerMoveOff[n], end = spawnerMoveOff[n + 1];
+                int qual[80], qn = 0;
+                for (int i = start; i < end; i++) {
+                    if (spawnerMoveLv[i] <= 1) { if (qn < 80) qual[qn++] = spawnerMoveIdx[i]; } else break;
+                }
+                mvCount = qn < 4 ? qn : 4;
+                for (int j = 0; j < mvCount; j++) mvIdx[j] = qual[qn - mvCount + j];
+            }
+            top.DrawSysfont(title << Utils::Format(getLanguage->Get("SPAWN_MOVES_AT_LV_FMT").c_str(), 1), 42, 172, title);
+            for (int i = 0; i < 4; i++) {
+                int col = i % 2, row = i / 2;
+                int mx = 46 + col * 164, my = 188 + row * 16;
+                if (i < mvCount) {
+                    int mi = mvIdx[i];
+                    top.DrawRect(mx, my + 3, 8, 8, TypeColor(spawnerMoveType[mi]), true);
+                    top.DrawSysfont(txt << spawnerMoveNames[mi], mx + 14, my, txt);
+                } else {
+                    top.DrawSysfont(txt << "-", mx + 14, my, txt);
+                }
+            }
+        }
+
+        // ===== Living Dex Dashboard =====
+        // Read-only collection panel: scans all 31 boxes x 30 + the party once, marks which of the 721 species
+        // you OWN (and which you own SHINY), then shows a paginated 9x4 grid using the existing 32px BoxIcons
+        // (owned = the real icon, shiny variant when you have one shiny; missing = a dim tile with the dex #,
+        // auto-contrasted so it stays legible in every theme). L/R page with wraparound.
+        //
+        // The bottom screen is a purpose-built control panel (not the shared PickerFilterHub's generic hub
+        // view - that one's default listing left most of the screen empty and its built-in hint line ran
+        // past the window edge): a stats line, Type/Gen buttons, a Missing-only toggle with a visible ON/OFF
+        // state, and an Export button. Tapping Type/Gen still opens the SAME PickerFilterHub option sub-panel
+        // the Species/Move pickers use (bitmask multi-select) - only the top-level "hub" listing is replaced.
+        // Fase 1-2 (roadmap F5). The "real" seen/caught Pokedex (D4 RAM hunt) is deferred. No new assets.
+        void LivingDex(MenuEntry *entry) {
+            (void)entry;
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+
+            // ---- one-shot scan: boxes (31 x 30) + party -> per-species owned COUNT + shiny bitset.
+            // `owned` is a count, not a bool - a non-zero int is still truthy in every `if (owned[sp])`/
+            // `!owned[sp])` check below, so nothing else needed to change; only the status line below reads
+            // the actual count (to show "(3 owned)" instead of just "(owned)" past the first copy).
+            static int owned[722]; static bool shinyOwn[722];
+            for (int i = 0; i < 722; ++i) { owned[i] = 0; shinyOwn[i] = false; }
+            u32 boxBase = AutoGameSet((u32)0x8C861C8, (u32)0x8C9E134);
+            for (int b = 0; b < 31; ++b) {
+                for (int s = 0; s < 30; ++s) {
+                    PK6 pk; u32 addr = boxBase + b * 6960 + s * 0xE8;
+                    if (GetPokemon(addr, &pk) && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
+                        ++owned[pk.species];
+                        if (IsShiny(&pk)) shinyOwn[pk.species] = true;
+                    }
+                }
+            }
+            u32 pbase = FindPartyBase();
+            for (int i = 0; i < 6 && pbase; ++i) {
+                PK6 pk;
+                bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
+                    ++owned[pk.species];
+                    if (IsShiny(&pk)) shinyOwn[pk.species] = true;
+                }
+            }
+            int ownedN = 0, shinyN = 0;
+            for (u16 sp = 1; sp <= 721; ++sp) { if (owned[sp]) ++ownedN; if (shinyOwn[sp]) ++shinyN; }
+
+            // ---- filter (Type/Gen/Category bitmask via the shared PFacet model) + paginate ----
+            static u16 filtered[721];
+            int fcount = 0, cursor = 0;
+            int missState = 0; // 0 = All, 1 = Missing only, 2 = Owned only - cycles on tap
+            // Bare numbers, not "Gen N" - the chip already prefixes "Gen" (would otherwise read "Gen Gen 1+4"),
+            // and the option sub-panel already shows "Gen" as its own header above these chips.
+            static const char *LD_GEN[6] = {"1", "2", "3", "4", "5", "6"};
+            static const char *LD_CAT[5] = {"Legendary", "Mythical", "Pseudo", "Starter", "Fossil"};
+            PFacet facets[3] = { {"Type", &g_typeName[1], 18, 0}, {"Gen", LD_GEN, 6, 0}, {"Category", LD_CAT, 5, 0} };
+            auto rebuild = [&]() {
+                fcount = 0;
+                for (u16 sp = 1; sp <= 721; ++sp) {
+                    int t1 = spawnerType1[sp], t2 = spawnerType2[sp];
+                    u32 tb = ((t1 >= 1 && t1 <= 18) ? (1u << (t1 - 1)) : 0u) | ((t2 >= 1 && t2 <= 18) ? (1u << (t2 - 1)) : 0u);
+                    if (!facetPass(facets[0].sel, tb)) continue;
+                    if (!facetPass(facets[1].sel, 1u << (SpeciesGen(sp) - 1))) continue;
+                    int cat = spawnerCategory[sp]; // 1 Legend,2 Myth,3 Pseudo,4 Starter,5 Fossil (0 = none)
+                    if (!facetPass(facets[2].sel, (cat >= 1 && cat <= 5) ? (1u << (cat - 1)) : 0u)) continue;
+                    if (missState == 1 && owned[sp]) continue;
+                    if (missState == 2 && !owned[sp]) continue;
+                    filtered[fcount++] = sp;
+                }
+                if (cursor >= fcount) cursor = fcount ? fcount - 1 : 0;
+            };
+            rebuild();
+
+            const int COLS = 9, ROWS = 4, PER_PAGE = COLS * ROWS;
+            Image gdcache[PER_PAGE]; int loadedPage = -1, filterVer = 0, loadedVer = -1;
+            int panel = -1; bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
+            bool showCard = false; // A on a grid tile opens the full species info card (top screen only)
+
+            // Bottom-screen custom hub: a 2x2 grid of filter buttons (Type/Gen/Category/Missing-only) plus a
+            // full-width Export row below - replaces the single stacked column, which left "Export" alone on
+            // its own full-width row for no reason once there were only 2 real buttons.
+            const int GX = 40, GW = 240, GAP = 8, CW = (GW - GAP) / 2, RBH = 30, RGAP = 8;
+            const int ROW1_Y = 106, ROW2_Y = ROW1_Y + RBH + RGAP;      // 106, 144
+            const int COL1_X = GX, COL2_X = GX + CW + GAP;
+            const int EXPORT_Y = ROW2_Y + RBH + RGAP, EXPORT_H = 26;    // 182
+
+            drainKeys();
+
+            while (true) {
+                Controller::Update();
+                if (System::IsSleeping()) break;
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close();
+                    break;
+                }
+                if (Controller::IsKeyPressed(Key::B)) {
+                    if (showCard) showCard = false;
+                    else if (panel >= 0) panel = -1;
+                    else break;
+                }
+                if (!showCard && fcount > 0 && Controller::IsKeyPressed(Key::A)) showCard = true;
+                // Start resets every filter (Type/Gen/Category back to "any", All/Missing/Owned back to All) -
+                // documented in the (i) note only, not as an on-screen legend.
+                if (!showCard && Controller::IsKeyPressed(Key::Start)) {
+                    facets[0].sel = facets[1].sel = facets[2].sel = 0; missState = 0;
+                    ++filterVer; rebuild();
+                }
+
+                // navigation (absolute cursor into the filtered list); L/R change page WITH WRAPAROUND
+                // (page 1 -> L wraps to the last page; last page -> R wraps to page 1).
+                if (!showCard && fcount > 0) {
+                    if (KeyRep(Key::Left))  cursor = (cursor + fcount - 1) % fcount;
+                    if (KeyRep(Key::Right)) cursor = (cursor + 1) % fcount;
+                    if (KeyRep(Key::Up))    { cursor -= COLS; if (cursor < 0) cursor = 0; }
+                    if (KeyRep(Key::Down))  { cursor += COLS; if (cursor >= fcount) cursor = fcount - 1; }
+                    if (Controller::IsKeyPressed(Key::L) || Controller::IsKeyPressed(Key::R)) {
+                        int totalPages = (fcount + PER_PAGE - 1) / PER_PAGE;
+                        int page = cursor / PER_PAGE, posInPage = cursor - page * PER_PAGE;
+                        int dir = Controller::IsKeyPressed(Key::R) ? 1 : -1;
+                        int newPage = (page + dir + totalPages) % totalPages;
+                        cursor = newPage * PER_PAGE + posInPage;
+                        if (cursor >= fcount) cursor = fcount - 1;
+                    }
+                }
+                if (!showCard && Controller::IsKeyPressed(Key::X)) {
+                    File f("LivingDex.txt", File::RWC | File::TRUNCATE);
+                    if (f.IsOpen()) {
+                        string out = "Living Dex - owned " + to_string(ownedN) + "/721, shiny " + to_string(shinyN) + "\n\nMissing:\n";
+                        for (u16 sp = 1; sp <= 721; ++sp)
+                            if (!owned[sp]) out += Utils::Format("#%03d %s\n", sp, speciesList[sp - 1]);
+                        f.Write(out.c_str(), out.size());
+                        f.Close();
+                        OSD::Notify(getLanguage->Get("LIVING_DEX_EXPORTED"));
+                    }
+                }
+
+                bool down = Touch::IsDown(); UIntVector tp = down ? Touch::GetPosition() : lastPos; if (down) lastPos = tp;
+                bool tap = armed && !down && wasDown; if (!down) armed = true; wasDown = down;
+
+                if (showCard) {
+                    // The card is a read-only overlay - swallow taps so nothing behind it reacts to them.
+                } else if (panel >= 0) {
+                    // Option sub-panel (choosing Type/Gen/Category values) - identical widget the Species/Move
+                    // pickers use.
+                    if (PickerFilterHub(bot, facets, 3, panel, tap, lastPos)) { ++filterVer; rebuild(); }
+                } else if (tap && inBox(lastPos, COL1_X, ROW1_Y, CW, RBH)) {
+                    panel = 0; // Type
+                } else if (tap && inBox(lastPos, COL2_X, ROW1_Y, CW, RBH)) {
+                    panel = 1; // Gen
+                } else if (tap && inBox(lastPos, COL1_X, ROW2_Y, CW, RBH)) {
+                    panel = 2; // Category
+                } else if (tap && inBox(lastPos, COL2_X, ROW2_Y, CW, RBH)) {
+                    missState = (missState + 1) % 3; ++filterVer; rebuild(); // cycles All -> Missing -> Owned -> All
+                } else if (tap && inBox(lastPos, GX, EXPORT_Y, GW, EXPORT_H)) {
+                    File f("LivingDex.txt", File::RWC | File::TRUNCATE);
+                    if (f.IsOpen()) {
+                        string out = "Living Dex - owned " + to_string(ownedN) + "/721, shiny " + to_string(shinyN) + "\n\nMissing:\n";
+                        for (u16 sp = 1; sp <= 721; ++sp)
+                            if (!owned[sp]) out += Utils::Format("#%03d %s\n", sp, speciesList[sp - 1]);
+                        f.Write(out.c_str(), out.size());
+                        f.Close();
+                        OSD::Notify(getLanguage->Get("LIVING_DEX_EXPORTED"));
+                    }
+                }
+
+                int page = cursor / PER_PAGE;
+                int totalPages = fcount ? (fcount + PER_PAGE - 1) / PER_PAGE : 1;
+
+                // (re)load the icons for the visible page when the page or a filter changed
+                if (page != loadedPage || filterVer != loadedVer) {
+                    for (int i = 0; i < PER_PAGE; ++i) {
+                        gdcache[i].Clear();
+                        int absIdx = page * PER_PAGE + i;
+                        if (absIdx < fcount) {
+                            u16 sp = filtered[absIdx];
+                            if (owned[sp]) { string p; BoxIconPath(p, sp, shinyOwn[sp], "BoxIcons/"); gdcache[i].LoadFromFile(p); }
+                        }
+                    }
+                    loadedPage = page; loadedVer = filterVer;
+                }
+
+                const FwkSettings &st = FwkSettings::Get();
+                Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, border = st.BackgroundBorderColor,
+                      title = st.WindowTitleColor, txt = st.MainTextColor, accent = st.MenuSelectedItemColor,
+                      dim = Color(0x52, 0x52, 0x4E); // neutral gray, not theme-blue - keeps the cursor's accent
+                                                      // highlight (also often blue-ish) from blending into the tiles
+                Color dimText = AutoContrastText(dim); // legible on the fixed dark tile regardless of theme
+                // Function-coded colors for the bottom hub (distinct color per action, not decoration): Gen =
+                // green, Category = amber, Export = red. Type stays on the theme's own accent since its
+                // sub-panel already color-codes each option by its elemental type. The 4th chip (All/Missing/
+                // Owned) gets a distinct color PER STATE, not per on/off - neutral for All, coral for Missing,
+                // teal for Owned.
+                const Color genColor(0x63, 0x99, 0x22), catColor(0xBA, 0x75, 0x17), exportColor(0xA3, 0x2D, 0x2D),
+                            missingStateColor(0xD8, 0x5A, 0x30), ownedStateColor(0x1D, 0x9E, 0x75);
+
+                // ---- TOP: header + grid + a single "selected species" line, or the full info card when A
+                // was pressed on a tile (read-only, same fields as Pokemon Spawner's own detail sheet).
+                if (showCard && fcount > 0) {
+                    u16 sp = filtered[cursor];
+                    LivingDexSpeciesCard(top, sp, shinyOwn[sp]);
+                } else {
+                top.DrawRect(30, 20, 340, 200, bg, true);
+                top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("MENU_LIVING_DEX"), 42, 28, title);
+                {
+                    string cnt = Utils::Format("%d / 721", ownedN);
+                    top.DrawSysfont(accent << cnt, 358 - (int)OSD::GetTextWidth(true, cnt), 28, accent);
+                }
+                top.DrawRect(42, 46, 316, 1, border, true);
+
+                // grid: 9 cols x 4 rows, 32px cells, 4px gap. gridBottom is the FIXED bottom of a full 4-row
+                // grid (not "wherever the last actually-drawn cell happened to be") so the species line below
+                // it doesn't jump up when a filter leaves fewer than 36 results on the page.
+                const int CELL = 32, PITCH = 36, x0 = 40, y0 = 52;
+                const int gridBottom = y0 + (ROWS - 1) * PITCH + CELL;
+                for (int i = 0; i < PER_PAGE; ++i) {
+                    int absIdx = page * PER_PAGE + i;
+                    if (absIdx >= fcount) break;
+                    u16 sp = filtered[absIdx];
+                    int cx = x0 + (i % COLS) * PITCH, cy = y0 + (i / COLS) * PITCH;
+                    if (owned[sp] && gdcache[i].IsLoaded()) {
+                        gdcache[i].Draw(top, cx, cy);
+                    } else {
+                        // Flat fill, no per-tile outline - the 4px gap between cells already separates them,
+                        // and a stroke here used to visually blend into the cursor's own accent-colored
+                        // highlight border, making the current selection hard to spot.
+                        top.DrawRect(cx, cy, CELL, CELL, dim, true);
+                        string n = to_string(sp);
+                        top.DrawSysfont(dimText << n, cx + (CELL - (int)OSD::GetTextWidth(true, n)) / 2, cy + 9, dimText);
+                    }
+                    if (absIdx == cursor)
+                        top.DrawRect(cx - 1, cy - 1, CELL + 2, CELL + 2, accent, false);
+                }
+
+                // Single line below the grid: JUST the selected species + status - nothing else competes for
+                // this space (owned/shiny/missing/page live on the bottom screen). Pulled up close to the grid
+                // (gridBottom+6, no separate divider before it) so its full text height fits inside the window
+                // instead of running past the bottom border like the two-block version did.
+                {
+                    u16 sel = fcount ? filtered[cursor] : 0;
+                    string who = sel ? Utils::Format("#%03d %s", sel, speciesList[sel - 1]) : "-";
+                    if (sel) {
+                        // Past the first copy, show the actual count ("3 owned") instead of just "owned" -
+                        // Living Dex entries can legitimately be duplicated across boxes/party.
+                        string status;
+                        if (shinyOwn[sel]) status = getLanguage->Get("LIVING_DEX_SHINY");
+                        else if (owned[sel] > 1) status = Utils::Format(getLanguage->Get("LIVING_DEX_OWNED_N").c_str(), owned[sel]);
+                        else if (owned[sel] == 1) status = getLanguage->Get("LIVING_DEX_HAVE");
+                        else status = getLanguage->Get("LIVING_DEX_MISS");
+                        who += " (" + status + ")";
+                    }
+                    while (!who.empty() && OSD::GetTextWidth(true, who) > 316) who.resize(who.size() - 1);
+                    top.DrawSysfont(accent << who, 30 + (340 - (int)OSD::GetTextWidth(true, who)) / 2, gridBottom + 6, accent);
+                }
+                }
+
+                // ---- BOTTOM: custom control panel, the shared option sub-panel, or a plain "go back" hint
+                // while the species card is open (the filter buttons underneath don't react to taps then).
+                if (showCard) {
+                    bot.DrawRect(20, 20, 280, 200, bg, true);
+                    bot.DrawRect(20, 20, 280, 200, border, false);
+                    string h = getLanguage->Get("LIVING_DEX_CARD_BACK");
+                    bot.DrawSysfont(txt << h, 40 + (240 - (int)OSD::GetTextWidth(true, h)) / 2, 108, txt);
+                } else if (panel >= 0) {
+                    PickerFilterHub(bot, facets, 3, panel, false, lastPos); // draw only; input already applied above
+                } else {
+                    bot.DrawRect(20, 20, 280, 200, bg, true);
+                    bot.DrawRect(20, 20, 280, 200, border, false);
+                    bot.DrawSysfont(title << getLanguage->Get("MENU_LIVING_DEX"), 40, 30, title);
+                    bot.DrawRect(40, 46, 240, 1, border, true);
+                    // Stats spread across TWO lines (Owned+Shiny, then Missing+Page) - cramming all four into
+                    // one line overflowed 240px and got silently truncated mid-word in an earlier cut. Each
+                    // value is colored by meaning (labels stay the theme's neutral text color, not literal
+                    // black - that would vanish on a dark theme): Owned=teal (matches the Owned chip), Shiny=
+                    // gold, Missing=coral (matches the Missing chip), Page=the theme's own accent (pure
+                    // navigation, no "collection" meaning).
+                    {
+                        const Color shinyColor(0xD4, 0xAF, 0x37);
+                        string ownedVal = to_string(ownedN) + "/721", shinyVal = to_string(shinyN),
+                               missVal = to_string(721 - ownedN), pageVal = Utils::Format("%d/%d", page + 1, totalPages);
+                        string ownedLab = getLanguage->Get("LIVING_DEX_OWNED") + " ", shinyLab = getLanguage->Get("LIVING_DEX_SHINY_C") + " ";
+                        string missLab = getLanguage->Get("LIVING_DEX_MISSING") + " ", pageLab = getLanguage->Get("LIVING_DEX_PAGE_LABEL") + " ";
+                        string leftPart1 = ownedLab + ownedVal, leftPart2 = missLab + missVal;
+
+                        // Fallback: if this line would run past 240px in some language, fall back to one flat
+                        // neutral-colored string (safety net) instead of colored segments running off the edge.
+                        string l1plain = leftPart1 + "   " + shinyLab + shinyVal;
+                        string l2plain = leftPart2 + "   " + pageLab + pageVal;
+
+                        auto drawSeg = [&](int &x, int y, const string &s, const Color &c) {
+                            bot.DrawSysfont(c << s, x, y, c); x += (int)OSD::GetTextWidth(true, s);
+                        };
+                        if ((int)OSD::GetTextWidth(true, l1plain) <= 240 && (int)OSD::GetTextWidth(true, l2plain) <= 240) {
+                            // Right column (Shiny/Page) sits at a SHARED fixed x - whichever left part (Owned or
+                            // Missing) is wider decides it, so the two rows line up like a table instead of each
+                            // starting wherever its own left text happened to end.
+                            int colR = 40 + std::max((int)OSD::GetTextWidth(true, leftPart1), (int)OSD::GetTextWidth(true, leftPart2)) + 14;
+                            int x = 40;
+                            drawSeg(x, 58, ownedLab, txt); drawSeg(x, 58, ownedVal, ownedStateColor);
+                            x = colR;
+                            drawSeg(x, 58, shinyLab, txt); drawSeg(x, 58, shinyVal, shinyColor);
+                            x = 40;
+                            drawSeg(x, 76, missLab, txt); drawSeg(x, 76, missVal, missingStateColor);
+                            x = colR;
+                            drawSeg(x, 76, pageLab, txt); drawSeg(x, 76, pageVal, accent);
+                        } else {
+                            while (!l1plain.empty() && OSD::GetTextWidth(true, l1plain) > 240) l1plain.resize(l1plain.size() - 1);
+                            bot.DrawSysfont(txt << l1plain, 40, 58, txt);
+                            while (!l2plain.empty() && OSD::GetTextWidth(true, l2plain) > 240) l2plain.resize(l2plain.size() - 1);
+                            bot.DrawSysfont(txt << l2plain, 40, 76, txt);
+                        }
+                    }
+                    bot.DrawRect(40, 98, 240, 1, border, true);
+
+                    // panelBtn always clamps the VALUE (never the label) so label+value can never overlap
+                    // regardless of language/length - this is what caused "Categoégy Starter" and the
+                    // "Missing onlON" collision in the previous cut.
+                    auto panelBtn = [&](int x, int y, int w, const string &label, const string &valIn, bool on, const Color &onColor) {
+                        Color fill = on ? onColor : bg2, txtCol = on ? AutoContrastText(onColor) : txt, valCol = on ? AutoContrastText(onColor) : accent;
+                        bot.DrawRect(x, y, w, RBH, fill, true);
+                        bot.DrawRect(x, y, w, RBH, on ? onColor : border, false);
+                        int lw = (int)OSD::GetTextWidth(true, label);
+                        string val = valIn;
+                        int maxValW = w - 16 - lw - 6;
+                        while (!val.empty() && OSD::GetTextWidth(true, val) > maxValW) val.resize(val.size() - 1);
+                        bot.DrawSysfont(txtCol << label, x + 8, y + 8, txtCol);
+                        int vw = (int)OSD::GetTextWidth(true, val);
+                        bot.DrawSysfont(valCol << val, x + w - 8 - vw, y + 8, valCol);
+                    };
+                    // Type's active color mirrors the actual selected type's own color (same TypeColor() the
+                    // option sub-panel already uses) instead of the generic theme accent - "Fire" reads red,
+                    // "Grass" reads green, etc. Multi-select uses the first selected type's color.
+                    Color typeActiveColor = accent;
+                    if (facets[0].sel) for (int o = 0; o < 18; ++o) if (facets[0].sel & (1u << o)) { typeActiveColor = TypeColor(o + 1); break; }
+
+                    panelBtn(COL1_X, ROW1_Y, CW, getLanguage->Get("LIVING_DEX_TYPE"), FacetSummary(facets[0]), facets[0].sel != 0, typeActiveColor);
+                    panelBtn(COL2_X, ROW1_Y, CW, getLanguage->Get("LIVING_DEX_GEN"), FacetSummary(facets[1]), facets[1].sel != 0, genColor);
+                    panelBtn(COL1_X, ROW2_Y, CW, getLanguage->Get("LIVING_DEX_CATEGORY"), FacetSummary(facets[2]), facets[2].sel != 0, catColor);
+                    {
+                        // No fixed label here - the chip IS the state (a single word: All/Missing/Owned), each
+                        // with its own color so the three states read apart at a glance (not just on/off).
+                        const char *stKey = missState == 1 ? "LIVING_DEX_MISSING" : missState == 2 ? "LIVING_DEX_OWNED" : "LIVING_DEX_ALL";
+                        Color stFill = missState == 1 ? missingStateColor : missState == 2 ? ownedStateColor : bg2;
+                        Color stBorder = missState != 0 ? stFill : border;
+                        Color stTxt = missState != 0 ? AutoContrastText(stFill) : txt;
+                        string sw = getLanguage->Get(stKey);
+                        bot.DrawRect(COL2_X, ROW2_Y, CW, RBH, stFill, true);
+                        bot.DrawRect(COL2_X, ROW2_Y, CW, RBH, stBorder, false);
+                        bot.DrawSysfont(stTxt << sw, COL2_X + (CW - (int)OSD::GetTextWidth(true, sw)) / 2, ROW2_Y + 8, stTxt);
+                    }
+                    {
+                        // Export always shows red - it's a write action, not a togglable state.
+                        Color exTxt = AutoContrastText(exportColor);
+                        bot.DrawRect(GX, EXPORT_Y, GW, EXPORT_H, exportColor, true);
+                        bot.DrawRect(GX, EXPORT_Y, GW, EXPORT_H, title, false);
+                        string el = getLanguage->Get("LIVING_DEX_EXPORT_BTN");
+                        bot.DrawSysfont(exTxt << el, GX + (GW - (int)OSD::GetTextWidth(true, el)) / 2, EXPORT_Y + 6, exTxt);
+                    }
+                }
+
+                OSD::SwapBuffers();
+            }
         }
 
         // Visual move picker (no keyboard): scrollable list filterable by type; top shows the move's
@@ -3062,10 +3527,18 @@ namespace CTRPluginFramework {
             Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
             const Color markCol(0xE5, 0x43, 0x3C); // pending move/clone source highlight (red)
 
-            // Grid geometry: 6 columns x 5 rows = 30 slots, inside the standard top window (30,20,340,200).
-            const int COLS = 6, ROWS = 5, CELLW = 48, CELLH = 35, GX0 = 56, GY0 = 42;
-            auto cellLeft = [&](int i) { return GX0 + (i % COLS) * CELLW; };
-            auto cellTop  = [&](int i) { return GY0 + (i / COLS) * CELLH; };
+            // Grid geometry: 8 columns x 4 rows (32 cells) to hold the 30 real slots of a Box (3 full rows
+            // of 8 + a last row of 6) - airier than the old 6x5 (more vertical breathing room below the
+            // grid), same 32px cell / 4px gap spacing as Living Dex's grid. The last (partial) row is
+            // horizontally centered rather than left-aligned with trailing gaps.
+            const int COLS = 8, ROWS = 4, CELL = 32, GAP = 4, PITCH = CELL + GAP;
+            const int GX0 = 30 + (340 - ((COLS - 1) * PITCH + CELL)) / 2, GY0 = 52;
+            auto cellLeft = [&](int i) {
+                int row = i / COLS, itemsInRow = std::min(COLS, 30 - row * COLS);
+                int rowOffset = (COLS - itemsInRow) * PITCH / 2;
+                return GX0 + rowOffset + (i % COLS) * PITCH;
+            };
+            auto cellTop  = [&](int i) { return GY0 + (i / COLS) * PITCH; };
 
             int curBox = (gBoxNumber >= 1 && gBoxNumber <= 31) ? gBoxNumber - 1 : 0;
             int cursor = (gPositionNumber >= 1 && gPositionNumber <= 30) ? gPositionNumber - 1 : 0;
@@ -3225,37 +3698,34 @@ namespace CTRPluginFramework {
 
                 int occ = 0; for (int i = 0; i < 30; ++i) if (boxSpecies[i]) ++occ;
 
-                // ---- TOP: header + the 6x5 grid ----
+                // ---- TOP: header + the 8x4 grid ----
                 top.DrawRect(30, 20, 340, 200, bg, true);
                 top.DrawRect(30, 20, 340, 200, border, false);
-                top.DrawSysfont(title << "PC Box ++", 42, 26, title);
+                top.DrawSysfont(title << "PC Box ++", 42, 28, title);
                 {
                     string h = "Box " + to_string(curBox + 1) + " / 31    " + to_string(occ) + "/30";
                     top.DrawSysfont(txt << h, 358 - (int)OSD::GetTextWidth(true, h), 28, txt);
                 }
-                top.DrawRect(42, 40, 316, 1, title, true);
+                // Divider pushed down to 46 (matches Living Dex's header spacing) - the old y=40 sat right
+                // under the header text baseline and looked like it was biting into it.
+                top.DrawRect(42, 46, 316, 1, title, true);
 
                 for (int i = 0; i < 30; ++i) {
-                    int cl = cellLeft(i), ct = cellTop(i);
-                    int tx = cl + 4, ty = ct + 1, tw = 40, th = 33;     // tray tile
-                    int ix = cl + 8, iy = ct + 1;                       // 32px icon origin
-                    top.DrawRect(tx, ty, tw, th, bg2, true);
-                    top.DrawRect(tx, ty, tw, th, border, false);
+                    int cx = cellLeft(i), cy = cellTop(i);
+                    // No background tile/fill behind the icon (matches Living Dex exactly) - just the
+                    // sprite floating on the window background, with the 4px gap separating cells.
                     bool cellMasked = boxSpecies[i] && boxEgg[i] && !EggRevealed(cellAddr(curBox, i));
                     if (cellMasked)
-                        top.DrawSysfont(title << "?", ix + 12, iy + 10, title); // masked egg: hide the baby icon
+                        top.DrawSysfont(title << "?", cx + 12, cy + 9, title); // masked egg: hide the baby icon
                     else if (boxSpecies[i] && gridIcon[i].IsLoaded())
-                        gridIcon[i].Draw(top, ix, iy);
-                    // pending move/clone source = red frame
-                    if (markMode && curBox == markBox && i == markSlot) {
-                        top.DrawRect(tx, ty, tw, th, markCol, false);
-                        top.DrawRect(tx + 1, ty + 1, tw - 2, th - 2, markCol, false);
-                    }
-                    // cursor = bright double frame
-                    if (i == cursor) {
-                        top.DrawRect(tx, ty, tw, th, sel, false);
-                        top.DrawRect(tx + 1, ty + 1, tw - 2, th - 2, sel, false);
-                    }
+                        gridIcon[i].Draw(top, cx, cy);
+                    // pending move/clone source = single frame (red) - drawn before the cursor so the
+                    // cursor visually wins if both land on the same slot.
+                    if (markMode && curBox == markBox && i == markSlot)
+                        top.DrawRect(cx - 1, cy - 1, CELL + 2, CELL + 2, markCol, false);
+                    // cursor = single frame, theme accent color (same look as Living Dex's cursor highlight)
+                    if (i == cursor)
+                        top.DrawRect(cx - 1, cy - 1, CELL + 2, CELL + 2, sel, false);
                 }
 
                 // ---- BOTTOM: focused slot card + controls ----

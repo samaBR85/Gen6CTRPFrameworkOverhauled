@@ -1199,3 +1199,40 @@ TRAINER_CARD_SAVE_BACK :: B : Enregistrer et retour
 MENU_TRAINER_INFO :: Infos Dresseur
 FAV_TRAINER_INFO :: Infos Dresseur
 NOTE_TRAINER_INFO :: Deux aperçus en lecture seule, sans effet, sur toi et ton équipe.\n\nRésumé d'équipe : les stats cachées de ton équipe (IVs, EVs, nature, talent...).\n\nCarte de Dresseur : une carte partageable avec ton OT/TID, Argent, Miles, PC, Temps de jeu, badges, et les sprites de ton équipe.
+
+# ==== Living Dex Dashboard (v0.6.5) ====
+MENU_LIVING_DEX :: Living Dex
+FAV_LIVING_DEX :: Living Dex
+NOTE_LIVING_DEX :: Ta collection d'un coup d'oeil : lesquels des 721 Pokemon tu POSSEDES (dans toutes les boites et ton equipe), lesquels tu as en CHROMATIQUE, et lesquels te manquent.\n\nPossedes = leur icone; manquants = une case sombre avec le numero.\n\nCroix bouger, L/R change de page (boucle). Sur l'ecran du bas : touche Type, Gen ou Categorie pour filtrer, touche la 4e puce pour alterner Tous / Manquants / Possedes, touche Exporter pour sauvegarder la liste des manquants dans LivingDex.txt sur ta SD. Start reinitialise tous les filtres, A ouvre la fiche complete du Pokemon selectionne.\n\nLecture seule. Compte ce que tu AS vraiment (pas le Pokedex vu/attrape du jeu).
+LIVING_DEX_PAGE :: Page %d/%d
+LIVING_DEX_OWNED :: Possedes
+LIVING_DEX_SHINY_C :: Chromatiques
+LIVING_DEX_MISSING :: Manquants
+LIVING_DEX_TYPE :: Type
+LIVING_DEX_GEN :: Gen
+LIVING_DEX_ALL :: Tous
+LIVING_DEX_MISSING_ONLY :: Manquants
+LIVING_DEX_HAVE :: possede
+LIVING_DEX_SHINY :: chromatique
+LIVING_DEX_MISS :: manquant
+LIVING_DEX_CTRL1 :: Croix bouger   L/R page
+LIVING_DEX_CTRL2 :: A: manquants   Y: type
+LIVING_DEX_CTRL3 :: Start: gen   X: export   B: retour
+LIVING_DEX_EXPORTED :: LivingDex.txt enregistre
+
+# ==== Living Dex v2 (custom bottom hub) ====
+LIVING_DEX_ON :: ON
+LIVING_DEX_OFF :: OFF
+LIVING_DEX_EXPORT_BTN :: Exporter la liste
+
+# ==== Living Dex v3 (Category filter) ====
+LIVING_DEX_CATEGORY :: Categorie
+
+# ==== Living Dex v4 (colored stats) ====
+LIVING_DEX_PAGE_LABEL :: Page
+
+# ==== Living Dex v5 (owned count) ====
+LIVING_DEX_OWNED_N :: %d possedes
+
+# ==== Living Dex v7 (species card) ====
+LIVING_DEX_CARD_BACK :: Appuie sur B pour revenir

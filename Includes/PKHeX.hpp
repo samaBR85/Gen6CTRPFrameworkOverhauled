@@ -137,6 +137,7 @@
       void ViewPartyInfo(MenuEntry *entry); // read-only party viewer (root menu, after Battle)
       int  CountParty(void);                // # of occupied overworld party slots (HUD Party count uses this)
       void TrainerCard(MenuEntry *entry);    // read-only shareable card (root menu, after View Party Summary)
+      void LivingDex(MenuEntry *entry);      // read-only collection dashboard (Trainer Info): owned/shiny/missing grid
       void BoxBrowserPlus(MenuEntry *entry); // PC Box ++ visual box grid (replaces Position/Clone/Find)
       void PartyBattleEditor(MenuEntry *entry); // Change Party Stats: visual battle-party editor (in-battle)
       void EnemyHelper(MenuEntry *entry);       // Enemy Helper: in-battle coach card for the enemy (in-battle)

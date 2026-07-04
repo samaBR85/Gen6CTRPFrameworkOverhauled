@@ -1199,3 +1199,40 @@ TRAINER_CARD_SAVE_BACK :: B：保存して戻る
 MENU_TRAINER_INFO :: トレーナー情報
 FAV_TRAINER_INFO :: トレーナー情報
 NOTE_TRAINER_INFO :: あなたとパーティについての、閲覧専用で副作用のない2つのスナップショット。\n\nパーティ概要：チームの隠しステータス（個体値、努力値、性格、特性など）。\n\nトレーナーカード：OT/TID、お金、マイル、BP、プレイ時間、バッジ、パーティのスプライトを含む共有可能なカード。
+
+# ==== Living Dex Dashboard (v0.6.5) ====
+MENU_LIVING_DEX :: リビングデックス
+FAV_LIVING_DEX :: リビングデックス
+NOTE_LIVING_DEX :: あなたのコレクションを一目で：721匹のうち所持しているもの（全ボックス＋手持ち）、色違い所持、まだ足りないものを表示。\n\n所持＝アイコン表示、未所持＝図鑑番号の暗いマス。\n\n十字キーで移動、L/Rでページ切替（循環）。下画面でType、Gen、Categoryをタッチして絞り込み、4つ目のチップでAll / Missing / Ownedを切り替え、Exportをタッチして未所持リストをSDのLivingDex.txtに保存。Startで全フィルターをリセット、Aで選択したポケモンの詳細カードを表示。\n\n閲覧のみ。実際に所持している数を数えます（ゲームの見た/捕まえた図鑑ではありません）。
+LIVING_DEX_PAGE :: %d/%dページ
+LIVING_DEX_OWNED :: 所持
+LIVING_DEX_SHINY_C :: 色違い
+LIVING_DEX_MISSING :: 未所持
+LIVING_DEX_TYPE :: タイプ
+LIVING_DEX_GEN :: 世代
+LIVING_DEX_ALL :: 全
+LIVING_DEX_MISSING_ONLY :: 未所持のみ
+LIVING_DEX_HAVE :: 所持
+LIVING_DEX_SHINY :: 色違い
+LIVING_DEX_MISS :: 未所持
+LIVING_DEX_CTRL1 :: 十字移動  L/R頁
+LIVING_DEX_CTRL2 :: A:未所持のみ Y:タイプ
+LIVING_DEX_CTRL3 :: Start:世代 X:書出 B:戻る
+LIVING_DEX_EXPORTED :: LivingDex.txtを保存
+
+# ==== Living Dex v2 (custom bottom hub) ====
+LIVING_DEX_ON :: ON
+LIVING_DEX_OFF :: OFF
+LIVING_DEX_EXPORT_BTN :: 未所持リストを書き出す
+
+# ==== Living Dex v3 (Category filter) ====
+LIVING_DEX_CATEGORY :: カテゴリ
+
+# ==== Living Dex v4 (colored stats) ====
+LIVING_DEX_PAGE_LABEL :: ページ
+
+# ==== Living Dex v5 (owned count) ====
+LIVING_DEX_OWNED_N :: %d匹所持
+
+# ==== Living Dex v7 (species card) ====
+LIVING_DEX_CARD_BACK :: Bボタンで戻る

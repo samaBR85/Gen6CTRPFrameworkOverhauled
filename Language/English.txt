@@ -1200,3 +1200,40 @@ TRAINER_CARD_SAVE_BACK :: B: Save and back
 MENU_TRAINER_INFO :: Trainer Info
 FAV_TRAINER_INFO :: Trainer Info
 NOTE_TRAINER_INFO :: Two read-only, no-side-effects snapshots about you and your team.\n\nView Party Summary: your team's hidden stats (IVs, EVs, nature, ability...).\n\nTrainer Card: a shareable card with your OT/TID, Money, Miles, BP, Time Played, badges, and your party's sprites.
+
+# ==== Living Dex Dashboard (v0.6.5) ====
+MENU_LIVING_DEX :: Living Dex
+FAV_LIVING_DEX :: Living Dex
+NOTE_LIVING_DEX :: Your collection at a glance: which of the 721 Pokemon you OWN (across every box and your party), which you have SHINY, and which are still missing.\n\nOwned show their icon; missing show a dim tile with the dex number.\n\nD-Pad move, L/R change page (wraps around). On the bottom screen: tap Type, Gen or Category to filter, tap the fourth chip to cycle All / Missing / Owned, tap Export to save the missing list to LivingDex.txt on your SD. Start resets every filter, A opens a full info card for the selected Pokemon.\n\nRead-only. It counts what you actually HAVE (not the game's own seen/caught Pokedex).
+LIVING_DEX_PAGE :: Page %d/%d
+LIVING_DEX_OWNED :: Owned
+LIVING_DEX_SHINY_C :: Shiny
+LIVING_DEX_MISSING :: Missing
+LIVING_DEX_TYPE :: Type
+LIVING_DEX_GEN :: Gen
+LIVING_DEX_ALL :: All
+LIVING_DEX_MISSING_ONLY :: Missing only
+LIVING_DEX_HAVE :: owned
+LIVING_DEX_SHINY :: shiny
+LIVING_DEX_MISS :: missing
+LIVING_DEX_CTRL1 :: D-Pad move   L/R page
+LIVING_DEX_CTRL2 :: A: missing only   Y: type
+LIVING_DEX_CTRL3 :: Start: gen   X: export   B: close
+LIVING_DEX_EXPORTED :: Saved LivingDex.txt
+
+# ==== Living Dex v2 (custom bottom hub) ====
+LIVING_DEX_ON :: ON
+LIVING_DEX_OFF :: OFF
+LIVING_DEX_EXPORT_BTN :: Export missing list
+
+# ==== Living Dex v3 (Category filter) ====
+LIVING_DEX_CATEGORY :: Category
+
+# ==== Living Dex v4 (colored stats) ====
+LIVING_DEX_PAGE_LABEL :: Page
+
+# ==== Living Dex v5 (owned count) ====
+LIVING_DEX_OWNED_N :: %d owned
+
+# ==== Living Dex v7 (species card) ====
+LIVING_DEX_CARD_BACK :: Press B to go back

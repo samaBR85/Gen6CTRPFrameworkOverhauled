@@ -810,6 +810,7 @@ namespace CTRPluginFramework {
         Fav(trainerInfo, "FAV_TRAINER_INFO");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_VIEW_PARTY_SUMMARY"), nullptr, PKHeX::ViewPartyInfo, getLanguage->Get("NOTE_VIEW_PARTY_SUMMARY")), "FAV_VIEW_PARTY_SUMMARY");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_TRAINER_CARD"), nullptr, PKHeX::TrainerCard, getLanguage->Get("NOTE_TRAINER_CARD")), "FAV_TRAINER_CARD");
+        *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_LIVING_DEX"), nullptr, PKHeX::LivingDex, getLanguage->Get("NOTE_LIVING_DEX")), "FAV_LIVING_DEX");
 
         // "Fun Stuff": mini-games hub (folder-as-button). Sits right after In-Battle Tools in the root order.
         MenuFolder *fun = new MenuFolder(getLanguage->Get("MENU_MINI_GAME_CORNER"), getLanguage->Get("NOTE_MINI_GAME_CORNER"));
@@ -831,7 +832,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 6, 4, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 6, 5, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized

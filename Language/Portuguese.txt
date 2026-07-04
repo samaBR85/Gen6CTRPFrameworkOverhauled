@@ -1201,3 +1201,40 @@ TRAINER_CARD_SAVE_BACK :: B: Salvar e voltar
 MENU_TRAINER_INFO :: Info do Treinador
 FAV_TRAINER_INFO :: Info Treinador
 NOTE_TRAINER_INFO :: Dois retratos somente leitura, sem efeitos colaterais, sobre você e seu time.\n\nResumo da Party: os status ocultos do seu time (IVs, EVs, natureza, habilidade...).\n\nCartão de Treinador: um cartão compartilhável com seu OT/TID, Dinheiro, Milhas, BP, Tempo de Jogo, insígnias, e os sprites do seu time.
+
+# ==== Living Dex Dashboard (v0.6.5) ====
+MENU_LIVING_DEX :: Living Dex
+FAV_LIVING_DEX :: Living Dex
+NOTE_LIVING_DEX :: Sua coleção num relance: quais dos 721 Pokémon você TEM (em todas as boxes e na party), quais você tem SHINY, e quais ainda faltam.\n\nPossuídos mostram o ícone; faltantes mostram uma célula escura com o número da dex.\n\nD-Pad move, L/R muda de pagina (circula). Na tela de baixo: toque em Type, Gen ou Category para filtrar, toque no quarto chip pra alternar All / Missing / Owned, toque em Exportar para salvar a lista de faltantes em LivingDex.txt no seu SD. Start reseta todos os filtros, A abre o card completo do Pokemon selecionado.\n\nSomente leitura. Conta o que você realmente TEM (não a Pokédex de vistos/capturados do jogo).
+LIVING_DEX_PAGE :: Pág. %d/%d
+LIVING_DEX_OWNED :: Possuídos
+LIVING_DEX_SHINY_C :: Shiny
+LIVING_DEX_MISSING :: Faltantes
+LIVING_DEX_TYPE :: Tipo
+LIVING_DEX_GEN :: Ger
+LIVING_DEX_ALL :: Todos
+LIVING_DEX_MISSING_ONLY :: Só faltantes
+LIVING_DEX_HAVE :: possui
+LIVING_DEX_SHINY :: shiny
+LIVING_DEX_MISS :: falta
+LIVING_DEX_CTRL1 :: D-Pad move   L/R página
+LIVING_DEX_CTRL2 :: A: só faltantes   Y: tipo
+LIVING_DEX_CTRL3 :: Start: ger   X: exportar   B: voltar
+LIVING_DEX_EXPORTED :: LivingDex.txt salvo
+
+# ==== Living Dex v2 (custom bottom hub) ====
+LIVING_DEX_ON :: ON
+LIVING_DEX_OFF :: OFF
+LIVING_DEX_EXPORT_BTN :: Exportar lista de faltantes
+
+# ==== Living Dex v3 (Category filter) ====
+LIVING_DEX_CATEGORY :: Categoria
+
+# ==== Living Dex v4 (colored stats) ====
+LIVING_DEX_PAGE_LABEL :: Pág.
+
+# ==== Living Dex v5 (owned count) ====
+LIVING_DEX_OWNED_N :: %d possuídos
+
+# ==== Living Dex v7 (species card) ====
+LIVING_DEX_CARD_BACK :: Aperte B para voltar
