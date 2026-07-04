@@ -453,7 +453,7 @@ NOTE_UNLOCK_FULL_DEX :: CUIDADO — SALVE SEU JOGO PRIMEIRO!\n\nMarca todos os 7
 FAV_UNLOCK_FULL_DEX :: Dex 100%
 NOTE_PC_BOX_FOLDER :: Navegue, busque e clone Pokémon nas suas boxes do PC.\nExporte ou importe seus dados completos de save aqui também.
 MENU_PC_BOX_PLUS :: PC Box ++
-NOTE_PC_BOX_PLUS :: Editor visual de boxes do PC - uma grade 6x5 das suas boxes com sprites.\n\nGRADE: D-Pad move - L/R mudam a box - X move/troca - Y clona - Start busca uma espécie - A abre o editor.\n\nEDITOR: L/R trocam a aba (Principal/Atributos/Golpes/Origens/Diversos) - D-Pad escolhe um campo - A edita - B volta.
+NOTE_PC_BOX_PLUS :: Editor visual de boxes do PC - uma grade 6x5 das suas boxes com sprites.\n\nGRADE: D-Pad move - L/R mudam a box - X move/troca - Y clona - Start busca uma espécie - A abre o editor.\n\nEDITOR: L/R trocam a aba (Principal/Atributos/Golpes/Origens/Diversos) - D-Pad escolhe um campo - A edita - B volta.\n\nESPIAR OVO: um ovo aparece como "?" na grade - foque nele e aperte A, depois confirme para espiar - os campos aparecem um a um, Shiny guardado para o final - A pula a revelação.
 NOTE_CLONING_FOLDER :: Ajudantes de clonagem por troca: faça backup de um Pokémon oferecido numa troca, e mantenha o original após trocar.
 FAV_COPY_POKEMON_IN_TRADE :: Copiar Troca
 FAV_KEEP_ORIGINAL_POKEMON :: Manter Orig.

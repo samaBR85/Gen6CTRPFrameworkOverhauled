@@ -452,7 +452,7 @@ NOTE_UNLOCK_FULL_DEX :: VORSICHT — SPEICHERE ZUERST DEIN SPIEL!\n\nMarkiert al
 FAV_UNLOCK_FULL_DEX :: Voller Dex
 NOTE_PC_BOX_FOLDER :: Durchsuche, finde und klone Pokémon in deinen PC-Boxen.\nExportiere oder importiere hier auch deine gesamten Spielstanddaten.
 MENU_PC_BOX_PLUS :: PC-Box ++
-NOTE_PC_BOX_PLUS :: Visueller PC-Box-Editor - ein 6x5-Raster deiner Boxen mit Sprites.\n\nRASTER: D-Pad bewegen - L/R Box wechseln - X verschieben/tauschen - Y klonen - Start eine Spezies finden - A den Editor öffnen.\n\nEDITOR: L/R Reiter wechseln (Haupt/Werte/Attacken/Herkunft/Sonst.) - D-Pad ein Feld wählen - A bearbeiten - B zurück.
+NOTE_PC_BOX_PLUS :: Visueller PC-Box-Editor - ein 6x5-Raster deiner Boxen mit Sprites.\n\nRASTER: D-Pad bewegen - L/R Box wechseln - X verschieben/tauschen - Y klonen - Start eine Spezies finden - A den Editor öffnen.\n\nEDITOR: L/R Reiter wechseln (Haupt/Werte/Attacken/Herkunft/Sonst.) - D-Pad ein Feld wählen - A bearbeiten - B zurück.\n\nEI-BLICK: ein Ei erscheint als "?" im Raster - wähle es aus und drücke A, dann bestätige zum Spähen - Felder erscheinen nacheinander, Shiny bleibt bis zuletzt geheim - A überspringt die Enthüllung.
 NOTE_CLONING_FOLDER :: Helfer fürs Tausch-Klonen: sichere ein Pokémon, das in einem Tausch angeboten wird, und behalte das Original nach dem Tausch.
 FAV_COPY_POKEMON_IN_TRADE :: Im Tausch kop.
 FAV_KEEP_ORIGINAL_POKEMON :: Original behalt.

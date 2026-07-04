@@ -452,7 +452,7 @@ NOTE_UNLOCK_FULL_DEX :: ATTENTION — SAUVEGARDEZ VOTRE PARTIE D'ABORD !\n\nMarq
 FAV_UNLOCK_FULL_DEX :: Pokédex
 NOTE_PC_BOX_FOLDER :: Parcourez, recherchez et clonez des Pokémon dans vos boîtes PC.\nExportez ou importez aussi vos données de sauvegarde complètes ici.
 MENU_PC_BOX_PLUS :: Boîte PC ++
-NOTE_PC_BOX_PLUS :: Éditeur visuel de boîtes PC - une grille 6x5 de vos boîtes avec sprites.\n\nGRILLE : D-Pad déplacer - L/R changer de boîte - X déplacer/échanger - Y cloner - Start chercher une espèce - A ouvrir l'éditeur.\n\nÉDITEUR : L/R changer d'onglet (Principal/Stats/Capacités/Origines/Divers) - D-Pad choisir un champ - A le modifier - B retour.
+NOTE_PC_BOX_PLUS :: Éditeur visuel de boîtes PC - une grille 6x5 de vos boîtes avec sprites.\n\nGRILLE : D-Pad déplacer - L/R changer de boîte - X déplacer/échanger - Y cloner - Start chercher une espèce - A ouvrir l'éditeur.\n\nÉDITEUR : L/R changer d'onglet (Principal/Stats/Capacités/Origines/Divers) - D-Pad choisir un champ - A le modifier - B retour.\n\nAPERÇU D’ŒUF : un œuf apparaît comme "?" dans la grille - sélectionne-le et appuie sur A, puis confirme pour observer - les champs se révèlent un à un, Chromatique gardé pour la fin - A passe la révélation.
 NOTE_CLONING_FOLDER :: Aides au clonage par échange : sauvegardez un Pokémon proposé dans un échange, et gardez l'original après l'échange.
 FAV_COPY_POKEMON_IN_TRADE :: Copier éch.
 FAV_KEEP_ORIGINAL_POKEMON :: Garder orig.

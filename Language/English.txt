@@ -453,7 +453,7 @@ NOTE_UNLOCK_FULL_DEX :: BEWARE — SAVE YOUR GAME FIRST!\n\nMarks all 721 Pokém
 FAV_UNLOCK_FULL_DEX :: Full Dex
 NOTE_PC_BOX_FOLDER :: Browse, search and clone Pokémon in your PC boxes.\nExport or import your full save data here too.
 MENU_PC_BOX_PLUS :: PC Box ++
-NOTE_PC_BOX_PLUS :: Visual PC box editor - a 6x5 grid of your boxes with sprites.\n\nGRID: D-Pad move - L/R change box - X move/swap - Y clone - Start find a species - A open the editor.\n\nEDITOR: L/R switch tab (Main/Stats/Moves/Origins/Misc) - D-Pad pick a field - A edit it - B back.
+NOTE_PC_BOX_PLUS :: Visual PC box editor - a 6x5 grid of your boxes with sprites.\n\nGRID: D-Pad move - L/R change box - X move/swap - Y clone - Start find a species - A open the editor.\n\nEDITOR: L/R switch tab (Main/Stats/Moves/Origins/Misc) - D-Pad pick a field - A edit it - B back.\n\nEGG PEEK: an egg shows as "?" in the grid - focus it and press A, then confirm to peek - fields reveal one by one, Shiny saved for last - A skips the reveal.
 NOTE_CLONING_FOLDER :: Trade-cloning helpers: back up a Pokemon being offered in a trade, and keep the original after trading.
 FAV_COPY_POKEMON_IN_TRADE :: Copy in Trade
 FAV_KEEP_ORIGINAL_POKEMON :: Keep Original
