@@ -136,6 +136,7 @@
       void Position(MenuEntry *entry);
       void ViewPartyInfo(MenuEntry *entry); // read-only party viewer (root menu, after Battle)
       int  CountParty(void);                // # of occupied overworld party slots (HUD Party count uses this)
+      void TrainerCard(MenuEntry *entry);    // read-only shareable card (root menu, after View Party Summary)
       void BoxBrowserPlus(MenuEntry *entry); // PC Box ++ visual box grid (replaces Position/Clone/Find)
       void PartyBattleEditor(MenuEntry *entry); // Change Party Stats: visual battle-party editor (in-battle)
       void EnemyHelper(MenuEntry *entry);       // Enemy Helper: in-battle coach card for the enemy (in-battle)
@@ -207,6 +208,12 @@
    // The current theme's Nth preview-square color (defined in Main.cpp). Lets tools accent text with a theme
    // color the user can see/count in the Change Theme list (sq[] order). i out of range -> window title color.
    Color ThemeSquareColor(int i);
+
+   // Read-only access to the plugin's full Theme list (defined in Main.cpp), for "preview any theme" UI (e.g.
+   // Trainer Card's Start-to-cycle) that must NOT change the actually-applied theme (that's ApplyTheme()'s job).
+   int ThemeCount(void);
+   const char *ThemeNameAt(int id);
+   void ThemeColorsAt(int id, Color &bg, Color &txt, Color &sel, Color &title, Color &border);
 }
 
 #endif // PKHEX_HPP

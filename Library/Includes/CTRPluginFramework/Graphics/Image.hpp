@@ -7,6 +7,7 @@
 namespace CTRPluginFramework {
     class Screen;
     class BMPImage;
+    class Color;
 
     // Minimal public wrapper over the framework's internal BMPImage so plugin code can load a
     // 24-bit BMP from the SD card and blit it onto an OSD Screen (top or bottom) with its TOP-LEFT
@@ -39,7 +40,16 @@ namespace CTRPluginFramework {
             // No-op if not loaded.
             void Draw(const Screen &screen, int x, int y) const;
 
+            // Same, but color-keyed: any source pixel whose RGB exactly equals transparentKey is
+            // skipped (left as-is on screen), so the image blits transparently over whatever is
+            // behind it. Bake the key as a flat background (e.g. pure magenta) with hard edges to
+            // avoid a blended fringe. Used by the Trainer Card badge row (tile-free icons).
+            void Draw(const Screen &screen, int x, int y, const Color &transparentKey) const;
+
         private:
+            // Shared blit; useKey skips source pixels whose RGB equals (kr,kg,kb).
+            void _DrawImpl(const Screen &screen, int x, int y, bool useKey, u8 kr, u8 kg, u8 kb) const;
+
             BMPImage *_img;
     };
 }

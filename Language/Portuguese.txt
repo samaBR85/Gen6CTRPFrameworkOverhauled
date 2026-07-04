@@ -1173,3 +1173,31 @@ SHINY_FOUND :: Shiny encontrado! Zere para caçar de novo.
 SHINY_CLOSE :: Fechar
 SHINY_ONLY_NOTE :: Conta só quando o líder selvagem é o seu alvo.
 EGG_PEEK_SKIP :: A para pular
+
+# ==== Trainer Card ====
+MENU_TRAINER_CARD :: Cartão de Treinador
+FAV_TRAINER_CARD :: Cartão Trein.
+NOTE_TRAINER_CARD :: Um retrato compartilhável: seu nome OT, TID/SID, o jogo, Dinheiro, Milhas, BP, Tempo de Jogo, e os sprites da sua party.\n\nSomente leitura - nada aqui pode ser editado.\n\nPara salvar como imagem: ative uma vez Ferramentas > Capturas de Tela > "Capturar UI do Plugin", depois aperte a tecla de captura enquanto este cartão estiver aberto.\n\nB: volta. Select: sai para o jogo.\n\nAs 8 insígnias de ginásio são as reais, lidas direto do seu save.
+TRAINER_CARD_MONEY :: Dinheiro:
+TRAINER_CARD_MILES :: Milhas:
+TRAINER_CARD_BP :: BP:
+TRAINER_CARD_TIME :: Tempo:
+TRAINER_CARD_HINT1 :: Para salvar: Ferramentas > Capturas >
+TRAINER_CARD_HINT2 :: Capturar UI, depois screenshot.
+TRAINER_CARD_CLOSE :: B: Voltar
+TRAINER_CARD_BADGES :: Insígnias: %d/8
+
+# ==== Trainer Card badges/editor ====
+TRAINER_CARD_EDIT_BADGES :: X: Editar insígnias
+TRAINER_CARD_CYCLE :: Start: Trocar cores
+TRAINER_CARD_BADGE_STATUS :: Insígnia %d - %s
+TRAINER_CARD_ON :: Conquistada
+TRAINER_CARD_OFF :: Não conquistada
+TRAINER_CARD_MOVE :: Esquerda/Direita: Mover
+TRAINER_CARD_TOGGLE :: A: Alternar
+TRAINER_CARD_SAVE_BACK :: B: Salvar e voltar
+
+# ==== Trainer Info folder (View Party Summary + Trainer Card) ====
+MENU_TRAINER_INFO :: Info do Treinador
+FAV_TRAINER_INFO :: Info Treinador
+NOTE_TRAINER_INFO :: Dois retratos somente leitura, sem efeitos colaterais, sobre você e seu time.\n\nResumo da Party: os status ocultos do seu time (IVs, EVs, natureza, habilidade...).\n\nCartão de Treinador: um cartão compartilhável com seu OT/TID, Dinheiro, Milhas, BP, Tempo de Jogo, insígnias, e os sprites do seu time.

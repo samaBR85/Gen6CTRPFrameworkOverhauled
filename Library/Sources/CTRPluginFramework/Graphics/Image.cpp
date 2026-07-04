@@ -46,6 +46,14 @@ namespace CTRPluginFramework {
     }
 
     void Image::Draw(const Screen &screen, int x, int y) const {
+        _DrawImpl(screen, x, y, false, 0, 0, 0);
+    }
+
+    void Image::Draw(const Screen &screen, int x, int y, const Color &transparentKey) const {
+        _DrawImpl(screen, x, y, true, transparentKey.r, transparentKey.g, transparentKey.b);
+    }
+
+    void Image::_DrawImpl(const Screen &screen, int x, int y, bool useKey, u8 kr, u8 kg, u8 kb) const {
         if (!IsLoaded())
             return;
 
@@ -77,7 +85,8 @@ namespace CTRPluginFramework {
                     u16 *colptr = reinterpret_cast<u16*>(scr->GetLeftFrameBuffer(x + col, y));
                     const u8 *px = base + col * 3;   // BGR source (col, row 0); rows are `stride` apart
                     for (int row = 0; row < h; ++row) {
-                        colptr[-row] = static_cast<u16>(((px[2] & 0xF8) << 8) | ((px[1] & 0xFC) << 3) | (px[0] >> 3));
+                        if (!(useKey && px[2] == kr && px[1] == kg && px[0] == kb))
+                            colptr[-row] = static_cast<u16>(((px[2] & 0xF8) << 8) | ((px[1] & 0xFC) << 3) | (px[0] >> 3));
                         px += stride;
                     }
                 }
@@ -89,8 +98,11 @@ namespace CTRPluginFramework {
         // which clips each pixel against the screen. Image is always BGR, so [B, G, R] order is correct.
         for (int row = 0; row < h; ++row) {
             const u8 *px = base + row * stride;
-            for (int col = 0; col < w; ++col, px += 3)
+            for (int col = 0; col < w; ++col, px += 3) {
+                if (useKey && px[2] == kr && px[1] == kg && px[0] == kb)
+                    continue;
                 Renderer::DrawPixel(x + col, y + row, Color(px[2], px[1], px[0]));
+            }
         }
     }
 }

@@ -1172,3 +1172,31 @@ SHINY_FOUND :: Shiny found! Reset to hunt again.
 SHINY_CLOSE :: Close
 SHINY_ONLY_NOTE :: Counts only when the wild lead matches your target.
 EGG_PEEK_SKIP :: Press A to skip
+
+# ==== Trainer Card ====
+MENU_TRAINER_CARD :: Trainer Card
+FAV_TRAINER_CARD :: Trainer Card
+NOTE_TRAINER_CARD :: A shareable snapshot: your OT name, TID/SID, game, Money, Miles, BP, Time Played, and your party's sprites.\n\nRead-only - nothing here can be edited.\n\nTo save it as an image: turn on Tools > Screenshots > "Capture Plugin UI" once, then press the screenshot hotkey while this card is open.\n\nB: back. Select: exit to the game.\n\nThe 8 gym badges are the real ones, read live from your save.
+TRAINER_CARD_MONEY :: Money:
+TRAINER_CARD_MILES :: Miles:
+TRAINER_CARD_BP :: BP:
+TRAINER_CARD_TIME :: Time:
+TRAINER_CARD_HINT1 :: To save: Tools > Screenshots >
+TRAINER_CARD_HINT2 :: Capture Plugin UI, then screenshot.
+TRAINER_CARD_CLOSE :: B: Close
+TRAINER_CARD_BADGES :: Badges: %d/8
+
+# ==== Trainer Card badges/editor ====
+TRAINER_CARD_EDIT_BADGES :: X: Edit badges
+TRAINER_CARD_CYCLE :: Start: Cycle colors
+TRAINER_CARD_BADGE_STATUS :: Badge %d - %s
+TRAINER_CARD_ON :: Owned
+TRAINER_CARD_OFF :: Not owned
+TRAINER_CARD_MOVE :: Left/Right: Move
+TRAINER_CARD_TOGGLE :: A: Toggle owned
+TRAINER_CARD_SAVE_BACK :: B: Save and back
+
+# ==== Trainer Info folder (View Party Summary + Trainer Card) ====
+MENU_TRAINER_INFO :: Trainer Info
+FAV_TRAINER_INFO :: Trainer Info
+NOTE_TRAINER_INFO :: Two read-only, no-side-effects snapshots about you and your team.\n\nView Party Summary: your team's hidden stats (IVs, EVs, nature, ability...).\n\nTrainer Card: a shareable card with your OT/TID, Money, Miles, BP, Time Played, badges, and your party's sprites.

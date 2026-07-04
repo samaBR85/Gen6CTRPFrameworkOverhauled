@@ -41,6 +41,19 @@ namespace CTRPluginFramework {
     extern u32 g_hiLoBest;
     void SetHiLoBest(u32 value);
 
+    // Trainer Card gym badges: bit i (0..7) = badge i+1 owned. Set manually by the player — there is no known
+    // RAM address for the real in-game badge flags. Persisted in Data.bin (header.reserved[7]) and mirrored here
+    // exactly like g_hiLoBest so PLUGIN code (PKHeX.cpp TrainerCard) can read it every frame and flip a bit
+    // through SetTrainerBadges(). Default 0 (no badges).
+    extern u32 g_trainerBadges;
+    void SetTrainerBadges(u32 value);
+
+    // Trainer Card color preview: an index into the plugin's full Theme list (see ThemeColorsAt/ThemeCount in
+    // PKHeX.hpp), cycled with Start. PREVIEW ONLY — does not change the plugin's actually-applied theme (that
+    // stays whatever Tools > Themes has set). Persisted in Data.bin (header.reserved[8]). Default 0.
+    extern u32 g_trainerCardTemplate;
+    void SetTrainerCardTemplate(u32 value);
+
     // The MenuEntry* of that very "Show ON/OFF notifications" checkbox (stored as void* to avoid a
     // Menu header dependency). _TriggerEntry uses it to (a) update g_entryToggleNotif the instant
     // the checkbox is toggled and (b) give the checkbox a single "Notifications: ON/OFF" toast

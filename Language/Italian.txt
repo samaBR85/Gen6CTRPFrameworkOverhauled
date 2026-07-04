@@ -1222,3 +1222,31 @@ SHINY_FOUND :: Shiny trovato! Azzera per ricominciare.
 SHINY_CLOSE :: Chiudi
 SHINY_ONLY_NOTE :: Conta solo se il selvatico è il tuo bersaglio.
 EGG_PEEK_SKIP :: A per saltare
+
+# ==== Trainer Card ====
+MENU_TRAINER_CARD :: Tessera Allenatore
+FAV_TRAINER_CARD :: Tessera All.
+NOTE_TRAINER_CARD :: Un'istantanea condivisibile: il tuo nome OT, TID/SID, il gioco, Soldi, Miglia, PL, Tempo di Gioco e gli sprite della tua squadra.\n\nSola lettura - qui non si può modificare nulla.\n\nPer salvarla come immagine: attiva una volta Strumenti > Screenshot > "Cattura UI Plugin", poi premi il tasto screenshot mentre questa scheda è aperta.\n\nB: indietro. Select: esci al gioco.\n\nLe 8 medaglie di palestra sono quelle vere, lette dal tuo salvataggio.
+TRAINER_CARD_MONEY :: Soldi:
+TRAINER_CARD_MILES :: Miglia:
+TRAINER_CARD_BP :: PL:
+TRAINER_CARD_TIME :: Tempo:
+TRAINER_CARD_HINT1 :: Per salvare: Strumenti > Screenshot >
+TRAINER_CARD_HINT2 :: Cattura UI Plugin, poi screenshot.
+TRAINER_CARD_CLOSE :: B: Indietro
+TRAINER_CARD_BADGES :: Medaglie: %d/8
+
+# ==== Trainer Card badges/editor ====
+TRAINER_CARD_EDIT_BADGES :: X: Modifica medaglie
+TRAINER_CARD_CYCLE :: Start: Cambia colori
+TRAINER_CARD_BADGE_STATUS :: Medaglia %d - %s
+TRAINER_CARD_ON :: Ottenuta
+TRAINER_CARD_OFF :: Non ottenuta
+TRAINER_CARD_MOVE :: Sinistra/Destra: Sposta
+TRAINER_CARD_TOGGLE :: A: Attiva/disattiva
+TRAINER_CARD_SAVE_BACK :: B: Salva e indietro
+
+# ==== Trainer Info folder (View Party Summary + Trainer Card) ====
+MENU_TRAINER_INFO :: Info Allenatore
+FAV_TRAINER_INFO :: Info Allen.
+NOTE_TRAINER_INFO :: Due istantanee di sola lettura, senza effetti, su di te e la tua squadra.\n\nRiepilogo Squadra: le statistiche nascoste della tua squadra (IV, EV, natura, abilità...).\n\nTessera Allenatore: una tessera condivisibile con il tuo OT/TID, Soldi, Miglia, PL, Tempo di Gioco, medaglie e gli sprite della tua squadra.

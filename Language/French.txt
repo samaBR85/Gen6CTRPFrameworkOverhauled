@@ -1171,3 +1171,31 @@ SHINY_FOUND :: Chromatique trouvé ! Réinitialise pour rechasser.
 SHINY_CLOSE :: Fermer
 SHINY_ONLY_NOTE :: Ne compte que si le Pokémon sauvage est ta cible.
 EGG_PEEK_SKIP :: A pour passer
+
+# ==== Trainer Card ====
+MENU_TRAINER_CARD :: Carte de Dresseur
+FAV_TRAINER_CARD :: Carte Dresseur
+NOTE_TRAINER_CARD :: Un aperçu partageable : ton nom OT, TID/SID, le jeu, l'Argent, les Miles, les PC, le Temps de jeu, et les sprites de ton équipe.\n\nLecture seule - rien ici ne peut être modifié.\n\nPour l'enregistrer en image : active Outils > Captures d'écran > "Capturer l'UI du plugin" une fois, puis appuie sur la touche de capture pendant que cette carte est ouverte.\n\nB : retour. Select : quitter vers le jeu.\n\nLes 8 badges d'arène sont les vrais, lus en direct depuis ta sauvegarde.
+TRAINER_CARD_MONEY :: Argent :
+TRAINER_CARD_MILES :: Miles :
+TRAINER_CARD_BP :: PC :
+TRAINER_CARD_TIME :: Temps :
+TRAINER_CARD_HINT1 :: Pour sauver : Outils > Captures >
+TRAINER_CARD_HINT2 :: Capturer l'UI, puis capture d'écran.
+TRAINER_CARD_CLOSE :: B : Fermer
+TRAINER_CARD_BADGES :: Badges : %d/8
+
+# ==== Trainer Card badges/editor ====
+TRAINER_CARD_EDIT_BADGES :: X : Modifier badges
+TRAINER_CARD_CYCLE :: Start : Changer couleurs
+TRAINER_CARD_BADGE_STATUS :: Badge %d - %s
+TRAINER_CARD_ON :: Obtenu
+TRAINER_CARD_OFF :: Non obtenu
+TRAINER_CARD_MOVE :: Gauche/Droite : Deplacer
+TRAINER_CARD_TOGGLE :: A : Basculer obtenu
+TRAINER_CARD_SAVE_BACK :: B : Enregistrer et retour
+
+# ==== Trainer Info folder (View Party Summary + Trainer Card) ====
+MENU_TRAINER_INFO :: Infos Dresseur
+FAV_TRAINER_INFO :: Infos Dresseur
+NOTE_TRAINER_INFO :: Deux aperçus en lecture seule, sans effet, sur toi et ton équipe.\n\nRésumé d'équipe : les stats cachées de ton équipe (IVs, EVs, nature, talent...).\n\nCarte de Dresseur : une carte partageable avec ton OT/TID, Argent, Miles, PC, Temps de jeu, badges, et les sprites de ton équipe.

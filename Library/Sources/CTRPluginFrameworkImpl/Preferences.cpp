@@ -116,6 +116,8 @@ namespace CTRPluginFramework {
             g_bagPayMode    = header.reserved[4]; // PokeMart PAY/FREE choice (0 default = FREE on a fresh file)
             g_funPayMode    = header.reserved[5]; // Fun Stuff mini-games FREE/PAID choice (0 default = FREE)
             g_hiLoBest      = header.reserved[6]; // Fun Stuff "Higher or Lower" best streak
+            g_trainerBadges = header.reserved[7]; // Trainer Card badges (manual, bit i = badge i+1)
+            g_trainerCardTemplate = header.reserved[8]; // Trainer Card background palette choice
             Flags = header.flags;
             memcpy(reinterpret_cast<void*>(Backlights), &header.lcdbacklights, sizeof(Backlights));
         }
@@ -287,6 +289,8 @@ namespace CTRPluginFramework {
             header.reserved[4] = g_bagPayMode; // PokeMart PAY/FREE choice (see SetBagPayMode)
             header.reserved[5] = g_funPayMode; // Fun Stuff mini-games FREE/PAID choice (see SetFunPayMode)
             header.reserved[6] = g_hiLoBest;   // Fun Stuff "Higher or Lower" best streak (see SetHiLoBest)
+            header.reserved[7] = g_trainerBadges;       // Trainer Card badges (see SetTrainerBadges)
+            header.reserved[8] = g_trainerCardTemplate; // Trainer Card background palette (see SetTrainerCardTemplate)
             header.flags = Flags;
             memcpy(&header.lcdbacklights, Backlights, sizeof(header.lcdbacklights));
 

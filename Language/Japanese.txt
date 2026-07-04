@@ -1171,3 +1171,31 @@ SHINY_FOUND :: 色違い発見！リセットで再開。
 SHINY_CLOSE :: 閉じる
 SHINY_ONLY_NOTE :: 野生の先頭が対象と一致した時だけ数えます。
 EGG_PEEK_SKIP :: Aでスキップ
+
+# ==== Trainer Card ====
+MENU_TRAINER_CARD :: トレーナーカード
+FAV_TRAINER_CARD :: トレーナーカード
+NOTE_TRAINER_CARD :: 共有できるスナップショット：OT名、TID/SID、ゲーム、お金、マイル、BP、プレイ時間、手持ちのスプライト。\n\n閲覧専用 - ここでは何も編集できません。\n\n画像として保存するには：ツール＞スクリーンショット＞「プラグインUIをキャプチャ」を一度オンにし、このカードを開いた状態でスクリーンショットのホットキーを押してください。\n\nB：戻る。Select：ゲームに戻る。\n\n8つのジムバッジは実際のもので、セーブデータから直接読み込まれます。
+TRAINER_CARD_MONEY :: おかね：
+TRAINER_CARD_MILES :: マイル：
+TRAINER_CARD_BP :: BP：
+TRAINER_CARD_TIME :: じかん：
+TRAINER_CARD_HINT1 :: 保存するには：ツール＞スクリーンショット
+TRAINER_CARD_HINT2 :: UIキャプチャをオンにしてから撮影
+TRAINER_CARD_CLOSE :: B：閉じる
+TRAINER_CARD_BADGES :: バッジ: %d/8
+
+# ==== Trainer Card badges/editor ====
+TRAINER_CARD_EDIT_BADGES :: X：バッジを編集
+TRAINER_CARD_CYCLE :: Start：配色を変更
+TRAINER_CARD_BADGE_STATUS :: バッジ %d - %s
+TRAINER_CARD_ON :: 獲得済み
+TRAINER_CARD_OFF :: 未獲得
+TRAINER_CARD_MOVE :: 左右：移動
+TRAINER_CARD_TOGGLE :: A：切り替え
+TRAINER_CARD_SAVE_BACK :: B：保存して戻る
+
+# ==== Trainer Info folder (View Party Summary + Trainer Card) ====
+MENU_TRAINER_INFO :: トレーナー情報
+FAV_TRAINER_INFO :: トレーナー情報
+NOTE_TRAINER_INFO :: あなたとパーティについての、閲覧専用で副作用のない2つのスナップショット。\n\nパーティ概要：チームの隠しステータス（個体値、努力値、性格、特性など）。\n\nトレーナーカード：OT/TID、お金、マイル、BP、プレイ時間、バッジ、パーティのスプライトを含む共有可能なカード。

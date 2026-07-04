@@ -351,6 +351,26 @@ namespace CTRPluginFramework {
         return HexColor(t.sq[i]);
     }
 
+    // Number of themes in g_themes[]. Lets other TUs (e.g. Trainer Card's Start-to-preview) iterate the full list.
+    int ThemeCount(void) { return g_themeCount; }
+
+    // Theme `id`'s display name (clamped). Theme names are English-only proper nouns everywhere else in the
+    // plugin (this table), so no i18n key is needed to show them.
+    const char *ThemeNameAt(int id) {
+        if (id < 0 || id >= g_themeCount) id = 0;
+        return g_themes[id].name;
+    }
+
+    // Read-only preview of theme `id`'s core colors — mirrors ApplyTheme()'s field mapping (bgMain/text/sel/
+    // title/border) but does NOT touch FwkSettings or g_currentTheme. For "preview this theme" UI (Trainer
+    // Card's Start-to-cycle) that must not change the plugin's actually-applied theme.
+    void ThemeColorsAt(int id, Color &bg, Color &txt, Color &sel, Color &title, Color &border) {
+        if (id < 0 || id >= g_themeCount) id = 0;
+        const ThemeDef &t = g_themes[id];
+        bg = HexColor(t.bgMain); txt = HexColor(t.text); sel = HexColor(t.sel);
+        title = HexColor(t.title); border = HexColor(t.border);
+    }
+
     void SaveTheme(int id) {
         if (File::Exists(PATH_THEME_SETTINGS) == 0)
             File::Create(PATH_THEME_SETTINGS);
@@ -508,15 +528,8 @@ namespace CTRPluginFramework {
         return true;
     }
 
-    // "View Party Summary" is a root folder used as a button: opening runs the viewer and returns false so the
-    // (empty) folder is never entered. As a folder it renders like the other root categories (no gear icon).
-    static bool ViewPartyOnAction(MenuFolder &folder, ActionType action) {
-        if (action == ActionType::Opening) PKHeX::ViewPartyInfo(nullptr);
-        return false;
-    }
-
     // "Fun Stuff" is a root folder used as a button: opening runs the mini-games hub and returns false so the
-    // (empty) folder is never entered, rendering it as a plain root category like View Party Summary.
+    // (empty) folder is never entered, rendering it as a plain root category.
     static bool FunStuffOnAction(MenuFolder &folder, ActionType action) {
         if (action == ActionType::Opening) PKHeX::FunHub(nullptr);
         return false;
@@ -791,18 +804,21 @@ namespace CTRPluginFramework {
         *misc += HudMasterEntry(); // "Display HUD" master — lifted out of Config HUD, sits right below Notifications
         *misc += hud;
 
-        MenuFolder *viewParty = new MenuFolder(getLanguage->Get("MENU_VIEW_PARTY_SUMMARY"), getLanguage->Get("NOTE_VIEW_PARTY_SUMMARY"));
-        Fav(viewParty, "FAV_VIEW_PARTY_SUMMARY");
-        viewParty->OnAction = ViewPartyOnAction;
+        // "Trainer Info": a real root folder (not folder-as-button, to keep the root at 7 items/no scroll)
+        // holding the two read-only, no-side-effects snapshots: View Party Summary and Trainer Card.
+        MenuFolder *trainerInfo = new MenuFolder(getLanguage->Get("MENU_TRAINER_INFO"), getLanguage->Get("NOTE_TRAINER_INFO"));
+        Fav(trainerInfo, "FAV_TRAINER_INFO");
+        *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_VIEW_PARTY_SUMMARY"), nullptr, PKHeX::ViewPartyInfo, getLanguage->Get("NOTE_VIEW_PARTY_SUMMARY")), "FAV_VIEW_PARTY_SUMMARY");
+        *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_TRAINER_CARD"), nullptr, PKHeX::TrainerCard, getLanguage->Get("NOTE_TRAINER_CARD")), "FAV_TRAINER_CARD");
 
         // "Fun Stuff": mini-games hub (folder-as-button). Sits right after In-Battle Tools in the root order.
         MenuFolder *fun = new MenuFolder(getLanguage->Get("MENU_MINI_GAME_CORNER"), getLanguage->Get("NOTE_MINI_GAME_CORNER"));
         Fav(fun, "FAV_MINI_GAME_CORNER");
         fun->OnAction = FunStuffOnAction;
 
-        // Top-level menu order: Pokémon (Spawner & Trainer) / View Party Summary / In-Battle Tools / Fun Stuff / Overworld & QoL / Screen Overlays / Online
+        // Top-level menu order (7 items, no scroll): Pokémon (Spawner & Trainer) / Trainer Info / In-Battle Tools / Fun Stuff / Overworld & QoL / Screen Overlays / Online
         menu += pkhex;
-        menu += viewParty;
+        menu += trainerInfo;
         menu += combat;
         menu += fun;
         menu += cheats;

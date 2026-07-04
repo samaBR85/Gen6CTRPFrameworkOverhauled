@@ -33,6 +33,24 @@ namespace CTRPluginFramework {
         Preferences::MarkDirty(); // so WriteSettings persists reserved[6] when the menu closes
     }
 
+    u32 g_trainerBadges = 0;                         // see OSD.hpp (synced from Data.bin reserved[7])
+
+    void SetTrainerBadges(u32 value) {
+        if (g_trainerBadges == value)
+            return;
+        g_trainerBadges = value;
+        Preferences::MarkDirty(); // so WriteSettings persists reserved[7] when the menu closes
+    }
+
+    u32 g_trainerCardTemplate = 0;                   // see OSD.hpp (synced from Data.bin reserved[8])
+
+    void SetTrainerCardTemplate(u32 value) {
+        if (g_trainerCardTemplate == value)
+            return;
+        g_trainerCardTemplate = value;
+        Preferences::MarkDirty(); // so WriteSettings persists reserved[8] when the menu closes
+    }
+
     u8 *Screen::GetFramebuffer(u32 posX, u32 posY, bool useRightFb) const {
         if (useRightFb && (!IsTop || !Is3DEnabled))
             return (nullptr);

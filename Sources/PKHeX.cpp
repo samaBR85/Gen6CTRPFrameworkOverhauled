@@ -1682,6 +1682,15 @@ namespace CTRPluginFramework {
             p += to_string((int)sp) + ".bmp";
         }
 
+        // Gym-badge icon path: Assets/Badges/<kalos|hoenn>/<on|off>/<1..8>.bmp (30x30, magenta-keyed).
+        // Kalos set for X/Y, Hoenn set for OR/AS; on = earned (colour), off = not earned (grey).
+        static void BadgeIconPath(string &p, int idx1to8, bool on) {
+            p = "Assets/Badges/";
+            p += AutoGameSet(std::string("kalos/"), std::string("hoenn/"));
+            p += on ? "on/" : "off/";
+            p += to_string(idx1to8) + ".bmp";
+        }
+
         // Bag-item sprite path: BagSprites/big/NNN.bmp (id zero-padded to 3). Single source of truth for
         // the pad logic that used to be copy-pasted inline in the item pickers and the Loot/Wheel/Hub games.
         static string BagIconPath(int id) {
@@ -1703,6 +1712,182 @@ namespace CTRPluginFramework {
         static Color RGB(u32 c) { return Color((u8)(c >> 16), (u8)(c >> 8), (u8)c); }
         static void drainKeys() {
             while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); }
+        }
+
+        // ===== Trainer Card =====
+        // Read-only snapshot for sharing: OT name/TID/SID, game version, gym badges, Money/Miles/BP/Time Played,
+        // and the party's sprites in a row. The gym badges are the REAL ones, read live from the save's Misc
+        // block (PKHeX Misc6 +0xC): XY 0x8C6A6B0 / ORAS 0x8C71DC4, one byte, bit i = badge i+1. Earned badges
+        // show in colour, the rest greyed. The only interactive bit is Start, which previews the plugin's real
+        // Themes on the card (does NOT apply them). Capture it like any other plugin screen: enable Tools >
+        // Screenshots > "Capture Plugin UI" once, then press the screenshot hotkey while this is open.
+        static string TrainerCardGameAbbr(void) {
+            switch (currGameName) {
+                case GameName::X:             return "X";
+                case GameName::Y:             return "Y";
+                case GameName::OmegaRuby:     return "Omega Ruby";
+                case GameName::AlphaSapphire: return "Alpha Sapphire";
+                default:                      return "?";
+            }
+        }
+
+        void TrainerCard(MenuEntry *entry) {
+            (void)entry;
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+
+            // Trainer identity: box slot 1 is the proven source (same read FindPartyBase() uses to bootstrap TID/SID).
+            string otName = "-"; u16 tid = 0, sid = 0;
+            {
+                PK6 idpk;
+                u32 boxBase = AutoGameSet((u32)0x8C861C8, (u32)0x8C9E134);
+                if (GetPokemon(boxBase, &idpk)) { otName = Utf16Field(idpk.originalTrainerName); tid = idpk.TID; sid = idpk.SID; }
+                if (tid == 0 && sid == 0) ReadPlayerTrainerID(tid, sid);
+                if (otName.empty()) otName = "-";
+            }
+
+            // Money / Miles / BP: same addresses as the Money/PokeMiles/BattlePoints editors above.
+            u32 money = 0, miles = 0; u16 bp = 0;
+            Process::Read32(AutoGameSet((u32)0x8C6A6AC, (u32)0x8C71DC0), money);
+            Process::Read32(AutoGameSet((u32)0x8C82BA0, (u32)0x8C8B36C), miles);
+            Process::Read16(AutoGameSet((u32)0x8C6A6E0, (u32)0x8C71DE8), bp);
+
+            // Time Played: same address/layout as the HUD "Time Played" field (hours u16, min/sec u8 following).
+            u16 hh = 0; u8 mm = 0, ss = 0;
+            u32 ptAddr = AutoGameSet((u32)0x8CE2814, (u32)0x8CFBD88);
+            Process::Read16(ptAddr, hh);
+            Process::Read8(ptAddr + 2, mm);
+            Process::Read8(ptAddr + 3, ss);
+
+            // Gym badges: real save byte (Misc block +0xC = Money addr + 0x4). Bit i (0..7) = badge i+1.
+            u8 badges = 0;
+            Process::Read8(AutoGameSet((u32)0x8C6A6B0, (u32)0x8C71DC4), badges);
+            int badgeCount = 0;
+            for (int i = 0; i < 8; ++i) if ((badges >> i) & 1) ++badgeCount;
+
+            // Party snapshot (species only, for the sprite row); read once like the rest of this screen.
+            u32 partyBase = FindPartyBase();
+            u16 partySp[6] = {0, 0, 0, 0, 0, 0};
+            for (int i = 0; i < 6 && partyBase; ++i) {
+                PK6 pk;
+                bool ok = gPartyEncrypted ? GetPokemon(partyBase + i * 0x104, &pk) : GetPokemonRaw(partyBase + i * 0x104, &pk);
+                if (ok && pk.species >= 1 && pk.species <= 721) partySp[i] = pk.species;
+            }
+            Image partySprite[6]; // one BMP load per slot, cached for the life of this screen
+            Image badgeIcon[8];   // one BMP load per badge, cached for the life of this screen
+
+            drainKeys();
+
+            while (true) {
+                Controller::Update();
+                if (System::IsSleeping()) break;
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close();
+                    break;
+                }
+
+                // Preview-only color set from the plugin's real Theme list (does not change the applied theme).
+                Color bg, txt, sel, title, border;
+                ThemeColorsAt((int)g_trainerCardTemplate, bg, txt, sel, title, border);
+
+                if (Controller::IsKeyPressed(Key::B)) break;
+                if (Controller::IsKeyPressed(Key::Start))
+                    SetTrainerCardTemplate((g_trainerCardTemplate + 1) % ThemeCount());
+
+                // ---- TOP: identity + badges + stats + party row ----
+                top.DrawRect(30, 20, 340, 200, bg, true);
+                top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("MENU_TRAINER_CARD"), 42, 28, title);
+                {
+                    string chip = TrainerCardGameAbbr();
+                    int cw = (int)OSD::GetTextWidth(true, chip);
+                    top.DrawSysfont(sel << chip, 358 - cw, 28, sel); // plain colored text, no box (house style)
+                }
+                top.DrawRect(42, 46, 316, 1, border, true);
+
+                top.DrawSysfont(sel << otName, 42, 56, sel);
+                top.DrawSysfont(txt << "TID " << Utils::Format("%05d", tid) << "  SID " << Utils::Format("%05d", sid), 42, 76, txt);
+
+                // Badge row: 8 real gym-badge icons, tile-free (magenta-keyed BMPs blit straight over the
+                // themed card). Earned badges load the "on" (colour) art, the rest the "off" (grey) art.
+                {
+                    const int BW = 30, BGAP = 8, N = 8;
+                    int totalW = N * BW + (N - 1) * BGAP;   // 296px, fits the 340-wide window
+                    int bx0 = 30 + (340 - totalW) / 2, by0 = 96;
+                    for (int i = 0; i < 8; ++i) {
+                        int bx = bx0 + i * (BW + BGAP);
+                        if (!badgeIcon[i].IsLoaded()) {
+                            string bp; BadgeIconPath(bp, i + 1, (badges >> i) & 1);
+                            badgeIcon[i].LoadFromFile(bp);
+                        }
+                        if (badgeIcon[i].IsLoaded())
+                            badgeIcon[i].Draw(top, bx, by0, Color(255, 0, 255));
+                    }
+                }
+
+                // Stat grid: 4 columns (Money / Miles / BP / Time), label above value.
+                {
+                    const char *labs[4] = {"TRAINER_CARD_MONEY", "TRAINER_CARD_MILES", "TRAINER_CARD_BP", "TRAINER_CARD_TIME"};
+                    string vals[4] = { "$" + commafy((int)money), commafy((int)miles), to_string(bp), Utils::Format("%02d:%02d:%02d", hh, mm, ss) };
+                    // Inset the 4-column block (300px of the 340 window, 20px margin each side) so long values
+                    // like "$9,999,999" / "999:59:59" stay clear of the window edges instead of spilling out.
+                    const int GRIDW = 300, gx0 = 30 + (340 - GRIDW) / 2, colW = GRIDW / 4;
+                    for (int i = 0; i < 4; ++i) {
+                        string lab = getLanguage->Get(labs[i]);
+                        int lx = gx0 + colW * i + (colW - (int)OSD::GetTextWidth(true, lab)) / 2;
+                        int vx = gx0 + colW * i + (colW - (int)OSD::GetTextWidth(true, vals[i])) / 2;
+                        top.DrawSysfont(sel << lab, lx, 132, sel);
+                        top.DrawSysfont(txt << vals[i], vx, 150, txt);
+                    }
+                }
+
+                // Party sprite row, below a divider, centered in the top window. Uses the 32x32 BoxIcons set
+                // (not the 72x72 Spawner sprites, which overflowed this small a frame) via the shared BoxIconPath.
+                top.DrawRect(42, 170, 316, 1, border, true);
+                {
+                    // sy0 must keep sy0+FH within the window's bottom edge (20+200=220); 174+40=214 leaves margin.
+                    const int FW = 40, FH = 40, GAP = 6, N = 6;
+                    int totalW = N * FW + (N - 1) * GAP;
+                    int sx0 = 30 + (340 - totalW) / 2, sy0 = 174;
+                    for (int i = 0; i < 6; ++i) {
+                        int fx = sx0 + i * (FW + GAP);
+                        top.DrawRect(fx, sy0, FW, FH, Color::White, true);
+                        top.DrawRect(fx, sy0, FW, FH, border, false);
+                        if (partySp[i]) {
+                            if (!partySprite[i].IsLoaded()) {
+                                string sp; BoxIconPath(sp, partySp[i], false, "BoxIcons/");
+                                partySprite[i].LoadFromFile(sp);
+                            }
+                            if (partySprite[i].IsLoaded()) {
+                                int sw = partySprite[i].Width(), sh = partySprite[i].Height();
+                                partySprite[i].Draw(top, fx + (FW - sw) / 2, sy0 + (FH - sh) / 2);
+                            }
+                        }
+                    }
+                }
+
+                // ---- BOTTOM: real badge count + theme preview + close ----
+                bot.DrawRect(20, 20, 280, 200, bg, true);
+                bot.DrawRect(20, 20, 280, 200, border, false);
+
+                auto centerText = [&](const string &s, int yy, Color c) {
+                    int w = (int)OSD::GetTextWidth(true, s);
+                    bot.DrawSysfont(c << s, 20 + (280 - w) / 2, yy, c);
+                };
+
+                bot.DrawSysfont(title << getLanguage->Get("MENU_TRAINER_CARD"), 40, 34, title);
+                bot.DrawRect(40, 52, 240, 1, border, true);
+                // Real gym-badge count (popcount of the save byte), shown in the accent colour.
+                centerText(Utils::Format(getLanguage->Get("TRAINER_CARD_BADGES").c_str(), badgeCount), 78, sel);
+                // Shows which of the real Themes is being previewed right now (preview only, doesn't apply it).
+                centerText(getLanguage->Get("TRAINER_CARD_CYCLE") + ": " + ThemeNameAt((int)g_trainerCardTemplate), 100, txt);
+                centerText(getLanguage->Get("TRAINER_CARD_CLOSE"), 118, txt);
+                centerText(getLanguage->Get("TRAINER_CARD_HINT1"), 152, txt);
+                centerText(getLanguage->Get("TRAINER_CARD_HINT2"), 170, txt);
+
+                OSD::SwapBuffers();
+            }
         }
 
         // ============================ Rich custom editors (PC Box ++) ============================

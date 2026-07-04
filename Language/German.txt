@@ -1171,3 +1171,31 @@ SHINY_FOUND :: Shiny gefunden! Zurücksetzen zum Weiterjagen.
 SHINY_CLOSE :: Schließen
 SHINY_ONLY_NOTE :: Zählt nur, wenn das wilde Pokémon dein Ziel ist.
 EGG_PEEK_SKIP :: A zum Überspringen
+
+# ==== Trainer Card ====
+MENU_TRAINER_CARD :: Trainerkarte
+FAV_TRAINER_CARD :: Trainerkarte
+NOTE_TRAINER_CARD :: Eine teilbare Momentaufnahme: dein OT-Name, TID/SID, das Spiel, Geld, Meilen, KP, Spielzeit und die Sprites deines Teams.\n\nNur Lesezugriff - hier kann nichts bearbeitet werden.\n\nZum Speichern als Bild: aktiviere einmal Werkzeuge > Screenshots > "Plugin-UI erfassen", dann drücke die Screenshot-Taste, während diese Karte offen ist.\n\nB: zurück. Select: zum Spiel verlassen.\n\nDie 8 Arena-Orden sind die echten, live aus deinem Spielstand gelesen.
+TRAINER_CARD_MONEY :: Geld:
+TRAINER_CARD_MILES :: Meilen:
+TRAINER_CARD_BP :: KP:
+TRAINER_CARD_TIME :: Zeit:
+TRAINER_CARD_HINT1 :: Speichern: Werkzeuge > Screenshots >
+TRAINER_CARD_HINT2 :: Plugin-UI erfassen, dann Screenshot.
+TRAINER_CARD_CLOSE :: B: Schließen
+TRAINER_CARD_BADGES :: Orden: %d/8
+
+# ==== Trainer Card badges/editor ====
+TRAINER_CARD_EDIT_BADGES :: X: Orden bearbeiten
+TRAINER_CARD_CYCLE :: Start: Farben wechseln
+TRAINER_CARD_BADGE_STATUS :: Orden %d - %s
+TRAINER_CARD_ON :: Erhalten
+TRAINER_CARD_OFF :: Nicht erhalten
+TRAINER_CARD_MOVE :: Links/Rechts: Bewegen
+TRAINER_CARD_TOGGLE :: A: Umschalten
+TRAINER_CARD_SAVE_BACK :: B: Speichern und zurück
+
+# ==== Trainer Info folder (View Party Summary + Trainer Card) ====
+MENU_TRAINER_INFO :: Trainer-Infos
+FAV_TRAINER_INFO :: Trainer-Infos
+NOTE_TRAINER_INFO :: Zwei schreibgeschützte Momentaufnahmen ohne Nebenwirkungen über dich und dein Team.\n\nTeamübersicht: die versteckten Werte deines Teams (WIs, EPs, Wesen, Fähigkeit...).\n\nTrainerkarte: eine teilbare Karte mit deinem OT/TID, Geld, Meilen, KP, Spielzeit, Orden und den Sprites deines Teams.
