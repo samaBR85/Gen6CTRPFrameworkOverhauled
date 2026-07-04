@@ -1149,7 +1149,7 @@ HUD_TARGET_PROMPT :: Ziel-Frame:
 # ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
 MENU_EGG_LABEL :: Ei
 EGG_PEEK_HINT :: A drücken zum Spähen
-NOTE_EGG_PEEK_CONFIRM :: Inhalt dieses Eis zeigen? Das verrät die Überraschung beim Schlüpfen.
+NOTE_EGG_PEEK_CONFIRM :: Inhalt dieses Eis zeigen?
 MENU_SHINY_HUNT :: Shiny-Jagd-Begleiter
 FAV_SHINY_HUNT :: Shiny-Jagd
 NOTE_SHINY_HUNT :: Öffne das Menü, wähle das Pokémon, das du jagst, und es zählt deine wilden Begegnungen dieser Art im Hintergrund.\n\nWenn ein echtes Shiny erscheint, wird es gemeldet und pausiert. Zählt nur wilde Kämpfe (näherungsweise). Dein Zähler wird pro Ziel gespeichert.
@@ -1170,3 +1170,4 @@ SHINY_TOAST_BONUS :: Wildes Shiny %s!
 SHINY_FOUND :: Shiny gefunden! Zurücksetzen zum Weiterjagen.
 SHINY_CLOSE :: Schließen
 SHINY_ONLY_NOTE :: Zählt nur, wenn das wilde Pokémon dein Ziel ist.
+EGG_PEEK_SKIP :: A zum Überspringen

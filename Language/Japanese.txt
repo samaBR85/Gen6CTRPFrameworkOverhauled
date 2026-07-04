@@ -1149,7 +1149,7 @@ HUD_TARGET_PROMPT :: 目標フレーム：
 # ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
 MENU_EGG_LABEL :: タマゴ
 EGG_PEEK_HINT :: Aで中身を見る
-NOTE_EGG_PEEK_CONFIRM :: このタマゴの中身を見ますか？ 孵化の楽しみが減ります。
+NOTE_EGG_PEEK_CONFIRM :: このタマゴの中身を見ますか？
 MENU_SHINY_HUNT :: 色違いハント補助
 FAV_SHINY_HUNT :: 色違いハント
 NOTE_SHINY_HUNT :: パネルを開いて狙うポケモンを選ぶと、その種の野生エンカウントを裏で数えます。\n\n本物の色違いが出ると通知して一時停止します。数えるのは野生戦のみ（目安）。カウントは対象ごとに保存されます。
@@ -1170,3 +1170,4 @@ SHINY_TOAST_BONUS :: 野生の色違い%s！
 SHINY_FOUND :: 色違い発見！リセットで再開。
 SHINY_CLOSE :: 閉じる
 SHINY_ONLY_NOTE :: 野生の先頭が対象と一致した時だけ数えます。
+EGG_PEEK_SKIP :: Aでスキップ

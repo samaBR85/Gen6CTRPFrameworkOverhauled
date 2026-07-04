@@ -1150,7 +1150,7 @@ HUD_TARGET_PROMPT :: Target frame:
 # ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
 MENU_EGG_LABEL :: Egg
 EGG_PEEK_HINT :: Press A to peek
-NOTE_EGG_PEEK_CONFIRM :: Reveal this egg's contents? This spoils the hatch surprise.
+NOTE_EGG_PEEK_CONFIRM :: Reveal this egg's contents?
 MENU_SHINY_HUNT :: Shiny Hunt Companion
 FAV_SHINY_HUNT :: Shiny Hunt
 NOTE_SHINY_HUNT :: Open the hub, pick the Pokémon you are hunting, and it counts your wild encounters of that species in the background.\n\nWhen a real shiny appears it alerts you and pauses. Counts wild battles only (best-effort). Your count is saved per target.
@@ -1171,3 +1171,4 @@ SHINY_TOAST_BONUS :: Wild shiny %s!
 SHINY_FOUND :: Shiny found! Reset to hunt again.
 SHINY_CLOSE :: Close
 SHINY_ONLY_NOTE :: Counts only when the wild lead matches your target.
+EGG_PEEK_SKIP :: Press A to skip

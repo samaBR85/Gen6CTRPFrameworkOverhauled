@@ -1176,6 +1176,30 @@ namespace CTRPluginFramework {
             return MessageBox(CenterAlign(getLanguage->Get("NOTE_EGG_PEEK_CONFIRM")), DialogType::DialogYesNo, ClearScreen::Both)();
         }
 
+        // ---- Animated reveal (line-by-line + shiny finale) ----
+        // After a peek is confirmed the card cascades in one field at a time, top to bottom; the Shiny answer is
+        // held for last (shown as "???") then flips with a gold flash — building the "is it shiny?!" moment.
+        // Frame-counter timed (house pattern), advanced once per frame by the focused card's render.
+        static u32 gEggRevealPtr = 0;      // slot address whose reveal is animating (0 = none)
+        static int gEggRevealFrame = 0;    // frames since the peek was confirmed
+        static const int EGG_STEP = 10;    // frames between each revealed line (~0.17s @60fps)
+        static const int EGG_CELEBRATE = 5;// extra steps after the last field so the shiny flip can pulse
+        // Start the reveal animation for a freshly-peeked slot.
+        static void EggRevealAnimStart(u32 ptr) { gEggRevealPtr = ptr; gEggRevealFrame = 0; }
+        // How many reveal steps to show for `ptr` right now (advances the clock while it's the animating slot).
+        // Returns `total` for any non-animating slot or once the animation + celebration completes.
+        static int EggRevealShown(u32 ptr, int total) {
+            if (ptr != gEggRevealPtr) return total;
+            int shown = gEggRevealFrame / EGG_STEP;
+            gEggRevealFrame++;
+            if (shown >= total + EGG_CELEBRATE) { gEggRevealPtr = 0; return total; }
+            return shown < total ? shown : total; // cap at total; keep animating through the celebration window
+        }
+        // True while `ptr` is mid-animation (used to gate the "press A to skip" hint / the shiny "???" hold).
+        static bool EggRevealAnimating(u32 ptr) { return ptr == gEggRevealPtr; }
+        // Skip to the finished state (A during the animation).
+        static void EggRevealSkip(void) { gEggRevealPtr = 0; }
+
         // Draw the selected slot's card on the top screen (no scroll): textual fields on the left, a vertical
         // STAT / IV / EV / Tot table on the right (like the in-game summary). Reads the decrypted PK6 directly.
         static void DrawPartyCard(const Screen &top, u32 ptr, int slot, Color title, Color txt, Color label) {
@@ -1203,22 +1227,43 @@ namespace CTRPluginFramework {
             string nature  = pk.nature < natureList.size() ? natureList[pk.nature] : to_string(pk.nature);
             string ability = (pk.ability >= 1 && pk.ability <= 191) ? string(abilityList[pk.ability - 1]) : "?";
             string item    = pk.heldItem == 0 ? "None" : (pk.heldItem <= 775 ? string(heldItemList[pk.heldItem - 1]) : "?");
+            bool  shiny    = IsShiny(&pk) != 0;
 
-            top.DrawSysfont(title << "Party slot " + to_string(slot) + " - " + speciesList[pk.species - 1], 42, 30, title);
-            DrawTypeChips(top, pk.species, 42 + (int)OSD::GetTextWidth(true, "Party slot " + to_string(slot) + " - " + string(speciesList[pk.species - 1])) + 12, 28);
+            // Animated reveal: each row appears in turn (index gate), the Shiny answer held for last as "???".
+            const int RTOTAL = 11;                 // reveal steps (row 0..9 + shiny resolve at 10/11)
+            bool anim     = EggRevealAnimating(ptr);
+            int  shown    = EggRevealShown(ptr, RTOTAL);
+            bool resolved = shown >= RTOTAL;       // Shiny value now visible
+            auto vis = [&](int step) { return shown >= step; };
 
-            // Left column: textual fields.
-            auto L = [&](const string &lab, const string &val, int yy) {
-                top.DrawSysfont(label << lab << txt << val, 42, yy, txt);
+            if (vis(0)) {
+                top.DrawSysfont(title << "Party slot " + to_string(slot) + " - " + speciesList[pk.species - 1], 42, 30, title);
+                DrawTypeChips(top, pk.species, 42 + (int)OSD::GetTextWidth(true, "Party slot " + to_string(slot) + " - " + string(speciesList[pk.species - 1])) + 12, 28);
+            }
+
+            // Left column: textual fields (each gated by its reveal step).
+            auto L = [&](int step, const string &lab, const string &val, int yy) {
+                if (vis(step)) top.DrawSysfont(label << lab << txt << val, 42, yy, txt);
             };
             const int ldy = 18; int ly = 54;
-            L("Nickname: ", nick,                        ly); ly += ldy;
-            L("Level: ",    to_string(level),            ly); ly += ldy;
-            L("Gender: ",   genders[g],                  ly); ly += ldy;
-            L("Nature: ",   nature,                      ly); ly += ldy;
-            L("Ability: ",  ability,                     ly); ly += ldy;
-            L("Held: ",     item,                        ly); ly += ldy;
-            L("Shiny: ",    IsShiny(&pk) ? "Yes" : "No", ly); ly += ldy;
+            L(1, "Nickname: ", nick,             ly); ly += ldy;
+            L(2, "Level: ",    to_string(level), ly); ly += ldy;
+            L(3, "Gender: ",   genders[g],       ly); ly += ldy;
+            L(4, "Nature: ",   nature,           ly); ly += ldy;
+            L(5, "Ability: ",  ability,          ly); ly += ldy;
+            L(6, "Held: ",     item,             ly); ly += ldy;
+
+            // Shiny row: label appears at step 7 but the VALUE stays "???" until the finale (step 11), then it
+            // flips — pulsing gold while it lands (the "is it shiny?!" payoff).
+            if (vis(7)) {
+                Color gold(0xF2, 0xC8, 0x3C);
+                string sval = resolved ? (shiny ? "Yes" : "No") : "???";
+                Color scol  = txt;
+                if (resolved && shiny) scol = (anim && (gEggRevealFrame / 6) % 2 == 0) ? Color::White : gold;
+                top.DrawSysfont(label << "Shiny: " << scol << sval, 42, ly, scol);
+                if (resolved && shiny) top.DrawSysfont(gold << "  *", 42 + (int)OSD::GetTextWidth(true, "Shiny: " + sval), ly, gold);
+            }
+            ly += ldy;
 
             // Hidden Power type from the LSB of each IV (HP/Atk/Def/Spe/SpA/SpD bits).
             static const char *hpTypes[16] = {
@@ -1231,31 +1276,38 @@ namespace CTRPluginFramework {
                       + (((pk.iv32 >> 15) & 1) << 3)
                       + (((pk.iv32 >> 20) & 1) << 4)
                       + (((pk.iv32 >> 25) & 1) << 5);
-            L("Hidden Power: ", hpTypes[hpSum * 15 / 63], ly); ly += ldy;
+            L(8, "Hidden Power: ", hpTypes[hpSum * 15 / 63], ly); ly += ldy;
 
-            top.DrawSysfont(label << "OT: " << txt << Utf16Field(pk.originalTrainerName) + " (TID " + to_string(pk.TID) + "/" + to_string(pk.SID) + ")", 42, ly, txt);
+            if (vis(9))
+                top.DrawSysfont(label << "OT: " << txt << Utf16Field(pk.originalTrainerName) + " (TID " + to_string(pk.TID) + "/" + to_string(pk.SID) + ")", 42, ly, txt);
 
-            // Right column: STAT / IV / EV / Tot table, order HP,Atk,Def,SpA,SpD,Speed.
-            u16 stat[6]; CalcStats(pk.species, level, pk.nature, pk.iv32, pk.EV, stat);
-            static const char *sName[6] = {"HP", "Atk", "Def", "SpA", "SpD", "Spe"};
-            static const int inMap[6] = {0, 1, 2, 4, 5, 3};
-            const int cN = 210, cT = 258, cIV = 300, cEV = 338; // Tot first, then IV, EV
-            int ry = 54; const int rdy = 18;
+            // Right column: STAT / IV / EV / Tot table (revealed as one step, just before the shiny finale).
+            if (vis(10)) {
+                u16 stat[6]; CalcStats(pk.species, level, pk.nature, pk.iv32, pk.EV, stat);
+                static const char *sName[6] = {"HP", "Atk", "Def", "SpA", "SpD", "Spe"};
+                static const int inMap[6] = {0, 1, 2, 4, 5, 3};
+                const int cN = 210, cT = 258, cIV = 300, cEV = 338; // Tot first, then IV, EV
+                int ry = 54; const int rdy = 18;
 
-            top.DrawSysfont(label << "Tot", cT,  ry, txt);
-            top.DrawSysfont(label << "IV",  cIV, ry, txt);
-            top.DrawSysfont(label << "EV",  cEV, ry, txt);
-            ry += rdy;
-
-            for (int d = 0; d < 6; d++) {
-                int iv = (pk.iv32 >> (5 * inMap[d])) & 0x1F;
-                int ev = pk.EV[inMap[d]];
-                top.DrawSysfont(label << sName[d],           cN,  ry, txt);
-                top.DrawSysfont(title << to_string(stat[d]), cT,  ry, txt);
-                top.DrawSysfont(txt << to_string(iv),        cIV, ry, txt);
-                top.DrawSysfont(txt << to_string(ev),        cEV, ry, txt);
+                top.DrawSysfont(label << "Tot", cT,  ry, txt);
+                top.DrawSysfont(label << "IV",  cIV, ry, txt);
+                top.DrawSysfont(label << "EV",  cEV, ry, txt);
                 ry += rdy;
+
+                for (int d = 0; d < 6; d++) {
+                    int iv = (pk.iv32 >> (5 * inMap[d])) & 0x1F;
+                    int ev = pk.EV[inMap[d]];
+                    top.DrawSysfont(label << sName[d],           cN,  ry, txt);
+                    top.DrawSysfont(title << to_string(stat[d]), cT,  ry, txt);
+                    top.DrawSysfont(txt << to_string(iv),        cIV, ry, txt);
+                    top.DrawSysfont(txt << to_string(ev),        cEV, ry, txt);
+                    ry += rdy;
+                }
             }
+
+            // "Press A to skip" hint while the cascade is still playing.
+            if (anim && !resolved)
+                top.DrawSysfont(txt << getLanguage->Get("EGG_PEEK_SKIP"), 42, 204, txt);
         }
 
         // Read-only viewer for the active party (editing the save-buffer copy doesn't persist). A button-navigated
@@ -1363,6 +1415,7 @@ namespace CTRPluginFramework {
 
         void ViewPartyInfo(MenuEntry *entry) {
             (void)entry;
+            gRevealedEggN = 0; // re-mask eggs on every open of the viewer (peeks last only while it's open)
             u32 base = FindPartyBase();
             if (base == 0) {
                 MessageBox(CenterAlign(getLanguage->Get("DLG_PARTY_NOT_FOUND")), DialogType::DialogOk, ClearScreen::Both)();
@@ -1449,15 +1502,20 @@ namespace CTRPluginFramework {
                     if (g_cardStatHotkey && Controller::IsKeysPressed(g_cardStatHotkey))
                         higher = !higher;
 
-                    bool cardMasked = slotEgg[cursor] && !EggRevealed(base + cursor * 0x104);
+                    u32 curPtr = base + cursor * 0x104;
+                    bool cardMasked = slotEgg[cursor] && !EggRevealed(curPtr);
+                    bool cardAnimating = EggRevealAnimating(curPtr); // egg mid-reveal cascade
                     if (Controller::IsKeyPressed(Key::B))          mode = 0;                  // back to list
                     else if (KeyRep(Key::Left))  cursor = (cursor + 5) % 6;  // previous card
                     else if (KeyRep(Key::Right)) cursor = (cursor + 1) % 6;  // next card
-                    else if (KeyRep(Key::Up) && !cardMasked)    selStat = (selStat + 5) % 6; // move stat selector
-                    else if (KeyRep(Key::Down) && !cardMasked)  selStat = (selStat + 1) % 6;
+                    else if (KeyRep(Key::Up) && !cardMasked && !cardAnimating)    selStat = (selStat + 5) % 6; // move stat selector
+                    else if (KeyRep(Key::Down) && !cardMasked && !cardAnimating)  selStat = (selStat + 1) % 6;
                     else if (Controller::IsKeyPressed(Key::A) && cardMasked) {
-                        // Masked egg: A peeks (with confirm) instead of the stat-jump. Reveal persists for the session.
-                        if (EggPeekConfirm()) EggReveal(base + cursor * 0x104);
+                        // Masked egg: A peeks (with confirm) instead of the stat-jump, then plays the reveal cascade.
+                        if (EggPeekConfirm()) { EggReveal(curPtr); EggRevealAnimStart(curPtr); }
+                    }
+                    else if (Controller::IsKeyPressed(Key::A) && cardAnimating) {
+                        EggRevealSkip(); // A during the cascade -> jump to the finished card
                     }
                     else if (Controller::IsKeyPressed(Key::A) && !cardMasked) {
                         // Jump to the member holding the extreme of selStat. If several tie, each A
@@ -1534,7 +1592,7 @@ namespace CTRPluginFramework {
 
                     // A masked egg draws no stat overlay (the card itself is just "Egg" + the peek prompt).
                     bool mMasked = slotEgg[cursor] && !EggRevealed(base + cursor * 0x104);
-                    if (!mMasked) {
+                    if (!mMasked && !EggRevealAnimating(base + cursor * 0x104)) { // hide overlay during the reveal cascade
                     // --- stat-selector overlay (rows match DrawPartyCard: y = 72 + d*18) ---
                     const int ROW0 = 72, RDY = 18;
                     // ▲/▼ markers left of each stat name where the shown member is the team best/worst.
@@ -2650,10 +2708,10 @@ namespace CTRPluginFramework {
         struct BoxEditField { const char *label; void (*fn)(MenuEntry*); };
         struct BoxEditCat   { const char *name; const BoxEditField *fields; int count; };
         static const BoxEditField BE_MAIN[] = {
-            {"Species", SpeciesRich}, {"Nickname", Nickname}, {"Nicknamed?", IsNicknamed}, {"Level", Level},
+            {"Species", SpeciesRich}, {"Nickname", Nickname}, {"Nicknamed?", IsNicknamed}, {"Egg?", IsEgg}, {"Level", Level},
             {"Nature", NatureRich}, {"Gender", Gender}, {"Form", Form}, {"Held Item", HeldItemRich},
             {"Ability", AbilityRich}, {"Friendship", Friendship}, {"Language", Language}, {"Shiny", Shiny},
-            {"Egg?", IsEgg}, {"Pokerus", Pokerus}, {"Country", Country}, {"Console Region", ConsoleRegion},
+            {"Pokerus", Pokerus}, {"Country", Country}, {"Console Region", ConsoleRegion},
         };
         static const BoxEditField BE_STAT[] = { {"IVs", IVRich}, {"EVs", EVRich}, {"Contest", ContestRich} };
         static const BoxEditField BE_MOVE[] = { {"Moves", MovesRich}, {"Relearn", RelearnRich} };
@@ -2674,21 +2732,21 @@ namespace CTRPluginFramework {
             auto evs  = [&]() { string s; for (int d = 0; d < 6; d++) s += to_string(pk.EV[inMap[d]]) + (d < 5 ? "/" : ""); return s; };
             auto date = [&](const u8 *d) -> string { if (!d[0] && !d[1] && !d[2]) return "None"; return to_string(2000 + d[0]) + "/" + to_string(d[1]) + "/" + to_string(d[2]); };
 
-            if (cat == 0) switch (idx) { // Main
+            if (cat == 0) switch (idx) { // Main (Egg? moved above Level)
                 case 0:  return (pk.species >= 1 && pk.species <= 721) ? string(speciesList[pk.species - 1]) : "?";
                 case 1:  { string n = Utf16Field(pk.nickname); return n.empty() ? "-" : n; }
                 case 2:  return ((pk.iv32 >> 31) & 1) ? "Yes" : "No";
-                case 3:  return to_string(LevelFromExp(pk.species, pk.exp));
-                case 4:  return pk.nature < natureList.size() ? string(natureList[pk.nature]) : to_string(pk.nature);
-                case 5:  { int g = (pk.fatefulEncounterGenderForm >> 1) & 3; return GEN[g > 2 ? 2 : g]; }
-                case 6:  { int f = pk.fatefulEncounterGenderForm >> 3; vector<string> fl = formList(pk.species);
+                case 3:  return ((pk.iv32 >> 30) & 1) ? "Yes" : "No"; // Egg?
+                case 4:  return to_string(LevelFromExp(pk.species, pk.exp));
+                case 5:  return pk.nature < natureList.size() ? string(natureList[pk.nature]) : to_string(pk.nature);
+                case 6:  { int g = (pk.fatefulEncounterGenderForm >> 1) & 3; return GEN[g > 2 ? 2 : g]; }
+                case 7:  { int f = pk.fatefulEncounterGenderForm >> 3; vector<string> fl = formList(pk.species);
                            if (f >= 0 && f < (int)fl.size()) return fl[f]; return f == 0 ? "Default" : to_string(f); }
-                case 7:  return pk.heldItem == 0 ? "None" : (pk.heldItem <= 775 ? string(heldItemList[pk.heldItem - 1]) : "?");
-                case 8:  return (pk.ability >= 1 && pk.ability <= 191) ? string(abilityList[pk.ability - 1]) : "?";
-                case 9:  return to_string(pk.originalTrainerFriendship);
-                case 10: { static const char *L[] = {"-","JPN","ENG","FRE","ITA","GER","-","SPA","KOR","CHS","CHT"}; return (pk.language < 11) ? string(L[pk.language]) : to_string(pk.language); }
-                case 11: return IsShiny(&pk) ? "Yes" : "No";
-                case 12: return ((pk.iv32 >> 30) & 1) ? "Yes" : "No";
+                case 8:  return pk.heldItem == 0 ? "None" : (pk.heldItem <= 775 ? string(heldItemList[pk.heldItem - 1]) : "?");
+                case 9:  return (pk.ability >= 1 && pk.ability <= 191) ? string(abilityList[pk.ability - 1]) : "?";
+                case 10: return to_string(pk.originalTrainerFriendship);
+                case 11: { static const char *L[] = {"-","JPN","ENG","FRE","ITA","GER","-","SPA","KOR","CHS","CHT"}; return (pk.language < 11) ? string(L[pk.language]) : to_string(pk.language); }
+                case 12: return IsShiny(&pk) ? "Yes" : "No";
                 case 13: return pk.infected ? "Yes" : "No";
                 case 14: { for (const Nations &c : countryList) if (c.name && c.id == pk.country) return string(c.name); return to_string(pk.country); }
                 case 15: { static const char *CR[6] = {"Japan", "Americas", "Europe", "China", "Korea", "Taiwan"};
@@ -2799,6 +2857,7 @@ namespace CTRPluginFramework {
 
         void BoxBrowserPlus(MenuEntry *entry) {
             (void)entry;
+            gRevealedEggN = 0; // re-mask eggs on every open of the browser (peeks last only while it's open)
             const u32 base = DetermineSpeciesPointer(); // box 1 / slot 1 (game-specific), 31 boxes x 30 slots
             auto cellAddr = [&](int box, int slot) -> u32 { return base + box * 6960 + slot * 0xE8; };
 
@@ -2862,7 +2921,11 @@ namespace CTRPluginFramework {
                 if (Controller::IsKeyPressed(Key::A)) {
                     // A masked egg must be peeked (with confirm) before it can be edited — first A reveals, then edit.
                     if (curBox == loadedBox && boxSpecies[cursor] && boxEgg[cursor] && !EggRevealed(cellAddr(curBox, cursor))) {
-                        if (EggPeekConfirm()) { EggReveal(cellAddr(curBox, cursor)); cardKey = -1; }
+                        if (EggPeekConfirm()) { u32 ep = cellAddr(curBox, cursor); EggReveal(ep); EggRevealAnimStart(ep); cardKey = -1; }
+                    }
+                    // A during the reveal cascade -> skip to the finished card (don't open the editor yet).
+                    else if (curBox == loadedBox && boxSpecies[cursor] && EggRevealAnimating(cellAddr(curBox, cursor))) {
+                        EggRevealSkip();
                     }
                     // Open the in-app editor on this slot (only if occupied).
                     else if (curBox == loadedBox && boxSpecies[cursor]) {
@@ -3007,7 +3070,13 @@ namespace CTRPluginFramework {
 
                 u16 fsp = (curBox == loadedBox) ? boxSpecies[cursor] : 0;
                 u8  fsh = (curBox == loadedBox) ? boxShiny[cursor] : 0;
-                bool fMasked = fsp && (curBox == loadedBox) && boxEgg[cursor] && !EggRevealed(cellAddr(curBox, cursor));
+                u32 fptr = cellAddr(curBox, cursor);
+                bool fMasked = fsp && (curBox == loadedBox) && boxEgg[cursor] && !EggRevealed(fptr);
+                // Animated reveal (line-by-line + shiny finale) for a freshly-peeked egg; 6 steps, shiny resolves last.
+                const int BTOTAL = 6;
+                bool bAnim = EggRevealAnimating(fptr);
+                int  bshown = fsp ? EggRevealShown(fptr, BTOTAL) : BTOTAL;
+                bool bResolved = bshown >= BTOTAL;
 
                 // 72px sprite, framed (reuses the Spawner BMPs, shiny-aware).
                 const int FX = 30, FY = 40;
@@ -3036,24 +3105,35 @@ namespace CTRPluginFramework {
                     bot.DrawSysfont(txt << getLanguage->Get("EGG_PEEK_HINT"), LX, 70, txt);
                 } else if (fsp) {
                     PK6 pk;
-                    if (GetPokemon(cellAddr(curBox, cursor), &pk)) {
+                    if (GetPokemon(fptr, &pk)) {
                         int level = LevelFromExp(pk.species, pk.exp);
                         string nature = pk.nature < natureList.size() ? natureList[pk.nature] : to_string(pk.nature);
                         const int LX = 128;
-                        bot.DrawSysfont(title << speciesList[fsp - 1], LX, 42, title);
-                        bot.DrawSysfont(sel << "Lv " << txt << to_string(level), LX, 64, txt);
-                        bot.DrawSysfont(sel << "Nat " << txt << nature, LX, 82, txt);
-                        bot.DrawSysfont(sel << "Shiny " << txt << (fsh ? "Yes" : "No"), LX, 100, txt);
-                        DrawTypeChips(bot, fsp, LX, 118); // type chips
+                        // Steps: 0 sprite+species, 1 Lv, 2 Nat, 3 Shiny label(???), 4 types, 5 stats, resolve at 6.
+                        if (bshown >= 0) bot.DrawSysfont(title << speciesList[fsp - 1], LX, 42, title);
+                        if (bshown >= 1) bot.DrawSysfont(sel << "Lv " << txt << to_string(level), LX, 64, txt);
+                        if (bshown >= 2) bot.DrawSysfont(sel << "Nat " << txt << nature, LX, 82, txt);
+                        if (bshown >= 3) {
+                            Color gold(0xF2, 0xC8, 0x3C);
+                            string sval = bResolved ? (fsh ? "Yes" : "No") : "???";
+                            Color scol = txt;
+                            if (bResolved && fsh) scol = (bAnim && (gEggRevealFrame / 6) % 2 == 0) ? Color::White : gold;
+                            bot.DrawSysfont(sel << "Shiny " << scol << sval, LX, 100, scol);
+                            if (bResolved && fsh) bot.DrawSysfont(gold << " *", LX + (int)OSD::GetTextWidth(true, "Shiny " + sval), 100, gold);
+                        }
+                        if (bshown >= 4) DrawTypeChips(bot, fsp, LX, 118); // type chips
 
                         // Compact 6-stat row under the sprite.
-                        u16 stt[6]; CalcStats(pk.species, level, pk.nature, pk.iv32, pk.EV, stt);
-                        static const char *sN[6] = {"HP", "At", "Df", "SA", "SD", "Sp"};
-                        const int sx0 = 30, sdx = 44;
-                        for (int d = 0; d < 6; ++d) {
-                            bot.DrawSysfont(sel << sN[d], sx0 + d * sdx, 140, sel);
-                            bot.DrawSysfont(txt << to_string(stt[d]), sx0 + d * sdx, 156, txt);
+                        if (bshown >= 5) {
+                            u16 stt[6]; CalcStats(pk.species, level, pk.nature, pk.iv32, pk.EV, stt);
+                            static const char *sN[6] = {"HP", "At", "Df", "SA", "SD", "Sp"};
+                            const int sx0 = 30, sdx = 44;
+                            for (int d = 0; d < 6; ++d) {
+                                bot.DrawSysfont(sel << sN[d], sx0 + d * sdx, 140, sel);
+                                bot.DrawSysfont(txt << to_string(stt[d]), sx0 + d * sdx, 156, txt);
+                            }
                         }
+                        if (bAnim && !bResolved) bot.DrawSysfont(txt << getLanguage->Get("EGG_PEEK_SKIP"), LX, 178, txt);
                     }
                 } else {
                     bot.DrawSysfont(txt << "Empty slot", 128, 64, txt);
@@ -3103,36 +3183,36 @@ namespace CTRPluginFramework {
                                 u32 ep = (u32)(uintptr_t)editScratch; PK6 sp;
                                 if (GetPokemon(ep, &sp) && sp.species >= 1 && sp.species <= 721) {
                                     bool changed = true;
-                                    switch (editField) {
-                                        case 3: { // Level (recompute EXP via growthGroupOf/growthTable)
+                                    switch (editField) { // indices match BE_MAIN (Egg? moved above Level)
+                                        case 3: MarkAsEgg(&sp, !((sp.iv32 >> 30) & 1)); break; // Egg toggle
+                                        case 4: { // Level (recompute EXP via growthGroupOf/growthTable)
                                             int lv = LevelFromExp(sp.species, sp.exp) + dir;
                                             if (lv < 1) lv = 1; if (lv > 100) lv = 100;
                                             int g = (sp.species < 808 && growthGroupOf[sp.species] != 0xFF) ? growthGroupOf[sp.species] : 0;
                                             sp.exp = (u32)growthTable[lv - 1][g];
                                             break;
                                         }
-                                        case 4: AssignNature(&sp, ((int)sp.nature + 25 + dir) % 25); break; // 0..24 wrap
-                                        case 5: { // Gender: only when not fixed for the species; toggle M<->F
+                                        case 5: AssignNature(&sp, ((int)sp.nature + 25 + dir) % 25); break; // 0..24 wrap
+                                        case 6: { // Gender: only when not fixed for the species; toggle M<->F
                                             bool fixed = false; for (const auto &f : genderCannotChange) if (sp.species == f) { fixed = true; break; }
                                             if (fixed) { changed = false; setStatus("Gender is fixed for this species"); }
                                             else { int g = (sp.fatefulEncounterGenderForm >> 1) & 3; AssignGender(&sp, (g == 1) ? 0 : 1); }
                                             break;
                                         }
-                                        case 6: { // Form 0..n-1 (per species)
+                                        case 7: { // Form 0..n-1 (per species)
                                             int n = (int)formList(sp.species).size();
                                             if (n > 1) { int f = sp.fatefulEncounterGenderForm >> 3; AssignForm(&sp, (f + n + dir) % n); }
                                             else { changed = false; setStatus("No alternate forms"); }
                                             break;
                                         }
-                                        case 8: { const int c = 191; int a = sp.ability; if (a < 1 || a > c) a = 1; // Ability 1..191 wrap
+                                        case 9: { const int c = 191; int a = sp.ability; if (a < 1 || a > c) a = 1; // Ability 1..191 wrap
                                                   AssignAbility(&sp, ((a - 1 + c + dir) % c) + 1); break; }
-                                        case 9: { int v = (int)sp.originalTrainerFriendship + dir; if (v < 0) v = 0; if (v > 255) v = 255; // 0..255 clamp
+                                        case 10: { int v = (int)sp.originalTrainerFriendship + dir; if (v < 0) v = 0; if (v > 255) v = 255; // 0..255 clamp
                                                   sp.originalTrainerFriendship = (u8)v; AdjustFriendship(&sp, v); break; } // keep OT (shown) + HT in sync
-                                        case 10: { static const int LC[9] = {1,2,3,4,5,7,8,9,10}; // Language: valid codes (skip 6)
+                                        case 11: { static const int LC[9] = {1,2,3,4,5,7,8,9,10}; // Language: valid codes (skip 6)
                                                    int idx = 0; for (int i = 0; i < 9; i++) if (LC[i] == sp.language) { idx = i; break; }
                                                    idx = (idx + 9 + dir) % 9; SpecifyLanguage(&sp, LC[idx]); break; }
-                                        case 11: MakeShiny(&sp, !IsShiny(&sp)); break;        // Shiny toggle
-                                        case 12: MarkAsEgg(&sp, !((sp.iv32 >> 30) & 1)); break; // Egg toggle
+                                        case 12: MakeShiny(&sp, !IsShiny(&sp)); break;        // Shiny toggle
                                         case 13: if (sp.infected) SetPokerusStatus(&sp, 0, 0); else SetPokerusStatus(&sp, 4, 2); break; // Pokerus toggle
                                         case 14: { vector<int> ids; for (const Nations &c : countryList) if (c.name) ids.push_back(c.id); // Country: cycle valid ids
                                                    if (!ids.empty()) { int idx = 0; for (size_t i = 0; i < ids.size(); i++) if (ids[i] == sp.country) { idx = (int)i; break; }

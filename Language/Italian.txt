@@ -1200,7 +1200,7 @@ HUD_TARGET_PROMPT :: Frame obiettivo:
 # ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
 MENU_EGG_LABEL :: Uovo
 EGG_PEEK_HINT :: Premi A per sbirciare
-NOTE_EGG_PEEK_CONFIRM :: Rivelare il contenuto di quest'uovo? Rovina la sorpresa della schiusa.
+NOTE_EGG_PEEK_CONFIRM :: Rivelare il contenuto dell'uovo?
 MENU_SHINY_HUNT :: Compagno Caccia Cromatica
 FAV_SHINY_HUNT :: Caccia Shiny
 NOTE_SHINY_HUNT :: Apri il pannello, scegli il Pokémon che stai cercando e conta i tuoi incontri selvatici di quella specie in background.\n\nQuando appare un vero shiny ti avvisa e mette in pausa. Conta solo le lotte selvatiche (approssimato). Il conteggio è salvato per bersaglio.
@@ -1221,3 +1221,4 @@ SHINY_TOAST_BONUS :: %s shiny selvatico!
 SHINY_FOUND :: Shiny trovato! Azzera per ricominciare.
 SHINY_CLOSE :: Chiudi
 SHINY_ONLY_NOTE :: Conta solo se il selvatico è il tuo bersaglio.
+EGG_PEEK_SKIP :: A per saltare

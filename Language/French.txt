@@ -1149,7 +1149,7 @@ HUD_TARGET_PROMPT :: Frame cible :
 # ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
 MENU_EGG_LABEL :: Œuf
 EGG_PEEK_HINT :: Appuie sur A pour observer
-NOTE_EGG_PEEK_CONFIRM :: Révéler le contenu de cet œuf ? Cela gâche la surprise de l'éclosion.
+NOTE_EGG_PEEK_CONFIRM :: Révéler le contenu de cet œuf ?
 MENU_SHINY_HUNT :: Assistant de chasse chromatique
 FAV_SHINY_HUNT :: Chasse Shiny
 NOTE_SHINY_HUNT :: Ouvre le panneau, choisis le Pokémon que tu chasses, et il compte tes rencontres sauvages de cette espèce en arrière-plan.\n\nQuand un vrai chromatique apparaît, il t'alerte et met en pause. Ne compte que les combats sauvages (approximatif). Ton compteur est enregistré par cible.
@@ -1170,3 +1170,4 @@ SHINY_TOAST_BONUS :: %s chromatique sauvage !
 SHINY_FOUND :: Chromatique trouvé ! Réinitialise pour rechasser.
 SHINY_CLOSE :: Fermer
 SHINY_ONLY_NOTE :: Ne compte que si le Pokémon sauvage est ta cible.
+EGG_PEEK_SKIP :: A pour passer
