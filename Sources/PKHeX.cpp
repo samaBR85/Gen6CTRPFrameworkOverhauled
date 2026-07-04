@@ -3529,15 +3529,14 @@ namespace CTRPluginFramework {
 
             // Grid geometry: 8 columns x 4 rows (32 cells) to hold the 30 real slots of a Box (3 full rows
             // of 8 + a last row of 6) - airier than the old 6x5 (more vertical breathing room below the
-            // grid), same 32px cell / 4px gap spacing as Living Dex's grid. The last (partial) row is
-            // horizontally centered rather than left-aligned with trailing gaps.
+            // grid), same 32px cell / 4px gap spacing as Living Dex's grid. The last (partial) row stays
+            // LEFT-ALIGNED like every other row - centering it made column N visually land in a different
+            // spot than column N in the rows above, so D-Pad Down from the second-to-last row landed one
+            // slot off from where it looked like it should (cursor math is a flat i/COLS, i%COLS grid; a
+            // per-row x offset breaks that assumption).
             const int COLS = 8, ROWS = 4, CELL = 32, GAP = 4, PITCH = CELL + GAP;
             const int GX0 = 30 + (340 - ((COLS - 1) * PITCH + CELL)) / 2, GY0 = 52;
-            auto cellLeft = [&](int i) {
-                int row = i / COLS, itemsInRow = std::min(COLS, 30 - row * COLS);
-                int rowOffset = (COLS - itemsInRow) * PITCH / 2;
-                return GX0 + rowOffset + (i % COLS) * PITCH;
-            };
+            auto cellLeft = [&](int i) { return GX0 + (i % COLS) * PITCH; };
             auto cellTop  = [&](int i) { return GY0 + (i / COLS) * PITCH; };
 
             int curBox = (gBoxNumber >= 1 && gBoxNumber <= 31) ? gBoxNumber - 1 : 0;
