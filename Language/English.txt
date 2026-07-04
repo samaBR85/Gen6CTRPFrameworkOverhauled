@@ -1146,3 +1146,28 @@ HUD_PARITY_NO :: FLIP
 HUD_TARGET_SET :: Target: %lu
 NOTE_HUD_TARGET :: Set the target frame 3DSRNGTool gave you (press the editor hotkey, default START, on this entry). The HUD then shows how many frames remain and whether the parity matches, so you can land it with Select.
 HUD_TARGET_PROMPT :: Target frame:
+
+# ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
+MENU_EGG_LABEL :: Egg
+EGG_PEEK_HINT :: Press A to peek
+NOTE_EGG_PEEK_CONFIRM :: Reveal this egg's contents? This spoils the hatch surprise.
+MENU_SHINY_HUNT :: Shiny Hunt Companion
+FAV_SHINY_HUNT :: Shiny Hunt
+NOTE_SHINY_HUNT :: Open the hub, pick the Pokémon you are hunting, and it counts your wild encounters of that species in the background.\n\nWhen a real shiny appears it alerts you and pauses. Counts wild battles only (best-effort). Your count is saved per target.
+SHINY_TARGET :: Target:
+SHINY_ENCOUNTERS :: Encounters
+SHINY_METHOD :: Method:
+SHINY_METHOD_FULL :: Full Odds
+SHINY_METHOD_MASUDA :: Masuda
+SHINY_METHOD_CHARM :: Shiny Charm
+SHINY_METHOD_BOTH :: Masuda + Charm
+SHINY_ODDS :: Odds:
+SHINY_CHANGE_TARGET :: Change target
+SHINY_RESET :: Reset counter
+SHINY_RESET_CONFIRM :: Reset the counter for this target?
+SHINY_LAST :: Last:
+SHINY_HIT :: SHINY %s!
+SHINY_TOAST_BONUS :: Wild shiny %s!
+SHINY_FOUND :: Shiny found! Reset to hunt again.
+SHINY_CLOSE :: Close
+SHINY_ONLY_NOTE :: Counts only when the wild lead matches your target.

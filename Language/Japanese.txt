@@ -1145,3 +1145,28 @@ HUD_PARITY_NO :: FLIP
 HUD_TARGET_SET :: Target: %lu
 NOTE_HUD_TARGET :: 3DSRNGToolが示した目標フレームを設定します（この項目で編集ホットキー、初期設定はSTART、を押す）。HUDに残りフレーム数とパリティが合うかが表示され、Selectで狙えます。
 HUD_TARGET_PROMPT :: 目標フレーム：
+
+# ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
+MENU_EGG_LABEL :: タマゴ
+EGG_PEEK_HINT :: Aで中身を見る
+NOTE_EGG_PEEK_CONFIRM :: このタマゴの中身を見ますか？ 孵化の楽しみが減ります。
+MENU_SHINY_HUNT :: 色違いハント補助
+FAV_SHINY_HUNT :: 色違いハント
+NOTE_SHINY_HUNT :: パネルを開いて狙うポケモンを選ぶと、その種の野生エンカウントを裏で数えます。\n\n本物の色違いが出ると通知して一時停止します。数えるのは野生戦のみ（目安）。カウントは対象ごとに保存されます。
+SHINY_TARGET :: 対象：
+SHINY_ENCOUNTERS :: エンカウント
+SHINY_METHOD :: 方法：
+SHINY_METHOD_FULL :: 通常
+SHINY_METHOD_MASUDA :: 国際孵化
+SHINY_METHOD_CHARM :: ひかるおまもり
+SHINY_METHOD_BOTH :: 国際 + おまもり
+SHINY_ODDS :: 確率：
+SHINY_CHANGE_TARGET :: 対象を変更
+SHINY_RESET :: カウントをリセット
+SHINY_RESET_CONFIRM :: この対象のカウントをリセットしますか？
+SHINY_LAST :: 直近：
+SHINY_HIT :: 色違いの%s！
+SHINY_TOAST_BONUS :: 野生の色違い%s！
+SHINY_FOUND :: 色違い発見！リセットで再開。
+SHINY_CLOSE :: 閉じる
+SHINY_ONLY_NOTE :: 野生の先頭が対象と一致した時だけ数えます。

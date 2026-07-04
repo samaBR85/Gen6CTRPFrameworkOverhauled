@@ -1145,3 +1145,28 @@ HUD_PARITY_NO :: FLIP
 HUD_TARGET_SET :: Target: %lu
 NOTE_HUD_TARGET :: Lege den Ziel-Frame fest, den 3DSRNGTool dir gegeben hat (drück die Editor-Taste, Standard START, auf diesem Eintrag). Das HUD zeigt, wie viele Frames noch fehlen und ob die Parität passt, damit du ihn mit Select triffst.
 HUD_TARGET_PROMPT :: Ziel-Frame:
+
+# ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
+MENU_EGG_LABEL :: Ei
+EGG_PEEK_HINT :: A drücken zum Spähen
+NOTE_EGG_PEEK_CONFIRM :: Inhalt dieses Eis zeigen? Das verrät die Überraschung beim Schlüpfen.
+MENU_SHINY_HUNT :: Shiny-Jagd-Begleiter
+FAV_SHINY_HUNT :: Shiny-Jagd
+NOTE_SHINY_HUNT :: Öffne das Menü, wähle das Pokémon, das du jagst, und es zählt deine wilden Begegnungen dieser Art im Hintergrund.\n\nWenn ein echtes Shiny erscheint, wird es gemeldet und pausiert. Zählt nur wilde Kämpfe (näherungsweise). Dein Zähler wird pro Ziel gespeichert.
+SHINY_TARGET :: Ziel:
+SHINY_ENCOUNTERS :: Begegnungen
+SHINY_METHOD :: Methode:
+SHINY_METHOD_FULL :: Normal
+SHINY_METHOD_MASUDA :: Masuda
+SHINY_METHOD_CHARM :: Schillerpin
+SHINY_METHOD_BOTH :: Masuda + Pin
+SHINY_ODDS :: Chance:
+SHINY_CHANGE_TARGET :: Ziel ändern
+SHINY_RESET :: Zähler zurücksetzen
+SHINY_RESET_CONFIRM :: Zähler für dieses Ziel zurücksetzen?
+SHINY_LAST :: Zuletzt:
+SHINY_HIT :: SHINY %s!
+SHINY_TOAST_BONUS :: Wildes Shiny %s!
+SHINY_FOUND :: Shiny gefunden! Zurücksetzen zum Weiterjagen.
+SHINY_CLOSE :: Schließen
+SHINY_ONLY_NOTE :: Zählt nur, wenn das wilde Pokémon dein Ziel ist.

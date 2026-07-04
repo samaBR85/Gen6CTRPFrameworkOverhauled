@@ -1196,3 +1196,28 @@ HUD_PARITY_NO :: FLIP
 HUD_TARGET_SET :: Target: %lu
 NOTE_HUD_TARGET :: Imposta la frame obiettivo data da 3DSRNGTool (premi il tasto editor, START di default, su questa voce). L'HUD mostra quante frame mancano e se la parità coincide, così la centri con Select.
 HUD_TARGET_PROMPT :: Frame obiettivo:
+
+# ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
+MENU_EGG_LABEL :: Uovo
+EGG_PEEK_HINT :: Premi A per sbirciare
+NOTE_EGG_PEEK_CONFIRM :: Rivelare il contenuto di quest'uovo? Rovina la sorpresa della schiusa.
+MENU_SHINY_HUNT :: Compagno Caccia Cromatica
+FAV_SHINY_HUNT :: Caccia Shiny
+NOTE_SHINY_HUNT :: Apri il pannello, scegli il Pokémon che stai cercando e conta i tuoi incontri selvatici di quella specie in background.\n\nQuando appare un vero shiny ti avvisa e mette in pausa. Conta solo le lotte selvatiche (approssimato). Il conteggio è salvato per bersaglio.
+SHINY_TARGET :: Bersaglio:
+SHINY_ENCOUNTERS :: Incontri
+SHINY_METHOD :: Metodo:
+SHINY_METHOD_FULL :: Standard
+SHINY_METHOD_MASUDA :: Masuda
+SHINY_METHOD_CHARM :: Cromamuleto
+SHINY_METHOD_BOTH :: Masuda + Amuleto
+SHINY_ODDS :: Prob.:
+SHINY_CHANGE_TARGET :: Cambia bersaglio
+SHINY_RESET :: Azzera contatore
+SHINY_RESET_CONFIRM :: Azzerare il contatore di questo bersaglio?
+SHINY_LAST :: Ultimo:
+SHINY_HIT :: %s SHINY!
+SHINY_TOAST_BONUS :: %s shiny selvatico!
+SHINY_FOUND :: Shiny trovato! Azzera per ricominciare.
+SHINY_CLOSE :: Chiudi
+SHINY_ONLY_NOTE :: Conta solo se il selvatico è il tuo bersaglio.

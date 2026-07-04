@@ -1147,3 +1147,28 @@ HUD_PARITY_NO :: FLIP
 HUD_TARGET_SET :: Target: %lu
 NOTE_HUD_TARGET :: Defina o frame-alvo que o 3DSRNGTool te deu (aperte o atalho do editor, padrão START, nesta entrada). O HUD mostra quantos frames faltam e se a paridade casa, pra você acertar com o Select.
 HUD_TARGET_PROMPT :: Frame-alvo:
+
+# ==== v0.6.4 Hunter's Update: Egg Peek + Shiny Hunt Companion ====
+MENU_EGG_LABEL :: Ovo
+EGG_PEEK_HINT :: Aperte A para espiar
+NOTE_EGG_PEEK_CONFIRM :: Revelar o conteúdo deste ovo? Isso estraga a surpresa do choco.
+MENU_SHINY_HUNT :: Assistente de Caça Shiny
+FAV_SHINY_HUNT :: Caça Shiny
+NOTE_SHINY_HUNT :: Abra o hub, escolha o Pokémon que você está caçando, e ele conta seus encontros selvagens dessa espécie em segundo plano.\n\nQuando um shiny de verdade aparece, ele avisa e pausa. Conta só batalhas selvagens (aproximado). Sua contagem é salva por alvo.
+SHINY_TARGET :: Alvo:
+SHINY_ENCOUNTERS :: Encontros
+SHINY_METHOD :: Método:
+SHINY_METHOD_FULL :: Padrão
+SHINY_METHOD_MASUDA :: Masuda
+SHINY_METHOD_CHARM :: Amuleto Shiny
+SHINY_METHOD_BOTH :: Masuda + Amuleto
+SHINY_ODDS :: Chance:
+SHINY_CHANGE_TARGET :: Trocar alvo
+SHINY_RESET :: Zerar contador
+SHINY_RESET_CONFIRM :: Zerar o contador deste alvo?
+SHINY_LAST :: Último:
+SHINY_HIT :: %s SHINY!
+SHINY_TOAST_BONUS :: %s shiny selvagem!
+SHINY_FOUND :: Shiny encontrado! Zere para caçar de novo.
+SHINY_CLOSE :: Fechar
+SHINY_ONLY_NOTE :: Conta só quando o líder selvagem é o seu alvo.

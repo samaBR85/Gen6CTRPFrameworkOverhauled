@@ -5220,6 +5220,17 @@ namespace CTRPluginFramework {
     static int  s_lastTX = 0, s_lastTY = 0;
     static bool s_haveTile = false;
 
+    // ===== Shiny Hunt Companion (Encounters & Catching hub) =====
+    // The hub picks a target species; the detector below (in HudCallback) then counts wild encounters of that
+    // species and celebrates a real shiny (toast + auto-screenshot, then pause). No menu toggle: a non-zero
+    // target IS the "armed" state; it persists per-target in ShinyHunts.txt so the count survives sessions.
+    static u16  g_shinyTarget = 0;   // 0 = disarmed; 1..721 = species being hunted
+    static u32  g_shinyCount  = 0;   // encounters seen of the current target (loaded from SD)
+    static u8   g_shinyMethod = 0;   // 0=Full Odds, 1=Masuda, 2=Shiny Charm, 3=Masuda+Charm (affects the odds shown)
+    static bool g_shinyPaused = false;// set when a target shiny is found; stops counting until the user resets/re-picks
+    static bool s_shinyEvalDone = false;// per-battle latch: evaluate the enemy lead once the struct is populated
+    static u16  s_shinyLastEnc = 0;   // species of the most recent wild encounter (for the hub's "Last" line)
+
     // RNG Tracking (Gen 6). Addresses verified against zaksabeast/PokeReader (reader_core) AND the 3DSRNGTool source;
     // AutoGameSet(kalos=XY, hoenn=ORAS). The MT struct = [u16 Index @ +0][u32 Status array @ +4]:
     //   MT index    : AutoGameSet(0x8C52848 XY, 0x8C59E44 ORAS)         (0..623, twists back to 0)
@@ -5312,9 +5323,236 @@ namespace CTRPluginFramework {
                     screen.DrawPixel((u32)xx, (u32)yy, black);
     }
 
+    // ===== Shiny Hunt Companion: per-target persistence (ShinyHunts.txt, plugin folder) =====
+    static const char *PATH_SHINY_HUNTS = "ShinyHunts.txt";
+    static u16 s_huntSp[64]; static u32 s_huntCt[64]; static int s_huntN = 0;
+    static bool s_shinyLoaded = false;
+
+    static u32 HuntGetCount(u16 sp) {
+        for (int i = 0; i < s_huntN; ++i) if (s_huntSp[i] == sp) return s_huntCt[i];
+        return 0;
+    }
+    static void HuntSetCount(u16 sp, u32 c) {
+        for (int i = 0; i < s_huntN; ++i) if (s_huntSp[i] == sp) { s_huntCt[i] = c; return; }
+        if (s_huntN < 64) { s_huntSp[s_huntN] = sp; s_huntCt[s_huntN] = c; ++s_huntN; }
+    }
+
+    static void SaveShinyHunts(void) {
+        if (File::Exists(PATH_SHINY_HUNTS) == 0) File::Create(PATH_SHINY_HUNTS);
+        File file(PATH_SHINY_HUNTS);
+        LineWriter writer(file);
+        writer << "# Gen6 Shiny Hunt Companion - per-target encounter counts. In the plugin folder; survives updates." << LineWriter::endl();
+        writer << Utils::Format("TARGET %d", (int)g_shinyTarget) << LineWriter::endl();
+        writer << Utils::Format("METHOD %d", (int)g_shinyMethod) << LineWriter::endl();
+        for (int i = 0; i < s_huntN; ++i)
+            writer << Utils::Format("COUNT %d %lu", (int)s_huntSp[i], (unsigned long)s_huntCt[i]) << LineWriter::endl();
+        writer.Flush(); writer.Close();
+    }
+
+    static void LoadShinyHunts(void) {
+        s_shinyLoaded = true;
+        s_huntN = 0; g_shinyTarget = 0; g_shinyMethod = 0; g_shinyCount = 0;
+        if (File::Exists(PATH_SHINY_HUNTS) != 1) return;
+        File file(PATH_SHINY_HUNTS);
+        LineReader reader(file);
+        string line;
+        auto tok = [](const string &s, size_t &i, string &out) -> bool {
+            while (i < s.size() && (s[i] == ' ' || s[i] == '\t')) i++;
+            size_t st = i; while (i < s.size() && s[i] != ' ' && s[i] != '\t' && s[i] != '\r') i++;
+            if (i == st) return false; out = s.substr(st, i - st); return true;
+        };
+        auto toU = [](const string &s) -> u32 { u32 v = 0; for (size_t i = 0; i < s.size() && s[i] >= '0' && s[i] <= '9'; i++) v = v * 10 + (s[i] - '0'); return v; };
+        while (reader(line)) {
+            if (line.empty() || line[0] == '#') continue;
+            size_t i = 0; string kw; if (!tok(line, i, kw)) continue;
+            if (kw == "TARGET")      { string a; if (tok(line, i, a)) { u32 v = toU(a); if (v >= 1 && v <= 721) g_shinyTarget = (u16)v; } }
+            else if (kw == "METHOD") { string a; if (tok(line, i, a)) { u32 v = toU(a); if (v <= 3) g_shinyMethod = (u8)v; } }
+            else if (kw == "COUNT")  { string a, b; if (tok(line, i, a) && tok(line, i, b)) { u32 sp = toU(a); if (sp >= 1 && sp <= 721) HuntSetCount((u16)sp, toU(b)); } }
+        }
+        g_shinyCount = g_shinyTarget ? HuntGetCount(g_shinyTarget) : 0;
+    }
+
+    static void ShinyLoadOnce(void) { if (!s_shinyLoaded) LoadShinyHunts(); }
+
+    // Set/replace the hunt target (from the hub). Flushes the old count, loads the new one, persists.
+    static void SetShinyTarget(u16 sp) {
+        ShinyLoadOnce();
+        if (g_shinyTarget) HuntSetCount(g_shinyTarget, g_shinyCount);
+        g_shinyTarget = sp;
+        g_shinyCount  = sp ? HuntGetCount(sp) : 0;
+        g_shinyPaused = false;
+        SaveShinyHunts();
+    }
+
+    // Per-frame detector, called from HudCallback with the current battle state. Reads the wild enemy lead once per
+    // battle (the struct fills a frame or two after IfInBattle() rises), counts a target encounter, and celebrates a
+    // real shiny with a toast (the player saves the moment with their existing screenshot hotkey). Wild-only is a
+    // best-effort heuristic (a wild mon's OT block is empty; trainers' team carry an OT) until the D2 flag hunt.
+    static void ShinyHuntDetect(bool nowBattle) {
+        ShinyLoadOnce();
+        if (!nowBattle) { s_shinyEvalDone = false; return; } // out of battle: re-arm the per-battle latch
+        if (g_shinyTarget == 0 || s_shinyEvalDone) return;   // disarmed or already evaluated this battle
+        PK6 epk;
+        u32 enemyLead = AutoGameSet((u32)0x81FF744, (u32)0x81FEEC8);
+        if (!IsValid(enemyLead, &epk)) return;               // struct not populated yet -> retry next frame
+        if (epk.species < 1 || epk.species > 721) return;
+        s_shinyEvalDone = true;                              // evaluate this battle exactly once
+        if (epk.originalTrainerName[0] != 0) return;         // has an OT -> trainer battle, ignore (wild-only)
+        s_shinyLastEnc = epk.species;
+        bool shiny = (u16)(epk.TID ^ epk.SID ^ (u16)epk.PID ^ (u16)(epk.PID >> 16)) < 16;
+        if (epk.species == g_shinyTarget && !g_shinyPaused) {
+            g_shinyCount++;
+            HuntSetCount(g_shinyTarget, g_shinyCount);
+            SaveShinyHunts();
+        }
+        if (shiny) {
+            string nm = string(speciesList[epk.species - 1]);
+            if (epk.species == g_shinyTarget) {
+                OSD::Notify(Utils::Format(getLanguage->Get("SHINY_HIT").c_str(), nm.c_str()), Color::Yellow);
+                g_shinyPaused = true; // stop counting until the user resets / re-picks in the hub
+            } else {
+                OSD::Notify(Utils::Format(getLanguage->Get("SHINY_TOAST_BONUS").c_str(), nm.c_str()), Color::Yellow);
+            }
+        }
+    }
+
+    // (1-p)^n via binary exponentiation (no <cmath>): cumulative shiny odds = 1 - (1-p)^n.
+    static float PowInt(float base, u32 n) {
+        float r = 1.0f;
+        while (n) { if (n & 1) r *= base; base *= base; n >>= 1; }
+        return r;
+    }
+
+    // Shiny Hunt Companion hub (Encounters & Catching). Pick a target species; the detector counts wild encounters
+    // of it and celebrates a real shiny. Dual-screen full-screen tool (same loop pattern as the Spawner/minigames).
+    void ShinyHuntCompanion(MenuEntry *entry) {
+        (void)entry;
+        ShinyLoadOnce();
+        const Screen &top = OSD::GetTopScreen();
+        const Screen &bot = OSD::GetBottomScreen();
+        const FwkSettings &st = FwkSettings::Get();
+        Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+        Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+        (void)bg2;
+
+        // shiny "rolls" per method -> per-encounter probability p = rolls/4096 (order = g_shinyMethod 0..3).
+        static const int ROLLS[4] = {1, 6, 3, 8};        // Full, Masuda, Shiny Charm, Masuda+Charm
+        static const char *MKEY[4] = {"SHINY_METHOD_FULL", "SHINY_METHOD_MASUDA", "SHINY_METHOD_CHARM", "SHINY_METHOD_BOTH"};
+
+        Image sprite; int spriteKey = -1;
+
+        // Word-wrap a string to fit maxW px, drawing multiple lines. Breaks at spaces when present; falls back to
+        // UTF-8 codepoint boundaries (so CJK, which has no spaces, wraps too) — keeps long notes inside the window.
+        auto drawWrap = [](const Screen &scr, const string &s, int x, int y, int maxW, int lineH, Color c) {
+            size_t i = 0, n = s.size();
+            int cy = y;
+            while (i < n) {
+                size_t k = i, fit = i, lastSpace = string::npos;
+                while (k < n) {
+                    size_t cp = k + 1; while (cp < n && ((unsigned char)s[cp] & 0xC0) == 0x80) cp++; // next codepoint
+                    if ((int)OSD::GetTextWidth(true, s.substr(i, cp - i)) > maxW) break;
+                    if (s[k] == ' ') lastSpace = k;
+                    fit = cp; k = cp;
+                }
+                if (fit >= n) { scr.DrawSysfont(c << s.substr(i), x, cy, c); break; }
+                size_t brk = (lastSpace != string::npos && lastSpace > i) ? lastSpace : fit;
+                scr.DrawSysfont(c << s.substr(i, brk - i), x, cy, c);
+                i = (brk == lastSpace) ? brk + 1 : brk; // skip the break space
+                cy += lineH;
+            }
+        };
+
+        // Swallow the A/B that opened the hub.
+        while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B)) { Controller::Update(); OSD::SwapBuffers(); }
+
+        while (true) {
+            Controller::Update();
+            if (System::IsSleeping()) break;
+
+            if (Controller::IsKeyPressed(Key::Select)) {
+                while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                PluginMenu::Close();
+                break;
+            }
+            if (Controller::IsKeyPressed(Key::B)) break;
+
+            if (Controller::IsKeyPressed(Key::A)) {
+                u16 pick = PKHeX::SpeciesPicker(g_shinyTarget);
+                if (pick >= 1 && pick <= 721) SetShinyTarget(pick);
+                spriteKey = -1; // force sprite reload (screens were repainted by the picker)
+                while (Controller::IsKeyDown(Key::A)) { Controller::Update(); OSD::SwapBuffers(); }
+            }
+            if (Controller::IsKeyPressed(Key::X)) {
+                g_shinyMethod = (u8)((g_shinyMethod + 1) & 3);
+                SaveShinyHunts();
+            }
+            if (Controller::IsKeyPressed(Key::Y) && g_shinyTarget) {
+                if (MessageBox(CenterAlign(getLanguage->Get("SHINY_RESET_CONFIRM")), DialogType::DialogYesNo, ClearScreen::Both)()) {
+                    HuntSetCount(g_shinyTarget, 0); g_shinyCount = 0; g_shinyPaused = false; SaveShinyHunts();
+                }
+                while (Controller::IsKeyDown(Key::Y)) { Controller::Update(); OSD::SwapBuffers(); }
+            }
+
+            // ---- TOP ----
+            top.DrawRect(30, 20, 340, 200, bg, true);
+            top.DrawRect(30, 20, 340, 200, border, false);
+            top.DrawSysfont(title << getLanguage->Get("MENU_SHINY_HUNT"), 42, 30, title);
+            top.DrawRect(42, 48, 200, 1, title, true);
+
+            if (g_shinyTarget == 0) {
+                top.DrawSysfont(txt << getLanguage->Get("SHINY_CHANGE_TARGET"), 60, 110, txt);
+            } else {
+                // sprite (reload on species change)
+                if (spriteKey != (int)g_shinyTarget) {
+                    spriteKey = (int)g_shinyTarget;
+                    sprite.LoadFromFile(string("Assets/Spawner/normal/") + SpawnerPad3(g_shinyTarget) + ".bmp");
+                }
+                const int FX = 250, FY = 70;
+                top.DrawRect(FX, FY, 88, 88, Color::White, true);
+                top.DrawRect(FX, FY, 88, 88, border, false);
+                if (sprite.IsLoaded()) { int sw = sprite.Width(), sh = sprite.Height(); sprite.Draw(top, FX + (88 - sw) / 2, FY + (88 - sh) / 2); }
+
+                top.DrawSysfont(sel << getLanguage->Get("SHINY_TARGET") << " " << txt << speciesList[g_shinyTarget - 1], 42, 62, txt);
+                top.DrawSysfont(sel << getLanguage->Get("SHINY_ENCOUNTERS"), 42, 90, sel);
+                top.DrawSysfont(title << to_string(g_shinyCount), 42, 108, title);
+
+                int rolls = ROLLS[g_shinyMethod & 3];
+                int denom = 4096 / rolls;
+                float p = (float)rolls / 4096.0f;
+                float cum = (1.0f - PowInt(1.0f - p, g_shinyCount)) * 100.0f;
+                int cumI = (int)(cum * 10.0f + 0.5f); // one decimal
+                top.DrawSysfont(sel << getLanguage->Get("SHINY_METHOD") << " " << txt << getLanguage->Get(MKEY[g_shinyMethod & 3]), 42, 140, txt);
+                top.DrawSysfont(sel << getLanguage->Get("SHINY_ODDS") << " " << txt << "1/" << to_string(denom)
+                                    << "  " << to_string(cumI / 10) << "." << to_string(cumI % 10) << "%", 42, 160, txt);
+
+                if (s_shinyLastEnc >= 1 && s_shinyLastEnc <= 721)
+                    top.DrawSysfont(txt << getLanguage->Get("SHINY_LAST") << " " << speciesList[s_shinyLastEnc - 1], 42, 180, txt);
+                if (g_shinyPaused)
+                    top.DrawSysfont(Color::Yellow << getLanguage->Get("SHINY_FOUND"), 42, 200, Color::Yellow);
+            }
+
+            // ---- BOTTOM: controls ----
+            bot.DrawRect(20, 20, 280, 200, bg, true);
+            bot.DrawRect(20, 20, 280, 200, border, false);
+            bot.DrawSysfont(title << getLanguage->Get("MENU_SHINY_HUNT"), 40, 34, title);
+            bot.DrawRect(40, 52, 240, 1, title, true);
+            bot.DrawSysfont(sel << "A " << txt << getLanguage->Get("SHINY_CHANGE_TARGET"), 40, 66, txt);
+            bot.DrawSysfont(sel << "X " << txt << getLanguage->Get("SHINY_METHOD"), 40, 88, txt);
+            bot.DrawSysfont(sel << "Y " << txt << getLanguage->Get("SHINY_RESET"), 40, 110, txt);
+            bot.DrawSysfont(sel << "B " << txt << getLanguage->Get("SHINY_CLOSE"), 40, 132, txt);
+            drawWrap(bot, getLanguage->Get("SHINY_ONLY_NOTE"), 40, 164, 254, 16, txt); // wrap: window is 20..300 wide
+
+            OSD::SwapBuffers();
+        }
+    }
+
     bool HudCallback(const Screen &screen) {
         if (!screen.IsTop || g_hudMaster == nullptr)
             return false;
+
+        // Shiny Hunt detector runs once per frame whenever a target is armed — independent of the HUD being shown,
+        // so it must sit BEFORE the master-activated guard below. Cheap no-op when disarmed (g_shinyTarget == 0).
+        ShinyHuntDetect(IfInBattle());
 
         if (!g_hudMaster->IsActivated())
             return false;

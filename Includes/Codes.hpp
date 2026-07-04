@@ -48,6 +48,7 @@ namespace CTRPluginFramework {
     void WildSpawner(MenuEntry *entry);
     void BagItemFinder(MenuEntry *entry); // unified Bag item-finder (#11 redesign)
     void AlwaysShiny(MenuEntry *entry);
+    void ShinyHuntCompanion(MenuEntry *entry); // Shiny Hunt Companion hub (Encounters & Catching)
     void DisableShinyLock(MenuEntry *entry);
     void CaptureRate(MenuEntry *entry);
     void MaxDexNavSearchLevel(MenuEntry *entry); // ORAS-only one-shot: max DexNav search level (all 721 species)

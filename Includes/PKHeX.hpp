@@ -140,6 +140,7 @@
       void PartyBattleEditor(MenuEntry *entry); // Change Party Stats: visual battle-party editor (in-battle)
       void EnemyHelper(MenuEntry *entry);       // Enemy Helper: in-battle coach card for the enemy (in-battle)
       void FunHub(MenuEntry *entry);            // Fun Stuff: mini-games hub (root-menu folder-as-button)
+      u16  SpeciesPicker(u16 current);          // visual species picker (no keyboard); reused by Shiny Hunt Companion
 
       // Health & Mana folder (under PokéMart Anywhere): Infinite (freeze) toggles + Refill (one-shot) actions.
       void InfiniteHealth(MenuEntry *entry);    // toggle: freeze HP at max in battle (no-faint)

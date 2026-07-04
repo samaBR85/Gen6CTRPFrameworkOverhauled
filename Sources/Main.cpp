@@ -680,6 +680,8 @@ namespace CTRPluginFramework {
             Fav(new MenuEntry(getLanguage->Get("BATTLE_CAPTURE_RATE_100"), CaptureRate, getLanguage->Get("NOTE_BATTLE_CAPTURE_RATE_100")), "FAV_BATTLE_CAPTURE_RATE_100"), // <W, tested: O3DS/O2DS - Y/OR
             Fav(new MenuEntry(getLanguage->Get("BATTLE_CAPTURE_TRAINER_POKEMON"), CatchTrainerPokemon, getLanguage->Get("NOTE_BATTLE_CAPTURE_TRAINER_POKEMON")), "FAV_BATTLE_CAPTURE_TRAINER_POKEMON") // <W, tested: O3DS/O2DS - Y/OR
         };
+        // Shiny Hunt Companion hub — sits right above "Max DexNav Search Lv." (full-screen tool, gameFunc arg).
+        ccItems.push_back(Fav(new MenuEntry(getLanguage->Get("MENU_SHINY_HUNT"), nullptr, ShinyHuntCompanion, getLanguage->Get("NOTE_SHINY_HUNT")), "FAV_SHINY_HUNT"));
         // DexNav Search Level max (ORAS only — XY has no DexNav). One-shot, irreversible, asks to confirm,
         // so the row is flagged dangerous (solid red warning background, like the "unlocks" folder).
         if (currGameSeries == GameSeries::ORAS) {
@@ -813,7 +815,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 6, 3, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 6, 4, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized

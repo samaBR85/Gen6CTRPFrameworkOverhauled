@@ -1153,6 +1153,29 @@ namespace CTRPluginFramework {
             return w;
         }
 
+        // ===== Egg Peek =====
+        // An egg is a fully-formed PK6 (species/IVs/nature/shininess are already fixed), but the game hides all
+        // of that until it hatches. The plugin used to over-reveal it (baby species icon + full stats). Egg Peek
+        // keeps the surprise: a masked card ("Egg" + a prompt) until the player confirms a peek. Revealed slots
+        // are remembered per session by their slot address (stable while the game runs); cleared on reboot.
+        // Small fixed array (no std::set/alloc) — a session never reveals more than a handful of eggs.
+        static u32 gRevealedEgg[64]; static int gRevealedEggN = 0;
+        static bool IsEggBit(const PK6 &pk) { return ((pk.iv32 >> 30) & 1) != 0; }
+        static bool EggRevealed(u32 ptr) {
+            for (int i = 0; i < gRevealedEggN; ++i) if (gRevealedEgg[i] == ptr) return true;
+            return false;
+        }
+        static void EggReveal(u32 ptr) {
+            if (EggRevealed(ptr)) return;
+            if (gRevealedEggN < 64) gRevealedEgg[gRevealedEggN++] = ptr;
+        }
+        // True if the slot at `ptr` holds a still-masked egg (valid egg PK6 not yet peeked this session).
+        static bool EggMasked(u32 ptr, const PK6 &pk) { return IsEggBit(pk) && !EggRevealed(ptr); }
+        // Blocking Yes/No confirm before revealing (keeps the anti-spoiler opt-in). Returns true if the user peeks.
+        static bool EggPeekConfirm(void) {
+            return MessageBox(CenterAlign(getLanguage->Get("NOTE_EGG_PEEK_CONFIRM")), DialogType::DialogYesNo, ClearScreen::Both)();
+        }
+
         // Draw the selected slot's card on the top screen (no scroll): textual fields on the left, a vertical
         // STAT / IV / EV / Tot table on the right (like the in-game summary). Reads the decrypted PK6 directly.
         static void DrawPartyCard(const Screen &top, u32 ptr, int slot, Color title, Color txt, Color label) {
@@ -1160,6 +1183,16 @@ namespace CTRPluginFramework {
             bool ok = gPartyEncrypted ? GetPokemon(ptr, &pk) : GetPokemonRaw(ptr, &pk);
             if (!ok || pk.species < 1 || pk.species > 721) {
                 top.DrawSysfont("Party slot " + to_string(slot) + " - empty / invalid", 42, 30, title);
+                return;
+            }
+
+            // Egg Peek: a masked egg hides everything behind an "Egg" card + a prompt (no species/stats leak).
+            if (EggMasked(ptr, pk)) {
+                top.DrawSysfont(title << "Party slot " + to_string(slot) + " - " + getLanguage->Get("MENU_EGG_LABEL"), 42, 30, title);
+                top.DrawRect(150, 78, 100, 100, Color::White, true);
+                top.DrawRect(150, 78, 100, 100, title, false);
+                top.DrawSysfont(title << "?", 150 + 46, 78 + 40, title);
+                top.DrawSysfont(txt << getLanguage->Get("EGG_PEEK_HINT"), 42, 190, txt);
                 return;
             }
 
@@ -1336,16 +1369,22 @@ namespace CTRPluginFramework {
                 return;
             }
 
-            // Read the 6 slots' species once (the last-saved party is static while viewing).
-            string slots[6]; u16 slotSpecies[6];
+            // Read the 6 slots' species + egg flag once (the last-saved party is static while viewing).
+            u16 slotSpecies[6]; bool slotEgg[6];
             for (int i = 0; i < 6; i++) {
                 PK6 pk;
                 bool ok = gPartyEncrypted ? GetPokemon(base + i * 0x104, &pk) : GetPokemonRaw(base + i * 0x104, &pk);
                 bool valid = ok && pk.species >= 1 && pk.species <= 721;
                 slotSpecies[i] = valid ? pk.species : 0;
-                string name = valid ? string(speciesList[pk.species - 1]) : "(empty)";
-                slots[i] = to_string(i + 1) + " - " + name;
+                slotEgg[i] = valid && IsEggBit(pk);
             }
+            // Slot label, recomputed each frame so it flips from "Egg" to the species right after a peek.
+            auto slotName = [&](int i) -> string {
+                if (slotSpecies[i] == 0) return to_string(i + 1) + " - (empty)";
+                bool masked = slotEgg[i] && !EggRevealed(base + i * 0x104);
+                string nm = masked ? getLanguage->Get("MENU_EGG_LABEL") : string(speciesList[slotSpecies[i] - 1]);
+                return to_string(i + 1) + " - " + nm;
+            };
 
             // Precompute every member's 6 stats once (the last-saved party is static while viewing).
             // Used by the card-mode stat selector's A-jump and the per-stat best/worst markers.
@@ -1410,12 +1449,17 @@ namespace CTRPluginFramework {
                     if (g_cardStatHotkey && Controller::IsKeysPressed(g_cardStatHotkey))
                         higher = !higher;
 
+                    bool cardMasked = slotEgg[cursor] && !EggRevealed(base + cursor * 0x104);
                     if (Controller::IsKeyPressed(Key::B))          mode = 0;                  // back to list
                     else if (KeyRep(Key::Left))  cursor = (cursor + 5) % 6;  // previous card
                     else if (KeyRep(Key::Right)) cursor = (cursor + 1) % 6;  // next card
-                    else if (KeyRep(Key::Up))    selStat = (selStat + 5) % 6; // move stat selector
-                    else if (KeyRep(Key::Down))  selStat = (selStat + 1) % 6;
-                    else if (Controller::IsKeyPressed(Key::A)) {
+                    else if (KeyRep(Key::Up) && !cardMasked)    selStat = (selStat + 5) % 6; // move stat selector
+                    else if (KeyRep(Key::Down) && !cardMasked)  selStat = (selStat + 1) % 6;
+                    else if (Controller::IsKeyPressed(Key::A) && cardMasked) {
+                        // Masked egg: A peeks (with confirm) instead of the stat-jump. Reveal persists for the session.
+                        if (EggPeekConfirm()) EggReveal(base + cursor * 0x104);
+                    }
+                    else if (Controller::IsKeyPressed(Key::A) && !cardMasked) {
                         // Jump to the member holding the extreme of selStat. If several tie, each A
                         // press advances to the next holder after the current card (cycles the tie).
                         int ext = higher ? -1 : 0x7FFFFFFF;
@@ -1445,18 +1489,21 @@ namespace CTRPluginFramework {
                     for (int i = 0; i < 6; i++) {
                         if (i == cursor) {
                             top.DrawRect(36, y - 2, 206, 18, bg2, true); // bar stops short of the sprite frame
-                            top.DrawSysfont(slots[i], 46, y, sel);
+                            top.DrawSysfont(slotName(i), 46, y, sel);
                         }
-                        else top.DrawSysfont(slots[i], 46, y, txt);
+                        else top.DrawSysfont(slotName(i), 46, y, txt);
                         y += 21;
                     }
 
                     // Selected member's sprite, framed, to the right of the list (reuses the Spawner BMPs on the SD).
                     // Load only when the selected species changes; the framed look matches the detail/Spawner sheets.
                     u16 sp = slotSpecies[cursor];
-                    if (sp != partySpriteKey) {
-                        partySpriteKey = sp;
-                        if (sp >= 1 && sp <= 721) {
+                    // A masked egg hides its sprite too (key -2 so it reloads the species once peeked).
+                    bool curMasked = slotEgg[cursor] && !EggRevealed(base + cursor * 0x104);
+                    int wantKey = curMasked ? -2 : (int)sp;
+                    if (wantKey != partySpriteKey) {
+                        partySpriteKey = wantKey;
+                        if (!curMasked && sp >= 1 && sp <= 721) {
                             string p = "Assets/Spawner/normal/";
                             if (sp < 100) p += "0";
                             if (sp < 10)  p += "0";
@@ -1467,7 +1514,10 @@ namespace CTRPluginFramework {
                     const int FX = 250, FY = 94;
                     top.DrawRect(FX, FY, 88, 88, Color::White, true);
                     top.DrawRect(FX, FY, 88, 88, border, false);
-                    if (sp >= 1 && sp <= 721 && partySprite.IsLoaded()) {
+                    if (curMasked) {
+                        top.DrawSysfont(Color::Black << getLanguage->Get("MENU_EGG_LABEL"), FX + 26, FY + 30, Color::Black);
+                        top.DrawSysfont(Color::Black << "?", FX + 42, FY + 50, Color::Black);
+                    } else if (sp >= 1 && sp <= 721 && partySprite.IsLoaded()) {
                         int sw = partySprite.Width(), sh = partySprite.Height();
                         partySprite.Draw(top, FX + (88 - sw) / 2, FY + (88 - sh) / 2);
                     } else {
@@ -1482,6 +1532,9 @@ namespace CTRPluginFramework {
                     DrawPartyCard(top, base + cursor * 0x104, cursor + 1, title, txt, sel);
                     gPartyMode = false;
 
+                    // A masked egg draws no stat overlay (the card itself is just "Egg" + the peek prompt).
+                    bool mMasked = slotEgg[cursor] && !EggRevealed(base + cursor * 0x104);
+                    if (!mMasked) {
                     // --- stat-selector overlay (rows match DrawPartyCard: y = 72 + d*18) ---
                     const int ROW0 = 72, RDY = 18;
                     // ▲/▼ markers left of each stat name where the shown member is the team best/worst.
@@ -1504,6 +1557,7 @@ namespace CTRPluginFramework {
                         string t = "TIE x" + to_string(ties) + " (A)";
                         top.DrawSysfont(txt << t, 364 - (int)OSD::GetTextWidth(true, t), 186, txt);
                     }
+                    }
                 }
 
                 // ---- BOTTOM: control hints, inside the bottom window (20,20,280,200) ----
@@ -1513,6 +1567,16 @@ namespace CTRPluginFramework {
                     bot.DrawSysfont("Up / Down : select", 70, 90,  txt);
                     bot.DrawSysfont("A : view card",       70, 118, txt);
                     bot.DrawSysfont("B : back",            70, 146, txt);
+                }
+                else if (slotEgg[cursor] && !EggRevealed(base + cursor * 0x104)) {
+                    // Masked egg: don't spoil the moves either — show the peek prompt on the bottom screen.
+                    bot.DrawSysfont(title << getLanguage->Get("MENU_EGG_LABEL"), 40, 40, title);
+                    auto centerHintE = [&](const string &s, int yy) {
+                        int w = (int)OSD::GetTextWidth(true, s);
+                        bot.DrawSysfont(txt << s, 20 + (280 - w) / 2, yy, txt);
+                    };
+                    centerHintE(getLanguage->Get("EGG_PEEK_HINT"), 110);
+                    centerHintE("B : back to list", 150);
                 }
                 else {
                     // Moves of the selected slot (read the same block the card uses).
@@ -2043,7 +2107,8 @@ namespace CTRPluginFramework {
 
         // Visual species picker (no keyboard): alphabetical list (bottom) + the highlighted species' sprite,
         // dex number, type(s) and base-stat total (top). Returns the chosen species ID (1..721), or 0.
-        static u16 SpeciesPicker(u16 current) {
+        // Exposed (declared in PKHeX.hpp) so the Shiny Hunt Companion hub can reuse it to pick a target.
+        u16 SpeciesPicker(u16 current) {
             const Screen &top = OSD::GetTopScreen(); const Screen &bot = OSD::GetBottomScreen();
             const FwkSettings &st = FwkSettings::Get();
             Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
@@ -2754,7 +2819,7 @@ namespace CTRPluginFramework {
             int loadedBox = -1;
 
             // Per-box cache (reloaded only on box change): species + shiny + the 30 grid icons.
-            static u16 boxSpecies[30]; static u8 boxShiny[30];
+            static u16 boxSpecies[30]; static u8 boxShiny[30]; static u8 boxEgg[30];
             Image gridIcon[30];
             Image cardSprite; int cardKey = -1; // 72px sprite of the focused slot (species*2+shiny)
 
@@ -2795,8 +2860,12 @@ namespace CTRPluginFramework {
                 if (Controller::IsKeyPressed(Key::R))     curBox = (curBox + 1) % 31;
 
                 if (Controller::IsKeyPressed(Key::A)) {
+                    // A masked egg must be peeked (with confirm) before it can be edited — first A reveals, then edit.
+                    if (curBox == loadedBox && boxSpecies[cursor] && boxEgg[cursor] && !EggRevealed(cellAddr(curBox, cursor))) {
+                        if (EggPeekConfirm()) { EggReveal(cellAddr(curBox, cursor)); cardKey = -1; }
+                    }
                     // Open the in-app editor on this slot (only if occupied).
-                    if (curBox == loadedBox && boxSpecies[cursor]) {
+                    else if (curBox == loadedBox && boxSpecies[cursor]) {
                         gPartyMode = false;
                         gBoxNumber = (u8)(curBox + 1); gPositionNumber = (u8)(cursor + 1);
                         // Non-destructive: copy the slot into a working buffer; edits hit it, the real slot is
@@ -2889,6 +2958,8 @@ namespace CTRPluginFramework {
                         bool ok = GetPokemon(cellAddr(curBox, i), &pk) && pk.species >= 1 && pk.species <= 721;
                         boxSpecies[i] = ok ? pk.species : 0;
                         boxShiny[i]   = ok ? (u8)(IsShiny(&pk) ? 1 : 0) : 0;
+                        boxEgg[i]     = ok ? (u8)(IsEggBit(pk) ? 1 : 0) : 0;
+                        // Load the icon even for eggs (kept in memory); the grid HIDES it while the egg is masked.
                         if (ok) { string p; BoxIconPath(p, pk.species, boxShiny[i], "BoxIcons/"); gridIcon[i].LoadFromFile(p); }
                         else gridIcon[i].Clear();
                     }
@@ -2913,7 +2984,10 @@ namespace CTRPluginFramework {
                     int ix = cl + 8, iy = ct + 1;                       // 32px icon origin
                     top.DrawRect(tx, ty, tw, th, bg2, true);
                     top.DrawRect(tx, ty, tw, th, border, false);
-                    if (boxSpecies[i] && gridIcon[i].IsLoaded())
+                    bool cellMasked = boxSpecies[i] && boxEgg[i] && !EggRevealed(cellAddr(curBox, i));
+                    if (cellMasked)
+                        top.DrawSysfont(title << "?", ix + 12, iy + 10, title); // masked egg: hide the baby icon
+                    else if (boxSpecies[i] && gridIcon[i].IsLoaded())
                         gridIcon[i].Draw(top, ix, iy);
                     // pending move/clone source = red frame
                     if (markMode && curBox == markBox && i == markSlot) {
@@ -2933,12 +3007,18 @@ namespace CTRPluginFramework {
 
                 u16 fsp = (curBox == loadedBox) ? boxSpecies[cursor] : 0;
                 u8  fsh = (curBox == loadedBox) ? boxShiny[cursor] : 0;
+                bool fMasked = fsp && (curBox == loadedBox) && boxEgg[cursor] && !EggRevealed(cellAddr(curBox, cursor));
 
                 // 72px sprite, framed (reuses the Spawner BMPs, shiny-aware).
                 const int FX = 30, FY = 40;
                 bot.DrawRect(FX, FY, 88, 88, Color::White, true);
                 bot.DrawRect(FX, FY, 88, 88, border, false);
-                if (fsp) {
+                if (fMasked) {
+                    // Masked egg: hide the baby sprite behind an "Egg" + "?" placeholder.
+                    bot.DrawSysfont(title << getLanguage->Get("MENU_EGG_LABEL"), FX + 26, FY + 30, title);
+                    bot.DrawSysfont(title << "?", FX + 42, FY + 50, title);
+                    cardKey = -1;
+                } else if (fsp) {
                     int key = fsp * 2 + fsh;
                     if (key != cardKey) {
                         cardKey = key; string p; BoxIconPath(p, fsp, fsh, "Spawner/");
@@ -2950,7 +3030,11 @@ namespace CTRPluginFramework {
                     }
                 } else cardKey = -1;
 
-                if (fsp) {
+                if (fMasked) {
+                    const int LX = 128;
+                    bot.DrawSysfont(title << getLanguage->Get("MENU_EGG_LABEL"), LX, 42, title);
+                    bot.DrawSysfont(txt << getLanguage->Get("EGG_PEEK_HINT"), LX, 70, txt);
+                } else if (fsp) {
                     PK6 pk;
                     if (GetPokemon(cellAddr(curBox, cursor), &pk)) {
                         int level = LevelFromExp(pk.species, pk.exp);
