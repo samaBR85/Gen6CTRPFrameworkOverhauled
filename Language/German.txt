@@ -1256,3 +1256,25 @@ GYM_COACH_SHOPPING_LIST :: Empfohlener Korb
 GYM_COACH_EDGE_FAVORABLE :: TYP-VORTEIL: GUENSTIG
 GYM_COACH_EDGE_NEUTRAL :: TYP-VORTEIL: NEUTRAL
 GYM_COACH_EDGE_UNFAVORABLE :: TYP-VORTEIL: UNGUENSTIG
+MENU_TEAM_COVERAGE :: Team-Abdeckung
+FAV_TEAM_COVERAGE :: Team-Abdeckung
+NOTE_TEAM_COVERAGE :: Ein reiner Lesebericht über die Typmatchups deines Teams: welche Angriffstypen zwei oder mehr Teammitglieder gleichzeitig bedrohen, welches Pokémon einen vollen 4-fach-Treffer einsteckt, und wo eure eigenen Attacken nicht durchkommen.\n\nSteuerkreuz Hoch/Runter blättert jede Liste; X wechselt zwischen den Reitern Verteidigung und Angriff.\n\nVerteidigung zählt Angriffstypen gegen die Typen deines Teams. Angriff prüft die Attacken, die dein Team wirklich kennt, gegen ein reines Einzeltyp-Ziel - Fähigkeit, Item, Wetter und Statuswerte werden nicht berücksichtigt.
+TEAM_COVERAGE_NO_PARTY :: Kein Pokemon in deinem Team gefunden.
+TEAM_COVERAGE_SUMMARY :: TEAM-UEBERSICHT
+TEAM_COVERAGE_SUMMARY_FMT :: %d gemeinsame Schwaechen - %d blinde Flecken
+TEAM_COVERAGE_HINT :: Sieh dir den unteren Bildschirm fuer alle Details an.
+TEAM_COVERAGE_DEFENSE :: Verteidigung
+TEAM_COVERAGE_OFFENSE :: Angriff
+TEAM_COVERAGE_SHARED_WEAK :: GEMEINSAME SCHWAECHEN
+TEAM_COVERAGE_NO_SHARED_WEAK :: Keine gemeinsamen Schwaechen - stark!
+TEAM_COVERAGE_QUAD_WEAK :: 4-FACH-SCHWAECHE
+TEAM_COVERAGE_NO_QUAD_WEAK :: Niemand kassiert einen 4-fach-Treffer.
+TEAM_COVERAGE_WELL_COVERED :: GUT ABGEDECKT
+TEAM_COVERAGE_NONE :: Keine.
+TEAM_COVERAGE_BLIND_SPOTS :: BLINDE FLECKEN
+TEAM_COVERAGE_NO_BLIND_SPOTS :: Keine blinden Flecken - dein Team trifft alles!
+TEAM_COVERAGE_HITS_FMT :: %s trifft: %s
+TEAM_COVERAGE_QUAD_FMT :: %s erleidet 4-fachen Schaden durch %s
+TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Niemand in deinem Team ist schwach gegen: %s
+TEAM_COVERAGE_BLIND_LIST_FMT :: Keine starke Attacke gegen: %s
+TEAM_COVERAGE_COVERED_LIST_FMT :: Dein Team trifft diese hart: %s

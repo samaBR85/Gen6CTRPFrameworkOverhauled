@@ -1256,3 +1256,25 @@ GYM_COACH_SHOPPING_LIST :: おすすめカート
 GYM_COACH_EDGE_FAVORABLE :: タイプ有利判定: 有利
 GYM_COACH_EDGE_NEUTRAL :: タイプ有利判定: 互角
 GYM_COACH_EDGE_UNFAVORABLE :: タイプ有利判定: 不利
+MENU_TEAM_COVERAGE :: タイプ相性
+FAV_TEAM_COVERAGE :: タイプ相性
+NOTE_TEAM_COVERAGE :: 自分のパーティのタイプ相性を確認できる読み取り専用の画面です。2匹以上に同時に効く弱点タイプ、4倍のダメージを受けるポケモン、そして自分の技が通らない相手が分かります。\n\n十字キー上下で各リストをスクロール、Xボタンで「防御」と「攻撃」タブを切り替えます。\n\n防御はパーティ自身のタイプに対する攻撃タイプを数えます。攻撃はパーティが実際に覚えている技を単一タイプの相手と照らし合わせます - 特性、持ち物、天気、能力ランクは考慮されません。
+TEAM_COVERAGE_NO_PARTY :: 手持ちにポケモンが見つかりません。
+TEAM_COVERAGE_SUMMARY :: チームまとめ
+TEAM_COVERAGE_SUMMARY_FMT :: 共通弱点 %d件 - 死角 %d件
+TEAM_COVERAGE_HINT :: 詳細は下画面を確認してください。
+TEAM_COVERAGE_DEFENSE :: 防御
+TEAM_COVERAGE_OFFENSE :: 攻撃
+TEAM_COVERAGE_SHARED_WEAK :: 共通の弱点
+TEAM_COVERAGE_NO_SHARED_WEAK :: 共通の弱点はありません - お見事！
+TEAM_COVERAGE_QUAD_WEAK :: 4倍弱点
+TEAM_COVERAGE_NO_QUAD_WEAK :: 4倍のダメージを受けるポケモンはいません。
+TEAM_COVERAGE_WELL_COVERED :: 対応済み
+TEAM_COVERAGE_NONE :: なし。
+TEAM_COVERAGE_BLIND_SPOTS :: 死角
+TEAM_COVERAGE_NO_BLIND_SPOTS :: 死角はありません - チームは何でも通せます！
+TEAM_COVERAGE_HITS_FMT :: %sの技が刺さる: %s
+TEAM_COVERAGE_QUAD_FMT :: %sは%sから4倍のダメージを受ける
+TEAM_COVERAGE_WEAK_TO_LIST_FMT :: パーティの誰も弱点にしていないタイプ: %s
+TEAM_COVERAGE_BLIND_LIST_FMT :: 有効な技がないタイプ: %s
+TEAM_COVERAGE_COVERED_LIST_FMT :: パーティが強く攻撃できるタイプ: %s

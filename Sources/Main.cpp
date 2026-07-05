@@ -809,6 +809,7 @@ namespace CTRPluginFramework {
         MenuFolder *trainerInfo = new MenuFolder(getLanguage->Get("MENU_TRAINER_INFO"), getLanguage->Get("NOTE_TRAINER_INFO"));
         Fav(trainerInfo, "FAV_TRAINER_INFO");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_VIEW_PARTY_SUMMARY"), nullptr, PKHeX::ViewPartyInfo, getLanguage->Get("NOTE_VIEW_PARTY_SUMMARY")), "FAV_VIEW_PARTY_SUMMARY");
+        *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_TEAM_COVERAGE"), nullptr, PKHeX::TeamCoverage, getLanguage->Get("NOTE_TEAM_COVERAGE")), "FAV_TEAM_COVERAGE");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_LIVING_DEX"), nullptr, PKHeX::LivingDex, getLanguage->Get("NOTE_LIVING_DEX")), "FAV_LIVING_DEX");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_GYM_COACH"), nullptr, PKHeX::GymCoach, getLanguage->Get("NOTE_GYM_COACH")), "FAV_GYM_COACH");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_TRAINER_CARD"), nullptr, PKHeX::TrainerCard, getLanguage->Get("NOTE_TRAINER_CARD")), "FAV_TRAINER_CARD");
@@ -833,7 +834,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 7, 2, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 7, 3, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized

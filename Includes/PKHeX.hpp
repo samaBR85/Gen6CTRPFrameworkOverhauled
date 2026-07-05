@@ -139,6 +139,7 @@
       void TrainerCard(MenuEntry *entry);    // read-only shareable card (root menu, after View Party Summary)
       void LivingDex(MenuEntry *entry);      // read-only collection dashboard (Trainer Info): owned/shiny/missing grid
       void GymCoach(MenuEntry *entry);  // Gym Coach (Trainer Info): browse the next Gym Leader/E4/Champion's team + matchup verdict vs your party
+      void TeamCoverage(MenuEntry *entry);  // Team Coverage (Trainer Info): party types at a glance + Defense/Offense weakness-and-blind-spot breakdown
       void BoxBrowserPlus(MenuEntry *entry); // PC Box ++ visual box grid (replaces Position/Clone/Find)
       void PartyBattleEditor(MenuEntry *entry); // Change Party Stats: visual battle-party editor (in-battle)
       void EnemyHelper(MenuEntry *entry);       // Enemy Helper: in-battle coach card for the enemy (in-battle)

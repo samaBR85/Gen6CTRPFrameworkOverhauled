@@ -1254,3 +1254,25 @@ LIVING_DEX_OWNED_N :: %d owned
 
 # ==== Living Dex v7 (species card) ====
 LIVING_DEX_CARD_BACK :: Press B to go back
+MENU_TEAM_COVERAGE :: Team Coverage
+FAV_TEAM_COVERAGE :: Team Coverage
+NOTE_TEAM_COVERAGE :: A read-only overview of your own party's type matchups: which attack types threaten two or more teammates at once, which Pokemon takes a full 4x hit from something, and where your own moves can't get through.\n\nD-Pad Up/Down scrolls each list; X switches between the Defense and Offense tabs.\n\nDefense counts attacking types against your party's own typing. Offense checks the moves your team actually knows against a plain single-type target - it doesn't account for ability, held item, weather or stat boosts.
+TEAM_COVERAGE_NO_PARTY :: No Pokemon found in your party.
+TEAM_COVERAGE_SUMMARY :: TEAM SUMMARY
+TEAM_COVERAGE_SUMMARY_FMT :: %d shared weaknesses - %d blind spots
+TEAM_COVERAGE_HINT :: Open the bottom screen for the full breakdown.
+TEAM_COVERAGE_DEFENSE :: Defense
+TEAM_COVERAGE_OFFENSE :: Offense
+TEAM_COVERAGE_SHARED_WEAK :: SHARED WEAKNESSES
+TEAM_COVERAGE_NO_SHARED_WEAK :: No shared weaknesses - nice!
+TEAM_COVERAGE_QUAD_WEAK :: 4X WEAKNESS
+TEAM_COVERAGE_NO_QUAD_WEAK :: Nobody takes a 4x hit.
+TEAM_COVERAGE_WELL_COVERED :: WELL COVERED
+TEAM_COVERAGE_NONE :: None.
+TEAM_COVERAGE_BLIND_SPOTS :: BLIND SPOTS
+TEAM_COVERAGE_NO_BLIND_SPOTS :: No blind spots - your team hits everything!
+TEAM_COVERAGE_HITS_FMT :: %s hits: %s
+TEAM_COVERAGE_QUAD_FMT :: %s takes 4x damage from %s
+TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Nobody on your team is weak to: %s
+TEAM_COVERAGE_BLIND_LIST_FMT :: No strong move against: %s
+TEAM_COVERAGE_COVERED_LIST_FMT :: Your team hits these hard: %s

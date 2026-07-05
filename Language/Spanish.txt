@@ -1257,3 +1257,25 @@ GYM_COACH_SHOPPING_LIST :: Carrito Sugerido
 GYM_COACH_EDGE_FAVORABLE :: VENTAJA DE TIPO: FAVORABLE
 GYM_COACH_EDGE_NEUTRAL :: VENTAJA DE TIPO: NEUTRO
 GYM_COACH_EDGE_UNFAVORABLE :: VENTAJA DE TIPO: DESFAVORABLE
+MENU_TEAM_COVERAGE :: Cobertura del Equipo
+FAV_TEAM_COVERAGE :: Cobertura
+NOTE_TEAM_COVERAGE :: Un resumen de solo lectura de los matchups de tipo de tu propio equipo: qué tipos de ataque amenazan a dos o más compañeros a la vez, qué Pokémon recibe un golpe de 4x completo, y dónde tus propios movimientos no logran pasar.\n\nCruceta Arriba/Abajo desplaza cada lista; X alterna entre las pestañas Defensa y Ataque.\n\nDefensa cuenta los tipos de ataque contra la tipificación de tu propio equipo. Ataque revisa los movimientos que tu equipo realmente conoce contra un objetivo de un solo tipo puro - no tiene en cuenta habilidad, objeto equipado, clima ni cambios de estadísticas.
+TEAM_COVERAGE_NO_PARTY :: No se encontro ningun Pokemon en tu equipo.
+TEAM_COVERAGE_SUMMARY :: RESUMEN DEL EQUIPO
+TEAM_COVERAGE_SUMMARY_FMT :: %d debilidades compartidas - %d puntos ciegos
+TEAM_COVERAGE_HINT :: Mira la pantalla inferior para el desglose completo.
+TEAM_COVERAGE_DEFENSE :: Defensa
+TEAM_COVERAGE_OFFENSE :: Ataque
+TEAM_COVERAGE_SHARED_WEAK :: DEBILIDADES COMPARTIDAS
+TEAM_COVERAGE_NO_SHARED_WEAK :: Sin debilidades compartidas - genial!
+TEAM_COVERAGE_QUAD_WEAK :: DEBILIDAD X4
+TEAM_COVERAGE_NO_QUAD_WEAK :: Nadie recibe un golpe x4.
+TEAM_COVERAGE_WELL_COVERED :: BIEN CUBIERTO
+TEAM_COVERAGE_NONE :: Ninguno.
+TEAM_COVERAGE_BLIND_SPOTS :: PUNTOS CIEGOS
+TEAM_COVERAGE_NO_BLIND_SPOTS :: Sin puntos ciegos - tu equipo golpea todo!
+TEAM_COVERAGE_HITS_FMT :: %s golpea a: %s
+TEAM_COVERAGE_QUAD_FMT :: %s recibe daño x4 de %s
+TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Nadie en tu equipo es debil contra: %s
+TEAM_COVERAGE_BLIND_LIST_FMT :: Ningun movimiento fuerte contra: %s
+TEAM_COVERAGE_COVERED_LIST_FMT :: Tu equipo golpea fuerte a: %s

@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.2
+# Gen6CTRPluginFrameworkOverhauled — v0.7.3
 
 [English](README.md) · **Português**
 
@@ -117,6 +117,14 @@ alto (ou mais baixo); marquinhas ▲/▼ sinalizam o melhor e o pior do seu time
   <img src="Screenshots/v0.3.3/export/12_party_card.png" width="330" alt="Carta de um membro do time com stats, nature, habilidade e golpes" />
 </p>
 
+O **Team Coverage** lista os tipos do seu time inteiro num relance, depois mostra a sinergia real: quais tipos de
+ataque ameaçam dois ou mais companheiros ao mesmo tempo, quem leva um golpe de 4x cheio, e quais tipos seus
+próprios golpes não conseguem furar — em frases diretas, não numa tabela de números.
+
+<p align="center">
+  <img src="Screenshots/v0.7.3/team_coverage.png" width="330" alt="Team Coverage — tipos do time num relance, mais fraquezas compartilhadas e pontos cegos" />
+</p>
+
 ### Vença a batalha
 
 As **In-Battle Tools** são o que você usa no meio da luta. O **Enemy Helper** é uma carta de treinador pro inimigo —
@@ -232,6 +240,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.7.0** — **Champion's Update**: o **Gym Coach** mostra com antecedência o time do próximo Líder de Ginásio, membro da Elite dos Quatro ou Campeão do jogo que você está jogando — um veredito de vantagem de tipo contra o seu time, um card completo por Pokémon, e um **Carrinho Sugerido** que abre o PokéMart Anywhere já montado pra aquela luta específica.
 - **v0.7.1** — **Damage Calc**: a aba Compare do Enemy Helper agora abre direto numa faixa de dano estimado e golpes pra nocautear dos dois lados, com nome e golpes de cada um na mesma cor pra ficar claro quem é quem — aperte **Y** pra ver a comparação simples de stats.
 - **v0.7.2** — o **Gym Coach** agora lê suas insígnias de ginásio reais e já pula direto pro seu próximo desafio na primeira vez que você abre a tela em cada sessão, com uma marca **Next** na lista pra você sempre saber quem é.
+- **v0.7.3** — **Team Coverage**: uma nova tela em Trainer Info que lista os tipos do seu time num relance, mais um detalhamento Defense/Offense de fraquezas compartilhadas, golpes 4x e pontos cegos que seus próprios golpes não furam.
 
 ## 📥 Instalando
 
@@ -341,7 +350,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.7.2 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.7.3 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença

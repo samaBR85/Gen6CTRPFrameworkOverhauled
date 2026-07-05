@@ -2694,6 +2694,185 @@ namespace CTRPluginFramework {
             }
         }
 
+        // ===== Team Coverage =====
+        // Read-only screen (Trainer Info): shows the party's own types at a glance, then two tabs -
+        // Defense (which attack types threaten 2+ teammates at once, and who takes a 4x hit) and Offense
+        // (pure defending types NONE of the party's own attacking moves is super effective against - a
+        // real blind spot, computed from the actual known moves, same data source as Damage Calc). The
+        // offense side treats each candidate defending type as a single pure type (no dual-type combos) -
+        // a deliberate simplification, same "type/stats only" honesty as Gym Coach's verdict.
+        void TeamCoverage(MenuEntry *entry) {
+            (void)entry;
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+            const FwkSettings &st = FwkSettings::Get();
+            Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+            Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+            const Color good(0x1B, 0x7A, 0x3A); Color dim = txt;
+
+            // Party scan - read-only screen, no editor here, so scanning once up front is safe.
+            u16 partySp[6] = {0, 0, 0, 0, 0, 0}; u16 partyMoves[6][4] = {}; int nParty = 0;
+            { u32 pbase = FindPartyBase();
+              for (int i = 0; i < 6 && pbase; ++i) {
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
+                      partySp[nParty] = pk.species;
+                      for (int m = 0; m < 4; ++m) partyMoves[nParty][m] = pk.move[m];
+                      ++nParty;
+                  }
+              } }
+            Image icon[6];
+            for (int i = 0; i < nParty; ++i) { string p; BoxIconPath(p, partySp[i], false, "BoxIcons/"); icon[i].LoadFromFile(p); }
+
+            // Defense: weakCount[a] = how many teammates take >=2x from attacking type a; weakMonIdx[a] =
+            // which ones; quad[a][i] = mon i takes the full 4x from type a.
+            int weakCount[19] = {0}; vector<int> weakMonIdx[19]; bool quad[19][6] = {};
+            for (int i = 0; i < nParty; ++i) {
+                int d1 = spawnerType1[partySp[i]], d2 = spawnerType2[partySp[i]];
+                if (d1 < 1) continue;
+                for (int a = 1; a <= 18; ++a) {
+                    int q = TypeFactorQ(a - 1, d1 - 1);
+                    if (d2 >= 1 && d2 != d1) q = q * TypeFactorQ(a - 1, d2 - 1) / 4;
+                    if (q >= 8) weakMonIdx[a].push_back(i), weakCount[a]++;
+                    if (q == 16) quad[a][i] = true;
+                }
+            }
+            // Offense: hasAtkType[a] = the party knows at least one real attacking move of type a. A pure
+            // defending type d is a blind spot if none of those types is super effective against it.
+            bool hasAtkType[19] = {false};
+            for (int i = 0; i < nParty; ++i) for (int m = 0; m < 4; ++m) {
+                u16 mid = partyMoves[i][m]; if (mid < 1 || mid > 621) continue;
+                int cat = gMoveExtra[mid - 1][1], pw = gMoveInfo[mid - 1][0];
+                if (cat == 0 || pw <= 0) continue;
+                int mt = gMoveExtra[mid - 1][0]; if (mt >= 1 && mt <= 18) hasAtkType[mt] = true;
+            }
+            bool blindSpot[19] = {false};
+            for (int d = 1; d <= 18; ++d) {
+                int best = 0;
+                for (int a = 1; a <= 18; ++a) if (hasAtkType[a]) { int q = TypeFactorQ(a - 1, d - 1); if (q > best) best = q; }
+                blindSpot[d] = best < 8;
+            }
+            int nSharedWeak = 0, nBlindSpots = 0;
+            for (int a = 1; a <= 18; ++a) { if (weakCount[a] >= 2) ++nSharedWeak; if (blindSpot[a]) ++nBlindSpots; }
+
+            // Greedy word-wrap (never a mid-word cut) - same helper shape used by Enemy Helper/Gym Coach.
+            auto wrapInto = [&](vector<pair<Color, string>> &out, Color c, const string &text, int maxW) {
+                vector<string> words; string w;
+                for (size_t i = 0; i < text.size(); ++i) { char ch = text[i]; if (ch == ' ') { if (!w.empty()) { words.push_back(w); w.clear(); } } else w += ch; }
+                if (!w.empty()) words.push_back(w);
+                string line;
+                for (size_t k = 0; k < words.size(); ++k) {
+                    string cand = line.empty() ? words[k] : line + " " + words[k];
+                    if ((int)OSD::GetTextWidth(true, cand) > maxW && !line.empty()) { out.push_back({c, line}); line = words[k]; }
+                    else line = cand;
+                }
+                if (!line.empty()) out.push_back({c, line});
+            };
+            auto namesFor = [&](vector<int> &idxs) -> string {
+                string s; for (size_t i = 0; i < idxs.size(); ++i) { if (i) s += ", "; s += speciesList[partySp[idxs[i]] - 1]; } return s;
+            };
+
+            int view = 0, scroll = 0;
+            drainKeys();
+            while (true) {
+                Controller::Update();
+                if (System::IsSleeping()) break;
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close(); break;
+                }
+                if (Controller::IsKeyPressed(Key::B)) break;
+                if (Controller::IsKeyPressed(Key::X)) { view = 1 - view; scroll = 0; }
+                if (KeyRep(Key::Up)) scroll--;
+                if (KeyRep(Key::Down)) scroll++;
+
+                // ---- TOP: party types at a glance ----
+                top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("MENU_TEAM_COVERAGE"), 42, 26, title);
+                top.DrawRect(42, 37, 316, 1, title, true);
+
+                if (nParty == 0) {
+                    string e = getLanguage->Get("TEAM_COVERAGE_NO_PARTY");
+                    top.DrawSysfont(txt << e, 42 + (316 - (int)OSD::GetTextWidth(true, e)) / 2, 110, txt);
+                } else {
+                    // One row per party member (icon + name + type chips) - a fixed 6-column grid left every
+                    // dual-type mon's second chip fighting the next icon's background for the same pixels
+                    // (a real collision bug on HW); a row gives each mon the full window width instead.
+                    const int IC = 32, rowH = 29, y0 = 39;
+                    for (int i = 0; i < nParty; ++i) {
+                        int ry = y0 + i * rowH;
+                        if (icon[i].IsLoaded()) icon[i].Draw(top, 42, ry);
+                        string nm = speciesList[partySp[i] - 1];
+                        while (nm.size() > 1 && (int)OSD::GetTextWidth(true, nm) > 90) nm.pop_back();
+                        top.DrawSysfont(txt << nm, 80, ry + 10, txt);
+                        int cw = TypeChipsWidth(partySp[i]);
+                        DrawTypeChips(top, partySp[i], 346 - cw, ry + 7);
+                    }
+                }
+
+                // ---- BOTTOM: Defense / Offense tabs ----
+                bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
+                auto tabBtn = [&](int x, int w, const string &label, bool active) {
+                    bot.DrawRect(x, 24, w, 22, active ? sel : bg2, true); bot.DrawRect(x, 24, w, 22, active ? title : border, false);
+                    int tw = (int)OSD::GetTextWidth(true, label);
+                    bot.DrawSysfont((active ? bg : txt) << label, x + (w - tw) / 2, 27, txt);
+                };
+                tabBtn(24, 126, getLanguage->Get("TEAM_COVERAGE_DEFENSE"), view == 0);
+                tabBtn(154, 126, getLanguage->Get("TEAM_COVERAGE_OFFENSE"), view == 1);
+                bot.DrawRect(26, 50, 268, 1, border, true);
+
+                // Every line reads as a plain sentence (type/mon names filled into a translated template),
+                // not a raw "Type: Name, Name" table - the format the user found hard to parse on HW.
+                vector<pair<Color, string>> L;
+                if (nParty == 0) {
+                    L.push_back({txt, getLanguage->Get("TEAM_COVERAGE_NO_PARTY")});
+                } else if (view == 0) {
+                    L.push_back({sel, getLanguage->Get("TEAM_COVERAGE_SHARED_WEAK")});
+                    bool any = false;
+                    for (int a = 1; a <= 18; ++a) if (weakCount[a] >= 2) {
+                        any = true;
+                        string line = Utils::Format(getLanguage->Get("TEAM_COVERAGE_HITS_FMT").c_str(), g_typeName[a], namesFor(weakMonIdx[a]).c_str());
+                        wrapInto(L, txt, line, 262);
+                    }
+                    if (!any) L.push_back({good, getLanguage->Get("TEAM_COVERAGE_NO_SHARED_WEAK")});
+                    L.push_back({txt, ""});
+                    L.push_back({sel, getLanguage->Get("TEAM_COVERAGE_QUAD_WEAK")});
+                    any = false;
+                    for (int a = 1; a <= 18; ++a) for (int i = 0; i < nParty; ++i) if (quad[a][i]) {
+                        any = true;
+                        string line = Utils::Format(getLanguage->Get("TEAM_COVERAGE_QUAD_FMT").c_str(), speciesList[partySp[i] - 1], g_typeName[a]);
+                        wrapInto(L, txt, line, 262);
+                    }
+                    if (!any) L.push_back({good, getLanguage->Get("TEAM_COVERAGE_NO_QUAD_WEAK")});
+                    L.push_back({txt, ""});
+                    L.push_back({sel, getLanguage->Get("TEAM_COVERAGE_WELL_COVERED")});
+                    { string cov; for (int a = 1; a <= 18; ++a) if (weakCount[a] == 0) cov += (cov.empty() ? "" : ", ") + string(g_typeName[a]);
+                      if (!cov.empty()) wrapInto(L, good, Utils::Format(getLanguage->Get("TEAM_COVERAGE_WEAK_TO_LIST_FMT").c_str(), cov.c_str()), 262);
+                      else L.push_back({dim, getLanguage->Get("TEAM_COVERAGE_NONE")}); }
+                } else {
+                    L.push_back({sel, getLanguage->Get("TEAM_COVERAGE_BLIND_SPOTS")});
+                    { string bs; for (int a = 1; a <= 18; ++a) if (blindSpot[a]) bs += (bs.empty() ? "" : ", ") + string(g_typeName[a]);
+                      if (!bs.empty()) wrapInto(L, txt, Utils::Format(getLanguage->Get("TEAM_COVERAGE_BLIND_LIST_FMT").c_str(), bs.c_str()), 262);
+                      else L.push_back({good, getLanguage->Get("TEAM_COVERAGE_NO_BLIND_SPOTS")}); }
+                    L.push_back({txt, ""});
+                    L.push_back({sel, getLanguage->Get("TEAM_COVERAGE_WELL_COVERED")});
+                    { string cov; for (int a = 1; a <= 18; ++a) if (!blindSpot[a]) cov += (cov.empty() ? "" : ", ") + string(g_typeName[a]);
+                      if (!cov.empty()) wrapInto(L, good, Utils::Format(getLanguage->Get("TEAM_COVERAGE_COVERED_LIST_FMT").c_str(), cov.c_str()), 262);
+                      else L.push_back({dim, getLanguage->Get("TEAM_COVERAGE_NONE")}); }
+                }
+                const int VIS = 9, lineH = 15, y0 = 56;
+                int total = (int)L.size(), maxScroll = total > VIS ? total - VIS : 0;
+                if (scroll > maxScroll) scroll = maxScroll; if (scroll < 0) scroll = 0;
+                for (int i = 0; i < VIS; ++i) { int idx = scroll + i; if (idx >= total) break; bot.DrawSysfont(L[idx].first << L[idx].second, 30, y0 + i * lineH, L[idx].first); }
+                if (scroll > 0) bot.DrawSysfont(sel << "\xE2\x96\xB2", 286, 54, sel);
+                if (scroll < maxScroll) bot.DrawSysfont(sel << "\xE2\x96\xBC", 286, 190, sel);
+                const char *h = "X tab   B exit";
+                bot.DrawSysfont(dim << h, 20 + (280 - (int)OSD::GetTextWidth(true, h)) / 2, 205, dim);
+
+                OSD::SwapBuffers();
+            }
+        }
+
         // ===== Gym Coach =====
         // Read-only battle-prep panel (Trainer Info): browse the 8 Gym Leaders + Elite Four + Champion of
         // whichever game is running (X/Y or OR/AS, from GymData.hpp) and see a quick type-matchup verdict

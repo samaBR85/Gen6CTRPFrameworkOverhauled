@@ -1256,3 +1256,25 @@ GYM_COACH_SHOPPING_LIST :: Panier Suggere
 GYM_COACH_EDGE_FAVORABLE :: AVANTAGE DE TYPE : FAVORABLE
 GYM_COACH_EDGE_NEUTRAL :: AVANTAGE DE TYPE : NEUTRE
 GYM_COACH_EDGE_UNFAVORABLE :: AVANTAGE DE TYPE : DEFAVORABLE
+MENU_TEAM_COVERAGE :: Couverture d'Equipe
+FAV_TEAM_COVERAGE :: Couverture
+NOTE_TEAM_COVERAGE :: Un aperçu en lecture seule des types de votre équipe : quels types offensifs menacent deux coéquipiers ou plus à la fois, quel Pokémon encaisse un coup à 4x, et où vos propres attaques ne passent pas.\n\nHaut/Bas de la croix fait défiler chaque liste ; X bascule entre les onglets Défense et Attaque.\n\nDéfense compte les types offensifs contre le typage de votre équipe. Attaque vérifie les capacités que votre équipe connaît vraiment contre une cible à un seul type - sans tenir compte du talent, de l'objet tenu, de la météo ou des boosts de stats.
+TEAM_COVERAGE_NO_PARTY :: Aucun Pokemon trouve dans votre equipe.
+TEAM_COVERAGE_SUMMARY :: RESUME DE L'EQUIPE
+TEAM_COVERAGE_SUMMARY_FMT :: %d faiblesses partagees - %d angles morts
+TEAM_COVERAGE_HINT :: Regardez l'ecran du bas pour le detail complet.
+TEAM_COVERAGE_DEFENSE :: Defense
+TEAM_COVERAGE_OFFENSE :: Attaque
+TEAM_COVERAGE_SHARED_WEAK :: FAIBLESSES PARTAGEES
+TEAM_COVERAGE_NO_SHARED_WEAK :: Aucune faiblesse partagee - bien joue !
+TEAM_COVERAGE_QUAD_WEAK :: FAIBLESSE X4
+TEAM_COVERAGE_NO_QUAD_WEAK :: Personne ne subit de coup x4.
+TEAM_COVERAGE_WELL_COVERED :: BIEN COUVERT
+TEAM_COVERAGE_NONE :: Aucun.
+TEAM_COVERAGE_BLIND_SPOTS :: ANGLES MORTS
+TEAM_COVERAGE_NO_BLIND_SPOTS :: Aucun angle mort - votre equipe touche tout !
+TEAM_COVERAGE_HITS_FMT :: %s touche : %s
+TEAM_COVERAGE_QUAD_FMT :: %s subit des degats x4 de %s
+TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Personne dans votre equipe n'est faible face a : %s
+TEAM_COVERAGE_BLIND_LIST_FMT :: Aucune attaque efficace contre : %s
+TEAM_COVERAGE_COVERED_LIST_FMT :: Votre equipe frappe fort contre : %s

@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.2
+# Gen6CTRPluginFrameworkOverhauled — v0.7.3
 
 **English** · [Português](README.pt-BR.md)
 
@@ -117,6 +117,14 @@ lowest) value; little ▲/▼ marks flag your team's best and worst.
   <img src="Screenshots/v0.3.3/export/12_party_card.png" width="330" alt="A party member card with stats, nature, ability and moves" />
 </p>
 
+**Team Coverage** lists your whole party's types at a glance, then breaks down the real synergy: which attack
+types threaten two or more teammates at once, who takes a full 4x hit from something, and which types your own
+moves can't get through — read as plain sentences, not a stat table.
+
+<p align="center">
+  <img src="Screenshots/v0.7.3/team_coverage.png" width="330" alt="Team Coverage — party types at a glance, plus shared weaknesses and blind spots" />
+</p>
+
 ### Win the battle
 
 The **In-Battle Tools** are the things you reach for mid-fight. **Enemy Helper** is a coach card for the foe — it
@@ -231,6 +239,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.7.0** — **Champion's Update**: **Gym Coach** previews the next Gym Leader's, Elite Four member's, or Champion's team for the game you're playing — a type-matchup verdict against your own party, a full species card per Pokémon, and a **Suggested Cart** that opens PokéMart Anywhere already stocked for that specific fight.
 - **v0.7.1** — **Damage Calc**: Enemy Helper's Compare tab now opens straight into an estimated damage range and hits-to-KO for both sides' moves, color-matched by owner so it's clear at a glance who deals what — press **Y** for the plain stat comparison.
 - **v0.7.2** — **Gym Coach** now reads your real gym badges to jump straight to your next opponent the first time you open it each session, with a **Next** tag on the list so you always know who that is.
+- **v0.7.3** — **Team Coverage**: a new Trainer Info screen listing your party's types at a glance, plus a Defense/Offense breakdown of shared weaknesses, 4x hits, and blind spots your own moves can't get through.
 
 ## 📥 Installing
 
@@ -340,7 +349,7 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.7.2 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.7.3 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

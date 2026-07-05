@@ -1258,3 +1258,25 @@ GYM_COACH_SHOPPING_LIST :: Carrinho Sugerido
 GYM_COACH_EDGE_FAVORABLE :: VANTAGEM DE TIPO: FAVORÁVEL
 GYM_COACH_EDGE_NEUTRAL :: VANTAGEM DE TIPO: NEUTRO
 GYM_COACH_EDGE_UNFAVORABLE :: VANTAGEM DE TIPO: DESFAVORÁVEL
+MENU_TEAM_COVERAGE :: Cobertura do Time
+FAV_TEAM_COVERAGE :: Cobertura
+NOTE_TEAM_COVERAGE :: Uma visão só de leitura dos matchups de tipo do seu próprio time: quais tipos de ataque ameaçam dois ou mais companheiros ao mesmo tempo, qual Pokémon leva um golpe de 4x cheio, e onde os seus próprios golpes não conseguem passar.\n\nCruzeta Cima/Baixo rola cada lista; X alterna entre as abas Defesa e Ataque.\n\nDefesa conta os tipos de ataque contra a tipagem do seu próprio time. Ataque verifica os golpes que seu time realmente conhece contra um alvo de um único tipo puro - não considera habilidade, item segurado, clima ou boosts de status.
+TEAM_COVERAGE_NO_PARTY :: Nenhum Pokemon encontrado no seu time.
+TEAM_COVERAGE_SUMMARY :: RESUMO DO TIME
+TEAM_COVERAGE_SUMMARY_FMT :: %d fraquezas compartilhadas - %d pontos cegos
+TEAM_COVERAGE_HINT :: Veja a tela de baixo para o detalhamento completo.
+TEAM_COVERAGE_DEFENSE :: Defesa
+TEAM_COVERAGE_OFFENSE :: Ataque
+TEAM_COVERAGE_SHARED_WEAK :: FRAQUEZAS COMPARTILHADAS
+TEAM_COVERAGE_NO_SHARED_WEAK :: Nenhuma fraqueza compartilhada - muito bom!
+TEAM_COVERAGE_QUAD_WEAK :: FRAQUEZA 4X
+TEAM_COVERAGE_NO_QUAD_WEAK :: Ninguem leva um golpe 4x.
+TEAM_COVERAGE_WELL_COVERED :: BEM COBERTO
+TEAM_COVERAGE_NONE :: Nenhum.
+TEAM_COVERAGE_BLIND_SPOTS :: PONTOS CEGOS
+TEAM_COVERAGE_NO_BLIND_SPOTS :: Nenhum ponto cego - seu time acerta tudo!
+TEAM_COVERAGE_HITS_FMT :: %s acerta: %s
+TEAM_COVERAGE_QUAD_FMT :: %s leva dano 4x de %s
+TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Ninguem no seu time e fraco contra: %s
+TEAM_COVERAGE_BLIND_LIST_FMT :: Nenhum golpe forte contra: %s
+TEAM_COVERAGE_COVERED_LIST_FMT :: Seu time acerta forte estes: %s
