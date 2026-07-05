@@ -5973,9 +5973,13 @@ namespace CTRPluginFramework {
             // tips/flash. move4 = the theme's 4th preview-square color (the swatches in the Change Theme list),
             // used to accent move-name lines.
             const Color good(0x1B, 0x7A, 0x3A); Color dim = txt; const Color move4 = ThemeSquareColor(3);
+            // Identity colors for the Compare/Damage sub-view: enemy's name + moves in rust, mine in blue - a
+            // channel independent from the dmg% severity coloring (good/dim/danger) used on the same rows.
+            const Color enemyColor(0xB5, 0x65, 0x1D); const Color myColor(0x2E, 0x6D, 0xA4);
 
             int slot = 0;      // 0..5 enemy slot
             int view = 0;      // 0 = details list, 1 = compare (enemy vs my active), 2 = suggested items
+            int dmgView = 1;   // inside view==1: 0 = stats compare, 1 = damage estimate (default; Y toggles to stats)
             int scroll = 0;    // detail-list scroll (rows)
             int focus = 0;     // item row focus
             string flash; int flashTtl = 0;
@@ -5995,6 +5999,23 @@ namespace CTRPluginFramework {
                     else line = cand;
                 }
                 if (!line.empty()) out.push_back({c, line});
+            };
+
+            // Rough Gen 6 damage estimate for the Compare/Damage sub-view: base formula + STAB + type
+            // effectiveness + the 85-100% random roll. Deliberately NOT modeling crits, weather, abilities,
+            // held items, or variable-power moves - same "type/stats only" honesty as Gym Coach's verdict.
+            auto estDmg = [&](int atkStat, int defStat, int power, int level, int moveType, int atkT1, int atkT2, int defT1, int defT2, int &lo, int &hi) {
+                if (power <= 0 || defStat <= 0) { lo = hi = 0; return; }
+                int base = ((2 * level / 5 + 2) * power * atkStat / defStat) / 50 + 2;
+                double mod = 1.0;
+                if (moveType >= 1 && (moveType == atkT1 || (atkT2 >= 1 && moveType == atkT2))) mod *= 1.5; // STAB
+                if (moveType >= 1 && moveType <= 18 && defT1 >= 1) {
+                    int q = TypeFactorQ(moveType - 1, defT1 - 1);
+                    if (defT2 >= 1 && defT2 != defT1) q = q * TypeFactorQ(moveType - 1, defT2 - 1) / 4;
+                    mod *= (q / 4.0);
+                }
+                lo = (int)(base * mod * 0.85);
+                hi = (int)(base * mod * 1.00);
             };
 
             // Confirm + acquire one item, honoring PAY/FREE.
@@ -6139,6 +6160,7 @@ namespace CTRPluginFramework {
                 if (Controller::IsKeyPressed(Key::Left)  || Controller::IsKeyPressed(Key::L)) { slot = (slot + 5) % 6; scroll = 0; focus = 0; sprKey = -1; }
                 if (Controller::IsKeyPressed(Key::Right) || Controller::IsKeyPressed(Key::R)) { slot = (slot + 1) % 6; scroll = 0; focus = 0; sprKey = -1; }
                 if (Controller::IsKeyPressed(Key::X)) { view = (view + 1) % 3; scroll = 0; }   // cycle Details -> Compare -> Items
+                if (view == 1 && Controller::IsKeyPressed(Key::Y)) dmgView = (dmgView + 1) % 2; // Compare: Y toggles Stats <-> Damage
                 if (view == 0) { if (KeyRep(Key::Up)) scroll--; if (KeyRep(Key::Down)) scroll++; }
                 else if (view == 2) { if (nItems > 0 && KeyRep(Key::Up)) focus = (focus + nItems - 1) % nItems; if (nItems > 0 && KeyRep(Key::Down)) focus = (focus + 1) % nItems; if (nItems > 0 && Controller::IsKeyPressed(Key::A)) buy(items[focus]); }
                 // tabs (Details / Compare / Items)
@@ -6246,15 +6268,16 @@ namespace CTRPluginFramework {
                     // Both sides show the FULL computed stat (Base + IV + EV + nature + level). Enemy = s6 (CalcStats).
                     // Mine: read the active species from the in-battle struct (battleOffset[0] slot 0, off 0xC), find
                     // that Pokemon in my party and CalcStats its PK6 (Base+IV+EV) - identical method to the enemy.
-                    // Fallback (party not located): the live battle-struct computed stats (maxHP 0xE, 0xF6+k*2).
+                    // Fallback (party not located): the live battle-struct computed stats (maxHP 0xE, 0xF6+k*2) - no
+                    // moves in that case, so the Damage sub-view (Y) needs the full "mp" PK6 (haveMoves) to work.
                     u16 my6[6] = {0, 0, 0, 0, 0, 0}; u16 mySp = 0; u32 pa = 0;
                     if (!battleOffset.empty()) { pa = Process::Read32(battleOffset[0]); if (pa) Process::Read16(pa + 0xC, mySp); }
-                    bool haveMine = false;
+                    bool haveMine = false, haveMoves = false; PK6 mp; int myLevel = 0;
                     if (mySp >= 1 && mySp <= 721) {
                         u32 pbase = FindPartyBase();
                         if (pbase) for (int i = 0; i < 6; ++i) {
-                            PK6 mp; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &mp) : GetPokemonRaw(pbase + i * 0x104, &mp);
-                            if (ok && mp.species == mySp) { CalcStats(mp.species, LevelFromExp(mp.species, mp.exp), mp.nature, mp.iv32, mp.EV, my6); haveMine = true; break; }
+                            PK6 t; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &t) : GetPokemonRaw(pbase + i * 0x104, &t);
+                            if (ok && t.species == mySp) { mp = t; myLevel = LevelFromExp(mp.species, mp.exp); CalcStats(mp.species, myLevel, mp.nature, mp.iv32, mp.EV, my6); haveMine = true; haveMoves = true; break; }
                         }
                         if (!haveMine && pa) {   // fallback: live battle-struct computed stats
                             Process::Read16(pa + 0xE, my6[0]);
@@ -6268,33 +6291,71 @@ namespace CTRPluginFramework {
                     } else if (!haveMine) {
                         bot.DrawSysfont(txt << "No active Pokemon found.", 30, 100, txt);
                     } else {
-                        int et = 0, mt = 0;
-                        for (int i = 0; i < 6; ++i) { et += s6[i]; mt += my6[i]; }
-                        // header: enemy name  vs  my name
+                        // header: enemy name  vs  my name. In the Damage sub-view each name is colored to match
+                        // its own move rows below (enemyColor/myColor) so it's obvious at a glance whose moves
+                        // are whose; the Stats sub-view keeps the neutral title color for both.
+                        bool colorId = (dmgView == 1 && haveMoves);
+                        Color enHdr = colorId ? enemyColor : title, myHdr = colorId ? myColor : title;
                         { string en = speciesList[pk.species - 1]; while (en.size() > 1 && (int)OSD::GetTextWidth(true, en) > 108) en.pop_back();
                           string mn = speciesList[mySp - 1];       while (mn.size() > 1 && (int)OSD::GetTextWidth(true, mn) > 108) mn.pop_back();
-                          bot.DrawSysfont(title << en, 30, 54, title);
+                          bot.DrawSysfont(enHdr << en, 30, 54, enHdr);
                           const char *vs = "vs"; bot.DrawSysfont(dim << vs, 20 + (280 - (int)OSD::GetTextWidth(true, vs)) / 2, 54, dim);
-                          bot.DrawSysfont(title << mn, 288 - (int)OSD::GetTextWidth(true, mn), 54, title); }
-                        // column heads (the "you win N/6" summary lives on the Total row, to avoid overlap here)
-                        bot.DrawSysfont(dim << "Enemy", 180 - (int)OSD::GetTextWidth(true, "Enemy"), 68, dim);
-                        bot.DrawSysfont(dim << "You",   288 - (int)OSD::GetTextWidth(true, "You"),   68, dim);
-                        // 6 stat rows: higher value green, lower dim, tie neutral
-                        for (int i = 0; i < 6; ++i) {
-                            int y = 86 + i * 16, ev = s6[i], mv = my6[i];
-                            Color ec = (ev > mv) ? good : (ev < mv ? dim : txt);
-                            Color mc = (mv > ev) ? good : (mv < ev ? dim : txt);
-                            bot.DrawSysfont(sel << SN[i], 30, y, sel);
-                            { string s = to_string(ev); bot.DrawSysfont(ec << s, 180 - (int)OSD::GetTextWidth(true, s), y, ec); }
-                            { string s = to_string(mv); bot.DrawSysfont(mc << s, 288 - (int)OSD::GetTextWidth(true, s), y, mc); }
+                          bot.DrawSysfont(myHdr << mn, 288 - (int)OSD::GetTextWidth(true, mn), 54, myHdr); }
+
+                        if (dmgView == 0 || !haveMoves) {
+                            // column heads (the "you win N/6" summary lives on the Total row, to avoid overlap here)
+                            bot.DrawSysfont(dim << "Enemy", 180 - (int)OSD::GetTextWidth(true, "Enemy"), 68, dim);
+                            bot.DrawSysfont(dim << "You",   288 - (int)OSD::GetTextWidth(true, "You"),   68, dim);
+                            int et = 0, mt = 0;
+                            for (int i = 0; i < 6; ++i) { et += s6[i]; mt += my6[i]; }
+                            // 6 stat rows: higher value green, lower dim, tie neutral
+                            for (int i = 0; i < 6; ++i) {
+                                int y = 86 + i * 16, ev = s6[i], mv = my6[i];
+                                Color ec = (ev > mv) ? good : (ev < mv ? dim : txt);
+                                Color mc = (mv > ev) ? good : (mv < ev ? dim : txt);
+                                bot.DrawSysfont(sel << SN[i], 30, y, sel);
+                                { string s = to_string(ev); bot.DrawSysfont(ec << s, 180 - (int)OSD::GetTextWidth(true, s), y, ec); }
+                                { string s = to_string(mv); bot.DrawSysfont(mc << s, 288 - (int)OSD::GetTextWidth(true, s), y, mc); }
+                            }
+                            // totals row
+                            bot.DrawRect(26, 182, 268, 1, border, true);
+                            bot.DrawSysfont(sel << "Total", 30, 185, sel);
+                            { Color tc = (et > mt) ? good : (et < mt ? dim : txt); string s = to_string(et); bot.DrawSysfont(tc << s, 180 - (int)OSD::GetTextWidth(true, s), 185, tc); }
+                            { Color tc = (mt > et) ? good : (mt < et ? dim : txt); string s = to_string(mt); bot.DrawSysfont(tc << s, 288 - (int)OSD::GetTextWidth(true, s), 185, tc); }
+                        } else {
+                            // ===== DAMAGE sub-view: enemy's 4 moves -> me (top block, matches the enemy name on
+                            // the LEFT of the header above), then my 4 moves -> enemy (bottom block, matches my
+                            // name on the right). Each move name is colored to match its owner's header color.
+                            int myT1 = (mySp >= 1) ? spawnerType1[mySp] : 0, myT2 = (mySp >= 1) ? spawnerType2[mySp] : 0;
+                            int enT1 = spawnerType1[pk.species], enT2 = spawnerType2[pk.species];
+                            auto row = [&](int y, u16 mid, Color nameColor, int atkStat, int defStat, int atkLevel, int atkT1, int atkT2, int defT1, int defT2, int maxHp) {
+                                string nm = (mid >= 1 && mid <= 621) ? movesList[mid - 1] : "-";
+                                while (nm.size() > 1 && (int)OSD::GetTextWidth(true, nm) > 132) nm.pop_back();
+                                bot.DrawSysfont(nameColor << nm, 30, y, nameColor);
+                                if (mid < 1 || mid > 621) return;
+                                int mtType = gMoveExtra[mid - 1][0], cat = gMoveExtra[mid - 1][1], pw = gMoveInfo[mid - 1][0];
+                                if (cat == 0 || pw <= 0) { const char *s = "support"; bot.DrawSysfont(dim << s, 288 - (int)OSD::GetTextWidth(true, s), y, dim); return; }
+                                int lo, hi; estDmg(atkStat, defStat, pw, atkLevel, mtType, atkT1, atkT2, defT1, defT2, lo, hi);
+                                int loPc = maxHp > 0 ? lo * 100 / maxHp : 0, hiPc = maxHp > 0 ? hi * 100 / maxHp : 0;
+                                int avg = (lo + hi) / 2; int hko = avg > 0 ? (maxHp + avg - 1) / avg : 99;
+                                Color c = (hiPc >= 50) ? good : (loPc >= 33 ? txt : dim);
+                                string s = to_string(loPc) + "-" + to_string(hiPc) + "% (" + to_string(hko > 9 ? 9 : hko) + "HKO)";
+                                bot.DrawSysfont(c << s, 288 - (int)OSD::GetTextWidth(true, s), y, c);
+                            };
+                            for (int i = 0; i < 4; ++i) {
+                                u16 mid = pk.move[i]; int cat = (mid >= 1 && mid <= 621) ? gMoveExtra[mid - 1][1] : 0;
+                                int atkStat = (cat == 1) ? s6[1] : s6[3], defStat = (cat == 1) ? my6[2] : my6[4];
+                                row(72 + i * 15, mid, enemyColor, atkStat, defStat, level, enT1, enT2, myT1, myT2, my6[0]);
+                            }
+                            bot.DrawRect(26, 132, 268, 1, border, true);
+                            for (int i = 0; i < 4; ++i) {
+                                u16 mid = mp.move[i]; int cat = (mid >= 1 && mid <= 621) ? gMoveExtra[mid - 1][1] : 0;
+                                int atkStat = (cat == 1) ? my6[1] : my6[3], defStat = (cat == 1) ? s6[2] : s6[4];
+                                row(140 + i * 15, mid, myColor, atkStat, defStat, myLevel, myT1, myT2, enT1, enT2, s6[0]);
+                            }
                         }
-                        // totals row
-                        bot.DrawRect(26, 182, 268, 1, border, true);
-                        bot.DrawSysfont(sel << "Total", 30, 185, sel);
-                        { Color tc = (et > mt) ? good : (et < mt ? dim : txt); string s = to_string(et); bot.DrawSysfont(tc << s, 180 - (int)OSD::GetTextWidth(true, s), 185, tc); }
-                        { Color tc = (mt > et) ? good : (mt < et ? dim : txt); string s = to_string(mt); bot.DrawSysfont(tc << s, 288 - (int)OSD::GetTextWidth(true, s), 185, tc); }
                     }
-                    const char *h = flashTtl > 0 ? flash.c_str() : "L/R enemy   X tab   B exit";
+                    const char *h = flashTtl > 0 ? flash.c_str() : (haveMoves ? "L/R enemy  X tab  Y dmg/stats  B exit" : "L/R enemy   X tab   B exit");
                     bot.DrawSysfont((flashTtl > 0 ? good : dim) << h, 20 + (280 - (int)OSD::GetTextWidth(true, h)) / 2, 205, dim);
                 } else {
                     int payMode = BagPayMode();

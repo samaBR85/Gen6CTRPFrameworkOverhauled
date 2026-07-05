@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.0
+# Gen6CTRPluginFrameworkOverhauled — v0.7.1
 
 [English](README.md) · **Português**
 
@@ -121,11 +121,13 @@ alto (ou mais baixo); marquinhas ▲/▼ sinalizam o melhor e o pior do seu time
 
 As **In-Battle Tools** são o que você usa no meio da luta. O **Enemy Helper** é uma carta de treinador pro inimigo —
 explica a habilidade, o item e os golpes dele, lista os tipos que o vencem, e compara os seis stats dele com o seu
-Pokémon ativo (e até diz se você já tem a espécie).
+Pokémon ativo (e até diz se você já tem a espécie). A aba **Compare** dele abre direto no **Damage Calc**: uma
+faixa de dano estimado e quantos golpes pra nocautear, dos dois lados — nome e golpes de cada um na mesma cor,
+pra ficar claro de cara quem é quem. Aperte **Y** pra voltar pra comparação simples de stats.
 
 <p align="center">
   <img src="Screenshots/v0.3.3/export/14_enemy_details.png" width="330" alt="Enemy Helper — os detalhes do inimigo e o item segurado" />
-  <img src="Screenshots/v0.3.3/export/15_enemy_compare.png" width="330" alt="Enemy Helper — aba Compare, os stats do inimigo vs os seus" />
+  <img src="Screenshots/v0.7.1/damage_calc.png" width="330" alt="Enemy Helper — Damage Calc, dano estimado e golpes pra nocautear dos dois lados" />
 </p>
 
 O **Change Party Stats** é um editor visual do seu próprio time, ali no meio da luta — cure, ajuste HP/PP, status,
@@ -228,6 +230,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.6.4** — **Hunter's Update**: um **Trainer Card** com seu OT/TID, dinheiro, Time Played, sprites da party e suas **insígnias de ginásio reais lidas ao vivo do save**; o **Egg Peek** pra revelar o conteúdo de um ovo mascarado (`?`) sem chocá‑lo (e ovos criados no PC Box ++ agora ganham uma data/local de recebimento reais); e um **Shiny Hunt Companion** que conta seus encontros de uma espécie‑alvo e avisa + pausa quando um shiny real aparece.
 - **v0.6.5** — **Living Dex Dashboard**: um painel de coleção somente‑leitura para as 721 espécies — possuídas, shiny e faltantes — filtrável por **Tipo**, **Geração** e **Categoria**, com exportação pra uma lista `LivingDex.txt` de faltantes e um card completo da espécie a um toque; além de uma grade do **PC Box ++** mais limpa e arejada.
 - **v0.7.0** — **Champion's Update**: o **Gym Coach** mostra com antecedência o time do próximo Líder de Ginásio, membro da Elite dos Quatro ou Campeão do jogo que você está jogando — um veredito de vantagem de tipo contra o seu time, um card completo por Pokémon, e um **Carrinho Sugerido** que abre o PokéMart Anywhere já montado pra aquela luta específica.
+- **v0.7.1** — **Damage Calc**: a aba Compare do Enemy Helper agora abre direto numa faixa de dano estimado e golpes pra nocautear dos dois lados, com nome e golpes de cada um na mesma cor pra ficar claro quem é quem — aperte **Y** pra ver a comparação simples de stats.
 
 ## 📥 Instalando
 
@@ -337,7 +340,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.7.0 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.7.1 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença

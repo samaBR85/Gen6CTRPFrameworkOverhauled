@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.0
+# Gen6CTRPluginFrameworkOverhauled — v0.7.1
 
 **English** · [Português](README.pt-BR.md)
 
@@ -121,11 +121,13 @@ lowest) value; little ▲/▼ marks flag your team's best and worst.
 
 The **In-Battle Tools** are the things you reach for mid-fight. **Enemy Helper** is a coach card for the foe — it
 explains its ability, item and moves, lists the types that beat it, and compares its six stats against your active
-Pokémon (and even tells you whether you already own the species).
+Pokémon (and even tells you whether you already own the species). Its **Compare** tab opens straight into
+**Damage Calc**: an estimated damage range and hits-to-KO for both sides' moves, each side's name and moves
+colored to match so it's obvious at a glance who's who — press **Y** to switch back to the plain stat comparison.
 
 <p align="center">
   <img src="Screenshots/v0.3.3/export/14_enemy_details.png" width="330" alt="Enemy Helper — the foe's details and held item" />
-  <img src="Screenshots/v0.3.3/export/15_enemy_compare.png" width="330" alt="Enemy Helper — Compare tab, the foe's stats vs yours" />
+  <img src="Screenshots/v0.7.1/damage_calc.png" width="330" alt="Enemy Helper — Damage Calc, estimated damage and hits-to-KO for both sides" />
 </p>
 
 **Change Party Stats** is a visual editor for your own team, right in the middle of a fight — heal, fix HP/PP,
@@ -227,6 +229,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.6.4** — **Hunter's Update**: a **Trainer Card** with your OT/TID, cash, Time Played, party sprites, and your **real gym badges read live from your save**; **Egg Peek** to reveal a masked egg's contents (`?`) without hatching it (and eggs made in PC Box ++ now get a real received date/place); and a **Shiny Hunt Companion** that counts your encounters of a target species and alerts + pauses on a real shiny.
 - **v0.6.5** — **Living Dex Dashboard**: a read-only collection panel for all 721 species — owned, shiny, and missing — filterable by **Type**, **Gen** and **Category**, with an export to a `LivingDex.txt` missing list and a full species info card a tap away; plus a cleaner, more spacious **PC Box ++** grid.
 - **v0.7.0** — **Champion's Update**: **Gym Coach** previews the next Gym Leader's, Elite Four member's, or Champion's team for the game you're playing — a type-matchup verdict against your own party, a full species card per Pokémon, and a **Suggested Cart** that opens PokéMart Anywhere already stocked for that specific fight.
+- **v0.7.1** — **Damage Calc**: Enemy Helper's Compare tab now opens straight into an estimated damage range and hits-to-KO for both sides' moves, color-matched by owner so it's clear at a glance who deals what — press **Y** for the plain stat comparison.
 
 ## 📥 Installing
 
@@ -336,7 +339,7 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.7.0 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.7.1 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License
