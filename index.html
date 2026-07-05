@@ -711,7 +711,7 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">Nintendo 3DS &amp; Azahar &bull; v0.7.2</div>
+  <div class="hero-badge">Nintendo 3DS &amp; Azahar &bull; v0.7.3</div>
   <h1>
     <span class="hl">Gen6</span> CTRPlugin<br/>
     <span class="hl2">Framework</span> Overhauled
@@ -747,7 +747,7 @@
       <div class="stat-label" data-i18n="stat_dl">Total Downloads</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">v0.7.2</div>
+      <div class="stat-num">v0.7.3</div>
       <div class="stat-label" data-i18n="stat_version">Latest Version</div>
     </div>
     <div class="stat-item">
@@ -998,6 +998,11 @@
     </div>
     <div class="screenshots-grid">
       <div class="screenshot-item fade-in" onclick="openLightbox(this)">
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/Screenshots/v0.7.3/team_coverage.png"
+             alt="Team Coverage — party types at a glance plus a Defense/Offense weakness and blind-spot breakdown" loading="lazy" />
+        <div class="screenshot-caption">Team Coverage (new in v0.7.3)</div>
+      </div>
+      <div class="screenshot-item fade-in" onclick="openLightbox(this)">
         <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/Screenshots/v0.7.1/damage_calc.png"
              alt="Damage Calc — estimated damage range and hits-to-KO for both sides' moves, color-matched by owner" loading="lazy" />
         <div class="screenshot-caption">Damage Calc (new in v0.7.1)</div>
@@ -1161,8 +1166,12 @@
     </div>
     <ul class="history-list fade-in" style="max-width:680px;margin:0 auto;list-style:none;padding:0;">
       <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
-        <span style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;flex:0 0 56px;">v0.7.2</span>
-        <span style="color:var(--text);" data-i18n="hist_072">Gym Coach now reads your real gym badges to jump straight to your next opponent the first time you open it each session, with a Next tag on the list so you always know who that is.</span>
+        <span style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;flex:0 0 56px;">v0.7.3</span>
+        <span style="color:var(--text);" data-i18n="hist_073">Team Coverage — a new Trainer Info screen listing your party's types at a glance, plus a Defense/Offense breakdown of shared weaknesses, 4x hits, and blind spots your own moves can't get through.</span>
+      </li>
+      <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
+        <span style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;flex:0 0 56px;">v0.7.2</span>
+        <span style="color:var(--muted);" data-i18n="hist_072">Gym Coach now reads your real gym badges to jump straight to your next opponent the first time you open it each session, with a Next tag on the list so you always know who that is.</span>
       </li>
       <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
         <span style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;flex:0 0 56px;">v0.7.1</span>
@@ -1273,15 +1282,15 @@
           <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>
           Latest Release
         </div>
-        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.7.2</div>
+        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.7.3</div>
         <div class="dl-meta">
           Released <span>July 5, 2026</span> &bull;
           Platform <span>Nintendo 3DS (3gx)</span> &bull;
           License <span>GNU GPL-3.0</span>
         </div>
         <div class="dl-buttons">
-          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.7.2/Gen6CTRPluginFramework-v0.7.2.zip" target="_blank" rel="noopener">
-            ⬇ Download v0.7.2 (.zip)
+          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.7.3/Gen6CTRPluginFramework-v0.7.3.zip" target="_blank" rel="noopener">
+            ⬇ Download v0.7.3 (.zip)
           </a>
           <a class="btn-secondary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases" target="_blank" rel="noopener">
             All Releases
@@ -1295,6 +1304,12 @@
     </div>
 
     <div class="releases-list fade-in">
+      <div class="release-row">
+        <span class="release-tag">v0.7.3</span>
+        <span class="release-date">Jul 5, 2026</span>
+        <span class="release-downloads" id="dl-v073">Loading…</span>
+        <a class="release-link" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.7.3/Gen6CTRPluginFramework-v0.7.3.zip" target="_blank" rel="noopener">Download</a>
+      </div>
       <div class="release-row">
         <span class="release-tag">v0.7.2</span>
         <span class="release-date">Jul 5, 2026</span>
@@ -1514,6 +1529,7 @@
         release.assets.forEach(asset => { total += asset.download_count; });
       });
 
+      const v073 = data.find(r => r.tag_name === 'v0.7.3');
       const v072 = data.find(r => r.tag_name === 'v0.7.2');
       const v071 = data.find(r => r.tag_name === 'v0.7.1');
       const v070 = data.find(r => r.tag_name === 'v0.7.0');
@@ -1531,6 +1547,7 @@
       const v021 = data.find(r => r.tag_name === 'v0.2.1');
       const v020 = data.find(r => r.tag_name === 'v0.2.0');
 
+      const count073 = v073 ? v073.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count072 = v072 ? v072.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count071 = v071 ? v071.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count070 = v070 ? v070.assets.reduce((s, a) => s + a.download_count, 0) : 0;
@@ -1551,6 +1568,7 @@
       animateCount('total-downloads', total);
       animateCount('download-count', total);
 
+      const el073 = document.getElementById('dl-v073');
       const el072 = document.getElementById('dl-v072');
       const el071 = document.getElementById('dl-v071');
       const el070 = document.getElementById('dl-v070');
@@ -1567,6 +1585,7 @@
       const el030 = document.getElementById('dl-v030');
       const el021 = document.getElementById('dl-v021');
       const el020 = document.getElementById('dl-v020');
+      if (el073) el073.textContent = count073 + ' downloads';
       if (el072) el072.textContent = count072 + ' downloads';
       if (el071) el071.textContent = count071 + ' downloads';
       if (el070) el070.textContent = count070 + ' downloads';
@@ -1584,7 +1603,7 @@
       if (el021) el021.textContent = count021 + ' downloads';
       if (el020) el020.textContent = count020 + ' downloads';
     } catch (e) {
-      const els = ['total-downloads','download-count','dl-v072','dl-v071','dl-v070','dl-v065','dl-v064','dl-v063','dl-v062','dl-v061','dl-v060','dl-v050','dl-v033','dl-v032','dl-v031','dl-v030','dl-v021','dl-v020'];
+      const els = ['total-downloads','download-count','dl-v073','dl-v072','dl-v071','dl-v070','dl-v065','dl-v064','dl-v063','dl-v062','dl-v061','dl-v060','dl-v050','dl-v033','dl-v032','dl-v031','dl-v030','dl-v021','dl-v020'];
       els.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = '–';
@@ -1717,6 +1736,7 @@
     hist_030: "Os localizadores de tela dupla (Wild Pokémon Spawner, Respawn Legendary) e o App Guide.",
     hist_031: "PokéMart Anywhere — uma loja real na bag com preços, carrinho e checkout — mais ordenar a bag.",
     hist_032: "Capturar a própria UI do plugin; favoritos, cheats e hotkeys sobrevivem a uma atualização.",
+    hist_073: "Team Coverage — uma nova tela em Trainer Info que lista os tipos do seu time num relance, mais um detalhamento Defense/Offense de fraquezas compartilhadas, golpes 4x e pontos cegos que seus próprios golpes não furam.",
     hist_072: "O Gym Coach agora lê suas insígnias de ginásio reais e já pula direto pro seu próximo desafio na primeira vez que você abre a tela em cada sessão, com uma marca Next na lista pra você sempre saber quem é.",
     hist_071: "Damage Calc — a aba Compare do Enemy Helper agora abre direto numa faixa de dano estimado e golpes pra nocautear dos dois lados, com nome e golpes de cada um na mesma cor pra ficar claro quem é quem.",
     hist_070: "Champion's Update — o Gym Coach mostra o time do próximo Líder de Ginásio, membro do Alto Comando ou Campeão com um veredito de vantagem de tipo contra seu próprio time, além de um Carrinho Sugerido que já monta o PokéMart Anywhere pra aquele combate.",
