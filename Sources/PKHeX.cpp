@@ -2715,7 +2715,25 @@ namespace CTRPluginFramework {
             static int idxList[13]; int nTrainer = 0;
             for (int i = 0; i < 26; ++i) if (gymTrainerGame[i] == gi) idxList[nTrainer++] = i;
 
+            // Real gym-badge byte (same address the Trainer Card reads: Misc6 +0xC, bit i = badge i+1) tells
+            // us which Gym Leader is next. Elite Four/Champion progress isn't flagged anywhere in RAM, so once
+            // all 8 badges are earned this just points at E4 slot 1 - still saves browsing past 8 leaders.
+            u8 gymBadges = 0; Process::Read8(AutoGameSet((u32)0x8C6A6B0, (u32)0x8C71DC4), gymBadges);
+            int gymBadgeCount = 0; for (int i = 0; i < 8; ++i) if ((gymBadges >> i) & 1) ++gymBadgeCount;
+            int nextTi = -1;
+            for (int i = 0; i < 26; ++i) {
+                if (gymTrainerGame[i] != gi) continue;
+                bool wantLeader = gymBadgeCount < 8 && gymTrainerKind[i] == 0 && gymTrainerOrder[i] == gymBadgeCount + 1;
+                bool wantE4First = gymBadgeCount >= 8 && gymTrainerKind[i] == 1 && gymTrainerOrder[i] == 1;
+                if (wantLeader || wantE4First) { nextTi = i; break; }
+            }
+
             static int leaderCursor = 0, leaderScroll = 0; // persists across openings, like Spawner's level
+            static bool badgeAutoSelected = false; // only auto-jump ONCE per session - after that, trust manual browsing
+            if (!badgeAutoSelected && nextTi >= 0) {
+                for (int j = 0; j < nTrainer; ++j) if (idxList[j] == nextTi) { leaderCursor = j; leaderScroll = (j >= 5) ? j - 4 : 0; break; }
+                badgeAutoSelected = true;
+            }
             if (leaderCursor >= nTrainer) leaderCursor = 0;
             int monCursor = 0;
             bool showCard = false;
@@ -2968,7 +2986,8 @@ namespace CTRPluginFramework {
                                   : (gymTrainerKind[idx] == 1) ? Utils::Format(getLanguage->Get("GYM_COACH_E4_FMT").c_str(), gymTrainerOrder[idx]) : getLanguage->Get("GYM_COACH_CHAMPION");
                     string line = string(gymTrainerNames[idx]) + " - " + suffix;
                     Color lc = cur ? sel : txt;
-                    bot.DrawSysfont(lc << line, 52, ry + 2, lc);
+                    if (idx == nextTi) bot.DrawSysfont(lc << line << favColor << ("  " + getLanguage->Get("GYM_COACH_NEXT")), 52, ry + 2, lc);
+                    else bot.DrawSysfont(lc << line, 52, ry + 2, lc);
                 }
                 {
                     Color shTxt = AutoContrastText(shopColor);

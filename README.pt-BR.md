@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.1
+# Gen6CTRPluginFrameworkOverhauled — v0.7.2
 
 [English](README.md) · **Português**
 
@@ -231,6 +231,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.6.5** — **Living Dex Dashboard**: um painel de coleção somente‑leitura para as 721 espécies — possuídas, shiny e faltantes — filtrável por **Tipo**, **Geração** e **Categoria**, com exportação pra uma lista `LivingDex.txt` de faltantes e um card completo da espécie a um toque; além de uma grade do **PC Box ++** mais limpa e arejada.
 - **v0.7.0** — **Champion's Update**: o **Gym Coach** mostra com antecedência o time do próximo Líder de Ginásio, membro da Elite dos Quatro ou Campeão do jogo que você está jogando — um veredito de vantagem de tipo contra o seu time, um card completo por Pokémon, e um **Carrinho Sugerido** que abre o PokéMart Anywhere já montado pra aquela luta específica.
 - **v0.7.1** — **Damage Calc**: a aba Compare do Enemy Helper agora abre direto numa faixa de dano estimado e golpes pra nocautear dos dois lados, com nome e golpes de cada um na mesma cor pra ficar claro quem é quem — aperte **Y** pra ver a comparação simples de stats.
+- **v0.7.2** — o **Gym Coach** agora lê suas insígnias de ginásio reais e já pula direto pro seu próximo desafio na primeira vez que você abre a tela em cada sessão, com uma marca **Next** na lista pra você sempre saber quem é.
 
 ## 📥 Instalando
 
@@ -340,7 +341,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.7.1 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.7.2 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença
