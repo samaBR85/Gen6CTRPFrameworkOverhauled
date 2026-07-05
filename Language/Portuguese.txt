@@ -1238,3 +1238,22 @@ LIVING_DEX_OWNED_N :: %d possuídos
 
 # ==== Living Dex v7 (species card) ====
 LIVING_DEX_CARD_BACK :: Aperte B para voltar
+
+MENU_GYM_COACH :: Treinador de Ginásio
+NOTE_GYM_COACH :: Veja com antecedência o time do próximo Líder de Ginásio, membro da Elite dos Quatro ou Campeão do jogo que você está jogando, com um veredito rápido de vantagem de tipo contra o seu próprio time.\n\nD-Pad Esquerda/Direita move o cursor pelo time deles (tela de cima). D-Pad Cima/Baixo (tela de baixo) escolhe outro Líder/Elite dos Quatro/Campeão. Aperte A num Pokémon pro card completo (tipos, habilidade, golpes), B pra voltar.\n\nCarrinho Sugerido abre o PokéMart Anywhere com um carrinho já montado com itens adequados àquele time (cura, cura de status, itens X) - só conferir e pagar.\n\nSomente leitura, usa a mesma tabela de tipos do Enemy Helper - não é um simulador de batalha completo (habilidade, item segurado, clima e boosts de status não entram na conta).
+
+# ==== Gym Coach (v0.7.0) ====
+GYM_COACH_FAVORABLE :: favorável
+GYM_COACH_NEUTRAL :: neutro
+GYM_COACH_UNFAVORABLE :: desfavorável
+GYM_COACH_WEAK_TO :: Fraco contra
+GYM_COACH_NO_WEAKNESS :: Sem fraqueza clara
+GYM_COACH_MORE_FMT ::  +%d a mais
+GYM_COACH_MEGA_EVOLVES :: Mega Evolui
+GYM_COACH_BADGE_FMT :: Insígnia %d
+GYM_COACH_E4_FMT :: Elite %d
+GYM_COACH_CHAMPION :: Campeão
+GYM_COACH_SHOPPING_LIST :: Carrinho Sugerido
+GYM_COACH_EDGE_FAVORABLE :: VANTAGEM DE TIPO: FAVORÁVEL
+GYM_COACH_EDGE_NEUTRAL :: VANTAGEM DE TIPO: NEUTRO
+GYM_COACH_EDGE_UNFAVORABLE :: VANTAGEM DE TIPO: DESFAVORÁVEL

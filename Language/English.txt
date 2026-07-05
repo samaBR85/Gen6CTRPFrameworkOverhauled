@@ -1203,6 +1203,22 @@ NOTE_TRAINER_INFO :: Two read-only, no-side-effects snapshots about you and your
 
 # ==== Living Dex Dashboard (v0.6.5) ====
 MENU_LIVING_DEX :: Living Dex
+MENU_GYM_COACH :: Gym Coach
+NOTE_GYM_COACH :: Preview the team of the next Gym Leader, Elite Four member or Champion for the game you're playing, with a quick type-matchup verdict against your own party.\n\nD-Pad Left/Right moves the cursor across their team on the top screen. D-Pad Up/Down (bottom screen) picks a different Gym Leader/E4/Champion. Press A on a Pokemon for its full card (types, ability, moves), B to go back.\n\nSuggested Cart opens PokeMart Anywhere with a cart already stocked with items suited to that team (healing, status cures, X items) - just review and pay.\n\nRead-only, uses the same type chart as Enemy Helper - not a full battle simulator (ability, held item, weather and stat boosts aren't factored in).
+GYM_COACH_FAVORABLE :: favorable
+GYM_COACH_NEUTRAL :: neutral
+GYM_COACH_UNFAVORABLE :: unfavorable
+GYM_COACH_WEAK_TO :: Weak to
+GYM_COACH_NO_WEAKNESS :: No clear weakness
+GYM_COACH_MORE_FMT ::  +%d more
+GYM_COACH_MEGA_EVOLVES :: Mega Evolves
+GYM_COACH_BADGE_FMT :: Badge %d
+GYM_COACH_E4_FMT :: E4 %d
+GYM_COACH_CHAMPION :: Champion
+GYM_COACH_SHOPPING_LIST :: Suggested Cart
+GYM_COACH_EDGE_FAVORABLE :: TYPE EDGE: FAVORABLE
+GYM_COACH_EDGE_NEUTRAL :: TYPE EDGE: NEUTRAL
+GYM_COACH_EDGE_UNFAVORABLE :: TYPE EDGE: UNFAVORABLE
 FAV_LIVING_DEX :: Living Dex
 NOTE_LIVING_DEX :: Your collection at a glance: which of the 721 Pokemon you OWN (across every box and your party), which you have SHINY, and which are still missing.\n\nOwned show their icon; missing show a dim tile with the dex number.\n\nD-Pad move, L/R change page (wraps around). On the bottom screen: tap Type, Gen or Category to filter, tap the fourth chip to cycle All / Missing / Owned, tap Export to save the missing list to LivingDex.txt on your SD. Start resets every filter, A opens a full info card for the selected Pokemon.\n\nRead-only. It counts what you actually HAVE (not the game's own seen/caught Pokedex).
 LIVING_DEX_PAGE :: Page %d/%d

@@ -1287,3 +1287,22 @@ LIVING_DEX_OWNED_N :: %d posseduti
 
 # ==== Living Dex v7 (species card) ====
 LIVING_DEX_CARD_BACK :: Premi B per tornare indietro
+
+MENU_GYM_COACH :: Coach di Palestra
+NOTE_GYM_COACH :: Anteprima della squadra del prossimo Capopalestra, membro dell'Alto Comando o Campione per il gioco che stai giocando, con un rapido verdetto di vantaggio di tipo contro la tua squadra.\n\nCroce Sinistra/Destra sposta il cursore sulla loro squadra (schermo superiore). Croce Su/Giu (schermo inferiore) sceglie un altro Capopalestra/Alto Comando/Campione. Premi A su un Pokemon per la scheda completa (tipi, abilita, mosse), B per tornare indietro.\n\nCarrello Suggerito apre PokeMart Anywhere con un carrello gia pieno di oggetti adatti a quella squadra (cure, oggetti anti-stato, oggetti X) - basta controllare e pagare.\n\nSola lettura, usa la stessa tabella dei tipi dell'Assistente Nemico - non e un simulatore di combattimento completo (abilita, oggetto, meteo e boost delle statistiche non sono considerati).
+
+# ==== Gym Coach (v0.7.0) ====
+GYM_COACH_FAVORABLE :: favorevole
+GYM_COACH_NEUTRAL :: neutro
+GYM_COACH_UNFAVORABLE :: sfavorevole
+GYM_COACH_WEAK_TO :: Debole contro
+GYM_COACH_NO_WEAKNESS :: Nessuna debolezza chiara
+GYM_COACH_MORE_FMT ::  +%d altri
+GYM_COACH_MEGA_EVOLVES :: Mega Evoluzione
+GYM_COACH_BADGE_FMT :: Medaglia %d
+GYM_COACH_E4_FMT :: Alto Comando %d
+GYM_COACH_CHAMPION :: Campione
+GYM_COACH_SHOPPING_LIST :: Carrello Suggerito
+GYM_COACH_EDGE_FAVORABLE :: VANTAGGIO DI TIPO: FAVOREVOLE
+GYM_COACH_EDGE_NEUTRAL :: VANTAGGIO DI TIPO: NEUTRO
+GYM_COACH_EDGE_UNFAVORABLE :: VANTAGGIO DI TIPO: SFAVOREVOLE

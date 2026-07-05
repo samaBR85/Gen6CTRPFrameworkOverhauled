@@ -1236,3 +1236,22 @@ LIVING_DEX_OWNED_N :: %d匹所持
 
 # ==== Living Dex v7 (species card) ====
 LIVING_DEX_CARD_BACK :: Bボタンで戻る
+
+MENU_GYM_COACH :: ジムコーチ
+NOTE_GYM_COACH :: 今プレイ中のゲームの、次のジムリーダー・四天王・チャンピオンのチームをプレビューし、自分のパーティとのタイプ相性の簡易判定を表示。\n\n十字キー左右で上画面のチームのカーソルを移動。十字キー上下（下画面）で別のジムリーダー/四天王/チャンピオンを選択。Aでそのポケモンの詳細カード（タイプ、特性、技）、Bで戻る。\n\nおすすめカートはPokeMart Anywhereを開き、そのチームに合わせたアイテム（回復、状態異常治療、X系アイテム）が入ったカートを用意済み - 確認して支払うだけ。\n\n閲覧のみ。Enemy Helperと同じタイプ相性表を使用 - 完全な戦闘シミュレーターではない（特性、持ち物、天候、能力ランク上昇は考慮されません）。
+
+# ==== Gym Coach (v0.7.0) ====
+GYM_COACH_FAVORABLE :: 有利
+GYM_COACH_NEUTRAL :: 互角
+GYM_COACH_UNFAVORABLE :: 不利
+GYM_COACH_WEAK_TO :: 弱点
+GYM_COACH_NO_WEAKNESS :: 明確な弱点なし
+GYM_COACH_MORE_FMT ::  +あと%d
+GYM_COACH_MEGA_EVOLVES :: メガシンカする
+GYM_COACH_BADGE_FMT :: バッジ%d
+GYM_COACH_E4_FMT :: 四天王%d
+GYM_COACH_CHAMPION :: チャンピオン
+GYM_COACH_SHOPPING_LIST :: おすすめカート
+GYM_COACH_EDGE_FAVORABLE :: タイプ有利判定: 有利
+GYM_COACH_EDGE_NEUTRAL :: タイプ有利判定: 互角
+GYM_COACH_EDGE_UNFAVORABLE :: タイプ有利判定: 不利

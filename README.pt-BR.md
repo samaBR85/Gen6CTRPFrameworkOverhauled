@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.6.5
+# Gen6CTRPluginFrameworkOverhauled — v0.7.0
 
 [English](README.md) · **Português**
 
@@ -19,7 +19,7 @@ esses jogos mas nunca mexeu com homebrew, é exatamente pra você. Os menus est�
 Você abre tudo com **SELECT**, e o menu aparece por cima do jogo:
 
 <p align="center">
-  <img src="Screenshots/v0.3.3/export/01_menu.png" width="330" alt="O menu do plugin sobre Pokémon Alpha Sapphire — lista de recursos em cima, botões embaixo" />
+  <img src="Screenshots/v0.7.0/home_v070.png" width="330" alt="O menu do plugin sobre Pokémon Alpha Sapphire — lista de recursos em cima, botões embaixo" />
 </p>
 
 > 🎯 **Funciona nos quatro jogos Gen 6.** X, Y, Omega Ruby e Alpha Sapphire têm conteúdo dedicado (guias + assets) na própria pasta de Title ID, e o mesmo `.3gx` detecta automaticamente qual jogo você está rodando.
@@ -227,6 +227,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.6.3** — **Ajustes no HUD**: o campo mal nomeado "Clock" virou **Time Played**, com dois campos novos no HUD — **In-Game Time** (a fase de dia/noite do jogo pelo relógio do 3DS, ex. `14:15 - Day`) e **Real Time** (o relógio do console) — e o campo **Party count** agora mostra o tamanho real da sua equipe.
 - **v0.6.4** — **Hunter's Update**: um **Trainer Card** com seu OT/TID, dinheiro, Time Played, sprites da party e suas **insígnias de ginásio reais lidas ao vivo do save**; o **Egg Peek** pra revelar o conteúdo de um ovo mascarado (`?`) sem chocá‑lo (e ovos criados no PC Box ++ agora ganham uma data/local de recebimento reais); e um **Shiny Hunt Companion** que conta seus encontros de uma espécie‑alvo e avisa + pausa quando um shiny real aparece.
 - **v0.6.5** — **Living Dex Dashboard**: um painel de coleção somente‑leitura para as 721 espécies — possuídas, shiny e faltantes — filtrável por **Tipo**, **Geração** e **Categoria**, com exportação pra uma lista `LivingDex.txt` de faltantes e um card completo da espécie a um toque; além de uma grade do **PC Box ++** mais limpa e arejada.
+- **v0.7.0** — **Champion's Update**: o **Gym Coach** mostra com antecedência o time do próximo Líder de Ginásio, membro da Elite dos Quatro ou Campeão do jogo que você está jogando — um veredito de vantagem de tipo contra o seu time, um card completo por Pokémon, e um **Carrinho Sugerido** que abre o PokéMart Anywhere já montado pra aquela luta específica.
 
 ## 📥 Instalando
 
@@ -336,7 +337,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.6.5 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.7.0 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença

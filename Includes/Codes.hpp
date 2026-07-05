@@ -47,6 +47,8 @@ namespace CTRPluginFramework {
     void UpdateWildSpawner(MenuEntry *entry);
     void WildSpawner(MenuEntry *entry);
     void BagItemFinder(MenuEntry *entry); // unified Bag item-finder (#11 redesign)
+    void BagCartAdd(int id, int pocket, int qty, int unit); // pre-fill the PokeMart Anywhere cart (Gym Coach's Shopping List)
+    void BagCartClear(void); // empty the cart before Gym Coach builds a fresh suggestion for a different trainer
     void AlwaysShiny(MenuEntry *entry);
     void ShinyHuntCompanion(MenuEntry *entry); // Shiny Hunt Companion hub (Encounters & Catching)
     void DisableShinyLock(MenuEntry *entry);

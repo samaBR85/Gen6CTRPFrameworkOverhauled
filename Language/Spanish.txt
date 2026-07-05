@@ -1237,3 +1237,22 @@ LIVING_DEX_OWNED_N :: %d en posesión
 
 # ==== Living Dex v7 (species card) ====
 LIVING_DEX_CARD_BACK :: Pulsa B para volver
+
+MENU_GYM_COACH :: Entrenador de Gimnasio
+NOTE_GYM_COACH :: Consulta con antelacion el equipo del proximo Lider de Gimnasio, miembro del Alto Mando o Campeon del juego que estas jugando, con un veredicto rapido de ventaja de tipo contra tu propio equipo.\n\nCruceta Izquierda/Derecha mueve el cursor por su equipo (pantalla superior). Cruceta Arriba/Abajo (pantalla inferior) elige otro Lider/Alto Mando/Campeon. Pulsa A en un Pokemon para su ficha completa (tipos, habilidad, movimientos), B para volver.\n\nCarrito Sugerido abre PokeMart Anywhere con un carrito ya preparado con objetos adecuados para ese equipo (curacion, curas de estado, objetos X) - solo hay que revisar y pagar.\n\nSolo lectura, usa la misma tabla de tipos que el Asistente Enemigo - no es un simulador de batalla completo (habilidad, objeto equipado, clima y aumentos de estadisticas no se tienen en cuenta).
+
+# ==== Gym Coach (v0.7.0) ====
+GYM_COACH_FAVORABLE :: favorable
+GYM_COACH_NEUTRAL :: neutro
+GYM_COACH_UNFAVORABLE :: desfavorable
+GYM_COACH_WEAK_TO :: Debil contra
+GYM_COACH_NO_WEAKNESS :: Sin debilidad clara
+GYM_COACH_MORE_FMT ::  +%d mas
+GYM_COACH_MEGA_EVOLVES :: Mega Evoluciona
+GYM_COACH_BADGE_FMT :: Medalla %d
+GYM_COACH_E4_FMT :: Alto Mando %d
+GYM_COACH_CHAMPION :: Campeón
+GYM_COACH_SHOPPING_LIST :: Carrito Sugerido
+GYM_COACH_EDGE_FAVORABLE :: VENTAJA DE TIPO: FAVORABLE
+GYM_COACH_EDGE_NEUTRAL :: VENTAJA DE TIPO: NEUTRO
+GYM_COACH_EDGE_UNFAVORABLE :: VENTAJA DE TIPO: DESFAVORABLE

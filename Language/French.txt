@@ -1236,3 +1236,22 @@ LIVING_DEX_OWNED_N :: %d possedes
 
 # ==== Living Dex v7 (species card) ====
 LIVING_DEX_CARD_BACK :: Appuie sur B pour revenir
+
+MENU_GYM_COACH :: Coach de Arene
+NOTE_GYM_COACH :: Previsualise l'equipe du prochain Champion d'Arene, membre du Conseil 4 ou Maitre pour le jeu que tu joues, avec un verdict rapide d'avantage de type contre ta propre equipe.\n\nCroix Gauche/Droite deplace le curseur sur leur equipe (ecran du haut). Croix Haut/Bas (ecran du bas) choisit un autre Champion/Conseil 4/Maitre. Appuie sur A sur un Pokemon pour sa fiche complete (types, talent, capacites), B pour revenir.\n\nPanier Suggere ouvre PokeMart Anywhere avec un panier deja rempli d'objets adaptes a cette equipe (soins, anti-statuts, objets X) - il suffit de verifier et payer.\n\nLecture seule, utilise le meme tableau des types que l'Assistant Ennemi - ce n'est pas un simulateur de combat complet (talent, objet tenu, meteo et boosts de stats ne sont pas pris en compte).
+
+# ==== Gym Coach (v0.7.0) ====
+GYM_COACH_FAVORABLE :: favorable
+GYM_COACH_NEUTRAL :: neutre
+GYM_COACH_UNFAVORABLE :: defavorable
+GYM_COACH_WEAK_TO :: Faible contre
+GYM_COACH_NO_WEAKNESS :: Aucune faiblesse claire
+GYM_COACH_MORE_FMT ::  +%d de plus
+GYM_COACH_MEGA_EVOLVES :: Mega-evolue
+GYM_COACH_BADGE_FMT :: Badge %d
+GYM_COACH_E4_FMT :: Conseil 4 - %d
+GYM_COACH_CHAMPION :: Maitre
+GYM_COACH_SHOPPING_LIST :: Panier Suggere
+GYM_COACH_EDGE_FAVORABLE :: AVANTAGE DE TYPE : FAVORABLE
+GYM_COACH_EDGE_NEUTRAL :: AVANTAGE DE TYPE : NEUTRE
+GYM_COACH_EDGE_UNFAVORABLE :: AVANTAGE DE TYPE : DEFAVORABLE

@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.6.5
+# Gen6CTRPluginFrameworkOverhauled — v0.7.0
 
 **English** · [Português](README.pt-BR.md)
 
@@ -19,7 +19,7 @@ is for.
 You open everything with **SELECT**, and the menu appears over your game:
 
 <p align="center">
-  <img src="Screenshots/v0.3.3/export/01_menu.png" width="330" alt="The plugin menu over Pokémon Alpha Sapphire — feature list on top, buttons below" />
+  <img src="Screenshots/v0.7.0/home_v070.png" width="330" alt="The plugin menu over Pokémon Alpha Sapphire — feature list on top, buttons below" />
 </p>
 
 > 🎯 **Works on all four Gen 6 games.** X, Y, Omega Ruby and Alpha Sapphire each get their own tailored content (guides + assets) in their own Title-ID folder, and the same `.3gx` auto-detects which game you're running.
@@ -226,6 +226,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.6.3** — **HUD polish**: the misnamed "Clock" field is now **Time Played**, joined by two new HUD fields — **In-Game Time** (the game's day/night phase from the 3DS clock, e.g. `14:15 - Day`) and **Real Time** (the console clock) — and the **Party count** field now shows your true roster size.
 - **v0.6.4** — **Hunter's Update**: a **Trainer Card** with your OT/TID, cash, Time Played, party sprites, and your **real gym badges read live from your save**; **Egg Peek** to reveal a masked egg's contents (`?`) without hatching it (and eggs made in PC Box ++ now get a real received date/place); and a **Shiny Hunt Companion** that counts your encounters of a target species and alerts + pauses on a real shiny.
 - **v0.6.5** — **Living Dex Dashboard**: a read-only collection panel for all 721 species — owned, shiny, and missing — filterable by **Type**, **Gen** and **Category**, with an export to a `LivingDex.txt` missing list and a full species info card a tap away; plus a cleaner, more spacious **PC Box ++** grid.
+- **v0.7.0** — **Champion's Update**: **Gym Coach** previews the next Gym Leader's, Elite Four member's, or Champion's team for the game you're playing — a type-matchup verdict against your own party, a full species card per Pokémon, and a **Suggested Cart** that opens PokéMart Anywhere already stocked for that specific fight.
 
 ## 📥 Installing
 
@@ -335,7 +336,7 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.6.5 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.7.0 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

@@ -13,6 +13,8 @@
 #include "BagItemMeta.hpp" // bagItemList/bagItemCount/bagItemPocket for the Held Item picker
 #include "ItemDesc.hpp"    // gItemDesc[id] item effect text (held items + balls)
 #include "TypeChart.hpp"   // gTypeEff[18][18]/TypeFactorQ() - Enemy Helper type-matchup counter advice
+#include "GymData.hpp"     // Gym Leader/Elite Four/Champion teams (X/Y + ORAS) - Gym Coach
+#include "Codes.hpp"       // BagItemFinder() - Gym Coach's Shopping List button opens PokeMart Anywhere
 #include "HeldItemList.hpp" // gHeldItemIds[] - curated holdable items (own list, NOT the PokeMart bag list)
 #include "AbilityTags.hpp"  // gAbilityTags[]/gAbilityTagName[] - effect tags for the ability filter panel
 #include "HeldItemTags.hpp" // gHeldItemTags[]/gHeldItemTagName[] - effect tags for the held-item filter panel
@@ -2686,6 +2688,293 @@ namespace CTRPluginFramework {
                         string el = getLanguage->Get("LIVING_DEX_EXPORT_BTN");
                         bot.DrawSysfont(exTxt << el, GX + (GW - (int)OSD::GetTextWidth(true, el)) / 2, EXPORT_Y + 6, exTxt);
                     }
+                }
+
+                OSD::SwapBuffers();
+            }
+        }
+
+        // ===== Gym Coach =====
+        // Read-only battle-prep panel (Trainer Info): browse the 8 Gym Leaders + Elite Four + Champion of
+        // whichever game is running (X/Y or OR/AS, from GymData.hpp) and see a quick type-matchup verdict
+        // of each of their Pokemon against your OWN party's types (reusing the same TypeFactorQ() chart
+        // Enemy Helper already uses). Unlike Enemy Helper this works OUTSIDE battle - it's meant to be
+        // checked before a fight, not during one. English-only for now (i18n wrap is a later phase);
+        // "Shopping List" opens the plain PokeMart Anywhere for now (a pre-filled cart is a later phase).
+        void GymCoach(MenuEntry *entry) {
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+            const FwkSettings &st = FwkSettings::Get();
+            Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+            Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+            const Color favColor(0x1D, 0x9E, 0x75), badColor(0xD8, 0x5A, 0x30), neutralColor(0x88, 0x87, 0x80);
+            const Color shopColor(0xA3, 0x2D, 0x2D);
+
+            bool isORAS = (currGameSeries == GameSeries::ORAS);
+            int gi = isORAS ? 1 : 0;
+            static int idxList[13]; int nTrainer = 0;
+            for (int i = 0; i < 26; ++i) if (gymTrainerGame[i] == gi) idxList[nTrainer++] = i;
+
+            static int leaderCursor = 0, leaderScroll = 0; // persists across openings, like Spawner's level
+            if (leaderCursor >= nTrainer) leaderCursor = 0;
+            int monCursor = 0;
+            bool showCard = false;
+
+            // My party's own types (as potential STAB attacks) - scanned once per opening; the party can't
+            // change while this screen is up (no editor here), so no need to rescan every frame.
+            int partyTypes[12]; int nPartyTypes = 0;
+            auto addPartyType = [&](int t) { if (t < 1) return; for (int i = 0; i < nPartyTypes; ++i) if (partyTypes[i] == t) return; if (nPartyTypes < 12) partyTypes[nPartyTypes++] = t; };
+            { u32 pbase = FindPartyBase();
+              for (int i = 0; i < 6 && pbase; ++i) {
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) { addPartyType(spawnerType1[pk.species]); addPartyType(spawnerType2[pk.species]); }
+              } }
+
+            // Defensive multiplier (quarter-units) of each attacking type 1-18 against a species' typing -
+            // identical formula to Enemy Helper's.
+            auto typeQV = [&](u16 species, int qv[19]) {
+                for (int a = 0; a <= 18; ++a) qv[a] = 0;
+                int d1 = spawnerType1[species], d2 = spawnerType2[species];
+                if (d1 < 1) return;
+                for (int a = 1; a <= 18; ++a) { int q = TypeFactorQ(a - 1, d1 - 1); if (d2 >= 1 && d2 != d1) q = q * TypeFactorQ(a - 1, d2 - 1) / 4; qv[a] = q; }
+            };
+            // -1 unfavorable, 0 neutral, 1 favorable, judged by the best quarter-unit multiplier any of my
+            // party's own types would land on this Pokemon.
+            auto verdictFor = [&](u16 species) -> int {
+                if (nPartyTypes == 0) return 0;
+                int qv[19]; typeQV(species, qv);
+                int best = 0;
+                for (int i = 0; i < nPartyTypes; ++i) if (qv[partyTypes[i]] > best) best = qv[partyTypes[i]];
+                if (best >= 8) return 1;
+                if (best <= 2) return -1;
+                return 0;
+            };
+            // "Weak to X, Y +N more" - drops whole trailing type NAMES once maxW is reached (never a
+            // mid-word cut, which used to leave a dangling comma when the line ran out of room).
+            auto weaknessReason = [&](u16 species, int maxW) -> string {
+                int qv[19]; typeQV(species, qv); vector<int> hitTypes;
+                for (int a = 1; a <= 18; ++a) if (qv[a] >= 8) hitTypes.push_back(a);
+                if (hitTypes.empty()) return getLanguage->Get("GYM_COACH_NO_WEAKNESS");
+                string reason = getLanguage->Get("GYM_COACH_WEAK_TO"); size_t shown = 0;
+                for (; shown < hitTypes.size(); ++shown) {
+                    string cand = reason + (shown ? ", " : "") + g_typeName[hitTypes[shown]];
+                    string tail = (shown + 1 < hitTypes.size()) ? Utils::Format(getLanguage->Get("GYM_COACH_MORE_FMT").c_str(), (int)(hitTypes.size() - shown - 1)) : string();
+                    if ((int)OSD::GetTextWidth(true, cand + tail) > maxW && shown > 0) break;
+                    reason = cand;
+                }
+                if (shown < hitTypes.size()) reason += Utils::Format(getLanguage->Get("GYM_COACH_MORE_FMT").c_str(), (int)(hitTypes.size() - shown));
+                return reason;
+            };
+
+            Image spr; int sprKey = -1;
+            static Image rowIcons[6]; int loadedTrainer = -1;
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
+            drainKeys();
+
+            const int ROWSVIS = 5, ROWH = 22, ROWY0 = 58;
+
+            while (true) {
+                Controller::Update();
+                if (System::IsSleeping()) break;
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close(); break;
+                }
+
+                int ti = idxList[leaderCursor];
+                int monBase = gymTrainerMonOff[ti], monCount = gymTrainerMonOff[ti + 1] - monBase;
+                if (monCursor >= monCount) monCursor = 0;
+
+                if (Controller::IsKeyPressed(Key::B)) { if (showCard) showCard = false; else break; }
+
+                if (!showCard) {
+                    if (monCount > 0) {
+                        if (Controller::IsKeyPressed(Key::Left))  monCursor = (monCursor + monCount - 1) % monCount;
+                        if (Controller::IsKeyPressed(Key::Right)) monCursor = (monCursor + 1) % monCount;
+                        if (Controller::IsKeyPressed(Key::A)) showCard = true;
+                    }
+                    static int heldDir = 0, repTimer = 0;
+                    int dir = Controller::IsKeyDown(Key::Down) ? 1 : (Controller::IsKeyDown(Key::Up) ? -1 : 0);
+                    if (dir != 0) {
+                        bool fire = false;
+                        if (dir != heldDir) { heldDir = dir; repTimer = 16; fire = true; }
+                        else if (--repTimer <= 0) { repTimer = 4; fire = true; }
+                        if (fire) {
+                            leaderCursor = (leaderCursor + dir + nTrainer) % nTrainer; monCursor = 0;
+                            if (leaderCursor < leaderScroll) leaderScroll = leaderCursor;
+                            if (leaderCursor >= leaderScroll + ROWSVIS) leaderScroll = leaderCursor - ROWSVIS + 1;
+                        }
+                    } else heldDir = 0;
+                } else if (monCount > 0) {
+                    if (Controller::IsKeyPressed(Key::L)) monCursor = (monCursor + monCount - 1) % monCount;
+                    if (Controller::IsKeyPressed(Key::R)) monCursor = (monCursor + 1) % monCount;
+                }
+
+                bool down = Touch::IsDown(); UIntVector tp = down ? Touch::GetPosition() : lastPos; if (down) lastPos = tp;
+                bool tap = armed && !down && wasDown; if (!down) armed = true; wasDown = down;
+                if (!showCard) {
+                    if (tap && inBox(lastPos, 30, 178, 260, 26)) {
+                        // Stock the PokeMart Anywhere cart with a small kit suited to THIS trainer's team
+                        // (same curated item set + heuristics Enemy Helper already uses per-enemy, just
+                        // pooled across the whole team): a status cure if anyone knows a status move, a
+                        // Sp.Atk/Atk-leaning X item matching the team's base-stat bias, always a healing
+                        // item, and X Speed if the team runs fast. Calibrated loosely by team level too -
+                        // Potion for early teams, working up to Full Restore for late-game ones.
+                        // Clear first - otherwise tapping Shopping List for a second trainer would just pile
+                        // more items onto whatever was already in the cart (including from a normal PokeMart
+                        // Anywhere session), instead of replacing it with THIS trainer's own suggestion.
+                        BagCartClear();
+                        auto addToCart = [&](int id, int qty) { if (id > 0 && id < 801) BagCartAdd(id, bagItemPocket[id], qty, bagItemCost[id]); };
+                        int atkSum = 0, spaSum = 0, speSum = 0, lvlSum = 0; bool anyStatus = false;
+                        for (int i = 0; i < monCount; ++i) {
+                            u16 sp = gymMonSpecies[monBase + i];
+                            atkSum += gBaseStats[sp - 1][1]; spaSum += gBaseStats[sp - 1][3]; speSum += gBaseStats[sp - 1][5];
+                            lvlSum += gymMonLevel[monBase + i];
+                            int mb = gymMonMoveOff[monBase + i], mc = gymMonMoveOff[monBase + i + 1] - mb;
+                            for (int j = 0; j < mc; ++j) { u16 mv = gymMoveIdx[mb + j]; if (mv >= 1 && mv <= 621 && gMoveExtra[mv - 1][1] == 0) anyStatus = true; }
+                        }
+                        int avgLvl = monCount > 0 ? lvlSum / monCount : 1;
+                        int healId = avgLvl >= 55 ? 23 /* Full Restore */ : avgLvl >= 30 ? 25 /* Hyper Potion */ : 17 /* Potion */;
+                        addToCart(healId, 3);
+                        if (anyStatus) { addToCart(27, 2); addToCart(55, 1); }             // Full Heal, Guard Spec.
+                        if (atkSum >= spaSum) addToCart(58, 2); else addToCart(62, 2);     // X Defense vs X Sp. Def
+                        if (monCount > 0 && speSum / monCount >= 90) addToCart(59, 1);     // X Speed
+                        BagItemFinder(entry);
+                        drainKeys(); armed = false; wasDown = false;
+                    } else if (tap) {
+                        for (int r = 0; r < ROWSVIS; ++r) {
+                            int li = leaderScroll + r; if (li >= nTrainer) break;
+                            int ry = ROWY0 + r * ROWH;
+                            if (inBox(lastPos, 30, ry - 2, 260, ROWH)) { leaderCursor = li; monCursor = 0; }
+                        }
+                    }
+                }
+
+                // (re)load the 32px row icons only when the trainer changes (BoxIcons - same asset the
+                // Living Dex / PC Box ++ grids already use, no new sprites).
+                if (ti != loadedTrainer) {
+                    for (int i = 0; i < 6; ++i) {
+                        rowIcons[i].Clear();
+                        if (i < monCount) { string p; BoxIconPath(p, gymMonSpecies[monBase + i], false, "BoxIcons/"); rowIcons[i].LoadFromFile(p); }
+                    }
+                    loadedTrainer = ti;
+                }
+
+                // ---- TOP ----
+                top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
+                if (!showCard) {
+                    top.DrawSysfont(title << getLanguage->Get("MENU_GYM_COACH"), 42, 28, title);
+                    string tname = string(gymTrainerNames[ti]) + " - " + g_typeName[gymTrainerType[ti]];
+                    top.DrawSysfont(txt << tname, 358 - (int)OSD::GetTextWidth(true, tname), 28, txt);
+                } else if (monCount > 0) {
+                    u16 hsp = gymMonSpecies[monBase + monCursor];
+                    top.DrawSysfont(title << speciesList[hsp - 1], 42, 28, title);
+                    string idxs = to_string(monCursor + 1) + " / " + to_string(monCount);
+                    top.DrawSysfont(txt << idxs, 358 - (int)OSD::GetTextWidth(true, idxs), 28, txt);
+                }
+                top.DrawRect(42, 46, 316, 1, title, true);
+
+                if (!showCard) {
+                    // Team row + summary are vertically centered in the window (not clumped at the top),
+                    // and the selected-Pokemon panel below now carries its own weight (name/level, type
+                    // chips, a "Weak to" hint) instead of a single bare line, so the window doesn't end in
+                    // a big empty gap.
+                    const int CELL = 32; int pitch = monCount > 1 ? std::min(50, 300 / monCount) : 50;
+                    int rowW = (monCount - 1) * pitch + CELL, x0 = 30 + (340 - rowW) / 2, y0 = 72;
+                    int favN = 0, neuN = 0, badN = 0;
+                    for (int i = 0; i < monCount; ++i) {
+                        u16 sp = gymMonSpecies[monBase + i]; int v = verdictFor(sp);
+                        if (v > 0) ++favN; else if (v < 0) ++badN; else ++neuN;
+                        int cx = x0 + i * pitch, cy = y0;
+                        if (rowIcons[i].IsLoaded()) rowIcons[i].Draw(top, cx, cy);
+                        Color vc = v > 0 ? favColor : v < 0 ? badColor : neutralColor;
+                        const char *vs = v > 0 ? "OK" : v < 0 ? "X" : "-";
+                        int vw = (int)OSD::GetTextWidth(true, vs) + 8;
+                        top.DrawRect(cx + (CELL - vw) / 2, cy - 14, vw, 12, vc, true);
+                        top.DrawSysfont(AutoContrastText(vc) << vs, cx + (CELL - (int)OSD::GetTextWidth(true, vs)) / 2, cy - 14, AutoContrastText(vc));
+                        string lv = "Lv" + to_string(gymMonLevel[monBase + i]);
+                        top.DrawSysfont(txt << lv, cx + (CELL - (int)OSD::GetTextWidth(true, lv)) / 2, cy + 34, txt);
+                        if (i == monCursor) top.DrawRect(cx - 1, cy - 1, CELL + 2, CELL + 2, sel, false);
+                    }
+                    top.DrawRect(42, 124, 316, 1, border, true);
+                    {
+                        int x = 44;
+                        auto seg = [&](const string &s, const Color &c) { top.DrawSysfont(c << s, x, 134, c); x += (int)OSD::GetTextWidth(true, s) + 14; };
+                        seg(to_string(favN) + " " + getLanguage->Get("GYM_COACH_FAVORABLE"), favColor);
+                        seg(to_string(neuN) + " " + getLanguage->Get("GYM_COACH_NEUTRAL"), neutralColor);
+                        seg(to_string(badN) + " " + getLanguage->Get("GYM_COACH_UNFAVORABLE"), badColor);
+                    }
+                    if (monCount > 0) {
+                        u16 sp = gymMonSpecies[monBase + monCursor];
+                        top.DrawRect(42, 152, 316, 62, bg2, true); top.DrawRect(42, 152, 316, 62, border, false);
+                        string who = string(speciesList[sp - 1]) + "  Lv " + to_string(gymMonLevel[monBase + monCursor]);
+                        top.DrawSysfont(title << who, 52, 158, title);
+                        DrawTypeChips(top, sp, 52, 176);
+                        top.DrawSysfont(txt << weaknessReason(sp, 300), 52, 196, txt);
+                    }
+                } else if (monCount > 0) {
+                    u16 sp = gymMonSpecies[monBase + monCursor];
+                    u8 lvl = gymMonLevel[monBase + monCursor], abil = gymMonAbility[monBase + monCursor], isMega = gymMonMega[monBase + monCursor];
+                    int mvBase = gymMonMoveOff[monBase + monCursor], mvCount = gymMonMoveOff[monBase + monCursor + 1] - mvBase;
+
+                    int key = sp * 2; if (key != sprKey) { sprKey = key; string p; BoxIconPath(p, sp, false, "Spawner/"); spr.LoadFromFile(p); }
+                    top.DrawRect(44, 54, 70, 70, Color::White, true); top.DrawRect(44, 54, 70, 70, border, false);
+                    if (spr.IsLoaded()) { int sw = spr.Width(), sh = spr.Height(); spr.Draw(top, 44 + (70 - sw) / 2, 54 + (70 - sh) / 2); }
+
+                    int rx = 126;
+                    DrawTypeChips(top, sp, rx, 58);
+                    {
+                        string abLine = "Lv " + to_string(lvl) + ((abil >= 1 && abil <= 191) ? (string("  ") + abilityList[abil - 1]) : string());
+                        if (isMega) abLine += " - " + getLanguage->Get("GYM_COACH_MEGA_EVOLVES");
+                        top.DrawSysfont(txt << abLine, rx, 78, txt);
+                    }
+                    // Moves back in a 2x2 grid (per feedback) but with a wider column gap (120px instead of
+                    // the original 90px) so a name like "Light Screen" in the left column has room before
+                    // the right column starts.
+                    for (int i = 0; i < 4; ++i) {
+                        int col = i % 2, row = i / 2, mx = rx + col * 120, my = 98 + row * 18;
+                        if (i < mvCount) {
+                            u16 mv = gymMoveIdx[mvBase + i]; int mt = (mv >= 1 && mv <= 621) ? gMoveExtra[mv - 1][0] : 0;
+                            top.DrawRect(mx, my + 3, 8, 8, TypeColor(mt), true);
+                            top.DrawSysfont(txt << movesList[mv - 1], mx + 14, my, txt);
+                        } else top.DrawSysfont(txt << "-", mx + 14, my, txt);
+                    }
+
+                    int v = verdictFor(sp);
+                    Color bandBg = v > 0 ? favColor : v < 0 ? badColor : neutralColor, bandTxt = AutoContrastText(bandBg);
+                    top.DrawRect(44, 146, 284, 44, bandBg, true); top.DrawRect(44, 146, 284, 44, border, false);
+                    // "TYPE EDGE" (not just "FAVORABLE") - this verdict is ONLY the type matchup between your
+                    // party and this Pokemon, not a full battle simulation (no level/stats/items factored in);
+                    // the earlier bare "FAVORABLE" label read as a complete verdict and confused a player whose
+                    // own team was far under-levelled but still "favorable" on pure typing.
+                    string label = getLanguage->Get(v > 0 ? "GYM_COACH_EDGE_FAVORABLE" : v < 0 ? "GYM_COACH_EDGE_UNFAVORABLE" : "GYM_COACH_EDGE_NEUTRAL");
+                    top.DrawSysfont(bandTxt << label, 44 + (284 - (int)OSD::GetTextWidth(true, label)) / 2, 152, bandTxt);
+                    {
+                        string reason = weaknessReason(sp, 268);
+                        top.DrawSysfont(bandTxt << reason, 44 + (284 - (int)OSD::GetTextWidth(true, reason)) / 2, 170, bandTxt);
+                    }
+                }
+
+                // ---- BOTTOM: leader list + Shopping List (always drawn - only input is gated by showCard) ----
+                bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
+                bot.DrawSysfont(title << getLanguage->Get("MENU_GYM_COACH"), 34, 28, title);
+                bot.DrawRect(34, 46, 232, 1, title, true);
+                for (int r = 0; r < ROWSVIS; ++r) {
+                    int li = leaderScroll + r; if (li >= nTrainer) break;
+                    int idx = idxList[li], ry = ROWY0 + r * ROWH; bool cur = (li == leaderCursor);
+                    if (cur) bot.DrawRect(30, ry - 2, 260, ROWH, bg2, true);
+                    bot.DrawRect(36, ry + 4, 10, 10, TypeColor(gymTrainerType[idx]), true);
+                    string suffix = (gymTrainerKind[idx] == 0) ? Utils::Format(getLanguage->Get("GYM_COACH_BADGE_FMT").c_str(), gymTrainerOrder[idx])
+                                  : (gymTrainerKind[idx] == 1) ? Utils::Format(getLanguage->Get("GYM_COACH_E4_FMT").c_str(), gymTrainerOrder[idx]) : getLanguage->Get("GYM_COACH_CHAMPION");
+                    string line = string(gymTrainerNames[idx]) + " - " + suffix;
+                    Color lc = cur ? sel : txt;
+                    bot.DrawSysfont(lc << line, 52, ry + 2, lc);
+                }
+                {
+                    Color shTxt = AutoContrastText(shopColor);
+                    bot.DrawRect(30, 178, 260, 26, shopColor, true); bot.DrawRect(30, 178, 260, 26, title, false);
+                    string sl = getLanguage->Get("GYM_COACH_SHOPPING_LIST");
+                    bot.DrawSysfont(shTxt << sl, 30 + (260 - (int)OSD::GetTextWidth(true, sl)) / 2, 185, shTxt);
                 }
 
                 OSD::SwapBuffers();

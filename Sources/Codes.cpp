@@ -2769,11 +2769,17 @@ namespace CTRPluginFramework {
     static int g_cartCount = 0;
 
     static int  BagCartTotal(void) { int t = 0; for (int i = 0; i < g_cartCount; i++) t += (int)g_cart[i].qty * (int)g_cart[i].unit; return t; }
-    static void BagCartAdd(int id, int pocket, int qty, int unit) {
+    // Not static: Gym Coach's Shopping List button (PKHeX.cpp) pre-fills the cart with a suggested list
+    // before opening BagItemFinder, so the player lands on PokeMart Anywhere with a "Cart (N - $total)"
+    // button already showing instead of an empty bag search.
+    void BagCartAdd(int id, int pocket, int qty, int unit) {
         for (int i = 0; i < g_cartCount; i++)
             if (g_cart[i].id == (u16)id && g_cart[i].pocket == (u8)pocket) { int q = (int)g_cart[i].qty + qty; if (q > 999) q = 999; g_cart[i].qty = (u16)q; return; }
         if (g_cartCount < 50) { g_cart[g_cartCount].id = (u16)id; g_cart[g_cartCount].pocket = (u8)pocket; g_cart[g_cartCount].qty = (u16)qty; g_cart[g_cartCount].unit = (u16)unit; g_cartCount++; }
     }
+    // Gym Coach calls this right before building a fresh suggestion, so tapping Shopping List for a
+    // second trainer REPLACES the previous team's suggestion instead of piling on top of it forever.
+    void BagCartClear(void) { g_cartCount = 0; }
     static u32  BagReadMoney(void)   { u32 m = 0; Process::Read32(AutoGameSet(0x8C6A6AC, 0x8C71DC0), m); return m; }
     static void BagWriteMoney(u32 m) { if (m > 9999999) m = 9999999; Process::Write32(AutoGameSet(0x8C6A6AC, 0x8C71DC0), m); }
 

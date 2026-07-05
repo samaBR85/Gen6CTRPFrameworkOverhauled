@@ -1236,3 +1236,22 @@ LIVING_DEX_OWNED_N :: %d im Besitz
 
 # ==== Living Dex v7 (species card) ====
 LIVING_DEX_CARD_BACK :: Druecke B zum Zurueckgehen
+
+MENU_GYM_COACH :: Arena-Coach
+NOTE_GYM_COACH :: Zeigt das Team des naechsten Arenaleiters, Top-Vier-Mitglieds oder Champs fuer dein Spiel, mit einem schnellen Typvorteil-Urteil gegen dein eigenes Team.\n\nKreuz Links/Rechts bewegt den Cursor durch ihr Team (oberer Bildschirm). Kreuz Hoch/Runter (unterer Bildschirm) waehlt einen anderen Arenaleiter/Top Vier/Champ. Druecke A auf einem Pokemon fuer die volle Karte (Typen, Faehigkeit, Attacken), B geht zurueck.\n\nEmpfohlener Korb oeffnet PokeMart Anywhere mit einem bereits gefuellten Warenkorb passend zu diesem Team (Heilung, Statusheilung, X-Items) - nur pruefen und bezahlen.\n\nNur lesen, nutzt dieselbe Typtabelle wie der Gegner-Assistent - kein vollstaendiger Kampfsimulator (Faehigkeit, Item, Wetter und Statuswerte-Boosts werden nicht beruecksichtigt).
+
+# ==== Gym Coach (v0.7.0) ====
+GYM_COACH_FAVORABLE :: guenstig
+GYM_COACH_NEUTRAL :: neutral
+GYM_COACH_UNFAVORABLE :: ungünstig
+GYM_COACH_WEAK_TO :: Schwach gegen
+GYM_COACH_NO_WEAKNESS :: Keine klare Schwaeche
+GYM_COACH_MORE_FMT ::  +%d weitere
+GYM_COACH_MEGA_EVOLVES :: Mega-Entwicklung
+GYM_COACH_BADGE_FMT :: Orden %d
+GYM_COACH_E4_FMT :: Top Vier %d
+GYM_COACH_CHAMPION :: Champ
+GYM_COACH_SHOPPING_LIST :: Empfohlener Korb
+GYM_COACH_EDGE_FAVORABLE :: TYP-VORTEIL: GUENSTIG
+GYM_COACH_EDGE_NEUTRAL :: TYP-VORTEIL: NEUTRAL
+GYM_COACH_EDGE_UNFAVORABLE :: TYP-VORTEIL: UNGUENSTIG
