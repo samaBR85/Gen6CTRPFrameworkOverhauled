@@ -8,7 +8,7 @@
     "sheet": "gen6ctrpf.t3x",
     "sheetURL": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.t3x",
     "version": 4,
-    "revision": 13
+    "revision": 14
   },
   "storeContent": [
     {
@@ -20,9 +20,9 @@
         "console": ["3DS"],
         "icon_index": 0,
         "sheet_index": 0,
-        "last_updated": "2026-07-04 (UTC)",
+        "last_updated": "2026-07-05 (UTC)",
         "license": "gpl-3.0",
-        "version": "0.6.5"
+        "version": "0.7.0"
       },
       "Download & Install Plugin": [
         {
