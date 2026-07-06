@@ -2756,6 +2756,13 @@ namespace CTRPluginFramework {
             }
         }
     }
+    // Public bridge for the Held Item Advisor (PKHeX.cpp): "do I already own this item" - re-reads the
+    // live bag each call (cheap, 5 short pocket scans) rather than trusting a possibly-stale cache.
+    int BagOwnedCount(int id) {
+        if (id <= 0 || id >= 801) return 0;
+        BagReadInventory();
+        return g_invCount[id];
+    }
 
     // ===== "PokéMart Anywhere": PAY/FREE mode + shopping cart (session-global; remembered across re-opens) =====
     // PAY/FREE now lives in the framework global g_bagPayMode (OSD.hpp), persisted in Data.bin so it

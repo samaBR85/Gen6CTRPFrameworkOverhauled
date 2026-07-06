@@ -1279,3 +1279,35 @@ TEAM_COVERAGE_QUAD_FMT :: %s recibe daño x4 de %s
 TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Nadie en tu equipo es debil contra: %s
 TEAM_COVERAGE_BLIND_LIST_FMT :: Ningun movimiento fuerte contra: %s
 TEAM_COVERAGE_COVERED_LIST_FMT :: Tu equipo golpea fuerte a: %s
+TEAM_COVERAGE_CART :: Carrito
+TEAM_COVERAGE_CART_HDR :: KIT GENERAL DEL EQUIPO
+TEAM_COVERAGE_CART_SUB :: Calibrado segun el nivel y el perfil de stats de tu equipo - no es especifico de un rival.
+TEAM_COVERAGE_SUGGESTED_CART :: Carrito Sugerido
+MENU_EV_ADVISOR :: Asesor de EVs
+FAV_EV_ADVISOR :: Asesor EVs
+NOTE_EV_ADVISOR :: Una revision de solo lectura de la inversion de EVs de tu equipo: marca a un Pokemon cuyos EVs en Ataque o Ataque Especial no coinciden con los movimientos que REALMENTE conoce (por ejemplo EVs en Ataque Especial en uno que solo tiene movimientos Fisicos), y marca por separado a quien no tiene movimientos de ataque (sus EVs de Ataque/Ataque Especial no sirven de nada).\n\nCruceta Arriba/Abajo desplaza los detalles en la pantalla inferior.\n\nLos atacantes mixtos (conocen movimientos Fisicos y Especiales) quedan fuera - no hay un veredicto claro para ellos. Esto solo revisa que la categoria coincida, no si la distribucion total es optima.
+EV_ADVISOR_NO_PARTY :: No se encontro ningun Pokemon en tu equipo.
+EV_ADVISOR_TAG_OK :: OK
+EV_ADVISOR_TAG_MISMATCH :: Descuadre
+EV_ADVISOR_TAG_SUPPORT :: Soporte
+EV_ADVISOR_DETAILS_HDR :: DETALLES
+EV_ADVISOR_NO_ATTACK :: Sin movimientos de ataque - los EVs de Ataque y Ataque Especial no le ayudaran a luchar.
+EV_ADVISOR_WASTED_SPA_FMT :: %d EVs en Ataque Especial estan desperdiciados - todos sus movimientos son Fisicos.
+EV_ADVISOR_WASTED_ATK_FMT :: %d EVs en Ataque estan desperdiciados - todos sus movimientos son Especiales.
+EV_ADVISOR_OK :: Los EVs coinciden con las categorias de sus movimientos - no hace falta cambiar nada.
+MENU_HELD_ITEM_ADVISOR :: Asesor de Objetos
+FAV_HELD_ITEM_ADVISOR :: Asesor Objetos
+NOTE_HELD_ITEM_ADVISOR :: Muestra lo que tu equipo tiene equipado ahora mismo (o Ninguno), y luego sugiere un objeto para quien no tenga uno, basado en un perfil simple de estadisticas - una estadistica claramente dominante apunta a un objeto Choice, un atacante rapido recibe Vidasfera, mucha resistencia recibe Restos, y sin nada destacado la sugerencia por defecto es una Baya Zidra segura.\n\nX alterna entre En la Mochila (ya tienes el objeto sugerido - equipalo desde el selector de objetos de PC Box ++) y Por Conseguir (aun no lo tienes - Carrito Sugerido abre PokeMart Anywhere con esos objetos ya agregados).\n\nSolo es una sugerencia basada en estadisticas, no en movimientos, habilidades ni tu estrategia real.
+HELD_ADVISOR_NO_PARTY :: No se encontro ningun Pokemon en tu equipo.
+HELD_ADVISOR_NONE :: Ninguno
+HELD_ADVISOR_IN_BAG :: En la Mochila
+HELD_ADVISOR_TO_GET :: Por Conseguir
+HELD_ADVISOR_SUGGEST_FMT :: %s -> %s
+HELD_ADVISOR_REASON_CHOICE_ATK :: Ataque alto y rapido - ve con todo al fisico.
+HELD_ADVISOR_REASON_CHOICE_SPA :: Ataque Especial es claramente su mejor stat - ve con todo.
+HELD_ADVISOR_REASON_LIFE_ORB :: Ofensiva alta y rapido - golpea mas fuerte a cambio de retroceso.
+HELD_ADVISOR_REASON_LEFTOVERS :: Resistente - un poco de curacion extra cada turno le ayuda a aguantar.
+HELD_ADVISOR_REASON_SITRUS :: Ninguna estadistica destaca - una eleccion segura y general.
+HELD_ADVISOR_NONE_IN_BAG :: Ninguna sugerencia coincide con lo que tienes ahora en la mochila.
+HELD_ADVISOR_NONE_TO_GET :: Ya tienes todo lo sugerido, o nadie necesita un objeto.
+HELD_ADVISOR_SUGGESTED_CART :: Carrito Sugerido

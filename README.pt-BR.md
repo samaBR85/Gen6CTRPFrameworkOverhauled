@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.3
+# Gen6CTRPluginFrameworkOverhauled — v0.7.4
 
 [English](README.md) · **Português**
 
@@ -125,6 +125,17 @@ próprios golpes não conseguem furar — em frases diretas, não numa tabela de
   <img src="Screenshots/v0.7.3/team_coverage.png" width="330" alt="Team Coverage — tipos do time num relance, mais fraquezas compartilhadas e pontos cegos" />
 </p>
 
+O **EV Advisor** sinaliza investimento de EV que não bate com os golpes que o Pokémon realmente conhece —
+EVs em Ataque Especial num bicho que só tem golpes Físicos, por exemplo — e separa quem não tem golpe de
+ataque nenhum. O **Held Item Advisor** mostra o que seu time está segurando agora e sugere um item pra
+quem tá de mãos vazias, dividido entre o que você já tem (**No Baú**) e o que precisa conseguir
+(**A Conseguir**, com um botão de Carrinho Sugerido direto pro PokéMart Anywhere).
+
+<p align="center">
+  <img src="Screenshots/v0.7.4/ev_advisor.png" width="330" alt="EV Advisor — sinaliza EVs que nao batem com os golpes reais do Pokemon" />
+  <img src="Screenshots/v0.7.4/held_item_advisor.png" width="330" alt="Held Item Advisor — sugestoes de item dividas entre No Bau e A Conseguir" />
+</p>
+
 ### Vença a batalha
 
 As **In-Battle Tools** são o que você usa no meio da luta. O **Enemy Helper** é uma carta de treinador pro inimigo —
@@ -241,6 +252,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.7.1** — **Damage Calc**: a aba Compare do Enemy Helper agora abre direto numa faixa de dano estimado e golpes pra nocautear dos dois lados, com nome e golpes de cada um na mesma cor pra ficar claro quem é quem — aperte **Y** pra ver a comparação simples de stats.
 - **v0.7.2** — o **Gym Coach** agora lê suas insígnias de ginásio reais e já pula direto pro seu próximo desafio na primeira vez que você abre a tela em cada sessão, com uma marca **Next** na lista pra você sempre saber quem é.
 - **v0.7.3** — **Team Coverage**: uma nova tela em Trainer Info que lista os tipos do seu time num relance, mais um detalhamento Defense/Offense de fraquezas compartilhadas, golpes 4x e pontos cegos que seus próprios golpes não furam.
+- **v0.7.4** — **EV Advisor** e **Held Item Advisor**, mais duas telas em Trainer Info: uma sinaliza EVs que não batem com os golpes reais do seu Pokémon, a outra sugere itens pra segurar (dividido em No Baú / A Conseguir) — e o Team Coverage ganhou uma 3ª aba **Cart** com uma lista de compras geral pro time.
 
 ## 📥 Instalando
 
@@ -350,7 +362,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.7.3 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.7.4 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença

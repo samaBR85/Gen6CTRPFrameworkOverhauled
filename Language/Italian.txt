@@ -1329,3 +1329,35 @@ TEAM_COVERAGE_QUAD_FMT :: %s subisce danno x4 da %s
 TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Nessuno nella tua squadra e debole contro: %s
 TEAM_COVERAGE_BLIND_LIST_FMT :: Nessuna mossa efficace contro: %s
 TEAM_COVERAGE_COVERED_LIST_FMT :: La tua squadra colpisce forte contro: %s
+TEAM_COVERAGE_CART :: Carrello
+TEAM_COVERAGE_CART_HDR :: KIT GENERALE SQUADRA
+TEAM_COVERAGE_CART_SUB :: Calibrato sul livello e sul profilo di statistiche della tua squadra - non specifico per un avversario.
+TEAM_COVERAGE_SUGGESTED_CART :: Carrello suggerito
+MENU_EV_ADVISOR :: Consulente SV
+FAV_EV_ADVISOR :: Consulente SV
+NOTE_EV_ADVISOR :: Un controllo di sola lettura sugli SV della tua squadra: segnala un Pokemon i cui SV in Attacco o Attacco Speciale non corrispondono alle mosse che conosce DAVVERO (ad esempio SV in Attacco Speciale su uno che ha solo mosse Fisiche), e segnala separatamente chi non ha mosse offensive (i suoi SV in Attacco/Attacco Speciale non servono a nulla).\n\nCroce direzionale Su/Giu scorre i dettagli sullo schermo in basso.\n\nGli attaccanti misti (conoscono sia mosse Fisiche che Speciali) non vengono segnalati - non c'e un verdetto chiaro per loro. Questo controlla solo la corrispondenza di categoria, non se la distribuzione totale sia ottimale.
+EV_ADVISOR_NO_PARTY :: Nessun Pokemon trovato nella tua squadra.
+EV_ADVISOR_TAG_OK :: OK
+EV_ADVISOR_TAG_MISMATCH :: Discordanza
+EV_ADVISOR_TAG_SUPPORT :: Supporto
+EV_ADVISOR_DETAILS_HDR :: DETTAGLI
+EV_ADVISOR_NO_ATTACK :: Nessuna mossa offensiva - gli SV in Attacco e Attacco Speciale non lo aiuteranno in battaglia.
+EV_ADVISOR_WASTED_SPA_FMT :: %d SV in Attacco Speciale sono sprecati - tutte le sue mosse sono Fisiche.
+EV_ADVISOR_WASTED_ATK_FMT :: %d SV in Attacco sono sprecati - tutte le sue mosse sono Speciali.
+EV_ADVISOR_OK :: Gli SV corrispondono alle categorie delle loro mosse - nessuna modifica necessaria.
+MENU_HELD_ITEM_ADVISOR :: Consulente Oggetti
+FAV_HELD_ITEM_ADVISOR :: Cons. Oggetti
+NOTE_HELD_ITEM_ADVISOR :: Mostra cosa sta tenendo attualmente la tua squadra (o Nessuno), poi suggerisce un oggetto da tenere per chi ne e sprovvisto in base a un semplice profilo di statistiche - una statistica chiaramente dominante porta verso un oggetto Choice, un attaccante veloce prende Life Orb, un'alta resistenza prende Leftover, e senza nulla di spiccato la scelta predefinita e una sicura Bacca Sitrus.\n\nX passa da In Borsa (possiedi gia l'oggetto suggerito - vai ad equipaggiarlo nel selettore oggetti di PC Box ++) a Da Ottenere (non lo possiedi ancora - Carrello suggerito apre PokeMart Anywhere con quegli oggetti gia inseriti).\n\nSolo un suggerimento basato sulle statistiche, non sulle mosse, abilita o sulla tua strategia reale.
+HELD_ADVISOR_NO_PARTY :: Nessun Pokemon trovato nella tua squadra.
+HELD_ADVISOR_NONE :: Nessuno
+HELD_ADVISOR_IN_BAG :: In Borsa
+HELD_ADVISOR_TO_GET :: Da Ottenere
+HELD_ADVISOR_SUGGEST_FMT :: %s -> %s
+HELD_ADVISOR_REASON_CHOICE_ATK :: Attacco alto e veloce - punta tutto sul fisico.
+HELD_ADVISOR_REASON_CHOICE_SPA :: Attacco Speciale e chiaramente la sua statistica migliore - punta tutto su di essa.
+HELD_ADVISOR_REASON_LIFE_ORB :: Attacco alto e velocita elevata - colpisce piu forte a costo di un contraccolpo.
+HELD_ADVISOR_REASON_LEFTOVERS :: Resistente - un po' di cura extra ogni turno lo aiuta a resistere.
+HELD_ADVISOR_REASON_SITRUS :: Nessuna statistica spicca - una scelta sicura e generica.
+HELD_ADVISOR_NONE_IN_BAG :: Nessun suggerimento corrisponde a cio che hai attualmente in borsa.
+HELD_ADVISOR_NONE_TO_GET :: Hai gia tutto quello che e stato suggerito, oppure nessuno ha bisogno di un oggetto.
+HELD_ADVISOR_SUGGESTED_CART :: Carrello suggerito

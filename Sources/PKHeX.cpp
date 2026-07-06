@@ -2723,6 +2723,12 @@ namespace CTRPluginFramework {
               } }
             Image icon[6];
             for (int i = 0; i < nParty; ++i) { string p; BoxIconPath(p, partySp[i], false, "BoxIcons/"); icon[i].LoadFromFile(p); }
+            u16 partyLevel[6] = {};
+            { u32 pbase2 = FindPartyBase();
+              for (int i = 0; i < nParty && pbase2; ++i) {
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase2 + i * 0x104, &pk) : GetPokemonRaw(pbase2 + i * 0x104, &pk);
+                  if (ok) partyLevel[i] = (u16)LevelFromExp(partySp[i], pk.exp);
+              } }
 
             // Defense: weakCount[a] = how many teammates take >=2x from attacking type a; weakMonIdx[a] =
             // which ones; quad[a][i] = mon i takes the full 4x from type a.
@@ -2773,6 +2779,7 @@ namespace CTRPluginFramework {
             };
 
             int view = 0, scroll = 0;
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
             drainKeys();
             while (true) {
                 Controller::Update();
@@ -2782,9 +2789,32 @@ namespace CTRPluginFramework {
                     PluginMenu::Close(); break;
                 }
                 if (Controller::IsKeyPressed(Key::B)) break;
-                if (Controller::IsKeyPressed(Key::X)) { view = 1 - view; scroll = 0; }
+                if (Controller::IsKeyPressed(Key::X)) { view = (view + 1) % 3; scroll = 0; }
                 if (KeyRep(Key::Up)) scroll--;
                 if (KeyRep(Key::Down)) scroll++;
+
+                bool down = Touch::IsDown(); UIntVector tp = down ? Touch::GetPosition() : lastPos; if (down) lastPos = tp;
+                bool tap = armed && !down && wasDown; if (!down) armed = true; wasDown = down;
+                if (view == 2 && nParty > 0 && tap && inBox(lastPos, 30, 178, 260, 26)) {
+                    // General team kit - not matchup-specific, so it leans on the team's OWN stat bias
+                    // (boost what you already hit hard with) rather than Gym Coach's "counter the enemy" logic.
+                    BagCartClear();
+                    auto addToCart = [&](int id, int qty) { if (id > 0 && id < 801) BagCartAdd(id, bagItemPocket[id], qty, bagItemCost[id]); };
+                    int atkSum = 0, spaSum = 0, speSum = 0, lvlSum = 0; bool anyStatus = false;
+                    for (int i = 0; i < nParty; ++i) {
+                        atkSum += gBaseStats[partySp[i] - 1][1]; spaSum += gBaseStats[partySp[i] - 1][3]; speSum += gBaseStats[partySp[i] - 1][5];
+                        lvlSum += partyLevel[i];
+                        for (int m = 0; m < 4; ++m) { u16 mv = partyMoves[i][m]; if (mv >= 1 && mv <= 621 && gMoveExtra[mv - 1][1] == 0) anyStatus = true; }
+                    }
+                    int avgLvl = nParty > 0 ? lvlSum / nParty : 1;
+                    int healId = avgLvl >= 55 ? 23 /* Full Restore */ : avgLvl >= 30 ? 25 /* Hyper Potion */ : 17 /* Potion */;
+                    addToCart(healId, 3);
+                    if (anyStatus) addToCart(27, 2);                                     // Full Heal
+                    if (atkSum >= spaSum) addToCart(57, 2); else addToCart(61, 2);        // X Attack vs X Sp. Atk
+                    if (nParty > 0 && speSum / nParty >= 90) addToCart(59, 1);            // X Speed
+                    BagItemFinder(entry);
+                    drainKeys(); armed = false; wasDown = false;
+                }
 
                 // ---- TOP: party types at a glance ----
                 top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
@@ -2817,9 +2847,28 @@ namespace CTRPluginFramework {
                     int tw = (int)OSD::GetTextWidth(true, label);
                     bot.DrawSysfont((active ? bg : txt) << label, x + (w - tw) / 2, 27, txt);
                 };
-                tabBtn(24, 126, getLanguage->Get("TEAM_COVERAGE_DEFENSE"), view == 0);
-                tabBtn(154, 126, getLanguage->Get("TEAM_COVERAGE_OFFENSE"), view == 1);
+                tabBtn(28, 82, getLanguage->Get("TEAM_COVERAGE_DEFENSE"), view == 0);
+                tabBtn(116, 82, getLanguage->Get("TEAM_COVERAGE_OFFENSE"), view == 1);
+                tabBtn(204, 82, getLanguage->Get("TEAM_COVERAGE_CART"), view == 2);
                 bot.DrawRect(26, 50, 268, 1, border, true);
+
+                if (view == 2) {
+                    const Color shopColor(0xA3, 0x2D, 0x2D);
+                    if (nParty == 0) {
+                        bot.DrawSysfont(txt << getLanguage->Get("TEAM_COVERAGE_NO_PARTY"), 30, 100, txt);
+                    } else {
+                        bot.DrawSysfont(sel << getLanguage->Get("TEAM_COVERAGE_CART_HDR"), 30, 56, sel);
+                        { string sub = getLanguage->Get("TEAM_COVERAGE_CART_SUB");
+                          int y0c = 69; auto lines = vector<pair<Color,string>>{}; wrapInto(lines, dim, sub, 260);
+                          for (size_t i = 0; i < lines.size(); ++i) bot.DrawSysfont(lines[i].first << lines[i].second, 30, y0c + (int)i * 12, lines[i].first); }
+                    }
+                    Color shTxt = AutoContrastText(shopColor);
+                    bot.DrawRect(30, 178, 260, 26, shopColor, true); bot.DrawRect(30, 178, 260, 26, title, false);
+                    string sl = getLanguage->Get("TEAM_COVERAGE_SUGGESTED_CART");
+                    bot.DrawSysfont(shTxt << sl, 30 + (260 - (int)OSD::GetTextWidth(true, sl)) / 2, 185, shTxt);
+                    OSD::SwapBuffers();
+                    continue;
+                }
 
                 // Every line reads as a plain sentence (type/mon names filled into a translated template),
                 // not a raw "Type: Name, Name" table - the format the user found hard to parse on HW.
@@ -2868,6 +2917,293 @@ namespace CTRPluginFramework {
                 if (scroll < maxScroll) bot.DrawSysfont(sel << "\xE2\x96\xBC", 286, 190, sel);
                 const char *h = "X tab   B exit";
                 bot.DrawSysfont(dim << h, 20 + (280 - (int)OSD::GetTextWidth(true, h)) / 2, 205, dim);
+
+                OSD::SwapBuffers();
+            }
+        }
+
+        // ===== EV Advisor =====
+        // Read-only screen (Trainer Info): flags EV investment that doesn't match a Pokemon's ACTUAL known
+        // moves - not a "PC Box ++" spread checker, just a sanity pass. A mon with EVs in Sp. Atk but only
+        // Physical moves (or vice versa) is flagged "Mismatch"; a mon with no attacking moves at all
+        // ("Support") gets its own flag since neither Atk nor Sp. Atk EVs do anything for it. Mixed
+        // attackers (knows both categories) are left alone - there's no clear verdict for those.
+        void EVAdvisor(MenuEntry *entry) {
+            (void)entry;
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+            const FwkSettings &st = FwkSettings::Get();
+            Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+            Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+            const Color good(0x1B, 0x7A, 0x3A), badColor(0xD8, 0x5A, 0x30), neutralColor(0x88, 0x87, 0x80);
+            Color dim = txt;
+
+            u16 partySp[6] = {0, 0, 0, 0, 0, 0}; u16 partyMoves[6][4] = {}; u8 partyEV[6][6] = {}; int nParty = 0;
+            { u32 pbase = FindPartyBase();
+              for (int i = 0; i < 6 && pbase; ++i) {
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
+                      partySp[nParty] = pk.species;
+                      for (int m = 0; m < 4; ++m) partyMoves[nParty][m] = pk.move[m];
+                      for (int e = 0; e < 6; ++e) partyEV[nParty][e] = pk.EV[e];
+                      ++nParty;
+                  }
+              } }
+            Image icon[6];
+            for (int i = 0; i < nParty; ++i) { string p; BoxIconPath(p, partySp[i], false, "BoxIcons/"); icon[i].LoadFromFile(p); }
+
+            // Verdict per mon: 0 OK, 1 Mismatch, 2 Support (no attacking moves). EV[] raw index order is
+            // HP,Atk,Def,Spe,SpA,SpD (the game's own box layout) - NOT the HP/Atk/Def/SpA/SpD/Spe display
+            // order used elsewhere in this file, so Atk EV = EV[1] and Sp. Atk EV = EV[4], not EV[3].
+            int verdict[6] = {}; string detail[6];
+            for (int i = 0; i < nParty; ++i) {
+                bool hasPhys = false, hasSpec = false;
+                for (int m = 0; m < 4; ++m) {
+                    u16 mid = partyMoves[i][m]; if (mid < 1 || mid > 621) continue;
+                    int cat = gMoveExtra[mid - 1][1], pw = gMoveInfo[mid - 1][0];
+                    if (cat == 0 || pw <= 0) continue;
+                    if (cat == 1) hasPhys = true; else if (cat == 2) hasSpec = true;
+                }
+                int atkEV = partyEV[i][1], spaEV = partyEV[i][4];
+                if (!hasPhys && !hasSpec) { verdict[i] = 2; detail[i] = getLanguage->Get("EV_ADVISOR_NO_ATTACK"); }
+                else if (hasPhys && !hasSpec && spaEV > 4) { verdict[i] = 1; detail[i] = Utils::Format(getLanguage->Get("EV_ADVISOR_WASTED_SPA_FMT").c_str(), spaEV); }
+                else if (hasSpec && !hasPhys && atkEV > 4) { verdict[i] = 1; detail[i] = Utils::Format(getLanguage->Get("EV_ADVISOR_WASTED_ATK_FMT").c_str(), atkEV); }
+                else verdict[i] = 0;
+            }
+
+            auto wrapInto = [&](vector<pair<Color, string>> &out, Color c, const string &text, int maxW) {
+                vector<string> words; string w;
+                for (size_t i = 0; i < text.size(); ++i) { char ch = text[i]; if (ch == ' ') { if (!w.empty()) { words.push_back(w); w.clear(); } } else w += ch; }
+                if (!w.empty()) words.push_back(w);
+                string line;
+                for (size_t k = 0; k < words.size(); ++k) {
+                    string cand = line.empty() ? words[k] : line + " " + words[k];
+                    if ((int)OSD::GetTextWidth(true, cand) > maxW && !line.empty()) { out.push_back({c, line}); line = words[k]; }
+                    else line = cand;
+                }
+                if (!line.empty()) out.push_back({c, line});
+            };
+
+            int scroll = 0;
+            drainKeys();
+            while (true) {
+                Controller::Update();
+                if (System::IsSleeping()) break;
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close(); break;
+                }
+                if (Controller::IsKeyPressed(Key::B)) break;
+                if (KeyRep(Key::Up)) scroll--;
+                if (KeyRep(Key::Down)) scroll++;
+
+                top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("MENU_EV_ADVISOR"), 42, 26, title);
+                top.DrawRect(42, 37, 316, 1, title, true);
+
+                if (nParty == 0) {
+                    string e = getLanguage->Get("EV_ADVISOR_NO_PARTY");
+                    top.DrawSysfont(txt << e, 42 + (316 - (int)OSD::GetTextWidth(true, e)) / 2, 110, txt);
+                } else {
+                    const int rowH = 29, y0 = 39;
+                    static const char *TAGKEY[3] = {"EV_ADVISOR_TAG_OK", "EV_ADVISOR_TAG_MISMATCH", "EV_ADVISOR_TAG_SUPPORT"};
+                    for (int i = 0; i < nParty; ++i) {
+                        int ry = y0 + i * rowH;
+                        if (icon[i].IsLoaded()) icon[i].Draw(top, 42, ry);
+                        string nm = speciesList[partySp[i] - 1];
+                        while (nm.size() > 1 && (int)OSD::GetTextWidth(true, nm) > 150) nm.pop_back();
+                        top.DrawSysfont(txt << nm, 80, ry + 10, txt);
+                        Color tc = verdict[i] == 0 ? good : (verdict[i] == 1 ? badColor : neutralColor);
+                        string tag = getLanguage->Get(TAGKEY[verdict[i]]);
+                        top.DrawSysfont(tc << tag, 346 - (int)OSD::GetTextWidth(true, tag), ry + 10, tc);
+                    }
+                }
+
+                bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
+                bot.DrawSysfont(title << getLanguage->Get("EV_ADVISOR_DETAILS_HDR"), 24, 24, title);
+                bot.DrawRect(26, 40, 268, 1, border, true);
+
+                vector<pair<Color, string>> L;
+                if (nParty == 0) {
+                    L.push_back({txt, getLanguage->Get("EV_ADVISOR_NO_PARTY")});
+                } else {
+                    string okNames;
+                    for (int i = 0; i < nParty; ++i) {
+                        if (verdict[i] == 0) { okNames += (okNames.empty() ? "" : ", ") + string(speciesList[partySp[i] - 1]); continue; }
+                        Color c = verdict[i] == 1 ? badColor : neutralColor;
+                        L.push_back({c, speciesList[partySp[i] - 1]});
+                        wrapInto(L, verdict[i] == 1 ? txt : dim, detail[i], 260);
+                        L.push_back({txt, ""});
+                    }
+                    if (!okNames.empty()) {
+                        L.push_back({good, okNames});
+                        wrapInto(L, good, getLanguage->Get("EV_ADVISOR_OK"), 260);
+                    }
+                }
+                const int VIS = 10, lineH = 15, y0b = 48;
+                int total = (int)L.size(), maxScroll = total > VIS ? total - VIS : 0;
+                if (scroll > maxScroll) scroll = maxScroll; if (scroll < 0) scroll = 0;
+                for (int i = 0; i < VIS; ++i) { int idx = scroll + i; if (idx >= total) break; bot.DrawSysfont(L[idx].first << L[idx].second, 30, y0b + i * 15, L[idx].first); }
+                if (scroll > 0) bot.DrawSysfont(sel << "\xE2\x96\xB2", 286, 44, sel);
+                if (scroll < maxScroll) bot.DrawSysfont(sel << "\xE2\x96\xBC", 286, 194, sel);
+                const char *h = "B exit";
+                bot.DrawSysfont(dim << h, 20 + (280 - (int)OSD::GetTextWidth(true, h)) / 2, 205, dim);
+
+                OSD::SwapBuffers();
+            }
+        }
+
+        // ===== Held Item Advisor =====
+        // Read-only screen (Trainer Info): shows the party's current held items (or "None"), then suggests
+        // one for anybody empty-handed based on a simple stat-profile heuristic. Two tabs split the
+        // suggestions by whether the player already has that item in their bag ("In Bag" - go get it from
+        // PC Box ++/the held-item picker right now) or not ("To Get" - includes a Suggested Cart button,
+        // same PokeMart Anywhere bridge Gym Coach and Team Coverage already use).
+        void HeldItemAdvisor(MenuEntry *entry) {
+            (void)entry;
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+            const FwkSettings &st = FwkSettings::Get();
+            Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+            Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+            const Color good(0x1B, 0x7A, 0x3A), badColor(0xD8, 0x5A, 0x30);
+            Color dim = txt;
+            const int SITRUS = 158, LEFTOVERS = 234, LIFE_ORB = 270, CHOICE_BAND = 220, CHOICE_SPECS = 297;
+
+            u16 partySp[6] = {0, 0, 0, 0, 0, 0}; u16 partyItem[6] = {}; u16 s6all[6][6] = {}; int nParty = 0;
+            { u32 pbase = FindPartyBase();
+              for (int i = 0; i < 6 && pbase; ++i) {
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
+                      partySp[nParty] = pk.species; partyItem[nParty] = pk.heldItem;
+                      CalcStats(pk.species, LevelFromExp(pk.species, pk.exp), pk.nature, pk.iv32, pk.EV, s6all[nParty]);
+                      ++nParty;
+                  }
+              } }
+            Image icon[6];
+            for (int i = 0; i < nParty; ++i) { string p; BoxIconPath(p, partySp[i], false, "BoxIcons/"); icon[i].LoadFromFile(p); }
+
+            // Suggestion heuristic per empty-handed mon (stat profile only - no move data needed): a clear
+            // best stat drives a Choice item, a fast-and-strong mix takes Life Orb, heavy bulk takes
+            // Leftovers, and anything with no standout falls back to a safe Sitrus Berry.
+            int suggestion[6] = {}; string reasonKey[6];
+            for (int i = 0; i < nParty; ++i) {
+                if (partyItem[i] != 0) continue;
+                int hp = s6all[i][0], atk = s6all[i][1], def = s6all[i][2], spa = s6all[i][3], spd = s6all[i][4], spe = s6all[i][5];
+                int bulk = hp + def + spd, offense = atk > spa ? atk : spa;
+                bool physBest = atk >= spa;
+                if (physBest && atk > spa * 3 / 2 && atk >= spe) { suggestion[i] = CHOICE_BAND; reasonKey[i] = "HELD_ADVISOR_REASON_CHOICE_ATK"; }
+                else if (!physBest && spa > atk * 3 / 2 && spa >= spe) { suggestion[i] = CHOICE_SPECS; reasonKey[i] = "HELD_ADVISOR_REASON_CHOICE_SPA"; }
+                else if (offense >= spe && spe >= offense * 3 / 4) { suggestion[i] = LIFE_ORB; reasonKey[i] = "HELD_ADVISOR_REASON_LIFE_ORB"; }
+                else if (bulk > (atk + spa + spe)) { suggestion[i] = LEFTOVERS; reasonKey[i] = "HELD_ADVISOR_REASON_LEFTOVERS"; }
+                else { suggestion[i] = SITRUS; reasonKey[i] = "HELD_ADVISOR_REASON_SITRUS"; }
+            }
+
+            auto wrapInto = [&](vector<pair<Color, string>> &out, Color c, const string &text, int maxW) {
+                vector<string> words; string w;
+                for (size_t i = 0; i < text.size(); ++i) { char ch = text[i]; if (ch == ' ') { if (!w.empty()) { words.push_back(w); w.clear(); } } else w += ch; }
+                if (!w.empty()) words.push_back(w);
+                string line;
+                for (size_t k = 0; k < words.size(); ++k) {
+                    string cand = line.empty() ? words[k] : line + " " + words[k];
+                    if ((int)OSD::GetTextWidth(true, cand) > maxW && !line.empty()) { out.push_back({c, line}); line = words[k]; }
+                    else line = cand;
+                }
+                if (!line.empty()) out.push_back({c, line});
+            };
+
+            int view = 0, scroll = 0;
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
+            drainKeys();
+            while (true) {
+                Controller::Update();
+                if (System::IsSleeping()) break;
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close(); break;
+                }
+                if (Controller::IsKeyPressed(Key::B)) break;
+                if (Controller::IsKeyPressed(Key::X)) { view = 1 - view; scroll = 0; }
+                if (KeyRep(Key::Up)) scroll--;
+                if (KeyRep(Key::Down)) scroll++;
+
+                bool down = Touch::IsDown(); UIntVector tp = down ? Touch::GetPosition() : lastPos; if (down) lastPos = tp;
+                bool tap = armed && !down && wasDown; if (!down) armed = true; wasDown = down;
+
+                top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("MENU_HELD_ITEM_ADVISOR"), 42, 26, title);
+                top.DrawRect(42, 37, 316, 1, title, true);
+
+                if (nParty == 0) {
+                    string e = getLanguage->Get("HELD_ADVISOR_NO_PARTY");
+                    top.DrawSysfont(txt << e, 42 + (316 - (int)OSD::GetTextWidth(true, e)) / 2, 110, txt);
+                } else {
+                    const int rowH = 29, y0 = 39;
+                    for (int i = 0; i < nParty; ++i) {
+                        int ry = y0 + i * rowH;
+                        if (icon[i].IsLoaded()) icon[i].Draw(top, 42, ry);
+                        string nm = speciesList[partySp[i] - 1];
+                        while (nm.size() > 1 && (int)OSD::GetTextWidth(true, nm) > 150) nm.pop_back();
+                        top.DrawSysfont(txt << nm, 80, ry + 10, txt);
+                        string itxt = partyItem[i] > 0 && partyItem[i] < 801 ? bagItemName[partyItem[i]] : getLanguage->Get("HELD_ADVISOR_NONE");
+                        Color ic = partyItem[i] > 0 ? txt : badColor;
+                        top.DrawSysfont(ic << itxt, 346 - (int)OSD::GetTextWidth(true, itxt), ry + 10, ic);
+                    }
+                }
+
+                bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
+                auto tabBtn = [&](int x, int w, const string &label, bool active) {
+                    bot.DrawRect(x, 24, w, 22, active ? sel : bg2, true); bot.DrawRect(x, 24, w, 22, active ? title : border, false);
+                    int tw = (int)OSD::GetTextWidth(true, label);
+                    bot.DrawSysfont((active ? bg : txt) << label, x + (w - tw) / 2, 27, txt);
+                };
+                tabBtn(28, 126, getLanguage->Get("HELD_ADVISOR_IN_BAG"), view == 0);
+                tabBtn(158, 126, getLanguage->Get("HELD_ADVISOR_TO_GET"), view == 1);
+                bot.DrawRect(26, 50, 268, 1, border, true);
+
+                vector<pair<Color, string>> L; bool anyToGet = false;
+                if (nParty == 0) {
+                    L.push_back({txt, getLanguage->Get("HELD_ADVISOR_NO_PARTY")});
+                } else {
+                    for (int i = 0; i < nParty; ++i) {
+                        if (partyItem[i] != 0 || suggestion[i] == 0) continue;
+                        bool owned = BagOwnedCount(suggestion[i]) > 0;
+                        if (view == 1) anyToGet = anyToGet || !owned;
+                        if ((view == 0) != owned) continue;
+                        string line = Utils::Format(getLanguage->Get("HELD_ADVISOR_SUGGEST_FMT").c_str(), speciesList[partySp[i] - 1], bagItemName[suggestion[i]]);
+                        L.push_back({title, line});
+                        wrapInto(L, dim, getLanguage->Get(reasonKey[i].c_str()), 260);
+                        L.push_back({txt, ""});
+                    }
+                    if (L.empty()) wrapInto(L, dim, getLanguage->Get(view == 0 ? "HELD_ADVISOR_NONE_IN_BAG" : "HELD_ADVISOR_NONE_TO_GET"), 260);
+                }
+                const int VIS = view == 1 ? 7 : 9, lineH = 15, y0b = 56;
+                int total = (int)L.size(), maxScroll = total > VIS ? total - VIS : 0;
+                if (scroll > maxScroll) scroll = maxScroll; if (scroll < 0) scroll = 0;
+                for (int i = 0; i < VIS; ++i) { int idx = scroll + i; if (idx >= total) break; bot.DrawSysfont(L[idx].first << L[idx].second, 30, y0b + i * lineH, L[idx].first); }
+                if (scroll > 0) bot.DrawSysfont(sel << "\xE2\x96\xB2", 286, 54, sel);
+                if (scroll < maxScroll) bot.DrawSysfont(sel << "\xE2\x96\xBC", 286, view == 1 ? 168 : 190, sel);
+
+                if (view == 1) {
+                    const Color shopColor(0xA3, 0x2D, 0x2D);
+                    if (tap && anyToGet && inBox(lastPos, 30, 178, 260, 26)) {
+                        BagCartClear();
+                        for (int i = 0; i < nParty; ++i) {
+                            if (partyItem[i] != 0 || suggestion[i] == 0) continue;
+                            if (BagOwnedCount(suggestion[i]) > 0) continue;
+                            int id = suggestion[i]; BagCartAdd(id, bagItemPocket[id], 1, bagItemCost[id]);
+                        }
+                        BagItemFinder(entry);
+                        drainKeys(); armed = false; wasDown = false;
+                    }
+                    Color shTxt = AutoContrastText(shopColor);
+                    bot.DrawRect(30, 178, 260, 26, shopColor, true); bot.DrawRect(30, 178, 260, 26, title, false);
+                    string sl = getLanguage->Get("HELD_ADVISOR_SUGGESTED_CART");
+                    bot.DrawSysfont(shTxt << sl, 30 + (260 - (int)OSD::GetTextWidth(true, sl)) / 2, 185, shTxt);
+                } else {
+                    const char *h = "X tab   B exit";
+                    bot.DrawSysfont(dim << h, 20 + (280 - (int)OSD::GetTextWidth(true, h)) / 2, 205, dim);
+                }
 
                 OSD::SwapBuffers();
             }

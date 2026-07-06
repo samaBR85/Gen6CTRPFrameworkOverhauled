@@ -1280,3 +1280,35 @@ TEAM_COVERAGE_QUAD_FMT :: %s leva dano 4x de %s
 TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Ninguem no seu time e fraco contra: %s
 TEAM_COVERAGE_BLIND_LIST_FMT :: Nenhum golpe forte contra: %s
 TEAM_COVERAGE_COVERED_LIST_FMT :: Seu time acerta forte estes: %s
+TEAM_COVERAGE_CART :: Carrinho
+TEAM_COVERAGE_CART_HDR :: KIT GERAL DO TIME
+TEAM_COVERAGE_CART_SUB :: Calibrado pelo nivel e pelo perfil de stats do seu time - nao e especifico de um adversario.
+TEAM_COVERAGE_SUGGESTED_CART :: Carrinho Sugerido
+MENU_EV_ADVISOR :: Conselheiro de EV
+FAV_EV_ADVISOR :: Cons. de EV
+NOTE_EV_ADVISOR :: Uma checagem só de leitura do investimento de EV do seu time: sinaliza um Pokémon cujos EVs em Ataque ou Ataque Especial não batem com os golpes que ele REALMENTE conhece (tipo EVs em Ataque Especial num Pokémon que só tem golpes Físicos), e sinaliza separadamente quem não tem golpe de ataque nenhum (os EVs de Ataque/Ataque Especial dele não servem pra nada).\n\nCruzeta Cima/Baixo rola os detalhes na tela de baixo.\n\nAtacantes mistos (conhecem golpes Físicos e Especiais) ficam de fora - não dá pra dar um veredito claro pra eles. Isso só confere se a categoria bate, não se a distribuição total é ótima.
+EV_ADVISOR_NO_PARTY :: Nenhum Pokemon encontrado no seu time.
+EV_ADVISOR_TAG_OK :: OK
+EV_ADVISOR_TAG_MISMATCH :: Descompasso
+EV_ADVISOR_TAG_SUPPORT :: Suporte
+EV_ADVISOR_DETAILS_HDR :: DETALHES
+EV_ADVISOR_NO_ATTACK :: Sem golpes de ataque - os EVs de Ataque e Ataque Especial nao vao ajudar na luta.
+EV_ADVISOR_WASTED_SPA_FMT :: %d EVs em Ataque Especial estao desperdicados - todos os golpes dele sao Fisicos.
+EV_ADVISOR_WASTED_ATK_FMT :: %d EVs em Ataque estao desperdicados - todos os golpes dele sao Especiais.
+EV_ADVISOR_OK :: Os EVs batem com as categorias dos golpes deles - nao precisa mudar nada.
+MENU_HELD_ITEM_ADVISOR :: Conselheiro de Itens
+FAV_HELD_ITEM_ADVISOR :: Cons. de Itens
+NOTE_HELD_ITEM_ADVISOR :: Mostra o que seu time esta segurando agora (ou Nenhum), depois sugere um item pra quem tiver as maos vazias com base num perfil simples de stats - uma stat claramente melhor puxa pra um item Choice, um atacante rapido leva Life Orb, muita resistencia leva Restos, e sem nada de destaque a sugestao padrao e uma Baga Sitrus segura.\n\nX alterna entre No Bau (voce ja tem o item sugerido - va equipar no seletor de item do PC Box ++) e A Conseguir (voce ainda nao tem - Carrinho Sugerido abre o PokeMart Anywhere com esses itens ja preenchidos).\n\nE so uma sugestao baseada em stats, nao em golpes, habilidades ou sua estrategia de verdade.
+HELD_ADVISOR_NO_PARTY :: Nenhum Pokemon encontrado no seu time.
+HELD_ADVISOR_NONE :: Nenhum
+HELD_ADVISOR_IN_BAG :: No Bau
+HELD_ADVISOR_TO_GET :: A Conseguir
+HELD_ADVISOR_SUGGEST_FMT :: %s -> %s
+HELD_ADVISOR_REASON_CHOICE_ATK :: Ataque alto e rapido - va tudo no fisico.
+HELD_ADVISOR_REASON_CHOICE_SPA :: Ataque Especial e claramente a stat mais forte dele - va tudo nisso.
+HELD_ADVISOR_REASON_LIFE_ORB :: Ofensiva alta e rapido - bate mais forte em troca de dano de recuo.
+HELD_ADVISOR_REASON_LEFTOVERS :: Resistente - uma curinha extra por turno ajuda ele a aguentar.
+HELD_ADVISOR_REASON_SITRUS :: Nenhuma stat se destaca - uma escolha segura e geral.
+HELD_ADVISOR_NONE_IN_BAG :: Nenhuma sugestao bate com o que tem no seu bau agora.
+HELD_ADVISOR_NONE_TO_GET :: Voce ja tem tudo que foi sugerido, ou ninguem precisa de item.
+HELD_ADVISOR_SUGGESTED_CART :: Carrinho Sugerido

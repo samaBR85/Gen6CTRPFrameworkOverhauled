@@ -1276,3 +1276,35 @@ TEAM_COVERAGE_QUAD_FMT :: %s takes 4x damage from %s
 TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Nobody on your team is weak to: %s
 TEAM_COVERAGE_BLIND_LIST_FMT :: No strong move against: %s
 TEAM_COVERAGE_COVERED_LIST_FMT :: Your team hits these hard: %s
+TEAM_COVERAGE_CART :: Cart
+TEAM_COVERAGE_CART_HDR :: GENERAL TEAM KIT
+TEAM_COVERAGE_CART_SUB :: Scaled to your team's level and stat spread - not matchup-specific.
+TEAM_COVERAGE_SUGGESTED_CART :: Suggested Cart
+MENU_EV_ADVISOR :: EV Advisor
+FAV_EV_ADVISOR :: EV Advisor
+NOTE_EV_ADVISOR :: A read-only sanity check on your party's EV investment: flags a Pokemon whose EVs in Attack or Sp. Atk don't match its ACTUAL known moves (say, EVs in Sp. Atk on something that only has Physical moves), and separately flags anyone with no attacking moves at all (their Attack/Sp. Atk EVs aren't doing anything).\n\nD-Pad Up/Down scrolls the details on the bottom screen.\n\nMixed attackers (knows both Physical and Special moves) are left alone - there's no clear verdict for those. This only checks category match, not whether the total spread itself is optimal.
+EV_ADVISOR_NO_PARTY :: No Pokemon found in your party.
+EV_ADVISOR_TAG_OK :: OK
+EV_ADVISOR_TAG_MISMATCH :: Mismatch
+EV_ADVISOR_TAG_SUPPORT :: Support
+EV_ADVISOR_DETAILS_HDR :: DETAILS
+EV_ADVISOR_NO_ATTACK :: No attacking moves - Attack and Sp. Atk EVs won't help it fight.
+EV_ADVISOR_WASTED_SPA_FMT :: %d EVs in Sp. Atk are wasted - all its moves are Physical.
+EV_ADVISOR_WASTED_ATK_FMT :: %d EVs in Attack are wasted - all its moves are Special.
+EV_ADVISOR_OK :: EVs match their move categories - no changes needed.
+MENU_HELD_ITEM_ADVISOR :: Held Item Advisor
+FAV_HELD_ITEM_ADVISOR :: Held Item Advisor
+NOTE_HELD_ITEM_ADVISOR :: Shows what your party is currently holding (or None), then suggests a held item for anybody empty-handed based on a simple stat-profile heuristic - a clear best stat leans towards a Choice item, a fast attacker takes Life Orb, heavy bulk takes Leftovers, and anything with no standout falls back to a safe Sitrus Berry.\n\nX switches between In Bag (you already own the suggested item - go equip it in PC Box ++'s held-item picker) and To Get (you don't own it yet - Suggested Cart opens PokeMart Anywhere with those items pre-filled).\n\nJust a suggestion based on stats, not moves, abilities, or your actual strategy.
+HELD_ADVISOR_NO_PARTY :: No Pokemon found in your party.
+HELD_ADVISOR_NONE :: None
+HELD_ADVISOR_IN_BAG :: In Bag
+HELD_ADVISOR_TO_GET :: To Get
+HELD_ADVISOR_SUGGEST_FMT :: %s -> %s
+HELD_ADVISOR_REASON_CHOICE_ATK :: High Attack and fast - go all in physically.
+HELD_ADVISOR_REASON_CHOICE_SPA :: Sp. Atk is its clear best stat - go all in.
+HELD_ADVISOR_REASON_LIFE_ORB :: High offense and fast - hits harder at the cost of recoil.
+HELD_ADVISOR_REASON_LEFTOVERS :: Bulky - a little extra healing every turn helps it stick around.
+HELD_ADVISOR_REASON_SITRUS :: No standout stat - a safe general pick.
+HELD_ADVISOR_NONE_IN_BAG :: No suggestions match what's currently in your bag.
+HELD_ADVISOR_NONE_TO_GET :: You already have everything suggested, or nobody needs an item.
+HELD_ADVISOR_SUGGESTED_CART :: Suggested Cart

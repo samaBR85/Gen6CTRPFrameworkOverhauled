@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.3
+# Gen6CTRPluginFrameworkOverhauled — v0.7.4
 
 **English** · [Português](README.pt-BR.md)
 
@@ -125,6 +125,17 @@ moves can't get through — read as plain sentences, not a stat table.
   <img src="Screenshots/v0.7.3/team_coverage.png" width="330" alt="Team Coverage — party types at a glance, plus shared weaknesses and blind spots" />
 </p>
 
+**EV Advisor** flags EV investment that doesn't match a Pokémon's actual known moves — EVs in Sp. Atk on
+something with only Physical moves, say — and separately calls out anyone with no attacking moves at all.
+**Held Item Advisor** shows what your team is currently holding and suggests one for anybody empty-handed,
+split between what you already own (**In Bag**) and what you'd need to pick up (**To Get**, with a
+Suggested Cart button straight into PokéMart Anywhere).
+
+<p align="center">
+  <img src="Screenshots/v0.7.4/ev_advisor.png" width="330" alt="EV Advisor — flags EV investment mismatched with a Pokemon's actual moves" />
+  <img src="Screenshots/v0.7.4/held_item_advisor.png" width="330" alt="Held Item Advisor — held-item suggestions split between In Bag and To Get" />
+</p>
+
 ### Win the battle
 
 The **In-Battle Tools** are the things you reach for mid-fight. **Enemy Helper** is a coach card for the foe — it
@@ -240,6 +251,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.7.1** — **Damage Calc**: Enemy Helper's Compare tab now opens straight into an estimated damage range and hits-to-KO for both sides' moves, color-matched by owner so it's clear at a glance who deals what — press **Y** for the plain stat comparison.
 - **v0.7.2** — **Gym Coach** now reads your real gym badges to jump straight to your next opponent the first time you open it each session, with a **Next** tag on the list so you always know who that is.
 - **v0.7.3** — **Team Coverage**: a new Trainer Info screen listing your party's types at a glance, plus a Defense/Offense breakdown of shared weaknesses, 4x hits, and blind spots your own moves can't get through.
+- **v0.7.4** — **EV Advisor** and **Held Item Advisor**, two more Trainer Info screens: one flags EV investment mismatched with your Pokémon's actual moves, the other suggests held items (split In Bag / To Get) — plus Team Coverage gained a third **Cart** tab for a general team-support shopping list.
 
 ## 📥 Installing
 
@@ -349,7 +361,7 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.7.3 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.7.4 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

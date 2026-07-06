@@ -1278,3 +1278,35 @@ TEAM_COVERAGE_QUAD_FMT :: %sは%sから4倍のダメージを受ける
 TEAM_COVERAGE_WEAK_TO_LIST_FMT :: パーティの誰も弱点にしていないタイプ: %s
 TEAM_COVERAGE_BLIND_LIST_FMT :: 有効な技がないタイプ: %s
 TEAM_COVERAGE_COVERED_LIST_FMT :: パーティが強く攻撃できるタイプ: %s
+TEAM_COVERAGE_CART :: カート
+TEAM_COVERAGE_CART_HDR :: チーム全体向けアイテム
+TEAM_COVERAGE_CART_SUB :: パーティのレベルとステータス傾向に合わせています - 特定の相手向けではありません。
+TEAM_COVERAGE_SUGGESTED_CART :: おすすめカート
+MENU_EV_ADVISOR :: 努力値アドバイザー
+FAV_EV_ADVISOR :: 努力値アドバイザー
+NOTE_EV_ADVISOR :: パーティの努力値配分を読み取り専用でチェックします。実際に覚えている技と合わない努力値配分のポケモン(例えば物理技しか覚えていないのに特攻に努力値が入っている場合)を表示し、攻撃技を1つも覚えていないポケモンは別枠で表示します(その場合、攻撃/特攻の努力値は何の役にも立ちません)。\n\n十字キー上下で下画面の詳細をスクロールします。\n\n物理・特殊の両方を覚えている混合アタッカーは対象外です - 明確な判定ができないためです。これはカテゴリの一致のみを確認するもので、配分の合計が最適かどうかは判定しません。
+EV_ADVISOR_NO_PARTY :: 手持ちにポケモンが見つかりません。
+EV_ADVISOR_TAG_OK :: OK
+EV_ADVISOR_TAG_MISMATCH :: 不一致
+EV_ADVISOR_TAG_SUPPORT :: サポート
+EV_ADVISOR_DETAILS_HDR :: 詳細
+EV_ADVISOR_NO_ATTACK :: 攻撃技を持っていません - 攻撃・特攻の努力値は戦闘の役に立ちません。
+EV_ADVISOR_WASTED_SPA_FMT :: 特攻の努力値%d点が無駄になっています - すべての技が物理技です。
+EV_ADVISOR_WASTED_ATK_FMT :: 攻撃の努力値%d点が無駄になっています - すべての技が特殊技です。
+EV_ADVISOR_OK :: 努力値は技のカテゴリと一致しています - 変更の必要はありません。
+MENU_HELD_ITEM_ADVISOR :: 持ち物アドバイザー
+FAV_HELD_ITEM_ADVISOR :: 持ち物アドバイザー
+NOTE_HELD_ITEM_ADVISOR :: 手持ちのポケモンが今持っている道具(または「なし」)を表示し、道具を持っていないポケモンにはステータス傾向をもとに簡単な提案をします - 突出したステータスがあればこだわりアイテム系、素早さが高ければいのちのたま、耐久が高ければたべのこし、これといった特徴がなければ安全策としてオレンのみを提案します。\n\nXボタンで「手持ちにある」(提案されたアイテムを既に持っている場合 - PC Box ++の持ち物選択で装備しましょう)と「入手が必要」(まだ持っていない場合 - 「おすすめカート」を押すとPokeMart Anywhereにそのアイテムが入った状態で開きます)を切り替えます。\n\nあくまでステータスだけをもとにした提案で、技や特性、実際の戦略までは考慮していません。
+HELD_ADVISOR_NO_PARTY :: 手持ちにポケモンが見つかりません。
+HELD_ADVISOR_NONE :: なし
+HELD_ADVISOR_IN_BAG :: 手持ちにある
+HELD_ADVISOR_TO_GET :: 入手が必要
+HELD_ADVISOR_SUGGEST_FMT :: %s -> %s
+HELD_ADVISOR_REASON_CHOICE_ATK :: 攻撃が高く素早い - 物理に全振りしましょう。
+HELD_ADVISOR_REASON_CHOICE_SPA :: 特攻が明確に一番高いステータスです - 全振りしましょう。
+HELD_ADVISOR_REASON_LIFE_ORB :: 攻撃力が高く素早い - 反動と引き換えに大きなダメージを与えます。
+HELD_ADVISOR_REASON_LEFTOVERS :: 耐久が高い - 毎ターンの少しの回復が長く戦う助けになります。
+HELD_ADVISOR_REASON_SITRUS :: 特に突出したステータスがありません - 無難な選択です。
+HELD_ADVISOR_NONE_IN_BAG :: 現在の持ち物と一致する提案はありません。
+HELD_ADVISOR_NONE_TO_GET :: 提案されたものはすべて持っているか、誰も道具を必要としていません。
+HELD_ADVISOR_SUGGESTED_CART :: おすすめカート

@@ -1278,3 +1278,35 @@ TEAM_COVERAGE_QUAD_FMT :: %s erleidet 4-fachen Schaden durch %s
 TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Niemand in deinem Team ist schwach gegen: %s
 TEAM_COVERAGE_BLIND_LIST_FMT :: Keine starke Attacke gegen: %s
 TEAM_COVERAGE_COVERED_LIST_FMT :: Dein Team trifft diese hart: %s
+TEAM_COVERAGE_CART :: Warenkorb
+TEAM_COVERAGE_CART_HDR :: ALLGEMEINES TEAM-SET
+TEAM_COVERAGE_CART_SUB :: Angepasst an das Level und die Statuswerte deines Teams - nicht gegnerspezifisch.
+TEAM_COVERAGE_SUGGESTED_CART :: Vorgeschlagener Warenkorb
+MENU_EV_ADVISOR :: EV-Berater
+FAV_EV_ADVISOR :: EV-Berater
+NOTE_EV_ADVISOR :: Ein reiner Lesecheck der EV-Investition deines Teams: markiert ein Pokemon, dessen EVs in Angriff oder Sp. Angriff nicht zu seinen TATSAECHLICH bekannten Attacken passen (z. B. EVs in Sp. Angriff bei einem Pokemon mit nur physischen Attacken), und markiert separat alle ohne jede Angriffsattacke (deren Angriff/Sp.-Angriff-EVs bewirken nichts).\n\nSteuerkreuz Hoch/Runter blaettert die Details auf dem unteren Bildschirm.\n\nGemischte Angreifer (kennen sowohl physische als auch spezielle Attacken) werden nicht markiert - dafuer gibt es kein klares Urteil. Es wird nur die Kategorie-Uebereinstimmung geprueft, nicht ob die Gesamtverteilung optimal ist.
+EV_ADVISOR_NO_PARTY :: Kein Pokemon in deinem Team gefunden.
+EV_ADVISOR_TAG_OK :: OK
+EV_ADVISOR_TAG_MISMATCH :: Fehlpassung
+EV_ADVISOR_TAG_SUPPORT :: Support
+EV_ADVISOR_DETAILS_HDR :: DETAILS
+EV_ADVISOR_NO_ATTACK :: Keine Angriffsattacken - Angriff- und Sp.-Angriff-EVs helfen ihm im Kampf nicht.
+EV_ADVISOR_WASTED_SPA_FMT :: %d EVs in Sp. Angriff sind verschwendet - alle seine Attacken sind physisch.
+EV_ADVISOR_WASTED_ATK_FMT :: %d EVs in Angriff sind verschwendet - alle seine Attacken sind speziell.
+EV_ADVISOR_OK :: Die EVs passen zu ihren Attackenkategorien - keine Aenderung noetig.
+MENU_HELD_ITEM_ADVISOR :: Item-Berater
+FAV_HELD_ITEM_ADVISOR :: Item-Berater
+NOTE_HELD_ITEM_ADVISOR :: Zeigt, was dein Team derzeit haelt (oder Keins), und schlaegt dann fuer jeden ohne Item basierend auf einem einfachen Statusprofil ein Item vor - ein klar dominanter Wert fuehrt zu einem Choice-Item, ein schneller Angreifer bekommt Life Orb, hohe Widerstandskraft bekommt Restposten, und ohne klaren Ausreisser gibt es standardmaessig eine sichere Sitrusbeere.\n\nX wechselt zwischen Im Beutel (du besitzt das vorgeschlagene Item schon - ruestet es im Halte-Item-Waehler von PC Box ++ aus) und Zu besorgen (du besitzt es noch nicht - Vorgeschlagener Warenkorb oeffnet PokeMart Anywhere mit diesen Items vorausgefuellt).\n\nNur ein Vorschlag basierend auf Statuswerten, nicht auf Attacken, Faehigkeiten oder deiner tatsaechlichen Strategie.
+HELD_ADVISOR_NO_PARTY :: Kein Pokemon in deinem Team gefunden.
+HELD_ADVISOR_NONE :: Keins
+HELD_ADVISOR_IN_BAG :: Im Beutel
+HELD_ADVISOR_TO_GET :: Zu besorgen
+HELD_ADVISOR_SUGGEST_FMT :: %s -> %s
+HELD_ADVISOR_REASON_CHOICE_ATK :: Hoher Angriff und schnell - voll auf physisch setzen.
+HELD_ADVISOR_REASON_CHOICE_SPA :: Sp. Angriff ist eindeutig sein bester Wert - voll darauf setzen.
+HELD_ADVISOR_REASON_LIFE_ORB :: Hoher Angriffswert und schnell - schlaegt haerter zu, kostet aber Rueckstoss.
+HELD_ADVISOR_REASON_LEFTOVERS :: Widerstandsfaehig - etwas extra Heilung pro Runde hilft ihm durchzuhalten.
+HELD_ADVISOR_REASON_SITRUS :: Kein herausragender Wert - eine sichere Allround-Wahl.
+HELD_ADVISOR_NONE_IN_BAG :: Keine Vorschlaege passen zu dem, was gerade in deinem Beutel ist.
+HELD_ADVISOR_NONE_TO_GET :: Du hast bereits alles Vorgeschlagene, oder niemand braucht ein Item.
+HELD_ADVISOR_SUGGESTED_CART :: Vorgeschlagener Warenkorb

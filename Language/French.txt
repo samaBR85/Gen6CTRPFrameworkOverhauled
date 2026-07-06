@@ -1278,3 +1278,35 @@ TEAM_COVERAGE_QUAD_FMT :: %s subit des degats x4 de %s
 TEAM_COVERAGE_WEAK_TO_LIST_FMT :: Personne dans votre equipe n'est faible face a : %s
 TEAM_COVERAGE_BLIND_LIST_FMT :: Aucune attaque efficace contre : %s
 TEAM_COVERAGE_COVERED_LIST_FMT :: Votre equipe frappe fort contre : %s
+TEAM_COVERAGE_CART :: Panier
+TEAM_COVERAGE_CART_HDR :: KIT GENERAL D'EQUIPE
+TEAM_COVERAGE_CART_SUB :: Adapte au niveau et au profil de stats de votre equipe - pas specifique a un adversaire.
+TEAM_COVERAGE_SUGGESTED_CART :: Panier suggere
+MENU_EV_ADVISOR :: Conseiller EV
+FAV_EV_ADVISOR :: Conseiller EV
+NOTE_EV_ADVISOR :: Une verification en lecture seule des EV de votre equipe : signale un Pokemon dont les EV en Attaque ou Attaque Spe ne correspondent pas a ses attaques REELLEMENT connues (par exemple des EV en Attaque Spe sur un Pokemon qui n'a que des capacites Physiques), et signale a part ceux qui n'ont aucune capacite offensive (leurs EV Attaque/Attaque Spe ne servent a rien).\n\nHaut/Bas de la croix fait defiler les details sur l'ecran du bas.\n\nLes attaquants mixtes (connaissent des capacites Physiques et Speciales) ne sont pas signales - pas de verdict clair possible. Ceci verifie seulement la correspondance de categorie, pas si la repartition totale est optimale.
+EV_ADVISOR_NO_PARTY :: Aucun Pokemon trouve dans votre equipe.
+EV_ADVISOR_TAG_OK :: OK
+EV_ADVISOR_TAG_MISMATCH :: Ecart
+EV_ADVISOR_TAG_SUPPORT :: Soutien
+EV_ADVISOR_DETAILS_HDR :: DETAILS
+EV_ADVISOR_NO_ATTACK :: Aucune capacite offensive - les EV Attaque et Attaque Spe ne l'aideront pas au combat.
+EV_ADVISOR_WASTED_SPA_FMT :: %d EV en Attaque Spe sont gaspilles - toutes ses capacites sont Physiques.
+EV_ADVISOR_WASTED_ATK_FMT :: %d EV en Attaque sont gaspilles - toutes ses capacites sont Speciales.
+EV_ADVISOR_OK :: Les EV correspondent a leurs categories de capacites - aucun changement necessaire.
+MENU_HELD_ITEM_ADVISOR :: Conseiller d'objets
+FAV_HELD_ITEM_ADVISOR :: Conseil. objets
+NOTE_HELD_ITEM_ADVISOR :: Montre ce que votre equipe tient actuellement (ou Aucun), puis suggere un objet a tenir pour quiconque n'en a pas, base sur un simple profil de stats - une stat clairement dominante oriente vers un objet Choix, un attaquant rapide prend Life Orb, une grosse resistance prend Reste, et sans stat dominante, la suggestion par defaut est une Baie Sitrus.\n\nX bascule entre Dans le sac (vous possedez deja l'objet suggere - allez l'equiper via le selecteur d'objet a tenir de PC Box ++) et A obtenir (vous ne le possedez pas encore - Panier suggere ouvre PokeMart Anywhere avec ces objets deja ajoutes).\n\nJuste une suggestion basee sur les stats, pas sur les capacites, talents ou votre strategie reelle.
+HELD_ADVISOR_NO_PARTY :: Aucun Pokemon trouve dans votre equipe.
+HELD_ADVISOR_NONE :: Aucun
+HELD_ADVISOR_IN_BAG :: Dans le sac
+HELD_ADVISOR_TO_GET :: A obtenir
+HELD_ADVISOR_SUGGEST_FMT :: %s -> %s
+HELD_ADVISOR_REASON_CHOICE_ATK :: Attaque elevee et rapide - foncez a fond en Physique.
+HELD_ADVISOR_REASON_CHOICE_SPA :: Attaque Spe est clairement sa meilleure stat - foncez a fond.
+HELD_ADVISOR_REASON_LIFE_ORB :: Attaque elevee et rapide - frappe plus fort au prix d'un contrecoup.
+HELD_ADVISOR_REASON_LEFTOVERS :: Resistant - un peu de soin en plus chaque tour l'aide a durer.
+HELD_ADVISOR_REASON_SITRUS :: Aucune stat ne se demarque - un choix sur surete.
+HELD_ADVISOR_NONE_IN_BAG :: Aucune suggestion ne correspond a ce qu'il y a dans votre sac.
+HELD_ADVISOR_NONE_TO_GET :: Vous avez deja tout ce qui est suggere, ou personne n'a besoin d'objet.
+HELD_ADVISOR_SUGGESTED_CART :: Panier suggere
