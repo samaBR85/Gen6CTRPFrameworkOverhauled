@@ -711,7 +711,7 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">Nintendo 3DS &amp; Azahar &bull; v0.7.4</div>
+  <div class="hero-badge">Nintendo 3DS &amp; Azahar &bull; v0.7.5</div>
   <h1>
     <span class="hl">Gen6</span> CTRPlugin<br/>
     <span class="hl2">Framework</span> Overhauled
@@ -747,7 +747,7 @@
       <div class="stat-label" data-i18n="stat_dl">Total Downloads</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">v0.7.4</div>
+      <div class="stat-num">v0.7.5</div>
       <div class="stat-label" data-i18n="stat_version">Latest Version</div>
     </div>
     <div class="stat-item">
@@ -998,6 +998,11 @@
     </div>
     <div class="screenshots-grid">
       <div class="screenshot-item fade-in" onclick="openLightbox(this)">
+        <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/Screenshots/v0.7.5/breeding_compat_boxes.png"
+             alt="Breeding Compatibility — Boxes tab, compatible pairs sorted by inheritable egg moves" loading="lazy" />
+        <div class="screenshot-caption">Breeding Compatibility (new in v0.7.5)</div>
+      </div>
+      <div class="screenshot-item fade-in" onclick="openLightbox(this)">
         <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/Screenshots/v0.7.4/held_item_advisor.png"
              alt="Held Item Advisor — held-item suggestions split between In Bag and To Get" loading="lazy" />
         <div class="screenshot-caption">Held Item Advisor (new in v0.7.4)</div>
@@ -1171,8 +1176,12 @@
     </div>
     <ul class="history-list fade-in" style="max-width:680px;margin:0 auto;list-style:none;padding:0;">
       <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
-        <span style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;flex:0 0 56px;">v0.7.4</span>
-        <span style="color:var(--text);" data-i18n="hist_074">EV Advisor and Held Item Advisor, two more Trainer Info screens: one flags EV investment mismatched with your Pokemon's actual moves, the other suggests held items (split In Bag / To Get) — plus Team Coverage gained a third Cart tab for a general team-support shopping list.</span>
+        <span style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;flex:0 0 56px;">v0.7.5</span>
+        <span style="color:var(--text);" data-i18n="hist_075">EV Advisor grew into Nature / IV / EV Advisor (three checks, one screen), and a new Breeding Compatibility screen (Party / Boxes / Check Two) finds Day Care pairs, the egg moves they could pass down, and lets you test any two species before you even own both.</span>
+      </li>
+      <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
+        <span style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;flex:0 0 56px;">v0.7.4</span>
+        <span style="color:var(--muted);" data-i18n="hist_074">EV Advisor and Held Item Advisor, two more Trainer Info screens: one flags EV investment mismatched with your Pokemon's actual moves, the other suggests held items (split In Bag / To Get) — plus Team Coverage gained a third Cart tab for a general team-support shopping list.</span>
       </li>
       <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
         <span style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;flex:0 0 56px;">v0.7.3</span>
@@ -1291,15 +1300,15 @@
           <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>
           Latest Release
         </div>
-        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.7.4</div>
+        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.7.5</div>
         <div class="dl-meta">
-          Released <span>July 5, 2026</span> &bull;
+          Released <span>July 6, 2026</span> &bull;
           Platform <span>Nintendo 3DS (3gx)</span> &bull;
           License <span>GNU GPL-3.0</span>
         </div>
         <div class="dl-buttons">
-          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.7.4/Gen6CTRPluginFramework-v0.7.4.zip" target="_blank" rel="noopener">
-            ⬇ Download v0.7.4 (.zip)
+          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.7.5/Gen6CTRPluginFramework-v0.7.5.zip" target="_blank" rel="noopener">
+            ⬇ Download v0.7.5 (.zip)
           </a>
           <a class="btn-secondary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases" target="_blank" rel="noopener">
             All Releases
@@ -1313,6 +1322,12 @@
     </div>
 
     <div class="releases-list fade-in">
+      <div class="release-row">
+        <span class="release-tag">v0.7.5</span>
+        <span class="release-date">Jul 6, 2026</span>
+        <span class="release-downloads" id="dl-v075">Loading…</span>
+        <a class="release-link" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.7.5/Gen6CTRPluginFramework-v0.7.5.zip" target="_blank" rel="noopener">Download</a>
+      </div>
       <div class="release-row">
         <span class="release-tag">v0.7.4</span>
         <span class="release-date">Jul 5, 2026</span>
@@ -1544,6 +1559,7 @@
         release.assets.forEach(asset => { total += asset.download_count; });
       });
 
+      const v075 = data.find(r => r.tag_name === 'v0.7.5');
       const v074 = data.find(r => r.tag_name === 'v0.7.4');
       const v073 = data.find(r => r.tag_name === 'v0.7.3');
       const v072 = data.find(r => r.tag_name === 'v0.7.2');
@@ -1563,6 +1579,7 @@
       const v021 = data.find(r => r.tag_name === 'v0.2.1');
       const v020 = data.find(r => r.tag_name === 'v0.2.0');
 
+      const count075 = v075 ? v075.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count074 = v074 ? v074.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count073 = v073 ? v073.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count072 = v072 ? v072.assets.reduce((s, a) => s + a.download_count, 0) : 0;
@@ -1585,6 +1602,7 @@
       animateCount('total-downloads', total);
       animateCount('download-count', total);
 
+      const el075 = document.getElementById('dl-v075');
       const el074 = document.getElementById('dl-v074');
       const el073 = document.getElementById('dl-v073');
       const el072 = document.getElementById('dl-v072');
@@ -1603,6 +1621,7 @@
       const el030 = document.getElementById('dl-v030');
       const el021 = document.getElementById('dl-v021');
       const el020 = document.getElementById('dl-v020');
+      if (el075) el075.textContent = count075 + ' downloads';
       if (el074) el074.textContent = count074 + ' downloads';
       if (el073) el073.textContent = count073 + ' downloads';
       if (el072) el072.textContent = count072 + ' downloads';
@@ -1622,7 +1641,7 @@
       if (el021) el021.textContent = count021 + ' downloads';
       if (el020) el020.textContent = count020 + ' downloads';
     } catch (e) {
-      const els = ['total-downloads','download-count','dl-v074','dl-v073','dl-v072','dl-v071','dl-v070','dl-v065','dl-v064','dl-v063','dl-v062','dl-v061','dl-v060','dl-v050','dl-v033','dl-v032','dl-v031','dl-v030','dl-v021','dl-v020'];
+      const els = ['total-downloads','download-count','dl-v075','dl-v074','dl-v073','dl-v072','dl-v071','dl-v070','dl-v065','dl-v064','dl-v063','dl-v062','dl-v061','dl-v060','dl-v050','dl-v033','dl-v032','dl-v031','dl-v030','dl-v021','dl-v020'];
       els.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = '–';
@@ -1755,6 +1774,7 @@
     hist_030: "Os localizadores de tela dupla (Wild Pokémon Spawner, Respawn Legendary) e o App Guide.",
     hist_031: "PokéMart Anywhere — uma loja real na bag com preços, carrinho e checkout — mais ordenar a bag.",
     hist_032: "Capturar a própria UI do plugin; favoritos, cheats e hotkeys sobrevivem a uma atualização.",
+    hist_075: "O EV Advisor virou Nature / IV / EV Advisor (3 checagens, uma tela), e uma nova tela Breeding Compatibility (Party / Boxes / Check Two) acha pares de Creche, os golpes de ovo que eles poderiam passar, e deixa você testar qualquer par de espécies antes mesmo de ter os dois.",
     hist_074: "EV Advisor e Held Item Advisor, mais duas telas em Trainer Info: uma sinaliza EVs que não batem com os golpes reais do seu Pokémon, a outra sugere itens pra segurar (dividido em No Baú / A Conseguir) — e o Team Coverage ganhou uma 3ª aba Cart com uma lista de compras geral pro time.",
     hist_073: "Team Coverage — uma nova tela em Trainer Info que lista os tipos do seu time num relance, mais um detalhamento Defense/Offense de fraquezas compartilhadas, golpes 4x e pontos cegos que seus próprios golpes não furam.",
     hist_072: "O Gym Coach agora lê suas insígnias de ginásio reais e já pula direto pro seu próximo desafio na primeira vez que você abre a tela em cada sessão, com uma marca Next na lista pra você sempre saber quem é.",
