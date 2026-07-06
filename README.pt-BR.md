@@ -108,12 +108,13 @@ teclado.
 </p>
 
 O mesmo editor agora alcança a sua **Equipe**, não só as boxes do PC — três abas no topo alternam entre **PC
-Box**, **Party** (os seus seis, em sprites grandes) e **Swap**. Editar um Pokémon da equipe muda ele de verdade
-no jogo e permanece depois que você salva.
+Box**, **Party** (os seus seis, em sprites grandes) e **Swap**. Abra qualquer Pokémon da equipe e você tem o
+mesmíssimo editor em abas das boxes — Main, Stats, Moves, Origins, Misc — e editar ele muda de verdade no jogo e
+permanece depois que você salva.
 
 <p align="center">
   <img src="Screenshots/v0.7.6/PC_BOX_party.png" width="330" alt="PC Box ++ — a aba Party, os seus seis em sprites grandes" />
-  <img src="Screenshots/v0.7.6/PC_BOX_home_box.png" width="330" alt="PC Box ++ — a aba PC Box com o cabeçalho de três abas" />
+  <img src="Screenshots/v0.7.6/PC_BOX_part_edit.png" width="330" alt="PC Box ++ — o editor completo em abas aberto num Pokémon da equipe (Edit - Party slot 4)" />
 </p>
 
 O **Swap** é uma troca em dois passos: escolha um Pokémon, depois escolha com quem ele troca de lugar —

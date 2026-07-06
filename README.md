@@ -108,12 +108,13 @@ keyboard.
 </p>
 
 The same editor now reaches your **Party**, not just the PC boxes — three tabs across the top switch between **PC
-Box**, **Party** (your six, as big sprites) and **Swap**. Editing a party Pokémon really changes it in-game and
-sticks after you save.
+Box**, **Party** (your six, as big sprites) and **Swap**. Open any party Pokémon and you get the exact same tabbed
+editor as the boxes — Main, Stats, Moves, Origins, Misc — and editing it really changes it in-game and sticks
+after you save.
 
 <p align="center">
   <img src="Screenshots/v0.7.6/PC_BOX_party.png" width="330" alt="PC Box ++ — the Party tab, your six as full-size sprites" />
-  <img src="Screenshots/v0.7.6/PC_BOX_home_box.png" width="330" alt="PC Box ++ — the PC Box tab with the three-tab header" />
+  <img src="Screenshots/v0.7.6/PC_BOX_part_edit.png" width="330" alt="PC Box ++ — the full tabbed editor open on a party Pokemon (Edit - Party slot 4)" />
 </p>
 
 **Swap** is a two-step exchange: pick a Pokémon, then pick who it trades places with — Box↔Party or the other way
