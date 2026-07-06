@@ -889,6 +889,15 @@ namespace CTRPluginFramework {
         static u8   gPartySlot = 0;
         static u32  gPartyBase = 0;          // cached party slot-0 address once found
         static bool gPartyEncrypted = true;  // whether that block is EK6-encrypted (vs decrypted in RAM)
+        // Per-slot stride of the located party. The AUTHORITATIVE party (fixed address, see FindPartyBase)
+        // uses 0x1E4 (484)-byte members; the old ±512KB scan locked onto a compact 0x104-packed MIRROR the
+        // game keeps for menus (writes there never reach the real party/save). All party reads/writes stride
+        // by this so both the fixed base (0x1E4) and the fallback scan (0x104) stay self-consistent.
+        static u32  gPartyStride = 0x1E4;
+        // SAFETY GATE for party identity WRITES (Swap commit into a party slot, Party-edit save-to-party).
+        // Fase 1 kept this false to verify the fixed address/stride/encryption read-only. HW-confirmed the
+        // reads on 2026-07-06 → Fase 2 flips it true so party writes hit the authoritative party.
+        static const bool PARTY_WRITE_ENABLED = true;
 
         u32 CurrentPtr(void) { return gPartyMode ? gPartyPtr : dataPointer; }
         void SetPartyMode(bool party) { gPartyMode = party; } // called from the folders' OnAction (no-bleed switch)
@@ -906,6 +915,23 @@ namespace CTRPluginFramework {
         u32 FindPartyBase(void) {
             if (gPartyBase != 0)
                 return gPartyBase;
+
+            // AUTHORITATIVE party base: a fixed address in the SAME AutoGameSet(XY, ORAS) scheme as the box
+            // (X/Y 0x8CE1CF8, OR/AS 0x8CFB26C — from PKMN-NTR's LookupTable, whose Box/TID offsets match this
+            // plugin's known-good constants byte-for-byte). Members stride 0x1E4 (484), body is EK6-encrypted
+            // like the boxes. Writing HERE actually changes the in-game party and persists to the save; the
+            // old ±512KB scan (kept below as a fallback) found a menu MIRROR that writes never reached.
+            {
+                const u32 fixed = AutoGameSet((u32)0x8CE1CF8, (u32)0x8CFB26C);
+                PK6 pk;
+                if (GetPokemon(fixed, &pk) && pk.species >= 1 && pk.species <= 721) {
+                    gPartyEncrypted = true; gPartyStride = 0x1E4; gPartyBase = fixed;
+                    return gPartyBase;
+                }
+            }
+            // ---- Fallback (unknown version / fixed base didn't validate): the original scan. It locks onto a
+            // 0x104-packed copy, so pin the stride to 0x104 to stay self-consistent for reads at least. ----
+            gPartyStride = 0x104;
 
             // Get the player's TID/SID from a REAL owned Pokemon (box slot 1) — the proven, reliable source.
             const u32 boxBase = AutoGameSet((u32)0x8C861C8, (u32)0x8C9E134);
@@ -1015,7 +1041,7 @@ namespace CTRPluginFramework {
             int count = 0;
             for (int i = 0; i < 6; ++i) {
                 PK6 pk;
-                bool ok = gPartyEncrypted ? GetPokemon(base + i * 0x104, &pk) : GetPokemonRaw(base + i * 0x104, &pk);
+                bool ok = gPartyEncrypted ? GetPokemon(base + i * gPartyStride, &pk) : GetPokemonRaw(base + i * gPartyStride, &pk);
                 if (ok && pk.species >= 1 && pk.species <= 721) ++count;
             }
             return count;
@@ -1132,6 +1158,33 @@ namespace CTRPluginFramework {
                 if (up != down && natMap[d] == down) val = val * 90 / 100;  // nature drop
                 out[d] = (u16)val;
             }
+        }
+
+        // Write a FULL party member at a 0x1E4-slot address: the EK6-encrypted PK6 body PLUS the plaintext
+        // party-stat tail (status/level/HP/6 stats) recomputed from the PK6 — same as what the game writes
+        // when it places a mon into the party, so the in-game party menu shows correct level/HP/stats and
+        // the change persists to save. An empty/invalid species clears the party-PK6 region of the slot.
+        // Tail offsets (plaintext, absolute within the slot) match RefillPartyOverworld: 0xE8 status(u32),
+        // 0xEC level(u8), 0xF0 curHP, 0xF2 maxHP, 0xF4 Atk, 0xF6 Def, 0xF8 Spe, 0xFA SpA, 0xFC SpD.
+        static bool WritePartyMemberFull(u32 addr, PK6 &pk) {
+            if (pk.species < 1 || pk.species > 721) {
+                static const u8 zero[0x104] = {0};
+                return Process::Patch(addr, (u8*)zero, 0x104); // clear body + stat tail
+            }
+            bool ok = gPartyEncrypted ? SetPokemon(addr, &pk) : SetPokemonRaw(addr, &pk); // body [0..0xE7]
+            if (!ok) return false;
+            int level = LevelFromExp(pk.species, pk.exp);
+            u16 st[6]; CalcStats(pk.species, level, pk.nature, pk.iv32, pk.EV, st); // display order HP,Atk,Def,SpA,SpD,Spe
+            Process::Write32(addr + 0xE8, 0);            // status = healthy
+            Process::Write8 (addr + 0xEC, (u8)level);    // level
+            Process::Write16(addr + 0xF0, st[0]);        // current HP = max
+            Process::Write16(addr + 0xF2, st[0]);        // max HP
+            Process::Write16(addr + 0xF4, st[1]);        // Atk
+            Process::Write16(addr + 0xF6, st[2]);        // Def
+            Process::Write16(addr + 0xF8, st[5]);        // Spe
+            Process::Write16(addr + 0xFA, st[3]);        // SpA
+            Process::Write16(addr + 0xFC, st[4]);        // SpD
+            return true;
         }
 
         // ---- Pokemon type chips (colored badges). Index 0=None..18=Fairy (matches gMoveExtra / spawnerType1-2). ----
@@ -1381,7 +1434,7 @@ namespace CTRPluginFramework {
             u32 base = FindPartyBase();
             if (!base) return;
             for (int i = 0; i < 6; ++i) {
-                u32 p = base + (u32)i * 0x104;
+                u32 p = base + (u32)i * gPartyStride;
                 PK6 pk;
                 bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk);
                 if (!ok || pk.species < 1 || pk.species > 721) continue;
@@ -1439,7 +1492,7 @@ namespace CTRPluginFramework {
             u16 slotSpecies[6]; bool slotEgg[6];
             for (int i = 0; i < 6; i++) {
                 PK6 pk;
-                bool ok = gPartyEncrypted ? GetPokemon(base + i * 0x104, &pk) : GetPokemonRaw(base + i * 0x104, &pk);
+                bool ok = gPartyEncrypted ? GetPokemon(base + i * gPartyStride, &pk) : GetPokemonRaw(base + i * gPartyStride, &pk);
                 bool valid = ok && pk.species >= 1 && pk.species <= 721;
                 slotSpecies[i] = valid ? pk.species : 0;
                 slotEgg[i] = valid && IsEggBit(pk);
@@ -1447,7 +1500,7 @@ namespace CTRPluginFramework {
             // Slot label, recomputed each frame so it flips from "Egg" to the species right after a peek.
             auto slotName = [&](int i) -> string {
                 if (slotSpecies[i] == 0) return to_string(i + 1) + " - (empty)";
-                bool masked = slotEgg[i] && !EggRevealed(base + i * 0x104);
+                bool masked = slotEgg[i] && !EggRevealed(base + i * gPartyStride);
                 string nm = masked ? getLanguage->Get("MENU_EGG_LABEL") : string(speciesList[slotSpecies[i] - 1]);
                 return to_string(i + 1) + " - " + nm;
             };
@@ -1458,7 +1511,7 @@ namespace CTRPluginFramework {
             u16 partyStat[6][6]; bool slotValid[6];
             for (int i = 0; i < 6; i++) {
                 PK6 pk;
-                bool ok = gPartyEncrypted ? GetPokemon(base + i * 0x104, &pk) : GetPokemonRaw(base + i * 0x104, &pk);
+                bool ok = gPartyEncrypted ? GetPokemon(base + i * gPartyStride, &pk) : GetPokemonRaw(base + i * gPartyStride, &pk);
                 slotValid[i] = ok && pk.species >= 1 && pk.species <= 721;
                 if (slotValid[i])
                     CalcStats(pk.species, LevelFromExp(pk.species, pk.exp), pk.nature, pk.iv32, pk.EV, partyStat[i]);
@@ -1515,7 +1568,7 @@ namespace CTRPluginFramework {
                     if (g_cardStatHotkey && Controller::IsKeysPressed(g_cardStatHotkey))
                         higher = !higher;
 
-                    u32 curPtr = base + cursor * 0x104;
+                    u32 curPtr = base + cursor * gPartyStride;
                     bool cardMasked = slotEgg[cursor] && !EggRevealed(curPtr);
                     bool cardAnimating = EggRevealAnimating(curPtr); // egg mid-reveal cascade
                     if (Controller::IsKeyPressed(Key::B))          mode = 0;                  // back to list
@@ -1570,7 +1623,7 @@ namespace CTRPluginFramework {
                     // Load only when the selected species changes; the framed look matches the detail/Spawner sheets.
                     u16 sp = slotSpecies[cursor];
                     // A masked egg hides its sprite too (key -2 so it reloads the species once peeked).
-                    bool curMasked = slotEgg[cursor] && !EggRevealed(base + cursor * 0x104);
+                    bool curMasked = slotEgg[cursor] && !EggRevealed(base + cursor * gPartyStride);
                     int wantKey = curMasked ? -2 : (int)sp;
                     if (wantKey != partySpriteKey) {
                         partySpriteKey = wantKey;
@@ -1599,13 +1652,13 @@ namespace CTRPluginFramework {
                 else {
                     // BuildSheet reads CurrentPtr() while gPartyMode is set; DrawPartyCard reads the ptr directly,
                     // so set the target only for consistency and reset right after.
-                    gPartyMode = true; gPartySlot = (u8)(cursor + 1); gPartyPtr = base + cursor * 0x104;
-                    DrawPartyCard(top, base + cursor * 0x104, cursor + 1, title, txt, sel);
+                    gPartyMode = true; gPartySlot = (u8)(cursor + 1); gPartyPtr = base + cursor * gPartyStride;
+                    DrawPartyCard(top, base + cursor * gPartyStride, cursor + 1, title, txt, sel);
                     gPartyMode = false;
 
                     // A masked egg draws no stat overlay (the card itself is just "Egg" + the peek prompt).
-                    bool mMasked = slotEgg[cursor] && !EggRevealed(base + cursor * 0x104);
-                    if (!mMasked && !EggRevealAnimating(base + cursor * 0x104)) { // hide overlay during the reveal cascade
+                    bool mMasked = slotEgg[cursor] && !EggRevealed(base + cursor * gPartyStride);
+                    if (!mMasked && !EggRevealAnimating(base + cursor * gPartyStride)) { // hide overlay during the reveal cascade
                     // --- stat-selector overlay (rows match DrawPartyCard: y = 72 + d*18) ---
                     const int ROW0 = 72, RDY = 18;
                     // ▲/▼ markers left of each stat name where the shown member is the team best/worst.
@@ -1639,7 +1692,7 @@ namespace CTRPluginFramework {
                     bot.DrawSysfont("A : view card",       70, 118, txt);
                     bot.DrawSysfont("B : back",            70, 146, txt);
                 }
-                else if (slotEgg[cursor] && !EggRevealed(base + cursor * 0x104)) {
+                else if (slotEgg[cursor] && !EggRevealed(base + cursor * gPartyStride)) {
                     // Masked egg: don't spoil the moves either — show the peek prompt on the bottom screen.
                     bot.DrawSysfont(title << getLanguage->Get("MENU_EGG_LABEL"), 40, 40, title);
                     auto centerHintE = [&](const string &s, int yy) {
@@ -1652,7 +1705,7 @@ namespace CTRPluginFramework {
                 else {
                     // Moves of the selected slot (read the same block the card uses).
                     PK6 mp;
-                    bool mok = gPartyEncrypted ? GetPokemon(base + cursor * 0x104, &mp) : GetPokemonRaw(base + cursor * 0x104, &mp);
+                    bool mok = gPartyEncrypted ? GetPokemon(base + cursor * gPartyStride, &mp) : GetPokemonRaw(base + cursor * gPartyStride, &mp);
                     bot.DrawSysfont(title << "Moves", 40, 34, title);
                     bot.DrawSysfont(title << "Pow", 204, 34, title);
                     bot.DrawSysfont(title << "Acc", 252, 34, title);
@@ -1783,7 +1836,7 @@ namespace CTRPluginFramework {
             u16 partySp[6] = {0, 0, 0, 0, 0, 0};
             for (int i = 0; i < 6 && partyBase; ++i) {
                 PK6 pk;
-                bool ok = gPartyEncrypted ? GetPokemon(partyBase + i * 0x104, &pk) : GetPokemonRaw(partyBase + i * 0x104, &pk);
+                bool ok = gPartyEncrypted ? GetPokemon(partyBase + i * gPartyStride, &pk) : GetPokemonRaw(partyBase + i * gPartyStride, &pk);
                 if (ok && pk.species >= 1 && pk.species <= 721) partySp[i] = pk.species;
             }
             Image partySprite[6]; // one BMP load per slot, cached for the life of this screen
@@ -2369,7 +2422,7 @@ namespace CTRPluginFramework {
             u32 pbase = FindPartyBase();
             for (int i = 0; i < 6 && pbase; ++i) {
                 PK6 pk;
-                bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                bool ok = gPartyEncrypted ? GetPokemon(pbase + i * gPartyStride, &pk) : GetPokemonRaw(pbase + i * gPartyStride, &pk);
                 if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
                     ++owned[pk.species];
                     if (IsShiny(&pk)) shinyOwn[pk.species] = true;
@@ -2716,7 +2769,7 @@ namespace CTRPluginFramework {
             u16 partySp[6] = {0, 0, 0, 0, 0, 0}; u16 partyMoves[6][4] = {}; int nParty = 0;
             { u32 pbase = FindPartyBase();
               for (int i = 0; i < 6 && pbase; ++i) {
-                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * gPartyStride, &pk) : GetPokemonRaw(pbase + i * gPartyStride, &pk);
                   if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
                       partySp[nParty] = pk.species;
                       for (int m = 0; m < 4; ++m) partyMoves[nParty][m] = pk.move[m];
@@ -2728,7 +2781,7 @@ namespace CTRPluginFramework {
             u16 partyLevel[6] = {};
             { u32 pbase2 = FindPartyBase();
               for (int i = 0; i < nParty && pbase2; ++i) {
-                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase2 + i * 0x104, &pk) : GetPokemonRaw(pbase2 + i * 0x104, &pk);
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase2 + i * gPartyStride, &pk) : GetPokemonRaw(pbase2 + i * gPartyStride, &pk);
                   if (ok) partyLevel[i] = (u16)LevelFromExp(partySp[i], pk.exp);
               } }
 
@@ -2945,7 +2998,7 @@ namespace CTRPluginFramework {
             u32 partyIV32[6] = {}; u8 partyNature[6] = {}; int nParty = 0;
             { u32 pbase = FindPartyBase();
               for (int i = 0; i < 6 && pbase; ++i) {
-                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * gPartyStride, &pk) : GetPokemonRaw(pbase + i * gPartyStride, &pk);
                   if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
                       partySp[nParty] = pk.species;
                       for (int m = 0; m < 4; ++m) partyMoves[nParty][m] = pk.move[m];
@@ -3122,7 +3175,7 @@ namespace CTRPluginFramework {
             u16 partySp[6] = {0, 0, 0, 0, 0, 0}; u16 partyItem[6] = {}; u16 s6all[6][6] = {}; int nParty = 0;
             { u32 pbase = FindPartyBase();
               for (int i = 0; i < 6 && pbase; ++i) {
-                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * gPartyStride, &pk) : GetPokemonRaw(pbase + i * gPartyStride, &pk);
                   if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
                       partySp[nParty] = pk.species; partyItem[nParty] = pk.heldItem;
                       CalcStats(pk.species, LevelFromExp(pk.species, pk.exp), pk.nature, pk.iv32, pk.EV, s6all[nParty]);
@@ -3286,7 +3339,7 @@ namespace CTRPluginFramework {
             u16 partySp[6] = {0, 0, 0, 0, 0, 0}; u16 partyMoves[6][4] = {}; u8 partyGender[6] = {}; int nParty = 0;
             { u32 pbase = FindPartyBase();
               for (int i = 0; i < 6 && pbase; ++i) {
-                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * gPartyStride, &pk) : GetPokemonRaw(pbase + i * gPartyStride, &pk);
                   if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
                       partySp[nParty] = pk.species;
                       for (int m = 0; m < 4; ++m) partyMoves[nParty][m] = pk.move[m];
@@ -3776,7 +3829,7 @@ namespace CTRPluginFramework {
             auto addPartyType = [&](int t) { if (t < 1) return; for (int i = 0; i < nPartyTypes; ++i) if (partyTypes[i] == t) return; if (nPartyTypes < 12) partyTypes[nPartyTypes++] = t; };
             { u32 pbase = FindPartyBase();
               for (int i = 0; i < 6 && pbase; ++i) {
-                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * gPartyStride, &pk) : GetPokemonRaw(pbase + i * gPartyStride, &pk);
                   if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) { addPartyType(spawnerType1[pk.species]); addPartyType(spawnerType2[pk.species]); }
               } }
 
@@ -4859,6 +4912,8 @@ namespace CTRPluginFramework {
             gRevealedEggN = 0; // re-mask eggs on every open of the browser (peeks last only while it's open)
             const u32 base = DetermineSpeciesPointer(); // box 1 / slot 1 (game-specific), 31 boxes x 30 slots
             auto cellAddr = [&](int box, int slot) -> u32 { return base + box * 6960 + slot * 0xE8; };
+            const u32 partyBase = FindPartyBase(); // also sets gPartyEncrypted as a side effect
+            auto partyAddr = [&](int slot) -> u32 { return partyBase + slot * gPartyStride; };
 
             const Screen &top = OSD::GetTopScreen();
             const Screen &bot = OSD::GetBottomScreen();
@@ -4866,22 +4921,26 @@ namespace CTRPluginFramework {
             Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
             Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
             const Color markCol(0xE5, 0x43, 0x3C); // pending move/clone source highlight (red)
+            // One fixed color per tab (not a theme color) so PC Box / Party / Swap read apart at a glance.
+            const Color tabBoxCol(0x18, 0x5F, 0xA5);   // steel blue - storage
+            const Color tabPartyCol(0x3B, 0x6D, 0x11); // forest green - your team
+            const Color tabSwapCol(0x8B, 0x2F, 0xA5);  // purple - exchange between the two
 
-            // Grid geometry: 8 columns x 4 rows (32 cells) to hold the 30 real slots of a Box (3 full rows
-            // of 8 + a last row of 6) - airier than the old 6x5 (more vertical breathing room below the
-            // grid), same 32px cell / 4px gap spacing as Living Dex's grid. The last (partial) row stays
-            // LEFT-ALIGNED like every other row - centering it made column N visually land in a different
-            // spot than column N in the rows above, so D-Pad Down from the second-to-last row landed one
-            // slot off from where it looked like it should (cursor math is a flat i/COLS, i%COLS grid; a
-            // per-row x offset breaks that assumption).
-            const int COLS = 8, ROWS = 4, CELL = 32, GAP = 4, PITCH = CELL + GAP;
-            const int GX0 = 30 + (340 - ((COLS - 1) * PITCH + CELL)) / 2, GY0 = 52;
-            auto cellLeft = [&](int i) { return GX0 + (i % COLS) * PITCH; };
-            auto cellTop  = [&](int i) { return GY0 + (i / COLS) * PITCH; };
+            // Grid geometry: 32px cell / 4px gap, same as Living Dex's grid. Box mode uses 8 columns x 4
+            // rows (32 cells) to hold the 30 real slots (3 full rows of 8 + a last row of 6) - the last
+            // (partial) row stays LEFT-ALIGNED like every other row - centering it made column N visually
+            // land in a different spot than column N in the rows above, so D-Pad Down from the
+            // second-to-last row landed one slot off from where it looked like it should (cursor math is
+            // a flat i/COLS, i%COLS grid; a per-row x offset breaks that assumption). Party mode has only
+            // 6 slots, shown as a single centered row instead - recomputed every frame (below, inside the
+            // grid-mode block) since the tap-pill can flip `viewParty` at any time.
+            const int CELL = 32, GAP = 4, PITCH = CELL + GAP;
+            static int tab = 0; // 0 = PC Box, 1 = Party, 2 = Swap - remembers the last choice between opens
+            bool swapSideParty = false; // Swap only: which grid the CURRENT step is browsing (source or destination)
 
             int curBox = (gBoxNumber >= 1 && gBoxNumber <= 31) ? gBoxNumber - 1 : 0;
             int cursor = (gPositionNumber >= 1 && gPositionNumber <= 30) ? gPositionNumber - 1 : 0;
-            int loadedBox = -1;
+            int loadedBox = -1; // -1 = nothing loaded yet, -2 = the party is loaded (sentinel, never a real box index)
 
             // Per-box cache (reloaded only on box change): species + shiny + the 30 grid icons.
             static u16 boxSpecies[30]; static u8 boxShiny[30]; static u8 boxEgg[30];
@@ -4889,8 +4948,9 @@ namespace CTRPluginFramework {
             Image cardSprite; int cardKey = -1; // 72px sprite of the focused slot (species*2+shiny)
 
             // Pending move/swap or clone source, and find state.
-            int markMode = 0;            // 0 none, 1 = move/swap (X), 2 = clone (Y)
+            int markMode = 0;            // 0 none, 1 = move/swap (X), 2 = clone (Y), 3 = cross Box<->Party swap (Swap tab)
             int markBox = -1, markSlot = -1; u32 markAddr = 0;
+            bool markIsParty = false;    // Swap only: which side markAddr belongs to
             static u16 fHitBox[930], fHitSlot[930]; int fN = 0, fIdx = 0; u16 fSpecies = 0; bool findActive = false;
             string status; int statusTtl = 0;
             auto setStatus = [&](const string &s) { status = s; statusTtl = 90; };
@@ -4900,13 +4960,18 @@ namespace CTRPluginFramework {
             MenuEntry editEntry("Edit"); // reusable temp entry to invoke the editors (they read only Name())
             static u8 editScratch[0xE8], editOrig[0xE8]; // PKSM-style working copy: edits land here, commit on Save
             u32 editCommitAddr = 0;       // the real slot address the working copy belongs to
+            bool editIsParty = false;     // whether editCommitAddr is a party slot (needs the crypto bridge on Save)
 
             // Swallow the A/B that opened this view so it doesn't bleed into the first frame.
             while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B)) { Controller::Update(); OSD::SwapBuffers(); }
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition(); // for the PC Box/Party tap-pill
 
             while (true) {
                 Controller::Update();
                 if (System::IsSleeping()) break; // release the game + handle sleep
+
+                bool touchDown = Touch::IsDown(); UIntVector tp = touchDown ? Touch::GetPosition() : lastPos; if (touchDown) lastPos = tp;
+                bool tap = armed && !touchDown && wasDown; if (!touchDown) armed = true; wasDown = touchDown;
 
                 if (Controller::IsKeyPressed(Key::Select)) {
                     while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
@@ -4916,38 +4981,190 @@ namespace CTRPluginFramework {
 
                 if (mode == 0) {
                 // ===================== STORAGE (grid) MODE =====================
-                // ---- input ----
-                if (KeyRep(Key::Up))    cursor = (cursor + 30 - COLS) % 30;
-                if (KeyRep(Key::Down))  cursor = (cursor + COLS) % 30;
-                if (KeyRep(Key::Left))  cursor = (cursor + 29) % 30;
-                if (KeyRep(Key::Right)) cursor = (cursor + 1) % 30;
-                if (Controller::IsKeyPressed(Key::L))     curBox = (curBox + 30) % 31;
-                if (Controller::IsKeyPressed(Key::R))     curBox = (curBox + 1) % 31;
+                // Slot count/address/geometry depend on which grid is currently shown - recomputed every
+                // frame since a tap can flip it mid-loop. Both caches (boxSpecies/boxShiny/boxEgg,
+                // gridIcon) are shared between Box/Party/Swap; whichever grid is active owns them until a
+                // reload happens (see the "(re)load" block below). In Swap (tab==2), `swapSideParty`
+                // decides which grid is showing for the CURRENT step (source or destination) - the rest of
+                // this block doesn't need to know it's in Swap at all, it just reads `viewParty`.
+                bool viewParty = (tab == 1) || (tab == 2 && swapSideParty);
+                int nSlots  = viewParty ? 6 : 30;
+                // Party gets a 3x2 grid of full-size Spawner sprites (72px) instead of the Box's 8x4 grid
+                // of small 32px BoxIcons - a 6-slot row of tiny icons left ~half the top screen empty, and
+                // pixel-checked against a real screenshot, 72px sprites at a 10px gap fit with room to
+                // spare (236x154 needed vs ~316x160 available).
+                int gCols   = viewParty ? 3 : 8;
+                int gCellSz = viewParty ? 72 : CELL;
+                int gGap    = viewParty ? 10 : GAP;
+                int gPitch  = gCellSz + gGap;
+                int gGX0    = 30 + (340 - ((gCols - 1) * gPitch + gCellSz)) / 2;
+                int gGY0    = viewParty ? 54 : 52;
+                auto cellLeft = [&](int i) { return gGX0 + (i % gCols) * gPitch; };
+                auto cellTop  = [&](int i) { return gGY0 + (i / gCols) * gPitch; };
+                auto slotAddr = [&](int i) -> u32 { return viewParty ? partyAddr(i) : cellAddr(curBox, i); };
+                auto readSlot = [&](u32 addr, PK6 &pk) -> bool {
+                    return viewParty ? (gPartyEncrypted ? GetPokemon(addr, &pk) : GetPokemonRaw(addr, &pk))
+                                      : (GetPokemon(addr, &pk) && pk.species >= 1 && pk.species <= 721);
+                };
+                // A generic read/write pair keyed by an EXPLICIT side (not the current `viewParty`) - Swap
+                // needs this because its two slots (source, destination) live in different modes at once.
+                auto readAny = [&](u32 addr, bool isParty, PK6 &pk) -> bool {
+                    return isParty ? (gPartyEncrypted ? GetPokemon(addr, &pk) : GetPokemonRaw(addr, &pk))
+                                   : (GetPokemon(addr, &pk) && pk.species >= 1 && pk.species <= 721);
+                };
+                auto writeAny = [&](u32 addr, bool isParty, PK6 &pk) -> bool {
+                    if (isParty) return WritePartyMemberFull(addr, pk); // EK6 body + recomputed stat tail (or clear)
+                    if (pk.species < 1 || pk.species > 721) {           // clear a box slot (232-byte EK6 record)
+                        static const u8 zero[0xE8] = {0};
+                        return Process::Patch(addr, (u8*)zero, 0xE8);
+                    }
+                    return SetPokemon(addr, &pk);                        // the Box is always the encrypted format
+                };
+                // whether boxSpecies/boxShiny/boxEgg/gridIcon currently hold data for THIS view
+                bool dataLoaded = viewParty ? (loadedBox == -2) : (curBox == loadedBox);
+                if (cursor >= nSlots) cursor = 0; // e.g. a remembered Box cursor (0-29) when reopening into Party (0-5)
 
+                // Both window frames turn the Swap purple while that mode is active - a persistent, hard-to-miss
+                // signal (on both screens) that this isn't just a third view like Box/Party. Drawn thicker
+                // (stacked 1px outlines) than the normal hairline border, which nearly disappeared at 1px.
+                Color frameCol = (tab == 2) ? tabSwapCol : border;
+                int frameTh = (tab == 2) ? 3 : 1;
+                auto drawFrame = [&](const Screen &s, int x, int y, int w, int h) {
+                    for (int t = 0; t < frameTh; ++t) s.DrawRect(x + t, y + t, w - 2 * t, h - 2 * t, frameCol, false);
+                };
+
+                // ---- tap-pills: PC Box / Party / Swap (top screen has no touch digitizer, so this lives here) ----
+                // Each pill always means exactly one thing - "switch to this tab" - no hidden dual behavior.
+                // Entering Swap keeps whichever grid was showing right before the tap (so tapping Swap while
+                // already looking at your Party starts the wizard browsing the Party, not a fixed Box default).
+                const int PILLW = 80, PILLGAP = 8, PILLX0 = 32, PILLY = 24, PILLH = 22;
+                if (tap && inBox(lastPos, PILLX0, PILLY, PILLW, PILLH)) {
+                    if (tab != 0) { tab = 0; cursor = 0; markMode = 0; findActive = false; }
+                }
+                if (tap && inBox(lastPos, PILLX0 + (PILLW + PILLGAP), PILLY, PILLW, PILLH)) {
+                    if (tab != 1) { tab = 1; cursor = 0; markMode = 0; findActive = false; }
+                }
+                if (tap && inBox(lastPos, PILLX0 + 2 * (PILLW + PILLGAP), PILLY, PILLW, PILLH)) {
+                    if (tab != 2) { tab = 2; cursor = 0; markMode = 0; findActive = false; swapSideParty = viewParty; }
+                    else { tab = swapSideParty ? 1 : 0; cursor = 0; markMode = 0; } // tap Swap again to turn it OFF
+                }
+                // Swap step 0 (picking the source): Y flips which grid you're browsing, Box <-> Party,
+                // without leaving Swap - this is the only way to start a swap from the Party side.
+                if (tab == 2 && markMode == 0 && Controller::IsKeyPressed(Key::Y)) { swapSideParty = !swapSideParty; cursor = 0; }
+
+                // ---- input ----
+                if (KeyRep(Key::Up))    cursor = (cursor + nSlots - gCols) % nSlots;
+                if (KeyRep(Key::Down))  cursor = (cursor + gCols) % nSlots;
+                if (KeyRep(Key::Left))  cursor = (cursor + nSlots - 1) % nSlots;
+                if (KeyRep(Key::Right)) cursor = (cursor + 1) % nSlots;
+                if (!viewParty && Controller::IsKeyPressed(Key::L))     curBox = (curBox + 30) % 31;
+                if (!viewParty && Controller::IsKeyPressed(Key::R))     curBox = (curBox + 1) % 31;
+
+                if (tab == 2) {
+                // ===================== SWAP wizard (A picks source, then destination) =====================
+                if (Controller::IsKeyPressed(Key::A)) {
+                    if (markMode != 3) {
+                        // Step 0: mark the source (must be occupied - nothing to swap out of an empty slot).
+                        if (dataLoaded && boxSpecies[cursor]) {
+                            markAddr = slotAddr(cursor); markIsParty = viewParty; markMode = 3;
+                            swapSideParty = !viewParty; cursor = 0; // auto-flip to the OTHER grid for step 1
+                            setStatus(viewParty ? "Now pick the Box slot to swap with" : "Now pick the Party slot to swap with");
+                        } else setStatus("Nothing to swap here");
+                    } else {
+                        // Step 1: destination. A swap must NOT change how many mons the party holds - the
+                        // party can't have a gap and its member count isn't ours to manage, so emptying a
+                        // party slot (move OUT) or filling a trailing empty one (move IN) glitches a slot
+                        // into an Egg. So require the destination to be "occupied": a real mon, or - party
+                        // only - a HOLE inside the party (some later party slot is filled), which is safe to
+                        // overwrite without changing the count (this is also how you'd fix such an Egg).
+                        u32 dstAddr = slotAddr(cursor); bool dstIsParty = viewParty;
+                        bool dstOccupied;
+                        if (dstIsParty) { dstOccupied = boxSpecies[cursor] != 0;
+                            for (int j = cursor + 1; j < 6 && !dstOccupied; ++j) if (boxSpecies[j]) dstOccupied = true; }
+                        else dstOccupied = dataLoaded && boxSpecies[cursor] != 0;
+
+                        if (!dstOccupied) {
+                            // Stay in destination-pick; let the user choose an occupied slot instead.
+                            setStatus("Both sides need a Pokemon");
+                        } else {
+                        PK6 a, b; bool okA = readAny(markAddr, markIsParty, a);
+                        bool hasB = readAny(dstAddr, dstIsParty, b); // may read false for a party Egg-hole
+                        string nameA = okA ? string(speciesList[a.species - 1]) : "?";
+                        string nameB = hasB ? string(speciesList[b.species - 1]) : getLanguage->Get("DLG_SWAP_EMPTY_SLOT");
+                        string prompt = Utils::Format(getLanguage->Get("DLG_SWAP_CONFIRM_FMT").c_str(), nameA.c_str(), nameB.c_str());
+                        vector<string> opts = {getLanguage->Get("DLG_CANCEL_SWAP"), getLanguage->Get("DLG_CONFIRM_SWAP")};
+                        int choice = 1; Keyboard kb;
+                        int r = kb.Setup(CenterAlign(prompt), true, opts, choice);
+                        if (r != -1) {
+                            if (choice == 1 && okA) {
+                                if (!PARTY_WRITE_ENABLED) {
+                                    // Party writes gated until the fixed address is HW-verified (safety).
+                                    setStatus("Party write off (verifying) - nothing changed");
+                                } else {
+                                    // Non-destructive: snapshot BOTH raw slots first so we can roll back if
+                                    // either write fails - a partial write would clone/destroy a mon.
+                                    u32 dstLen = dstIsParty ? 0x1E4 : 0xE8, srcLen = markIsParty ? 0x1E4 : 0xE8;
+                                    static u8 snapDst[0x1E4], snapSrc[0x1E4];
+                                    Process::CopyMemory(snapDst, (u8*)dstAddr, dstLen);
+                                    Process::CopyMemory(snapSrc, (u8*)markAddr, srcLen);
+                                    bool w1 = writeAny(dstAddr, dstIsParty, a); // source mon -> destination
+                                    bool w2;
+                                    if (hasB) w2 = writeAny(markAddr, markIsParty, b);        // dest mon -> source
+                                    else { PK6 empty{}; w2 = writeAny(markAddr, markIsParty, empty); } // Egg-hole: source empties
+                                    if (w1 && w2) setStatus("Swapped");
+                                    else { // roll back both slots to their exact prior bytes
+                                        Process::CopyMemory((u8*)dstAddr, snapDst, dstLen);
+                                        Process::CopyMemory((u8*)markAddr, snapSrc, srcLen);
+                                        setStatus("Swap failed - restored");
+                                    }
+                                }
+                            } else setStatus("Swap cancelled");
+                            markMode = 0; loadedBox = -1; cursor = 0;
+                        }
+                        }
+                    }
+                }
+                if (Controller::IsKeyPressed(Key::B)) {
+                    if (markMode == 3) { markMode = 0; setStatus("Swap cancelled"); }
+                    else { tab = swapSideParty ? 1 : 0; cursor = 0; } // B with no step pending turns Swap OFF (doesn't exit the browser)
+                }
+                } else
                 if (Controller::IsKeyPressed(Key::A)) {
                     // A masked egg must be peeked (with confirm) before it can be edited — first A reveals, then edit.
-                    if (curBox == loadedBox && boxSpecies[cursor] && boxEgg[cursor] && !EggRevealed(cellAddr(curBox, cursor))) {
+                    // (boxEgg is always 0 for party slots, so this branch is naturally box-only.)
+                    if (dataLoaded && boxSpecies[cursor] && boxEgg[cursor] && !EggRevealed(cellAddr(curBox, cursor))) {
                         if (EggPeekConfirm()) { u32 ep = cellAddr(curBox, cursor); EggReveal(ep); EggRevealAnimStart(ep); cardKey = -1; }
                     }
                     // A during the reveal cascade -> skip to the finished card (don't open the editor yet).
-                    else if (curBox == loadedBox && boxSpecies[cursor] && EggRevealAnimating(cellAddr(curBox, cursor))) {
+                    else if (dataLoaded && boxSpecies[cursor] && EggRevealAnimating(cellAddr(curBox, cursor))) {
                         EggRevealSkip();
                     }
                     // Open the in-app editor on this slot (only if occupied).
-                    else if (curBox == loadedBox && boxSpecies[cursor]) {
+                    else if (dataLoaded && boxSpecies[cursor]) {
                         gPartyMode = false;
-                        gBoxNumber = (u8)(curBox + 1); gPositionNumber = (u8)(cursor + 1);
+                        if (!viewParty) { gBoxNumber = (u8)(curBox + 1); gPositionNumber = (u8)(cursor + 1); }
                         // Non-destructive: copy the slot into a working buffer; edits hit it, the real slot is
                         // only written when the user picks SAVE on exit.
-                        editCommitAddr = cellAddr(curBox, cursor);
-                        Process::CopyMemory(editScratch, (u8*)editCommitAddr, 0xE8);
+                        editCommitAddr = slotAddr(cursor);
+                        editIsParty = viewParty;
+                        if (viewParty) {
+                            // Party slots aren't stored in the box's encrypted format (and may not even be
+                            // encrypted at all - see gPartyEncrypted) - decode into a PK6, then re-encrypt
+                            // it into editScratch via the same SetPokemon() every box slot already uses, so
+                            // every sub-editor below can keep assuming the one encrypted-buffer format.
+                            PK6 pkTemp;
+                            bool ok = gPartyEncrypted ? GetPokemon(editCommitAddr, &pkTemp) : GetPokemonRaw(editCommitAddr, &pkTemp);
+                            if (ok) SetPokemon((u32)(uintptr_t)editScratch, &pkTemp);
+                        } else {
+                            Process::CopyMemory(editScratch, (u8*)editCommitAddr, 0xE8);
+                        }
                         Process::CopyMemory(editOrig, editScratch, 0xE8);
                         dataPointer = (u32)(uintptr_t)editScratch;
                         mode = 1; editCat = 0; editField = 0; editTop = 0;
                     } else setStatus("Empty slot - nothing to edit");
                 }
 
-                if (Controller::IsKeyPressed(Key::X)) {
+                if (tab != 2 && !viewParty && Controller::IsKeyPressed(Key::X)) {
                     if (markMode == 1) {
                         u32 dst = cellAddr(curBox, cursor);
                         if (dst == markAddr) { markMode = 0; setStatus("Move cancelled"); }
@@ -4966,12 +5183,12 @@ namespace CTRPluginFramework {
                     }
                 }
 
-                if (Controller::IsKeyPressed(Key::Y)) {
+                if (tab != 2 && !viewParty && Controller::IsKeyPressed(Key::Y)) {
                     if (markMode == 2) {
                         u32 dst = cellAddr(curBox, cursor);
                         if (dst == markAddr) { markMode = 0; setStatus("Clone cancelled"); }
                         else {
-                            bool occupied = boxSpecies[cursor] != 0 && curBox == loadedBox;
+                            bool occupied = boxSpecies[cursor] != 0 && dataLoaded;
                             bool go = !occupied ||
                                       DangerConfirm(getLanguage->Get("DLG_OVERWRITE_HEADING"), getLanguage->Get("DLG_OVERWRITE_BODY"), getLanguage->Get("DLG_OVERWRITE_Q"));
                             if (go) {
@@ -4982,13 +5199,13 @@ namespace CTRPluginFramework {
                             } else { markMode = 0; setStatus("Clone cancelled"); }
                         }
                     } else {
-                        if (boxSpecies[cursor] == 0 && curBox == loadedBox) setStatus("Nothing to clone here");
+                        if (boxSpecies[cursor] == 0 && dataLoaded) setStatus("Nothing to clone here");
                         else { markMode = 2; markBox = curBox; markSlot = cursor; markAddr = cellAddr(curBox, cursor);
                                setStatus("CLONE: pick destination (Y)"); }
                     }
                 }
 
-                if (Controller::IsKeyPressed(Key::Start)) {
+                if (!viewParty && Controller::IsKeyPressed(Key::Start)) {
                     if (findActive && fN > 0) { // cycle to the next copy without re-typing
                         fIdx = (fIdx + 1) % fN; curBox = fHitBox[fIdx]; cursor = fHitSlot[fIdx];
                         setStatus(string(speciesList[fSpecies - 1]) + "  " + to_string(fIdx + 1) + "/" + to_string(fN));
@@ -5008,81 +5225,114 @@ namespace CTRPluginFramework {
                     }
                 }
 
-                if (Controller::IsKeyPressed(Key::B)) {
+                if (tab != 2 && Controller::IsKeyPressed(Key::B)) { // Swap's own B-handler lives above
                     if (markMode) { markMode = 0; setStatus("Cancelled"); }
                     else if (findActive) { findActive = false; fN = 0; setStatus("Find cleared"); }
                     else break; // exit the browser
                 }
 
-                // ---- (re)load the box on change, with a one-frame "Loading" splash ----
-                if (curBox != loadedBox) {
+                // ---- (re)load the active view on change, with a one-frame "Loading" splash ----
+                if (!dataLoaded) {
                     top.DrawRect(30, 20, 340, 200, bg, true);
-                    top.DrawRect(30, 20, 340, 200, border, false);
-                    string ld = "Loading Box " + to_string(curBox + 1) + "...";
+                    drawFrame(top, 30, 20, 340, 200);
+                    string ld = viewParty ? "Loading Party..." : ("Loading Box " + to_string(curBox + 1) + "...");
                     top.DrawSysfont(title << ld, 30 + (340 - (int)OSD::GetTextWidth(true, ld)) / 2, 112, title);
                     OSD::SwapBuffers();
 
                     PK6 pk;
-                    for (int i = 0; i < 30; ++i) {
-                        bool ok = GetPokemon(cellAddr(curBox, i), &pk) && pk.species >= 1 && pk.species <= 721;
+                    for (int i = 0; i < nSlots; ++i) {
+                        bool ok = readSlot(slotAddr(i), pk);
                         boxSpecies[i] = ok ? pk.species : 0;
                         boxShiny[i]   = ok ? (u8)(IsShiny(&pk) ? 1 : 0) : 0;
-                        boxEgg[i]     = ok ? (u8)(IsEggBit(pk) ? 1 : 0) : 0;
+                        boxEgg[i]     = (ok && !viewParty) ? (u8)(IsEggBit(pk) ? 1 : 0) : 0; // no egg-peek masking in Party
                         // Load the icon even for eggs (kept in memory); the grid HIDES it while the egg is masked.
-                        if (ok) { string p; BoxIconPath(p, pk.species, boxShiny[i], "BoxIcons/"); gridIcon[i].LoadFromFile(p); }
+                        // Party uses the bigger Spawner sprites (its grid has 6x fewer, much larger cells).
+                        if (ok) { string p; BoxIconPath(p, pk.species, boxShiny[i], viewParty ? "Spawner/" : "BoxIcons/"); gridIcon[i].LoadFromFile(p); }
                         else gridIcon[i].Clear();
                     }
-                    loadedBox = curBox; cardKey = -1;
+                    loadedBox = viewParty ? -2 : curBox; cardKey = -1; dataLoaded = true;
                 }
 
-                int occ = 0; for (int i = 0; i < 30; ++i) if (boxSpecies[i]) ++occ;
+                int occ = 0; for (int i = 0; i < nSlots; ++i) if (boxSpecies[i]) ++occ;
 
-                // ---- TOP: header + the 8x4 grid ----
+                // ---- TOP: header + the grid (8x4 for a Box, a single row of 6 for the Party) ----
                 top.DrawRect(30, 20, 340, 200, bg, true);
-                top.DrawRect(30, 20, 340, 200, border, false);
+                drawFrame(top, 30, 20, 340, 200);
                 top.DrawSysfont(title << "PC Box ++", 42, 28, title);
                 {
-                    string h = "Box " + to_string(curBox + 1) + " / 31    " + to_string(occ) + "/30";
+                    string h = viewParty ? ("Party    " + to_string(occ) + "/6")
+                                         : ("Box " + to_string(curBox + 1) + " / 31    " + to_string(occ) + "/30");
                     top.DrawSysfont(txt << h, 358 - (int)OSD::GetTextWidth(true, h), 28, txt);
                 }
                 // Divider pushed down to 46 (matches Living Dex's header spacing) - the old y=40 sat right
                 // under the header text baseline and looked like it was biting into it.
                 top.DrawRect(42, 46, 316, 1, title, true);
 
-                for (int i = 0; i < 30; ++i) {
+                for (int i = 0; i < nSlots; ++i) {
                     int cx = cellLeft(i), cy = cellTop(i);
                     // No background tile/fill behind the icon (matches Living Dex exactly) - just the
-                    // sprite floating on the window background, with the 4px gap separating cells.
+                    // sprite floating on the window background, with the gap separating cells. Centered
+                    // within the cell since Party's Spawner sprites vary in actual pixel size (unlike the
+                    // Box's BoxIcons, which are always exactly 32x32 - centering is then a no-op there).
                     bool cellMasked = boxSpecies[i] && boxEgg[i] && !EggRevealed(cellAddr(curBox, i));
                     if (cellMasked)
-                        top.DrawSysfont(title << "?", cx + 12, cy + 9, title); // masked egg: hide the baby icon
-                    else if (boxSpecies[i] && gridIcon[i].IsLoaded())
-                        gridIcon[i].Draw(top, cx, cy);
+                        top.DrawSysfont(title << "?", cx + gCellSz / 2 - 4, cy + gCellSz / 2 - 7, title); // masked egg: hide the baby icon
+                    else if (boxSpecies[i] && gridIcon[i].IsLoaded()) {
+                        int iw = gridIcon[i].Width(), ih = gridIcon[i].Height();
+                        gridIcon[i].Draw(top, cx + (gCellSz - iw) / 2, cy + (gCellSz - ih) / 2);
+                    }
                     // pending move/clone source = single frame (red) - drawn before the cursor so the
-                    // cursor visually wins if both land on the same slot.
-                    if (markMode && curBox == markBox && i == markSlot)
-                        top.DrawRect(cx - 1, cy - 1, CELL + 2, CELL + 2, markCol, false);
+                    // cursor visually wins if both land on the same slot. (Swap's own pending source lives
+                    // in a different mode/grid at once, so it isn't highlighted here - see markMode == 3.)
+                    if (!viewParty && (markMode == 1 || markMode == 2) && curBox == markBox && i == markSlot)
+                        top.DrawRect(cx - 1, cy - 1, gCellSz + 2, gCellSz + 2, markCol, false);
                     // cursor = single frame, theme accent color (same look as Living Dex's cursor highlight)
                     if (i == cursor)
-                        top.DrawRect(cx - 1, cy - 1, CELL + 2, CELL + 2, sel, false);
+                        top.DrawRect(cx - 1, cy - 1, gCellSz + 2, gCellSz + 2, sel, false);
                 }
 
-                // ---- BOTTOM: focused slot card + controls ----
+                // ---- BOTTOM: PC Box/Party/Swap tap-pills + focused slot card + controls ----
                 bot.DrawRect(20, 20, 280, 200, bg, true);
-                bot.DrawRect(20, 20, 280, 200, border, false);
+                drawFrame(bot, 20, 20, 280, 200);
+                {
+                    // Taller pill row (24..46, was 22..38), centered as a group in the 280px window - the old
+                    // strip was too thin to tap and left-hugged instead of centered. The SELECTED pill gets a
+                    // solid fill in its own color with white text (readable on all three - they're each dark
+                    // enough); the other two stay a plain outline with the normal text color.
+                    struct { const char *key; Color col; bool active; } pills[3] = {
+                        { "PC_BOX_TAB_BOX",   tabBoxCol,   !viewParty },
+                        { "PC_BOX_TAB_PARTY", tabPartyCol,  viewParty },
+                        { "PC_BOX_TAB_SWAP",  tabSwapCol,   tab == 2 },
+                    };
+                    for (int p = 0; p < 3; ++p) {
+                        int px = PILLX0 + p * (PILLW + PILLGAP);
+                        string lbl = getLanguage->Get(pills[p].key);
+                        int tx = px + (PILLW - (int)OSD::GetTextWidth(true, lbl)) / 2;
+                        int ty = PILLY + (PILLH - 12) / 2 + 1; // ~centered for a single ~12px text line
+                        if (pills[p].active) {
+                            bot.DrawRect(px, PILLY, PILLW, PILLH, pills[p].col, true);
+                            bot.DrawSysfont(Color::White << lbl, tx, ty, Color::White);
+                        } else {
+                            bot.DrawRect(px, PILLY, PILLW, PILLH, border, false);
+                            bot.DrawSysfont(txt << lbl, tx, ty, txt);
+                        }
+                    }
+                }
 
-                u16 fsp = (curBox == loadedBox) ? boxSpecies[cursor] : 0;
-                u8  fsh = (curBox == loadedBox) ? boxShiny[cursor] : 0;
-                u32 fptr = cellAddr(curBox, cursor);
-                bool fMasked = fsp && (curBox == loadedBox) && boxEgg[cursor] && !EggRevealed(fptr);
+                u16 fsp = dataLoaded ? boxSpecies[cursor] : 0;
+                u8  fsh = dataLoaded ? boxShiny[cursor] : 0;
+                u32 fptr = slotAddr(cursor);
+                bool fMasked = fsp && dataLoaded && boxEgg[cursor] && !EggRevealed(fptr);
                 // Animated reveal (line-by-line + shiny finale) for a freshly-peeked egg; 6 steps, shiny resolves last.
                 const int BTOTAL = 6;
                 bool bAnim = EggRevealAnimating(fptr);
                 int  bshown = fsp ? EggRevealShown(fptr, BTOTAL) : BTOTAL;
                 bool bResolved = bshown >= BTOTAL;
 
-                // 72px sprite, framed (reuses the Spawner BMPs, shiny-aware).
-                const int FX = 30, FY = 40;
+                // 72px sprite, framed (reuses the Spawner BMPs, shiny-aware). Pushed further down (10px
+                // clear of the pill row's bottom edge at 46, was only 2px) so the pills read as a separate
+                // header rather than crowding the card underneath.
+                const int FX = 30, FY = 56;
                 bot.DrawRect(FX, FY, 88, 88, Color::White, true);
                 bot.DrawRect(FX, FY, 88, 88, border, false);
                 if (fMasked) {
@@ -5104,27 +5354,27 @@ namespace CTRPluginFramework {
 
                 if (fMasked) {
                     const int LX = 128;
-                    bot.DrawSysfont(title << getLanguage->Get("MENU_EGG_LABEL"), LX, 42, title);
-                    bot.DrawSysfont(txt << getLanguage->Get("EGG_PEEK_HINT"), LX, 70, txt);
+                    bot.DrawSysfont(title << getLanguage->Get("MENU_EGG_LABEL"), LX, 58, title);
+                    bot.DrawSysfont(txt << getLanguage->Get("EGG_PEEK_HINT"), LX, 86, txt);
                 } else if (fsp) {
                     PK6 pk;
-                    if (GetPokemon(fptr, &pk)) {
+                    if (readSlot(fptr, pk)) {
                         int level = LevelFromExp(pk.species, pk.exp);
                         string nature = pk.nature < natureList.size() ? natureList[pk.nature] : to_string(pk.nature);
                         const int LX = 128;
                         // Steps: 0 sprite+species, 1 Lv, 2 Nat, 3 Shiny label(???), 4 types, 5 stats, resolve at 6.
-                        if (bshown >= 0) bot.DrawSysfont(title << speciesList[fsp - 1], LX, 42, title);
-                        if (bshown >= 1) bot.DrawSysfont(sel << "Lv " << txt << to_string(level), LX, 64, txt);
-                        if (bshown >= 2) bot.DrawSysfont(sel << "Nat " << txt << nature, LX, 82, txt);
+                        if (bshown >= 0) bot.DrawSysfont(title << speciesList[fsp - 1], LX, 58, title);
+                        if (bshown >= 1) bot.DrawSysfont(sel << "Lv " << txt << to_string(level), LX, 80, txt);
+                        if (bshown >= 2) bot.DrawSysfont(sel << "Nat " << txt << nature, LX, 98, txt);
                         if (bshown >= 3) {
                             Color gold(0xF2, 0xC8, 0x3C);
                             string sval = bResolved ? (fsh ? "Yes" : "No") : "???";
                             Color scol = txt;
                             if (bResolved && fsh) scol = (bAnim && (gEggRevealFrame / 6) % 2 == 0) ? Color::White : gold;
-                            bot.DrawSysfont(sel << "Shiny " << scol << sval, LX, 100, scol);
-                            if (bResolved && fsh) bot.DrawSysfont(gold << " *", LX + (int)OSD::GetTextWidth(true, "Shiny " + sval), 100, gold);
+                            bot.DrawSysfont(sel << "Shiny " << scol << sval, LX, 116, scol);
+                            if (bResolved && fsh) bot.DrawSysfont(gold << " *", LX + (int)OSD::GetTextWidth(true, "Shiny " + sval), 116, gold);
                         }
-                        if (bshown >= 4) DrawTypeChips(bot, fsp, LX, 118); // type chips
+                        if (bshown >= 4) DrawTypeChips(bot, fsp, LX, 134); // type chips
 
                         // Compact 6-stat row under the sprite.
                         if (bshown >= 5) {
@@ -5132,23 +5382,31 @@ namespace CTRPluginFramework {
                             static const char *sN[6] = {"HP", "At", "Df", "SA", "SD", "Sp"};
                             const int sx0 = 30, sdx = 44;
                             for (int d = 0; d < 6; ++d) {
-                                bot.DrawSysfont(sel << sN[d], sx0 + d * sdx, 140, sel);
-                                bot.DrawSysfont(txt << to_string(stt[d]), sx0 + d * sdx, 156, txt);
+                                bot.DrawSysfont(sel << sN[d], sx0 + d * sdx, 152, sel);
+                                bot.DrawSysfont(txt << to_string(stt[d]), sx0 + d * sdx, 168, txt);
                             }
                         }
-                        if (bAnim && !bResolved) bot.DrawSysfont(txt << getLanguage->Get("EGG_PEEK_SKIP"), LX, 178, txt);
+                        if (bAnim && !bResolved) bot.DrawSysfont(txt << getLanguage->Get("EGG_PEEK_SKIP"), LX, 186, txt);
                     }
                 } else {
-                    bot.DrawSysfont(txt << "Empty slot", 128, 64, txt);
-                    bot.DrawSysfont(txt << "Box " << to_string(curBox + 1) << " / Slot " << to_string(cursor + 1), 128, 86, txt);
+                    bot.DrawSysfont(txt << "Empty slot", 128, 92, txt);
+                    string loc = viewParty ? ("Party slot " + to_string(cursor + 1))
+                                           : ("Box " + to_string(curBox + 1) + " / Slot " + to_string(cursor + 1));
+                    bot.DrawSysfont(txt << loc, 128, 114, txt);
                 }
 
-                // Status line (transient) or the active-mode prompt.
-                if (statusTtl > 0) { bot.DrawSysfont(markCol << status, 20 + (280 - (int)OSD::GetTextWidth(true, status)) / 2, 176, markCol); --statusTtl; }
+                // Status line (transient), else the standing Swap-step prompt when there's nothing transient to show.
+                if (statusTtl > 0) { bot.DrawSysfont(markCol << status, 20 + (280 - (int)OSD::GetTextWidth(true, status)) / 2, 184, markCol); --statusTtl; }
+                else if (tab == 2) {
+                    string sw = markMode == 3 ? "Pick the destination (A)" : "Pick the Pokemon to move (A)";
+                    bot.DrawSysfont(txt << sw, 20 + (280 - (int)OSD::GetTextWidth(true, sw)) / 2, 184, txt);
+                }
 
                 // Controls hint (compact, context-aware).
                 string hint = markMode == 1 ? "X drop  B cancel  L/R box"
                             : markMode == 2 ? "Y drop  B cancel  L/R box"
+                            : tab == 2 ? (markMode == 3 ? "A pick   B cancel" : "A pick   Y flip side   B off")
+                            : viewParty ? "A edit"
                             : "A edit  X move  Y clone  Start find";
                 bot.DrawSysfont(txt << hint, 20 + (280 - (int)OSD::GetTextWidth(true, hint)) / 2, 196, txt);
                 } // ===================== end STORAGE mode =====================
@@ -5160,13 +5418,31 @@ namespace CTRPluginFramework {
                         bool dirty = false; for (int k = 0; k < 0xE8; ++k) if (editScratch[k] != editOrig[k]) { dirty = true; break; }
                         if (!dirty) mode = 0; // nothing changed -> just leave
                         else {
-                            vector<string> opts = {getLanguage->Get("DLG_DISCARD_EDITS"), getLanguage->Get("DLG_SAVE_TO_BOX")};
+                            vector<string> opts = {getLanguage->Get("DLG_DISCARD_EDITS"), getLanguage->Get(editIsParty ? "DLG_SAVE_TO_PARTY" : "DLG_SAVE_TO_BOX")};
                             int choice = 1; Keyboard kb;
-                            int r = kb.Setup(CenterAlign(Utils::Format(getLanguage->Get("DLG_KEEP_EDITS_FMT").c_str(), curBox + 1, cursor + 1)), true, opts, choice);
+                            string prompt = editIsParty
+                                ? Utils::Format(getLanguage->Get("DLG_KEEP_EDITS_PARTY_FMT").c_str(), cursor + 1)
+                                : Utils::Format(getLanguage->Get("DLG_KEEP_EDITS_FMT").c_str(), curBox + 1, cursor + 1);
+                            int r = kb.Setup(CenterAlign(prompt), true, opts, choice);
                             if (r != -1) { // -1 = aborted the dialog -> stay in the editor
                                 if (choice == 1) {
-                                    if (Process::CopyMemory((u8*)editCommitAddr, editScratch, 0xE8)) { loadedBox = -1; cardKey = -1; setStatus("Saved to box (save the game to keep it)"); }
-                                    else setStatus("Save failed");
+                                    bool wrote;
+                                    if (editIsParty && !PARTY_WRITE_ENABLED) {
+                                        // Fase 1: party writes gated until the fixed address is HW-verified.
+                                        setStatus("Party write off (verifying) - not saved");
+                                    } else if (editIsParty) {
+                                        // Decrypt the working buffer, then write the FULL party member (EK6
+                                        // body + recomputed stat tail) so the in-game party reflects the edit.
+                                        PK6 pk;
+                                        wrote = GetPokemon((u32)(uintptr_t)editScratch, &pk);
+                                        if (wrote) wrote = WritePartyMemberFull(editCommitAddr, pk);
+                                        if (wrote) { loadedBox = -1; cardKey = -1; setStatus("Saved to party (SAVE the game to keep it)"); }
+                                        else setStatus("Save failed");
+                                    } else {
+                                        wrote = Process::CopyMemory((u8*)editCommitAddr, editScratch, 0xE8);
+                                        if (wrote) { loadedBox = -1; cardKey = -1; setStatus("Saved to box (save the game to keep it)"); }
+                                        else setStatus("Save failed");
+                                    }
                                 } else setStatus("Edits discarded");
                                 mode = 0;
                             }
@@ -5271,7 +5547,9 @@ namespace CTRPluginFramework {
                     // ---- TOP: live summary card ----
                     top.DrawRect(30, 20, 340, 200, bg, true);
                     top.DrawRect(30, 20, 340, 200, border, false);
-                    top.DrawSysfont(title << ("Edit  -  Box " + to_string(curBox + 1) + " / Slot " + to_string(cursor + 1)), 42, 26, title);
+                    string editHdr = editIsParty ? ("Edit  -  Party slot " + to_string(cursor + 1))
+                                                 : ("Edit  -  Box " + to_string(curBox + 1) + " / Slot " + to_string(cursor + 1));
+                    top.DrawSysfont(title << editHdr, 42, 26, title);
                     top.DrawRect(42, 40, 316, 1, title, true);
                     if (ok) {
                         int key = pk.species * 2 + (IsShiny(&pk) ? 1 : 0);
@@ -5752,7 +6030,7 @@ namespace CTRPluginFramework {
             auto partyAvg = [&]() -> int {
                 u32 base = FindPartyBase(); if (!base) return 0;
                 int sum = 0, cnt = 0;
-                for (int i = 0; i < 6; i++) { PK6 pk; u32 p = base + i * 0x104; bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk); if (ok && pk.species >= 1 && pk.species <= 721) { sum += LevelFromExp(pk.species, pk.exp); cnt++; } }
+                for (int i = 0; i < 6; i++) { PK6 pk; u32 p = base + i * gPartyStride; bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk); if (ok && pk.species >= 1 && pk.species <= 721) { sum += LevelFromExp(pk.species, pk.exp); cnt++; } }
                 return cnt ? (sum + cnt / 2) / cnt : 0;
             };
             int avg = partyAvg();
@@ -6096,7 +6374,7 @@ namespace CTRPluginFramework {
             // collect the player's valid party species (your side draws from these)
             int party[6], nParty = 0;
             { u32 base = FindPartyBase();
-              if (base) for (int i = 0; i < 6; i++) { PK6 pk; u32 p = base + i * 0x104; bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk); if (ok && pk.species >= 1 && pk.species <= 721) party[nParty++] = pk.species; } }
+              if (base) for (int i = 0; i < 6; i++) { PK6 pk; u32 p = base + i * gPartyStride; bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk); if (ok && pk.species >= 1 && pk.species <= 721) party[nParty++] = pk.species; } }
             static const char *STAT[6] = {"HP", "Atk", "Def", "SpA", "SpD", "Spe"};
 
             bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();            drainKeys();
@@ -6248,7 +6526,7 @@ namespace CTRPluginFramework {
             auto partyAvg = [&]() -> int {
                 u32 base = FindPartyBase(); if (!base) return 0;
                 int sum = 0, cnt = 0;
-                for (int i = 0; i < 6; i++) { PK6 pk; u32 p = base + i * 0x104; bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk); if (ok && pk.species >= 1 && pk.species <= 721) { sum += LevelFromExp(pk.species, pk.exp); cnt++; } }
+                for (int i = 0; i < 6; i++) { PK6 pk; u32 p = base + i * gPartyStride; bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk); if (ok && pk.species >= 1 && pk.species <= 721) { sum += LevelFromExp(pk.species, pk.exp); cnt++; } }
                 return cnt ? (sum + cnt / 2) / cnt : 0;
             };
             int avg = partyAvg();
@@ -6687,10 +6965,10 @@ namespace CTRPluginFramework {
             // clone trainer identity from a party mon (REQUIRED - else block: avoids building a half-valid foreign mon)
             PK6 templ; bool haveTempl = false;
             { u32 base = FindPartyBase();
-              if (base) for (int i = 0; i < 6 && !haveTempl; i++) { PK6 t; u32 p = base + i * 0x104; bool ok = gPartyEncrypted ? GetPokemon(p, &t) : GetPokemonRaw(p, &t); if (ok && t.species >= 1 && t.species <= 721) { templ = t; haveTempl = true; } } }
+              if (base) for (int i = 0; i < 6 && !haveTempl; i++) { PK6 t; u32 p = base + i * gPartyStride; bool ok = gPartyEncrypted ? GetPokemon(p, &t) : GetPokemonRaw(p, &t); if (ok && t.species >= 1 && t.species <= 721) { templ = t; haveTempl = true; } } }
             auto partyAvg = [&]() -> int {
                 u32 base = FindPartyBase(); if (!base) return 0; int sum = 0, cnt = 0;
-                for (int i = 0; i < 6; i++) { PK6 pk; u32 p = base + i * 0x104; bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk); if (ok && pk.species >= 1 && pk.species <= 721) { sum += LevelFromExp(pk.species, pk.exp); cnt++; } }
+                for (int i = 0; i < 6; i++) { PK6 pk; u32 p = base + i * gPartyStride; bool ok = gPartyEncrypted ? GetPokemon(p, &pk) : GetPokemonRaw(p, &pk); if (ok && pk.species >= 1 && pk.species <= 721) { sum += LevelFromExp(pk.species, pk.exp); cnt++; } }
                 return cnt ? (sum + cnt / 2) / cnt : 0;
             };
             int avg = partyAvg(); if (avg < 1) avg = 50; if (avg > 100) avg = 100;
@@ -7327,7 +7605,7 @@ namespace CTRPluginFramework {
                     if (mySp >= 1 && mySp <= 721) {
                         u32 pbase = FindPartyBase();
                         if (pbase) for (int i = 0; i < 6; ++i) {
-                            PK6 t; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &t) : GetPokemonRaw(pbase + i * 0x104, &t);
+                            PK6 t; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * gPartyStride, &t) : GetPokemonRaw(pbase + i * gPartyStride, &t);
                             if (ok && t.species == mySp) { mp = t; myLevel = LevelFromExp(mp.species, mp.exp); CalcStats(mp.species, myLevel, mp.nature, mp.iv32, mp.EV, my6); haveMine = true; haveMoves = true; break; }
                         }
                         if (!haveMine && pa) {   // fallback: live battle-struct computed stats

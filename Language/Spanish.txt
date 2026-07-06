@@ -572,6 +572,15 @@ DLG_RELEARN_SAVE_PROMPT :: Cambiaste los movimientos por reaprender.\n¿Guardar 
 DLG_DISCARD_EDITS :: DESCARTAR cambios
 DLG_SAVE_TO_BOX :: GUARDAR en la caja
 DLG_KEEP_EDITS_FMT :: ¿Conservar tus cambios en\nCaja %d / Casilla %d ?
+DLG_KEEP_EDITS_PARTY_FMT :: ¿Conservar tus cambios en\nel equipo, casilla %d ?
+DLG_SAVE_TO_PARTY :: GUARDAR en el equipo
+PC_BOX_TAB_BOX :: Caja PC
+PC_BOX_TAB_PARTY :: Equipo
+PC_BOX_TAB_SWAP :: Intercambiar
+DLG_SWAP_EMPTY_SLOT :: casilla vacía
+DLG_SWAP_CONFIRM_FMT :: ¿Intercambiar %s por %s ?
+DLG_CANCEL_SWAP :: Cancelar
+DLG_CONFIRM_SWAP :: INTERCAMBIAR
 DLG_COMING_SOON :: \n\n¡Próximamente!
 DLG_BUY_FMT :: ¿Comprar %s por %s?
 DLG_ADD_FMT :: ¿Añadir %s a tu bolsa?

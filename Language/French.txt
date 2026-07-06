@@ -572,6 +572,15 @@ DLG_RELEARN_SAVE_PROMPT :: Vous avez changé les capacités à réapprendre.\nSa
 DLG_DISCARD_EDITS :: ABANDONNER les modifs
 DLG_SAVE_TO_BOX :: SAUVEGARDER en boîte
 DLG_KEEP_EDITS_FMT :: Conserver vos modifs sur\nBoîte %d / Emplacement %d ?
+DLG_KEEP_EDITS_PARTY_FMT :: Conserver vos modifs sur\nl'équipe, emplacement %d ?
+DLG_SAVE_TO_PARTY :: SAUVEGARDER dans l'équipe
+PC_BOX_TAB_BOX :: Boîte PC
+PC_BOX_TAB_PARTY :: Équipe
+PC_BOX_TAB_SWAP :: Échanger
+DLG_SWAP_EMPTY_SLOT :: emplacement vide
+DLG_SWAP_CONFIRM_FMT :: Échanger %s avec %s ?
+DLG_CANCEL_SWAP :: Annuler
+DLG_CONFIRM_SWAP :: ÉCHANGER
 DLG_COMING_SOON :: \n\nBientôt disponible !
 DLG_BUY_FMT :: Acheter %s pour %s ?
 DLG_ADD_FMT :: Ajouter %s à votre sac ?

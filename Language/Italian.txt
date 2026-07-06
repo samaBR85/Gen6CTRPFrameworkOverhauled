@@ -572,6 +572,15 @@ DLG_RELEARN_SAVE_PROMPT :: Hai cambiato le mosse da reimparare.\nSalvare prima d
 DLG_DISCARD_EDITS :: SCARTA modifiche
 DLG_SAVE_TO_BOX :: SALVA nel box
 DLG_KEEP_EDITS_FMT :: Mantenere le tue modifiche a\nBox %d / Slot %d ?
+DLG_KEEP_EDITS_PARTY_FMT :: Mantenere le tue modifiche allo\nslot squadra %d ?
+DLG_SAVE_TO_PARTY :: SALVA nella squadra
+PC_BOX_TAB_BOX :: Box PC
+PC_BOX_TAB_PARTY :: Squadra
+PC_BOX_TAB_SWAP :: Scambia
+DLG_SWAP_EMPTY_SLOT :: slot vuoto
+DLG_SWAP_CONFIRM_FMT :: Scambiare %s con %s ?
+DLG_CANCEL_SWAP :: Annulla
+DLG_CONFIRM_SWAP :: SCAMBIA
 DLG_COMING_SOON :: \n\nProssimamente!
 DLG_BUY_FMT :: Comprare %s per %s?
 DLG_ADD_FMT :: Aggiungere %s alla tua borsa?

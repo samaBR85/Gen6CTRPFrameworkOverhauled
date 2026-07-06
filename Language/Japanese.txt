@@ -572,6 +572,15 @@ DLG_RELEARN_SAVE_PROMPT :: 思い出すわざを変更しました。\n出る前
 DLG_DISCARD_EDITS :: 編集を破棄
 DLG_SAVE_TO_BOX :: ボックスに保存
 DLG_KEEP_EDITS_FMT :: ボックス%d / スロット%dへの\n編集を保持しますか？
+DLG_KEEP_EDITS_PARTY_FMT :: 手持ちスロット%dへの\n編集を保持しますか？
+DLG_SAVE_TO_PARTY :: 手持ちに保存
+PC_BOX_TAB_BOX :: ボックス
+PC_BOX_TAB_PARTY :: 手持ち
+PC_BOX_TAB_SWAP :: 交換
+DLG_SWAP_EMPTY_SLOT :: 空きスロット
+DLG_SWAP_CONFIRM_FMT :: %sと%sを交換しますか？
+DLG_CANCEL_SWAP :: キャンセル
+DLG_CONFIRM_SWAP :: 交換する
 DLG_COMING_SOON :: \n\n近日公開！
 DLG_BUY_FMT :: %sを%sで買いますか？
 DLG_ADD_FMT :: %sをバッグに追加しますか？

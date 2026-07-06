@@ -573,6 +573,15 @@ DLG_RELEARN_SAVE_PROMPT :: Você mudou os golpes p/ reaprender.\nSalvar antes de
 DLG_DISCARD_EDITS :: DESCARTAR edições
 DLG_SAVE_TO_BOX :: SALVAR na box
 DLG_KEEP_EDITS_FMT :: Manter suas edições na\nBox %d / Slot %d ?
+DLG_KEEP_EDITS_PARTY_FMT :: Manter suas edições no\nslot %d da equipe ?
+DLG_SAVE_TO_PARTY :: SALVAR na equipe
+PC_BOX_TAB_BOX :: PC Box
+PC_BOX_TAB_PARTY :: Equipe
+PC_BOX_TAB_SWAP :: Trocar
+DLG_SWAP_EMPTY_SLOT :: slot vazio
+DLG_SWAP_CONFIRM_FMT :: Trocar %s por %s ?
+DLG_CANCEL_SWAP :: Cancelar
+DLG_CONFIRM_SWAP :: TROCAR
 DLG_COMING_SOON :: \n\nEm breve!
 DLG_BUY_FMT :: Comprar %s por %s?
 DLG_ADD_FMT :: Adicionar %s à sua mochila?

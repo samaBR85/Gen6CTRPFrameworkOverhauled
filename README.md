@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.5
+# Gen6CTRPluginFrameworkOverhauled — v0.7.6
 
 **English** · [Português](README.pt-BR.md)
 
@@ -105,6 +105,22 @@ keyboard.
 
 <p align="center">
   <img src="Screenshots/v0.3.3/export/11_pcbox_movepicker.png" width="330" alt="Choosing a move from a searchable, type-filtered list" />
+</p>
+
+The same editor now reaches your **Party**, not just the PC boxes — three tabs across the top switch between **PC
+Box**, **Party** (your six, as big sprites) and **Swap**. Editing a party Pokémon really changes it in-game and
+sticks after you save.
+
+<p align="center">
+  <img src="Screenshots/v0.7.6/PC_BOX_party.png" width="330" alt="PC Box ++ — the Party tab, your six as full-size sprites" />
+  <img src="Screenshots/v0.7.6/PC_BOX_home_box.png" width="330" alt="PC Box ++ — the PC Box tab with the three-tab header" />
+</p>
+
+**Swap** is a two-step exchange: pick a Pokémon, then pick who it trades places with — Box↔Party or the other way
+around. The whole window turns purple while you're in Swap so you never forget which mode you're in.
+
+<p align="center">
+  <img src="Screenshots/v0.7.6/PC_BOX_swap.png" width="330" alt="PC Box ++ — Swap mode, purple frame, picking two Pokémon to trade places" />
 </p>
 
 ### Know your team at a glance
@@ -266,6 +282,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.7.3** — **Team Coverage**: a new Trainer Info screen listing your party's types at a glance, plus a Defense/Offense breakdown of shared weaknesses, 4x hits, and blind spots your own moves can't get through.
 - **v0.7.4** — **EV Advisor** and **Held Item Advisor**, two more Trainer Info screens: one flags EV investment mismatched with your Pokémon's actual moves, the other suggests held items (split In Bag / To Get) — plus Team Coverage gained a third **Cart** tab for a general team-support shopping list.
 - **v0.7.5** — EV Advisor grew into **Nature / IV / EV Advisor** (three checks, one screen), and a new **Breeding Compatibility** screen (Party / Boxes / Check Two) finds Day Care pairs, the egg moves they could pass down, and lets you test any two species before you even own both.
+- **v0.7.6** — **PC Box ++** now edits your **Party**, not just the PC boxes (same visual editor), and gained a **Swap** tab to trade a Pokémon between Box and Party in two taps. Under the hood this fixes party editing for real — changes to party Pokémon now actually take effect in-game and persist to the save.
 
 ## 📥 Installing
 
@@ -375,7 +392,7 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.7.5 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.7.6 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

@@ -572,6 +572,15 @@ DLG_RELEARN_SAVE_PROMPT :: Du hast die Erinnerungs-Attacken geändert.\nVor dem 
 DLG_DISCARD_EDITS :: Änderungen verwerfen
 DLG_SAVE_TO_BOX :: In Box speichern
 DLG_KEEP_EDITS_FMT :: Deine Änderungen an\nBox %d / Platz %d behalten?
+DLG_KEEP_EDITS_PARTY_FMT :: Deine Änderungen an\nTeam-Platz %d behalten?
+DLG_SAVE_TO_PARTY :: Im Team speichern
+PC_BOX_TAB_BOX :: PC-Box
+PC_BOX_TAB_PARTY :: Team
+PC_BOX_TAB_SWAP :: Tausch
+DLG_SWAP_EMPTY_SLOT :: leerer Platz
+DLG_SWAP_CONFIRM_FMT :: %s gegen %s tauschen?
+DLG_CANCEL_SWAP :: Abbrechen
+DLG_CONFIRM_SWAP :: TAUSCHEN
 DLG_COMING_SOON :: \n\nDemnächst!
 DLG_BUY_FMT :: %s für %s kaufen?
 DLG_ADD_FMT :: %s zu deinem Beutel hinzufügen?

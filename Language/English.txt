@@ -573,6 +573,15 @@ DLG_RELEARN_SAVE_PROMPT :: You changed the relearn moves.\nSave before leaving?
 DLG_DISCARD_EDITS :: DISCARD edits
 DLG_SAVE_TO_BOX :: SAVE to box
 DLG_KEEP_EDITS_FMT :: Keep your edits to\nBox %d / Slot %d ?
+DLG_KEEP_EDITS_PARTY_FMT :: Keep your edits to\nParty slot %d ?
+DLG_SAVE_TO_PARTY :: SAVE to party
+PC_BOX_TAB_BOX :: PC Box
+PC_BOX_TAB_PARTY :: Party
+PC_BOX_TAB_SWAP :: Swap
+DLG_SWAP_EMPTY_SLOT :: empty slot
+DLG_SWAP_CONFIRM_FMT :: Swap %s with %s ?
+DLG_CANCEL_SWAP :: Cancel
+DLG_CONFIRM_SWAP :: SWAP
 DLG_COMING_SOON :: \n\nComing soon!
 DLG_BUY_FMT :: Buy %s for %s?
 DLG_ADD_FMT :: Add %s to your bag?

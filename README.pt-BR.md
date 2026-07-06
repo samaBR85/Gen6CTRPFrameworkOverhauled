@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.5
+# Gen6CTRPluginFrameworkOverhauled — v0.7.6
 
 [English](README.md) · **Português**
 
@@ -105,6 +105,23 @@ teclado.
 
 <p align="center">
   <img src="Screenshots/v0.3.3/export/11_pcbox_movepicker.png" width="330" alt="Escolhendo um golpe numa lista buscável e filtrada por tipo" />
+</p>
+
+O mesmo editor agora alcança a sua **Equipe**, não só as boxes do PC — três abas no topo alternam entre **PC
+Box**, **Party** (os seus seis, em sprites grandes) e **Swap**. Editar um Pokémon da equipe muda ele de verdade
+no jogo e permanece depois que você salva.
+
+<p align="center">
+  <img src="Screenshots/v0.7.6/PC_BOX_party.png" width="330" alt="PC Box ++ — a aba Party, os seus seis em sprites grandes" />
+  <img src="Screenshots/v0.7.6/PC_BOX_home_box.png" width="330" alt="PC Box ++ — a aba PC Box com o cabeçalho de três abas" />
+</p>
+
+O **Swap** é uma troca em dois passos: escolha um Pokémon, depois escolha com quem ele troca de lugar —
+Box↔Party ou o contrário. A janela inteira fica roxa enquanto você está no Swap pra você nunca esquecer em que
+modo está.
+
+<p align="center">
+  <img src="Screenshots/v0.7.6/PC_BOX_swap.png" width="330" alt="PC Box ++ — modo Swap, moldura roxa, escolhendo dois Pokémon pra trocar de lugar" />
 </p>
 
 ### Conheça seu time num relance
@@ -268,6 +285,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.7.3** — **Team Coverage**: uma nova tela em Trainer Info que lista os tipos do seu time num relance, mais um detalhamento Defense/Offense de fraquezas compartilhadas, golpes 4x e pontos cegos que seus próprios golpes não furam.
 - **v0.7.4** — **EV Advisor** e **Held Item Advisor**, mais duas telas em Trainer Info: uma sinaliza EVs que não batem com os golpes reais do seu Pokémon, a outra sugere itens pra segurar (dividido em No Baú / A Conseguir) — e o Team Coverage ganhou uma 3ª aba **Cart** com uma lista de compras geral pro time.
 - **v0.7.5** — o EV Advisor virou **Nature / IV / EV Advisor** (3 checagens, uma tela), e uma nova tela **Breeding Compatibility** (Party / Boxes / Check Two) acha pares de Creche, os golpes de ovo que eles poderiam passar, e deixa você testar qualquer par de espécies antes mesmo de ter os dois.
+- **v0.7.6** — o **PC Box ++** agora edita a sua **Equipe**, não só as boxes do PC (mesmo editor visual), e ganhou uma aba **Swap** pra trocar um Pokémon entre Box e Party em dois toques. Por baixo dos panos isso conserta a edição da equipe de verdade — mudanças em Pokémon da equipe agora surtem efeito no jogo e permanecem no save.
 
 ## 📥 Instalando
 
@@ -377,7 +395,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.7.5 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.7.6 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença
