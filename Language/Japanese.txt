@@ -1282,18 +1282,36 @@ TEAM_COVERAGE_CART :: カート
 TEAM_COVERAGE_CART_HDR :: チーム全体向けアイテム
 TEAM_COVERAGE_CART_SUB :: パーティのレベルとステータス傾向に合わせています - 特定の相手向けではありません。
 TEAM_COVERAGE_SUGGESTED_CART :: おすすめカート
-MENU_EV_ADVISOR :: 努力値アドバイザー
-FAV_EV_ADVISOR :: 努力値アドバイザー
-NOTE_EV_ADVISOR :: パーティの努力値配分を読み取り専用でチェックします。実際に覚えている技と合わない努力値配分のポケモン(例えば物理技しか覚えていないのに特攻に努力値が入っている場合)を表示し、攻撃技を1つも覚えていないポケモンは別枠で表示します(その場合、攻撃/特攻の努力値は何の役にも立ちません)。\n\n十字キー上下で下画面の詳細をスクロールします。\n\n物理・特殊の両方を覚えている混合アタッカーは対象外です - 明確な判定ができないためです。これはカテゴリの一致のみを確認するもので、配分の合計が最適かどうかは判定しません。
+MENU_NATURE_IV_EV_ADVISOR :: 性格・個体値・努力値アドバイザー
+FAV_EV_ADVISOR :: 性格/個体値/努力値
+NOTE_NATURE_IV_EV_ADVISOR :: パーティを読み取り専用でチェックします。L/Rで3つのタブを切り替えます。\n\n性格タブは、そのポケモンが実際に攻撃で使うステータスを下げる性格(または素早さを下げる性格。素早さはどちらにせよ重要です)を表示します。個体値タブは、実際に使うステータスの個体値が低い(20未満)場合を表示します。努力値タブは、実際に攻撃で使わないカテゴリに努力値が入っている場合を表示します(例:物理技しか覚えていないのに特攻に努力値が入っている場合)。\n\n十字キー上下で下画面の詳細をスクロールします。物理・特殊の両方を覚えている混合アタッカーは、性格・努力値タブでは対象外です - 明確な判定ができないためです。
 EV_ADVISOR_NO_PARTY :: 手持ちにポケモンが見つかりません。
 EV_ADVISOR_TAG_OK :: OK
 EV_ADVISOR_TAG_MISMATCH :: 不一致
 EV_ADVISOR_TAG_SUPPORT :: サポート
 EV_ADVISOR_DETAILS_HDR :: 詳細
+EV_ADVISOR_DETAILS_HDR_FMT :: 詳細 - %s
+NATURE_ADVISOR_SHORT :: 性格
+IV_ADVISOR_SHORT :: 個体値
+EV_ADVISOR_SHORT :: 努力値
 EV_ADVISOR_NO_ATTACK :: 攻撃技を持っていません - 攻撃・特攻の努力値は戦闘の役に立ちません。
 EV_ADVISOR_WASTED_SPA_FMT :: 特攻の努力値%d点が無駄になっています - すべての技が物理技です。
 EV_ADVISOR_WASTED_ATK_FMT :: 攻撃の努力値%d点が無駄になっています - すべての技が特殊技です。
 EV_ADVISOR_OK :: 努力値は技のカテゴリと一致しています - 変更の必要はありません。
+MENU_NATURE_ADVISOR_TAB :: 性格アドバイザー
+MENU_IV_ADVISOR_TAB :: 個体値アドバイザー
+MENU_EV_ADVISOR_TAB :: 努力値アドバイザー
+NATURE_ADVISOR_NO_ATTACK :: 攻撃技を持っていません - 性格が攻撃・特攻に与える影響はここでは関係ありません。
+NATURE_ADVISOR_LOWERS_ATK_FMT :: %sは攻撃を下げます - すべての技が物理技です。
+NATURE_ADVISOR_LOWERS_SPA_FMT :: %sは特攻を下げます - すべての技が特殊技です。
+NATURE_ADVISOR_LOWERS_SPE_FMT :: %sは素早さを下げます。いずれにせよ遅くなります。
+NATURE_ADVISOR_TAG_OK :: OK
+NATURE_ADVISOR_TAG_LOWERS :: 低下
+NATURE_ADVISOR_OK :: 性格による足かせはありません。
+IV_ADVISOR_LOW_FMT :: 個体値が低い: %s
+IV_ADVISOR_TAG_OK :: OK
+IV_ADVISOR_TAG_LOW :: 個体値が低い
+IV_ADVISOR_OK :: 使用するステータスの個体値は十分です。
 MENU_HELD_ITEM_ADVISOR :: 持ち物アドバイザー
 FAV_HELD_ITEM_ADVISOR :: 持ち物アドバイザー
 NOTE_HELD_ITEM_ADVISOR :: 手持ちのポケモンが今持っている道具(または「なし」)を表示し、道具を持っていないポケモンにはステータス傾向をもとに簡単な提案をします - 突出したステータスがあればこだわりアイテム系、素早さが高ければいのちのたま、耐久が高ければたべのこし、これといった特徴がなければ安全策としてオレンのみを提案します。\n\nXボタンで「手持ちにある」(提案されたアイテムを既に持っている場合 - PC Box ++の持ち物選択で装備しましょう)と「入手が必要」(まだ持っていない場合 - 「おすすめカート」を押すとPokeMart Anywhereにそのアイテムが入った状態で開きます)を切り替えます。\n\nあくまでステータスだけをもとにした提案で、技や特性、実際の戦略までは考慮していません。
@@ -1310,3 +1328,34 @@ HELD_ADVISOR_REASON_SITRUS :: 特に突出したステータスがありませ�
 HELD_ADVISOR_NONE_IN_BAG :: 現在の持ち物と一致する提案はありません。
 HELD_ADVISOR_NONE_TO_GET :: 提案されたものはすべて持っているか、誰も道具を必要としていません。
 HELD_ADVISOR_SUGGESTED_CART :: おすすめカート
+MENU_BREEDING_CHECKER :: 繁殖相性チェッカー
+FAV_BREEDING_CHECKER :: 繁殖相性チェッカー
+NOTE_BREEDING_CHECKER :: 3つのタブ(Xで切り替え):\n\n手持ちは、現在のパーティから預り屋で相性が良いペア(タマゴグループが同じ、またはどちらかがメタモン、性別が異なる)を探し、親が今覚えている技のうち、生まれる赤ちゃんに遺伝しうるタマゴ技を表示します。\n\nボックスは同じことをすべてのPCボックスに対して、種族単位で行います(同じ種族が何匹もいてもリストが埋め尽くされないようにするためです)。\n\n2匹をテストでは、まだ持っていないポケモンも含めて、ビジュアルなポケモン選択画面で好きな2種類を試せます - 下画面の枠をタップして選びます。これは種族レベルのチェックのみです(個体の性別はわからないため)。2種類が繁殖できるかどうかと、それぞれが遺伝させられるタマゴ技の全リストを表示します。
+BREEDING_NO_PARTY :: 手持ちにポケモンが見つかりません。
+BREEDING_PAIRS_FOUND_FMT :: 相性の良いペアが%d組見つかりました
+BREEDING_MOVES_COUNT_FMT :: 技%d個
+BREEDING_CHIP_DITTO :: メタモン
+BREEDING_MOVE_FRACTION_FMT :: 技 %d/%d
+BREEDING_PAIR_RANGE_FMT :: %d-%d組目 / 全%d組
+BREEDING_TAB_PARTY :: 手持ち
+BREEDING_TAB_BOXES :: ボックス
+BREEDING_TAB_CHECK_TWO :: 2匹をテスト
+BREEDING_TAP_TO_CHOOSE :: タップして選択
+BREEDING_NOT_CHOSEN :: 未選択
+BREEDING_SPECIES_A_FMT :: ポケモンA: %s
+BREEDING_SPECIES_B_FMT :: ポケモンB: %s
+BREEDING_NEED_TWO :: 手持ちに2匹以上のポケモンが必要です。
+BREEDING_NO_BOXED :: PCボックスにポケモンが見つかりません。
+BREEDING_SPECIES_OWNED_FMT :: ボックス内に%d種類のポケモンを所持
+BREEDING_MORE_NOT_SHOWN_FMT :: 他に%d組は表示されていません
+BREEDING_NO_PAIRS :: 相性の良いペアが見つかりません。
+BREEDING_BABY_FMT :: 生まれる子供: %s
+BREEDING_NO_EGG_MOVES :: 現在遺伝できるタマゴ技はありません。
+BREEDING_PASSABLE_FMT :: 遺伝できる技: %s
+BREEDING_PICK_BOTH :: 上の2つの枠をタップして2種類選んでください。
+BREEDING_NOT_COMPATIBLE :: 相性が悪い
+BREEDING_REASON_UNDISCOVERED :: どちらかが繁殖できません(タマゴグループ「未発見」)。
+BREEDING_REASON_NO_GROUP :: タマゴグループが一致しません。
+BREEDING_COMPATIBLE :: 相性が良い
+BREEDING_EGG_MOVE_LIST_HDR :: 覚えられるタマゴ技
+BREEDING_IF_MOTHER_FMT :: %sが母親の場合:

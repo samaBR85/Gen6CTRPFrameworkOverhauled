@@ -1282,18 +1282,36 @@ TEAM_COVERAGE_CART :: Panier
 TEAM_COVERAGE_CART_HDR :: KIT GENERAL D'EQUIPE
 TEAM_COVERAGE_CART_SUB :: Adapte au niveau et au profil de stats de votre equipe - pas specifique a un adversaire.
 TEAM_COVERAGE_SUGGESTED_CART :: Panier suggere
-MENU_EV_ADVISOR :: Conseiller EV
-FAV_EV_ADVISOR :: Conseiller EV
-NOTE_EV_ADVISOR :: Une verification en lecture seule des EV de votre equipe : signale un Pokemon dont les EV en Attaque ou Attaque Spe ne correspondent pas a ses attaques REELLEMENT connues (par exemple des EV en Attaque Spe sur un Pokemon qui n'a que des capacites Physiques), et signale a part ceux qui n'ont aucune capacite offensive (leurs EV Attaque/Attaque Spe ne servent a rien).\n\nHaut/Bas de la croix fait defiler les details sur l'ecran du bas.\n\nLes attaquants mixtes (connaissent des capacites Physiques et Speciales) ne sont pas signales - pas de verdict clair possible. Ceci verifie seulement la correspondance de categorie, pas si la repartition totale est optimale.
+MENU_NATURE_IV_EV_ADVISOR :: Conseiller Nature / IV / EV
+FAV_EV_ADVISOR :: Conseiller Nature/IV/EV
+NOTE_NATURE_IV_EV_ADVISOR :: Une verification en lecture seule de votre equipe, en 3 onglets (L/R change) :\n\nNature signale une Nature qui BAISSE la stat avec laquelle le Pokemon attaque reellement (ou la Vitesse, qui compte de toute facon). IV signale des IV faibles (moins de 20) dans les stats qu'il utilise reellement. EV signale un investissement EV dans une categorie qu'il n'utilise pas pour attaquer (par exemple des EV en Attaque Spe sur un Pokemon qui n'a que des capacites Physiques).\n\nHaut/Bas de la croix fait defiler les details sur l'ecran du bas. Les attaquants mixtes (connaissent des capacites Physiques et Speciales) ne sont pas signales sur Nature/EV - pas de verdict clair possible.
 EV_ADVISOR_NO_PARTY :: Aucun Pokemon trouve dans votre equipe.
 EV_ADVISOR_TAG_OK :: OK
 EV_ADVISOR_TAG_MISMATCH :: Ecart
 EV_ADVISOR_TAG_SUPPORT :: Soutien
 EV_ADVISOR_DETAILS_HDR :: DETAILS
+EV_ADVISOR_DETAILS_HDR_FMT :: DETAILS - %s
+NATURE_ADVISOR_SHORT :: Nature
+IV_ADVISOR_SHORT :: IV
+EV_ADVISOR_SHORT :: EV
 EV_ADVISOR_NO_ATTACK :: Aucune capacite offensive - les EV Attaque et Attaque Spe ne l'aideront pas au combat.
 EV_ADVISOR_WASTED_SPA_FMT :: %d EV en Attaque Spe sont gaspilles - toutes ses capacites sont Physiques.
 EV_ADVISOR_WASTED_ATK_FMT :: %d EV en Attaque sont gaspilles - toutes ses capacites sont Speciales.
 EV_ADVISOR_OK :: Les EV correspondent a leurs categories de capacites - aucun changement necessaire.
+MENU_NATURE_ADVISOR_TAB :: Conseiller Nature
+MENU_IV_ADVISOR_TAB :: Conseiller IV
+MENU_EV_ADVISOR_TAB :: Conseiller EV
+NATURE_ADVISOR_NO_ATTACK :: Aucune capacite offensive - l'effet de la Nature sur Attaque/Attaque Spe n'a pas d'importance ici.
+NATURE_ADVISOR_LOWERS_ATK_FMT :: %s baisse l'Attaque - toutes ses capacites sont Physiques.
+NATURE_ADVISOR_LOWERS_SPA_FMT :: %s baisse l'Attaque Spe - toutes ses capacites sont Speciales.
+NATURE_ADVISOR_LOWERS_SPE_FMT :: %s baisse la Vitesse, ce qui le ralentit de toute facon.
+NATURE_ADVISOR_TAG_OK :: OK
+NATURE_ADVISOR_TAG_LOWERS :: Baisse
+NATURE_ADVISOR_OK :: La Nature ne les penalise pas.
+IV_ADVISOR_LOW_FMT :: IV faibles en : %s
+IV_ADVISOR_TAG_OK :: OK
+IV_ADVISOR_TAG_LOW :: IV faibles
+IV_ADVISOR_OK :: Les IV sont solides dans les stats utilisees.
 MENU_HELD_ITEM_ADVISOR :: Conseiller d'objets
 FAV_HELD_ITEM_ADVISOR :: Conseil. objets
 NOTE_HELD_ITEM_ADVISOR :: Montre ce que votre equipe tient actuellement (ou Aucun), puis suggere un objet a tenir pour quiconque n'en a pas, base sur un simple profil de stats - une stat clairement dominante oriente vers un objet Choix, un attaquant rapide prend Life Orb, une grosse resistance prend Reste, et sans stat dominante, la suggestion par defaut est une Baie Sitrus.\n\nX bascule entre Dans le sac (vous possedez deja l'objet suggere - allez l'equiper via le selecteur d'objet a tenir de PC Box ++) et A obtenir (vous ne le possedez pas encore - Panier suggere ouvre PokeMart Anywhere avec ces objets deja ajoutes).\n\nJuste une suggestion basee sur les stats, pas sur les capacites, talents ou votre strategie reelle.
@@ -1310,3 +1328,34 @@ HELD_ADVISOR_REASON_SITRUS :: Aucune stat ne se demarque - un choix sur surete.
 HELD_ADVISOR_NONE_IN_BAG :: Aucune suggestion ne correspond a ce qu'il y a dans votre sac.
 HELD_ADVISOR_NONE_TO_GET :: Vous avez deja tout ce qui est suggere, ou personne n'a besoin d'objet.
 HELD_ADVISOR_SUGGESTED_CART :: Panier suggere
+MENU_BREEDING_CHECKER :: Compatibilite d'elevage
+FAV_BREEDING_CHECKER :: Compatibilite d'elevage
+NOTE_BREEDING_CHECKER :: Trois onglets (X change) :\n\nEquipe examine votre equipe actuelle pour des paires compatibles a la Pension (partage un groupe d'oeufs ou l'un des deux est Metamorph, sexes opposes) et montre les capacites Oeuf que le bebe pourrait heriter des capacites ACTUELLES d'un parent.\n\nBoites fait pareil sur toutes vos boites PC, au niveau de l'espece (pour que les doublons ne saturent pas la liste).\n\nTester Deux vous permet de tester N'IMPORTE QUELLES deux especes avec le Selecteur d'especes visuel, meme celles que vous ne possedez pas encore - touchez une case sur l'ecran du bas pour choisir. C'est une verification au niveau de l'espece seulement (le sexe d'un individu n'est pas connu), donc cela indique juste si les deux especes peuvent se reproduire ensemble, plus la liste complete des capacites Oeuf que chaque cote pourrait transmettre.
+BREEDING_NO_PARTY :: Aucun Pokemon trouve dans votre equipe.
+BREEDING_PAIRS_FOUND_FMT :: %d paire(s) compatible(s) trouvee(s)
+BREEDING_MOVES_COUNT_FMT :: %d capacite(s)
+BREEDING_CHIP_DITTO :: Metamorph
+BREEDING_MOVE_FRACTION_FMT :: %d/%d capacites
+BREEDING_PAIR_RANGE_FMT :: paire %d-%d sur %d
+BREEDING_TAB_PARTY :: Equipe
+BREEDING_TAB_BOXES :: Boites
+BREEDING_TAB_CHECK_TWO :: Tester Deux
+BREEDING_TAP_TO_CHOOSE :: Toucher pour choisir
+BREEDING_NOT_CHOSEN :: Pas encore choisi
+BREEDING_SPECIES_A_FMT :: Espece A : %s
+BREEDING_SPECIES_B_FMT :: Espece B : %s
+BREEDING_NEED_TWO :: Il faut au moins 2 Pokemon dans votre equipe.
+BREEDING_NO_PAIRS :: Aucune paire compatible trouvee.
+BREEDING_NO_BOXED :: Aucun Pokemon trouve dans vos boites PC.
+BREEDING_SPECIES_OWNED_FMT :: %d especes possedees dans vos boites
+BREEDING_MORE_NOT_SHOWN_FMT :: +%d paire(s) non affichee(s)
+BREEDING_BABY_FMT :: Bebe : %s
+BREEDING_NO_EGG_MOVES :: Aucune capacite Oeuf transmissible pour l'instant.
+BREEDING_PASSABLE_FMT :: Pourrait transmettre : %s
+BREEDING_PICK_BOTH :: Touchez les deux cases ci-dessus pour choisir deux especes.
+BREEDING_NOT_COMPATIBLE :: Non compatible
+BREEDING_REASON_UNDISCOVERED :: L'un des deux ne peut pas du tout se reproduire (groupe Oeuf inconnu).
+BREEDING_REASON_NO_GROUP :: Ils ne partagent pas de groupe d'oeufs.
+BREEDING_COMPATIBLE :: Compatible
+BREEDING_EGG_MOVE_LIST_HDR :: CAPACITES OEUF QU'IL PEUT APPRENDRE
+BREEDING_IF_MOTHER_FMT :: Si %s est la mere :

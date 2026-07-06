@@ -142,6 +142,7 @@
       void TeamCoverage(MenuEntry *entry);  // Team Coverage (Trainer Info): party types at a glance + Defense/Offense/Cart breakdown
       void EVAdvisor(MenuEntry *entry);     // EV Advisor (Trainer Info): flags EV investment mismatched with actual known moves
       void HeldItemAdvisor(MenuEntry *entry); // Held Item Advisor (Trainer Info): held-item suggestions, split In Bag / To Get
+      void BreedingCompatibility(MenuEntry *entry); // Breeding Compatibility Checker (Breeding): Party Suggestions + Check Two species picker
       void BoxBrowserPlus(MenuEntry *entry); // PC Box ++ visual box grid (replaces Position/Clone/Find)
       void PartyBattleEditor(MenuEntry *entry); // Change Party Stats: visual battle-party editor (in-battle)
       void EnemyHelper(MenuEntry *entry);       // Enemy Helper: in-battle coach card for the enemy (in-battle)

@@ -1282,18 +1282,36 @@ TEAM_COVERAGE_CART :: Warenkorb
 TEAM_COVERAGE_CART_HDR :: ALLGEMEINES TEAM-SET
 TEAM_COVERAGE_CART_SUB :: Angepasst an das Level und die Statuswerte deines Teams - nicht gegnerspezifisch.
 TEAM_COVERAGE_SUGGESTED_CART :: Vorgeschlagener Warenkorb
-MENU_EV_ADVISOR :: EV-Berater
-FAV_EV_ADVISOR :: EV-Berater
-NOTE_EV_ADVISOR :: Ein reiner Lesecheck der EV-Investition deines Teams: markiert ein Pokemon, dessen EVs in Angriff oder Sp. Angriff nicht zu seinen TATSAECHLICH bekannten Attacken passen (z. B. EVs in Sp. Angriff bei einem Pokemon mit nur physischen Attacken), und markiert separat alle ohne jede Angriffsattacke (deren Angriff/Sp.-Angriff-EVs bewirken nichts).\n\nSteuerkreuz Hoch/Runter blaettert die Details auf dem unteren Bildschirm.\n\nGemischte Angreifer (kennen sowohl physische als auch spezielle Attacken) werden nicht markiert - dafuer gibt es kein klares Urteil. Es wird nur die Kategorie-Uebereinstimmung geprueft, nicht ob die Gesamtverteilung optimal ist.
+MENU_NATURE_IV_EV_ADVISOR :: Wesen / IV / EV-Berater
+FAV_EV_ADVISOR :: Wesen/IV/EV-Berater
+NOTE_NATURE_IV_EV_ADVISOR :: Ein reiner Lesecheck deines Teams in 3 Tabs (L/R wechselt):\n\nWesen markiert ein Wesen, das die Statuswerte SENKT, mit denen ein Pokemon tatsaechlich angreift (oder Initiative, die immer zaehlt). IV markiert niedrige IVs (unter 20) in den Werten, die es tatsaechlich nutzt. EV markiert EV-Investition in eine Kategorie, mit der es nicht angreift (z. B. EVs in Sp. Angriff bei einem Pokemon mit nur physischen Attacken).\n\nSteuerkreuz Hoch/Runter blaettert die Details auf dem unteren Bildschirm. Gemischte Angreifer (kennen physische und spezielle Attacken) werden bei Wesen/EV nicht markiert - dafuer gibt es kein klares Urteil.
 EV_ADVISOR_NO_PARTY :: Kein Pokemon in deinem Team gefunden.
 EV_ADVISOR_TAG_OK :: OK
 EV_ADVISOR_TAG_MISMATCH :: Fehlpassung
 EV_ADVISOR_TAG_SUPPORT :: Support
 EV_ADVISOR_DETAILS_HDR :: DETAILS
+EV_ADVISOR_DETAILS_HDR_FMT :: DETAILS - %s
+NATURE_ADVISOR_SHORT :: Wesen
+IV_ADVISOR_SHORT :: IVs
+EV_ADVISOR_SHORT :: EVs
 EV_ADVISOR_NO_ATTACK :: Keine Angriffsattacken - Angriff- und Sp.-Angriff-EVs helfen ihm im Kampf nicht.
 EV_ADVISOR_WASTED_SPA_FMT :: %d EVs in Sp. Angriff sind verschwendet - alle seine Attacken sind physisch.
 EV_ADVISOR_WASTED_ATK_FMT :: %d EVs in Angriff sind verschwendet - alle seine Attacken sind speziell.
 EV_ADVISOR_OK :: Die EVs passen zu ihren Attackenkategorien - keine Aenderung noetig.
+MENU_NATURE_ADVISOR_TAB :: Wesen-Berater
+MENU_IV_ADVISOR_TAB :: IV-Berater
+MENU_EV_ADVISOR_TAB :: EV-Berater
+NATURE_ADVISOR_NO_ATTACK :: Keine Angriffsattacken - die Wirkung des Wesens auf Angriff/Sp. Angriff spielt hier keine Rolle.
+NATURE_ADVISOR_LOWERS_ATK_FMT :: %s senkt Angriff - alle seine Attacken sind physisch.
+NATURE_ADVISOR_LOWERS_SPA_FMT :: %s senkt Sp. Angriff - alle seine Attacken sind speziell.
+NATURE_ADVISOR_LOWERS_SPE_FMT :: %s senkt Initiative, was es so oder so verlangsamt.
+NATURE_ADVISOR_TAG_OK :: OK
+NATURE_ADVISOR_TAG_LOWERS :: Senkt
+NATURE_ADVISOR_OK :: Das Wesen bremst sie nicht aus.
+IV_ADVISOR_LOW_FMT :: Niedrige IVs bei: %s
+IV_ADVISOR_TAG_OK :: OK
+IV_ADVISOR_TAG_LOW :: Niedrige IVs
+IV_ADVISOR_OK :: Die IVs sind solide in den genutzten Werten.
 MENU_HELD_ITEM_ADVISOR :: Item-Berater
 FAV_HELD_ITEM_ADVISOR :: Item-Berater
 NOTE_HELD_ITEM_ADVISOR :: Zeigt, was dein Team derzeit haelt (oder Keins), und schlaegt dann fuer jeden ohne Item basierend auf einem einfachen Statusprofil ein Item vor - ein klar dominanter Wert fuehrt zu einem Choice-Item, ein schneller Angreifer bekommt Life Orb, hohe Widerstandskraft bekommt Restposten, und ohne klaren Ausreisser gibt es standardmaessig eine sichere Sitrusbeere.\n\nX wechselt zwischen Im Beutel (du besitzt das vorgeschlagene Item schon - ruestet es im Halte-Item-Waehler von PC Box ++ aus) und Zu besorgen (du besitzt es noch nicht - Vorgeschlagener Warenkorb oeffnet PokeMart Anywhere mit diesen Items vorausgefuellt).\n\nNur ein Vorschlag basierend auf Statuswerten, nicht auf Attacken, Faehigkeiten oder deiner tatsaechlichen Strategie.
@@ -1310,3 +1328,34 @@ HELD_ADVISOR_REASON_SITRUS :: Kein herausragender Wert - eine sichere Allround-W
 HELD_ADVISOR_NONE_IN_BAG :: Keine Vorschlaege passen zu dem, was gerade in deinem Beutel ist.
 HELD_ADVISOR_NONE_TO_GET :: Du hast bereits alles Vorgeschlagene, oder niemand braucht ein Item.
 HELD_ADVISOR_SUGGESTED_CART :: Vorgeschlagener Warenkorb
+MENU_BREEDING_CHECKER :: Zucht-Kompatibilitaet
+FAV_BREEDING_CHECKER :: Zucht-Kompatibilitaet
+NOTE_BREEDING_CHECKER :: Drei Tabs (X wechselt):\n\nTeam durchsucht dein aktuelles Team nach kompatiblen Kindergarten-Paaren (teilt eine Ei-Gruppe oder eine Seite ist Ditto, entgegengesetztes Geschlecht) und zeigt die Ei-Attacken, die das Baby von den AKTUELLEN Attacken eines Elternteils erben koennte.\n\nBoxen macht dasselbe ueber alle deine PC-Boxen hinweg, auf Artebene (damit Duplikate die Liste nicht ueberfluten).\n\nZwei Testen laesst dich JEDE zwei Arten mit dem visuellen Arten-Auswaehler testen, auch solche, die du noch nicht besitzt - tippe auf ein Feld auf dem unteren Bildschirm zum Auswaehlen. Dies ist nur eine Pruefung auf Artebene (das Geschlecht eines Individuums ist nicht bekannt), es zeigt also nur, ob die beiden Arten sich zusammen fortpflanzen koennen, plus die volle Liste der Ei-Attacken, die jede Seite weitergeben koennte.
+BREEDING_NO_PARTY :: Kein Pokemon in deinem Team gefunden.
+BREEDING_PAIRS_FOUND_FMT :: %d kompatible(s) Paar(e) gefunden
+BREEDING_MOVES_COUNT_FMT :: %d Attacke(n)
+BREEDING_CHIP_DITTO :: Ditto
+BREEDING_MOVE_FRACTION_FMT :: %d/%d Attacken
+BREEDING_PAIR_RANGE_FMT :: Paar %d-%d von %d
+BREEDING_TAB_PARTY :: Team
+BREEDING_TAB_BOXES :: Boxen
+BREEDING_TAB_CHECK_TWO :: Zwei Testen
+BREEDING_TAP_TO_CHOOSE :: Antippen zum Waehlen
+BREEDING_NOT_CHOSEN :: Noch nicht gewaehlt
+BREEDING_SPECIES_A_FMT :: Art A: %s
+BREEDING_SPECIES_B_FMT :: Art B: %s
+BREEDING_NEED_TWO :: Mindestens 2 Pokemon in deinem Team noetig.
+BREEDING_NO_BOXED :: Kein Pokemon in deinen PC-Boxen gefunden.
+BREEDING_SPECIES_OWNED_FMT :: %d Arten in deinen Boxen vorhanden
+BREEDING_MORE_NOT_SHOWN_FMT :: +%d weitere(s) Paar(e) nicht angezeigt
+BREEDING_NO_PAIRS :: Keine kompatiblen Paare gefunden.
+BREEDING_BABY_FMT :: Baby: %s
+BREEDING_NO_EGG_MOVES :: Aktuell keine vererbbaren Ei-Attacken.
+BREEDING_PASSABLE_FMT :: Koennte vererben: %s
+BREEDING_PICK_BOTH :: Tippe beide Felder oben an, um zwei Arten zu waehlen.
+BREEDING_NOT_COMPATIBLE :: Nicht kompatibel
+BREEDING_REASON_UNDISCOVERED :: Eine von beiden kann sich gar nicht fortpflanzen (Ei-Gruppe unbekannt).
+BREEDING_REASON_NO_GROUP :: Sie teilen keine Ei-Gruppe.
+BREEDING_COMPATIBLE :: Kompatibel
+BREEDING_EGG_MOVE_LIST_HDR :: EI-ATTACKEN, DIE ES LERNEN KANN
+BREEDING_IF_MOTHER_FMT :: Wenn %s die Mutter ist:

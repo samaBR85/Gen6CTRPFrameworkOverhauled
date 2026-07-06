@@ -1333,18 +1333,36 @@ TEAM_COVERAGE_CART :: Carrello
 TEAM_COVERAGE_CART_HDR :: KIT GENERALE SQUADRA
 TEAM_COVERAGE_CART_SUB :: Calibrato sul livello e sul profilo di statistiche della tua squadra - non specifico per un avversario.
 TEAM_COVERAGE_SUGGESTED_CART :: Carrello suggerito
-MENU_EV_ADVISOR :: Consulente SV
-FAV_EV_ADVISOR :: Consulente SV
-NOTE_EV_ADVISOR :: Un controllo di sola lettura sugli SV della tua squadra: segnala un Pokemon i cui SV in Attacco o Attacco Speciale non corrispondono alle mosse che conosce DAVVERO (ad esempio SV in Attacco Speciale su uno che ha solo mosse Fisiche), e segnala separatamente chi non ha mosse offensive (i suoi SV in Attacco/Attacco Speciale non servono a nulla).\n\nCroce direzionale Su/Giu scorre i dettagli sullo schermo in basso.\n\nGli attaccanti misti (conoscono sia mosse Fisiche che Speciali) non vengono segnalati - non c'e un verdetto chiaro per loro. Questo controlla solo la corrispondenza di categoria, non se la distribuzione totale sia ottimale.
+MENU_NATURE_IV_EV_ADVISOR :: Consulente Natura / IV / SV
+FAV_EV_ADVISOR :: Consulente Natura/IV/SV
+NOTE_NATURE_IV_EV_ADVISOR :: Un controllo di sola lettura sulla tua squadra, in 3 schede (L/R cambia):\n\nNatura segnala una Natura che ABBASSA la statistica con cui il Pokemon attacca davvero (o la Velocita, che conta comunque). IV segnala IV basse (sotto 20) nelle statistiche che usa davvero. SV segnala SV investiti in una categoria con cui non attacca (ad esempio SV in Attacco Speciale su uno che ha solo mosse Fisiche).\n\nCroce direzionale Su/Giu scorre i dettagli sullo schermo in basso. Gli attaccanti misti (conoscono mosse Fisiche e Speciali) non vengono segnalati su Natura/SV - non c'e un verdetto chiaro per loro.
 EV_ADVISOR_NO_PARTY :: Nessun Pokemon trovato nella tua squadra.
 EV_ADVISOR_TAG_OK :: OK
 EV_ADVISOR_TAG_MISMATCH :: Discordanza
 EV_ADVISOR_TAG_SUPPORT :: Supporto
 EV_ADVISOR_DETAILS_HDR :: DETTAGLI
+EV_ADVISOR_DETAILS_HDR_FMT :: DETTAGLI - %s
+NATURE_ADVISOR_SHORT :: Natura
+IV_ADVISOR_SHORT :: IV
+EV_ADVISOR_SHORT :: SV
 EV_ADVISOR_NO_ATTACK :: Nessuna mossa offensiva - gli SV in Attacco e Attacco Speciale non lo aiuteranno in battaglia.
 EV_ADVISOR_WASTED_SPA_FMT :: %d SV in Attacco Speciale sono sprecati - tutte le sue mosse sono Fisiche.
 EV_ADVISOR_WASTED_ATK_FMT :: %d SV in Attacco sono sprecati - tutte le sue mosse sono Speciali.
 EV_ADVISOR_OK :: Gli SV corrispondono alle categorie delle loro mosse - nessuna modifica necessaria.
+MENU_NATURE_ADVISOR_TAB :: Consulente Natura
+MENU_IV_ADVISOR_TAB :: Consulente IV
+MENU_EV_ADVISOR_TAB :: Consulente SV
+NATURE_ADVISOR_NO_ATTACK :: Nessuna mossa offensiva - l'effetto della Natura su Attacco/Attacco Speciale qui non conta.
+NATURE_ADVISOR_LOWERS_ATK_FMT :: %s abbassa l'Attacco - tutte le sue mosse sono Fisiche.
+NATURE_ADVISOR_LOWERS_SPA_FMT :: %s abbassa l'Attacco Speciale - tutte le sue mosse sono Speciali.
+NATURE_ADVISOR_LOWERS_SPE_FMT :: %s abbassa la Velocita, il che lo rallenta comunque.
+NATURE_ADVISOR_TAG_OK :: OK
+NATURE_ADVISOR_TAG_LOWERS :: Abbassa
+NATURE_ADVISOR_OK :: La Natura non li penalizza.
+IV_ADVISOR_LOW_FMT :: IV basse in: %s
+IV_ADVISOR_TAG_OK :: OK
+IV_ADVISOR_TAG_LOW :: IV basse
+IV_ADVISOR_OK :: Le IV sono solide nelle statistiche usate.
 MENU_HELD_ITEM_ADVISOR :: Consulente Oggetti
 FAV_HELD_ITEM_ADVISOR :: Cons. Oggetti
 NOTE_HELD_ITEM_ADVISOR :: Mostra cosa sta tenendo attualmente la tua squadra (o Nessuno), poi suggerisce un oggetto da tenere per chi ne e sprovvisto in base a un semplice profilo di statistiche - una statistica chiaramente dominante porta verso un oggetto Choice, un attaccante veloce prende Life Orb, un'alta resistenza prende Leftover, e senza nulla di spiccato la scelta predefinita e una sicura Bacca Sitrus.\n\nX passa da In Borsa (possiedi gia l'oggetto suggerito - vai ad equipaggiarlo nel selettore oggetti di PC Box ++) a Da Ottenere (non lo possiedi ancora - Carrello suggerito apre PokeMart Anywhere con quegli oggetti gia inseriti).\n\nSolo un suggerimento basato sulle statistiche, non sulle mosse, abilita o sulla tua strategia reale.
@@ -1361,3 +1379,34 @@ HELD_ADVISOR_REASON_SITRUS :: Nessuna statistica spicca - una scelta sicura e ge
 HELD_ADVISOR_NONE_IN_BAG :: Nessun suggerimento corrisponde a cio che hai attualmente in borsa.
 HELD_ADVISOR_NONE_TO_GET :: Hai gia tutto quello che e stato suggerito, oppure nessuno ha bisogno di un oggetto.
 HELD_ADVISOR_SUGGESTED_CART :: Carrello suggerito
+MENU_BREEDING_CHECKER :: Compatibilita di allevamento
+FAV_BREEDING_CHECKER :: Compatibilita allevamento
+NOTE_BREEDING_CHECKER :: Tre schede (X cambia):\n\nSquadra controlla la tua squadra attuale per coppie compatibili all'Asilo (condividono un gruppo Uovo o uno dei due e Ditto, sessi opposti) e mostra le mosse Uovo che il piccolo potrebbe ereditare dalle mosse ATTUALI di un genitore.\n\nScatole fa lo stesso su tutte le tue scatole PC, a livello di specie (cosi i duplicati non intasano l'elenco).\n\nTesta Due ti permette di testare QUALSIASI coppia di specie con il Selettore di specie visivo, anche quelle che non possiedi ancora - tocca una casella sullo schermo in basso per scegliere. Questo e un controllo solo a livello di specie (non puo conoscere il sesso di un individuo), quindi indica solo se le due specie possono riprodursi insieme, piu l'elenco completo delle mosse Uovo che ciascuna parte potrebbe trasmettere.
+BREEDING_NO_PARTY :: Nessun Pokemon trovato nella tua squadra.
+BREEDING_PAIRS_FOUND_FMT :: %d coppia/e compatibile/i trovata/e
+BREEDING_MOVES_COUNT_FMT :: %d mossa/e
+BREEDING_CHIP_DITTO :: Ditto
+BREEDING_MOVE_FRACTION_FMT :: %d/%d mosse
+BREEDING_PAIR_RANGE_FMT :: coppia %d-%d di %d
+BREEDING_TAB_PARTY :: Squadra
+BREEDING_TAB_BOXES :: Scatole
+BREEDING_TAB_CHECK_TWO :: Testa Due
+BREEDING_TAP_TO_CHOOSE :: Tocca per scegliere
+BREEDING_NOT_CHOSEN :: Non ancora scelto
+BREEDING_SPECIES_A_FMT :: Specie A: %s
+BREEDING_SPECIES_B_FMT :: Specie B: %s
+BREEDING_NEED_TWO :: Servono almeno 2 Pokemon nella tua squadra.
+BREEDING_NO_BOXED :: Nessun Pokemon trovato nelle tue scatole PC.
+BREEDING_SPECIES_OWNED_FMT :: %d specie possedute nelle tue scatole
+BREEDING_MORE_NOT_SHOWN_FMT :: +%d altra/e coppia/e non mostrata/e
+BREEDING_NO_PAIRS :: Nessuna coppia compatibile trovata.
+BREEDING_BABY_FMT :: Piccolo: %s
+BREEDING_NO_EGG_MOVES :: Nessuna mossa Uovo trasmissibile al momento.
+BREEDING_PASSABLE_FMT :: Potrebbe trasmettere: %s
+BREEDING_PICK_BOTH :: Tocca entrambe le caselle sopra per scegliere due specie.
+BREEDING_NOT_COMPATIBLE :: Non compatibile
+BREEDING_REASON_UNDISCOVERED :: Una delle due non puo riprodursi affatto (gruppo Uovo sconosciuto).
+BREEDING_REASON_NO_GROUP :: Non condividono un gruppo Uovo.
+BREEDING_COMPATIBLE :: Compatibile
+BREEDING_EGG_MOVE_LIST_HDR :: MOSSE UOVO CHE PUO IMPARARE
+BREEDING_IF_MOTHER_FMT :: Se %s e la madre:

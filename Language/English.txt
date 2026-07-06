@@ -1280,18 +1280,36 @@ TEAM_COVERAGE_CART :: Cart
 TEAM_COVERAGE_CART_HDR :: GENERAL TEAM KIT
 TEAM_COVERAGE_CART_SUB :: Scaled to your team's level and stat spread - not matchup-specific.
 TEAM_COVERAGE_SUGGESTED_CART :: Suggested Cart
-MENU_EV_ADVISOR :: EV Advisor
-FAV_EV_ADVISOR :: EV Advisor
-NOTE_EV_ADVISOR :: A read-only sanity check on your party's EV investment: flags a Pokemon whose EVs in Attack or Sp. Atk don't match its ACTUAL known moves (say, EVs in Sp. Atk on something that only has Physical moves), and separately flags anyone with no attacking moves at all (their Attack/Sp. Atk EVs aren't doing anything).\n\nD-Pad Up/Down scrolls the details on the bottom screen.\n\nMixed attackers (knows both Physical and Special moves) are left alone - there's no clear verdict for those. This only checks category match, not whether the total spread itself is optimal.
+MENU_NATURE_IV_EV_ADVISOR :: Nature / IV / EV Advisor
+FAV_EV_ADVISOR :: Nature/IV/EV Advisor
+NOTE_NATURE_IV_EV_ADVISOR :: A read-only sanity check on your party, in 3 tabs (L/R switches):\n\nNature flags a Nature that LOWERS the stat a Pokemon actually attacks with (or Speed, which matters either way). IV flags low IVs (under 20) in the stats it actually relies on. EV flags EV investment in a category it doesn't attack with (say, Sp. Atk EVs on something with only Physical moves).\n\nD-Pad Up/Down scrolls the details on the bottom screen. Mixed attackers (knows both Physical and Special moves) are left alone on Nature/EV - there's no clear verdict for those.
 EV_ADVISOR_NO_PARTY :: No Pokemon found in your party.
 EV_ADVISOR_TAG_OK :: OK
 EV_ADVISOR_TAG_MISMATCH :: Mismatch
 EV_ADVISOR_TAG_SUPPORT :: Support
 EV_ADVISOR_DETAILS_HDR :: DETAILS
+EV_ADVISOR_DETAILS_HDR_FMT :: DETAILS - %s
+NATURE_ADVISOR_SHORT :: Nature
+IV_ADVISOR_SHORT :: IVs
+EV_ADVISOR_SHORT :: EVs
 EV_ADVISOR_NO_ATTACK :: No attacking moves - Attack and Sp. Atk EVs won't help it fight.
 EV_ADVISOR_WASTED_SPA_FMT :: %d EVs in Sp. Atk are wasted - all its moves are Physical.
 EV_ADVISOR_WASTED_ATK_FMT :: %d EVs in Attack are wasted - all its moves are Special.
 EV_ADVISOR_OK :: EVs match their move categories - no changes needed.
+MENU_NATURE_ADVISOR_TAB :: Nature Advisor
+MENU_IV_ADVISOR_TAB :: IV Advisor
+MENU_EV_ADVISOR_TAB :: EV Advisor
+NATURE_ADVISOR_NO_ATTACK :: No attacking moves - its Nature's effect on Attack/Sp. Atk doesn't matter here.
+NATURE_ADVISOR_LOWERS_ATK_FMT :: %s lowers Attack - all its moves are Physical.
+NATURE_ADVISOR_LOWERS_SPA_FMT :: %s lowers Sp. Atk - all its moves are Special.
+NATURE_ADVISOR_LOWERS_SPE_FMT :: %s lowers Speed, which slows it down either way.
+NATURE_ADVISOR_TAG_OK :: OK
+NATURE_ADVISOR_TAG_LOWERS :: Lowers
+NATURE_ADVISOR_OK :: Nature isn't holding these back.
+IV_ADVISOR_LOW_FMT :: Low IVs in: %s
+IV_ADVISOR_TAG_OK :: OK
+IV_ADVISOR_TAG_LOW :: Low IVs
+IV_ADVISOR_OK :: IVs look solid in the stats these use.
 MENU_HELD_ITEM_ADVISOR :: Held Item Advisor
 FAV_HELD_ITEM_ADVISOR :: Held Item Advisor
 NOTE_HELD_ITEM_ADVISOR :: Shows what your party is currently holding (or None), then suggests a held item for anybody empty-handed based on a simple stat-profile heuristic - a clear best stat leans towards a Choice item, a fast attacker takes Life Orb, heavy bulk takes Leftovers, and anything with no standout falls back to a safe Sitrus Berry.\n\nX switches between In Bag (you already own the suggested item - go equip it in PC Box ++'s held-item picker) and To Get (you don't own it yet - Suggested Cart opens PokeMart Anywhere with those items pre-filled).\n\nJust a suggestion based on stats, not moves, abilities, or your actual strategy.
@@ -1308,3 +1326,34 @@ HELD_ADVISOR_REASON_SITRUS :: No standout stat - a safe general pick.
 HELD_ADVISOR_NONE_IN_BAG :: No suggestions match what's currently in your bag.
 HELD_ADVISOR_NONE_TO_GET :: You already have everything suggested, or nobody needs an item.
 HELD_ADVISOR_SUGGESTED_CART :: Suggested Cart
+MENU_BREEDING_CHECKER :: Breeding Compatibility
+FAV_BREEDING_CHECKER :: Breeding Compatibility
+NOTE_BREEDING_CHECKER :: Three tabs (X switches):\n\nParty scans your current party for compatible Day Care pairs (shares an egg group or either side is Ditto, opposite genders) and shows the egg moves the baby could inherit from a parent's CURRENT moveset.\n\nBoxes does the same across all your PC boxes, at the species level (so duplicates don't flood the list).\n\nCheck Two lets you test ANY two species with the visual Species Picker, even ones you don't own yet - tap a box on the bottom screen to pick. This is a species-level check only (it can't know an individual's gender), so it just reports whether the two species can breed together, plus the full egg-move list either side could pass down.
+BREEDING_NO_PARTY :: No Pokemon found in your party.
+BREEDING_PAIRS_FOUND_FMT :: %d compatible pair(s) found
+BREEDING_MOVES_COUNT_FMT :: %d move(s)
+BREEDING_CHIP_DITTO :: Ditto
+BREEDING_MOVE_FRACTION_FMT :: %d/%d moves
+BREEDING_PAIR_RANGE_FMT :: pair %d-%d of %d
+BREEDING_TAB_PARTY :: Party
+BREEDING_TAB_BOXES :: Boxes
+BREEDING_TAB_CHECK_TWO :: Check Two
+BREEDING_TAP_TO_CHOOSE :: Tap to choose
+BREEDING_NOT_CHOSEN :: Not chosen yet
+BREEDING_SPECIES_A_FMT :: Species A: %s
+BREEDING_SPECIES_B_FMT :: Species B: %s
+BREEDING_NEED_TWO :: Need at least 2 Pokemon in your party.
+BREEDING_NO_PAIRS :: No compatible pairs found.
+BREEDING_NO_BOXED :: No Pokemon found in your PC boxes.
+BREEDING_SPECIES_OWNED_FMT :: %d species owned across your boxes
+BREEDING_MORE_NOT_SHOWN_FMT :: +%d more pair(s) not shown
+BREEDING_BABY_FMT :: Baby: %s
+BREEDING_NO_EGG_MOVES :: No inheritable egg moves right now.
+BREEDING_PASSABLE_FMT :: Could pass down: %s
+BREEDING_PICK_BOTH :: Tap both boxes above to choose two species.
+BREEDING_NOT_COMPATIBLE :: Not compatible
+BREEDING_REASON_UNDISCOVERED :: One of these can't breed at all (Undiscovered egg group).
+BREEDING_REASON_NO_GROUP :: They don't share an egg group.
+BREEDING_COMPATIBLE :: Compatible
+BREEDING_EGG_MOVE_LIST_HDR :: EGG MOVES IT CAN LEARN
+BREEDING_IF_MOTHER_FMT :: If %s is the mother:

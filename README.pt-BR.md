@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.4
+# Gen6CTRPluginFrameworkOverhauled — v0.7.5
 
 [English](README.md) · **Português**
 
@@ -125,15 +125,29 @@ próprios golpes não conseguem furar — em frases diretas, não numa tabela de
   <img src="Screenshots/v0.7.3/team_coverage.png" width="330" alt="Team Coverage — tipos do time num relance, mais fraquezas compartilhadas e pontos cegos" />
 </p>
 
-O **EV Advisor** sinaliza investimento de EV que não bate com os golpes que o Pokémon realmente conhece —
-EVs em Ataque Especial num bicho que só tem golpes Físicos, por exemplo — e separa quem não tem golpe de
-ataque nenhum. O **Held Item Advisor** mostra o que seu time está segurando agora e sugere um item pra
-quem tá de mãos vazias, dividido entre o que você já tem (**No Baú**) e o que precisa conseguir
-(**A Conseguir**, com um botão de Carrinho Sugerido direto pro PokéMart Anywhere).
+O **Nature / IV / EV Advisor** é 3 checagens numa tela só (L/R alterna): **Nature** sinaliza uma natureza
+que baixa o status que o Pokémon realmente usa pra atacar (ou Velocidade, que importa de qualquer jeito),
+**IV** sinaliza IVs baixas nos status que ele realmente usa, e **EV** sinaliza investimento de EV que não
+bate com os golpes reais — EVs em Ataque Especial num bicho que só tem golpes Físicos, por exemplo. O
+**Held Item Advisor** mostra o que seu time está segurando agora e sugere um item pra quem tá de mãos
+vazias, dividido entre o que você já tem (**No Baú**) e o que precisa conseguir (**A Conseguir**, com um
+botão de Carrinho Sugerido direto pro PokéMart Anywhere).
 
 <p align="center">
-  <img src="Screenshots/v0.7.4/ev_advisor.png" width="330" alt="EV Advisor — sinaliza EVs que nao batem com os golpes reais do Pokemon" />
+  <img src="Screenshots/v0.7.5/nature_iv_ev_advisor.png" width="330" alt="Nature / IV / EV Advisor — 3 checagens contra os golpes reais do Pokemon, numa tela so" />
   <img src="Screenshots/v0.7.4/held_item_advisor.png" width="330" alt="Held Item Advisor — sugestoes de item dividas entre No Bau e A Conseguir" />
+</p>
+
+**Breeding Compatibility** (na pasta Breeding) confere pares de Creche pra você: **Party** e **Boxes**
+escaneiam o que você já tem procurando pares compatíveis (mesmo grupo de ovo, ou um dos dois é Ditto) e
+mostram os golpes de ovo que o filhote poderia herdar dos golpes atuais de um dos pais, ordenados pra
+mostrar os úteis primeiro — com um filtro por grupo de ovo (**Y**) quando a lista fica grande. **Check Two**
+deixa você testar qualquer par de espécies com o Seletor de Espécies visual, mesmo umas que você ainda não
+tem, mostrando os dois pais e o que realmente nasce lado a lado.
+
+<p align="center">
+  <img src="Screenshots/v0.7.5/breeding_compat_boxes.png" width="330" alt="Breeding Compatibility — aba Boxes, pares compativeis ordenados por golpes de ovo herdaveis" />
+  <img src="Screenshots/v0.7.5/breeding_compat_checktwo.png" width="330" alt="Breeding Compatibility — Check Two, duas especies e o que nasce entre elas" />
 </p>
 
 ### Vença a batalha
@@ -253,6 +267,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.7.2** — o **Gym Coach** agora lê suas insígnias de ginásio reais e já pula direto pro seu próximo desafio na primeira vez que você abre a tela em cada sessão, com uma marca **Next** na lista pra você sempre saber quem é.
 - **v0.7.3** — **Team Coverage**: uma nova tela em Trainer Info que lista os tipos do seu time num relance, mais um detalhamento Defense/Offense de fraquezas compartilhadas, golpes 4x e pontos cegos que seus próprios golpes não furam.
 - **v0.7.4** — **EV Advisor** e **Held Item Advisor**, mais duas telas em Trainer Info: uma sinaliza EVs que não batem com os golpes reais do seu Pokémon, a outra sugere itens pra segurar (dividido em No Baú / A Conseguir) — e o Team Coverage ganhou uma 3ª aba **Cart** com uma lista de compras geral pro time.
+- **v0.7.5** — o EV Advisor virou **Nature / IV / EV Advisor** (3 checagens, uma tela), e uma nova tela **Breeding Compatibility** (Party / Boxes / Check Two) acha pares de Creche, os golpes de ovo que eles poderiam passar, e deixa você testar qualquer par de espécies antes mesmo de ter os dois.
 
 ## 📥 Instalando
 
@@ -362,7 +377,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.7.4 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.7.5 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença

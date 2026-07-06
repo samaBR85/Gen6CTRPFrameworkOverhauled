@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.4
+# Gen6CTRPluginFrameworkOverhauled — v0.7.5
 
 **English** · [Português](README.pt-BR.md)
 
@@ -125,15 +125,28 @@ moves can't get through — read as plain sentences, not a stat table.
   <img src="Screenshots/v0.7.3/team_coverage.png" width="330" alt="Team Coverage — party types at a glance, plus shared weaknesses and blind spots" />
 </p>
 
-**EV Advisor** flags EV investment that doesn't match a Pokémon's actual known moves — EVs in Sp. Atk on
-something with only Physical moves, say — and separately calls out anyone with no attacking moves at all.
-**Held Item Advisor** shows what your team is currently holding and suggests one for anybody empty-handed,
-split between what you already own (**In Bag**) and what you'd need to pick up (**To Get**, with a
-Suggested Cart button straight into PokéMart Anywhere).
+**Nature / IV / EV Advisor** is three checks in one screen (L/R switches): **Nature** flags a nature that
+lowers the stat a Pokémon actually attacks with (or Speed, which matters either way), **IV** flags low IVs in
+the stats it actually relies on, and **EV** flags EV investment that doesn't match its actual known moves —
+EVs in Sp. Atk on something with only Physical moves, say. **Held Item Advisor** shows what your team is
+currently holding and suggests one for anybody empty-handed, split between what you already own (**In Bag**)
+and what you'd need to pick up (**To Get**, with a Suggested Cart button straight into PokéMart Anywhere).
 
 <p align="center">
-  <img src="Screenshots/v0.7.4/ev_advisor.png" width="330" alt="EV Advisor — flags EV investment mismatched with a Pokemon's actual moves" />
+  <img src="Screenshots/v0.7.5/nature_iv_ev_advisor.png" width="330" alt="Nature / IV / EV Advisor — three checks against a Pokemon's actual moves, one screen" />
   <img src="Screenshots/v0.7.4/held_item_advisor.png" width="330" alt="Held Item Advisor — held-item suggestions split between In Bag and To Get" />
+</p>
+
+**Breeding Compatibility** (in the Breeding folder) checks Day Care pairs for you: **Party** and **Boxes** scan
+what you already own for compatible pairs (shares an egg group, or either side is Ditto) and show the egg
+moves the baby could inherit from a parent's current moveset, sorted so the useful ones surface first — with
+a filter by egg group (**Y**) when the list gets long. **Check Two** lets you test any two species with the
+visual Species Picker, even ones you don't own yet, showing both parents and what actually hatches side by
+side.
+
+<p align="center">
+  <img src="Screenshots/v0.7.5/breeding_compat_boxes.png" width="330" alt="Breeding Compatibility — Boxes tab, compatible pairs sorted by inheritable egg moves" />
+  <img src="Screenshots/v0.7.5/breeding_compat_checktwo.png" width="330" alt="Breeding Compatibility — Check Two, two species and what hatches between them" />
 </p>
 
 ### Win the battle
@@ -252,6 +265,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.7.2** — **Gym Coach** now reads your real gym badges to jump straight to your next opponent the first time you open it each session, with a **Next** tag on the list so you always know who that is.
 - **v0.7.3** — **Team Coverage**: a new Trainer Info screen listing your party's types at a glance, plus a Defense/Offense breakdown of shared weaknesses, 4x hits, and blind spots your own moves can't get through.
 - **v0.7.4** — **EV Advisor** and **Held Item Advisor**, two more Trainer Info screens: one flags EV investment mismatched with your Pokémon's actual moves, the other suggests held items (split In Bag / To Get) — plus Team Coverage gained a third **Cart** tab for a general team-support shopping list.
+- **v0.7.5** — EV Advisor grew into **Nature / IV / EV Advisor** (three checks, one screen), and a new **Breeding Compatibility** screen (Party / Boxes / Check Two) finds Day Care pairs, the egg moves they could pass down, and lets you test any two species before you even own both.
 
 ## 📥 Installing
 
@@ -361,7 +375,7 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.7.4 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.7.5 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

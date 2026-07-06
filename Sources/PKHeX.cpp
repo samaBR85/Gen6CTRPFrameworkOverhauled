@@ -18,6 +18,8 @@
 #include "HeldItemList.hpp" // gHeldItemIds[] - curated holdable items (own list, NOT the PokeMart bag list)
 #include "AbilityTags.hpp"  // gAbilityTags[]/gAbilityTagName[] - effect tags for the ability filter panel
 #include "HeldItemTags.hpp" // gHeldItemTags[]/gHeldItemTagName[] - effect tags for the held-item filter panel
+#include "EggGroups.hpp"    // gEggGroups[]/g_eggGroupNames[] - Breeding Compatibility Checker
+#include "EggMoves.hpp"     // gEggMoves[] - Breeding Compatibility Checker
 #include <functional>
 #include <array>
 #include <cstdint>
@@ -2213,7 +2215,7 @@ namespace CTRPluginFramework {
                 bot.DrawRect(30, ry, 260, 22, bg2, true); bot.DrawRect(30, ry, 260, 22, border, false);
                 { const char *rl = "Reset all filters"; int tw = (int)OSD::GetTextWidth(true, rl);
                   bot.DrawSysfont((anyOn ? title : txt) << rl, 30 + (260 - tw) / 2, ry + 4, txt); }
-                const char *hint = "Tap a filter    D-Pad list  A choose  B back";
+                const char *hint = "Tap a filter   A choose  B back";
                 bot.DrawSysfont(txt << hint, 20 + (280 - (int)OSD::GetTextWidth(true, hint)) / 2, 204, txt);
             } else {
                 PFacet &f = facets[panel]; bool typeF = (f.opts == &g_typeName[1]);
@@ -2922,12 +2924,13 @@ namespace CTRPluginFramework {
             }
         }
 
-        // ===== EV Advisor =====
-        // Read-only screen (Trainer Info): flags EV investment that doesn't match a Pokemon's ACTUAL known
-        // moves - not a "PC Box ++" spread checker, just a sanity pass. A mon with EVs in Sp. Atk but only
-        // Physical moves (or vice versa) is flagged "Mismatch"; a mon with no attacking moves at all
-        // ("Support") gets its own flag since neither Atk nor Sp. Atk EVs do anything for it. Mixed
-        // attackers (knows both categories) are left alone - there's no clear verdict for those.
+        // ===== Nature / IV / EV Advisor =====
+        // Read-only screen (Trainer Info): 3 tabs (L/R) that each check the party against its ACTUAL known
+        // moves - not "perfect IV/EV" checkers, just sanity passes. Nature tab flags a nature that LOWERS
+        // the mon's own attacking stat (or Speed, which matters for everyone); IV tab flags low IVs (<20)
+        // in the stats the mon actually relies on; EV tab is the original EV Advisor logic (EVs in a
+        // category the mon doesn't attack with). Mixed attackers (knows both Physical and Special) are left
+        // alone on the Nature/EV tabs - there's no clear verdict for those.
         void EVAdvisor(MenuEntry *entry) {
             (void)entry;
             const Screen &top = OSD::GetTopScreen();
@@ -2938,7 +2941,8 @@ namespace CTRPluginFramework {
             const Color good(0x1B, 0x7A, 0x3A), badColor(0xD8, 0x5A, 0x30), neutralColor(0x88, 0x87, 0x80);
             Color dim = txt;
 
-            u16 partySp[6] = {0, 0, 0, 0, 0, 0}; u16 partyMoves[6][4] = {}; u8 partyEV[6][6] = {}; int nParty = 0;
+            u16 partySp[6] = {0, 0, 0, 0, 0, 0}; u16 partyMoves[6][4] = {}; u8 partyEV[6][6] = {};
+            u32 partyIV32[6] = {}; u8 partyNature[6] = {}; int nParty = 0;
             { u32 pbase = FindPartyBase();
               for (int i = 0; i < 6 && pbase; ++i) {
                   PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
@@ -2946,29 +2950,61 @@ namespace CTRPluginFramework {
                       partySp[nParty] = pk.species;
                       for (int m = 0; m < 4; ++m) partyMoves[nParty][m] = pk.move[m];
                       for (int e = 0; e < 6; ++e) partyEV[nParty][e] = pk.EV[e];
+                      partyIV32[nParty] = pk.iv32; partyNature[nParty] = pk.nature;
                       ++nParty;
                   }
               } }
             Image icon[6];
             for (int i = 0; i < nParty; ++i) { string p; BoxIconPath(p, partySp[i], false, "BoxIcons/"); icon[i].LoadFromFile(p); }
 
-            // Verdict per mon: 0 OK, 1 Mismatch, 2 Support (no attacking moves). EV[] raw index order is
-            // HP,Atk,Def,Spe,SpA,SpD (the game's own box layout) - NOT the HP/Atk/Def/SpA/SpD/Spe display
-            // order used elsewhere in this file, so Atk EV = EV[1] and Sp. Atk EV = EV[4], not EV[3].
-            int verdict[6] = {}; string detail[6];
+            // iv32/EV[] raw index order is HP,Atk,Def,Spe,SpA,SpD (the game's own box layout) - NOT the
+            // HP/Atk/Def/SpA/SpD/Spe display order used elsewhere in this file, so inMap[d] maps a display
+            // slot d to the internal index (Atk display=1 -> internal 1, SpA display=3 -> internal 4).
+            static const int inMap[6] = {0, 1, 2, 4, 5, 3};
+            bool hasPhys[6] = {}, hasSpec[6] = {};
             for (int i = 0; i < nParty; ++i) {
-                bool hasPhys = false, hasSpec = false;
                 for (int m = 0; m < 4; ++m) {
                     u16 mid = partyMoves[i][m]; if (mid < 1 || mid > 621) continue;
                     int cat = gMoveExtra[mid - 1][1], pw = gMoveInfo[mid - 1][0];
                     if (cat == 0 || pw <= 0) continue;
-                    if (cat == 1) hasPhys = true; else if (cat == 2) hasSpec = true;
+                    if (cat == 1) hasPhys[i] = true; else if (cat == 2) hasSpec[i] = true;
                 }
+            }
+
+            // Tab 0 - Nature: standard nature formula is inc = nature/5, dec = nature%5, stat order
+            // {Atk,Def,Spe,SpA,SpD} (dec==0 lowers Atk, dec==3 lowers Sp. Atk, dec==2 lowers Speed).
+            int natVerdict[6] = {}; string natDetail[6];
+            for (int i = 0; i < nParty; ++i) {
+                int n = partyNature[i], inc = n / 5, dec = n % 5; bool neutral = inc == dec;
+                if (!hasPhys[i] && !hasSpec[i]) { natVerdict[i] = 2; natDetail[i] = getLanguage->Get("NATURE_ADVISOR_NO_ATTACK"); }
+                else if (!neutral && dec == 0 && hasPhys[i] && !hasSpec[i]) { natVerdict[i] = 1; natDetail[i] = Utils::Format(getLanguage->Get("NATURE_ADVISOR_LOWERS_ATK_FMT").c_str(), natureList[n].c_str()); }
+                else if (!neutral && dec == 3 && hasSpec[i] && !hasPhys[i]) { natVerdict[i] = 1; natDetail[i] = Utils::Format(getLanguage->Get("NATURE_ADVISOR_LOWERS_SPA_FMT").c_str(), natureList[n].c_str()); }
+                else if (!neutral && dec == 2) { natVerdict[i] = 1; natDetail[i] = Utils::Format(getLanguage->Get("NATURE_ADVISOR_LOWERS_SPE_FMT").c_str(), natureList[n].c_str()); }
+                else natVerdict[i] = 0;
+            }
+
+            // Tab 1 - IV: flags low IVs (<20) only in the stats the mon actually relies on (bulk stats
+            // always count; Attack/Sp. Atk only count if it has a real move of that category).
+            int ivVerdict[6] = {}; string ivDetail[6];
+            for (int i = 0; i < nParty; ++i) {
+                int iv[6]; for (int d = 0; d < 6; ++d) iv[d] = (partyIV32[i] >> (5 * inMap[d])) & 0x1F;
+                string low;
+                auto flag = [&](int val, const char *nm) { if (val < 20) low += (low.empty() ? "" : ", ") + string(nm); };
+                flag(iv[0], "HP"); flag(iv[2], "Def"); flag(iv[4], "SpD"); flag(iv[5], "Spe");
+                if (hasPhys[i]) flag(iv[1], "Atk");
+                if (hasSpec[i]) flag(iv[3], "SpA");
+                if (low.empty()) ivVerdict[i] = 0;
+                else { ivVerdict[i] = 1; ivDetail[i] = Utils::Format(getLanguage->Get("IV_ADVISOR_LOW_FMT").c_str(), low.c_str()); }
+            }
+
+            // Tab 2 - EV: original EV Advisor logic, unchanged.
+            int evVerdict[6] = {}; string evDetail[6];
+            for (int i = 0; i < nParty; ++i) {
                 int atkEV = partyEV[i][1], spaEV = partyEV[i][4];
-                if (!hasPhys && !hasSpec) { verdict[i] = 2; detail[i] = getLanguage->Get("EV_ADVISOR_NO_ATTACK"); }
-                else if (hasPhys && !hasSpec && spaEV > 4) { verdict[i] = 1; detail[i] = Utils::Format(getLanguage->Get("EV_ADVISOR_WASTED_SPA_FMT").c_str(), spaEV); }
-                else if (hasSpec && !hasPhys && atkEV > 4) { verdict[i] = 1; detail[i] = Utils::Format(getLanguage->Get("EV_ADVISOR_WASTED_ATK_FMT").c_str(), atkEV); }
-                else verdict[i] = 0;
+                if (!hasPhys[i] && !hasSpec[i]) { evVerdict[i] = 2; evDetail[i] = getLanguage->Get("EV_ADVISOR_NO_ATTACK"); }
+                else if (hasPhys[i] && !hasSpec[i] && spaEV > 4) { evVerdict[i] = 1; evDetail[i] = Utils::Format(getLanguage->Get("EV_ADVISOR_WASTED_SPA_FMT").c_str(), spaEV); }
+                else if (hasSpec[i] && !hasPhys[i] && atkEV > 4) { evVerdict[i] = 1; evDetail[i] = Utils::Format(getLanguage->Get("EV_ADVISOR_WASTED_ATK_FMT").c_str(), atkEV); }
+                else evVerdict[i] = 0;
             }
 
             auto wrapInto = [&](vector<pair<Color, string>> &out, Color c, const string &text, int maxW) {
@@ -2984,7 +3020,7 @@ namespace CTRPluginFramework {
                 if (!line.empty()) out.push_back({c, line});
             };
 
-            int scroll = 0;
+            int view = 0, scroll = 0;
             drainKeys();
             while (true) {
                 Controller::Update();
@@ -2994,11 +3030,23 @@ namespace CTRPluginFramework {
                     PluginMenu::Close(); break;
                 }
                 if (Controller::IsKeyPressed(Key::B)) break;
+                if (Controller::IsKeyPressed(Key::L)) { view = (view + 2) % 3; scroll = 0; }
+                if (Controller::IsKeyPressed(Key::R)) { view = (view + 1) % 3; scroll = 0; }
                 if (KeyRep(Key::Up)) scroll--;
                 if (KeyRep(Key::Down)) scroll++;
 
+                int *verdict = view == 0 ? natVerdict : (view == 1 ? ivVerdict : evVerdict);
+                string *detail = view == 0 ? natDetail : (view == 1 ? ivDetail : evDetail);
+                static const char *TITLEKEY[3] = {"MENU_NATURE_ADVISOR_TAB", "MENU_IV_ADVISOR_TAB", "MENU_EV_ADVISOR_TAB"};
+                static const char *OKKEY[3] = {"NATURE_ADVISOR_OK", "IV_ADVISOR_OK", "EV_ADVISOR_OK"};
+                static const char *TAGKEY[3][3] = {
+                    {"NATURE_ADVISOR_TAG_OK", "NATURE_ADVISOR_TAG_LOWERS", "EV_ADVISOR_TAG_SUPPORT"},
+                    {"IV_ADVISOR_TAG_OK", "IV_ADVISOR_TAG_LOW", "IV_ADVISOR_TAG_OK"},
+                    {"EV_ADVISOR_TAG_OK", "EV_ADVISOR_TAG_MISMATCH", "EV_ADVISOR_TAG_SUPPORT"}
+                };
+
                 top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
-                top.DrawSysfont(title << getLanguage->Get("MENU_EV_ADVISOR"), 42, 26, title);
+                top.DrawSysfont(title << getLanguage->Get(TITLEKEY[view]), 42, 26, title);
                 top.DrawRect(42, 37, 316, 1, title, true);
 
                 if (nParty == 0) {
@@ -3006,7 +3054,6 @@ namespace CTRPluginFramework {
                     top.DrawSysfont(txt << e, 42 + (316 - (int)OSD::GetTextWidth(true, e)) / 2, 110, txt);
                 } else {
                     const int rowH = 29, y0 = 39;
-                    static const char *TAGKEY[3] = {"EV_ADVISOR_TAG_OK", "EV_ADVISOR_TAG_MISMATCH", "EV_ADVISOR_TAG_SUPPORT"};
                     for (int i = 0; i < nParty; ++i) {
                         int ry = y0 + i * rowH;
                         if (icon[i].IsLoaded()) icon[i].Draw(top, 42, ry);
@@ -3014,13 +3061,15 @@ namespace CTRPluginFramework {
                         while (nm.size() > 1 && (int)OSD::GetTextWidth(true, nm) > 150) nm.pop_back();
                         top.DrawSysfont(txt << nm, 80, ry + 10, txt);
                         Color tc = verdict[i] == 0 ? good : (verdict[i] == 1 ? badColor : neutralColor);
-                        string tag = getLanguage->Get(TAGKEY[verdict[i]]);
+                        string tag = getLanguage->Get(TAGKEY[view][verdict[i]]);
                         top.DrawSysfont(tc << tag, 346 - (int)OSD::GetTextWidth(true, tag), ry + 10, tc);
                     }
                 }
 
                 bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
-                bot.DrawSysfont(title << getLanguage->Get("EV_ADVISOR_DETAILS_HDR"), 24, 24, title);
+                static const char *SHORTKEY[3] = {"NATURE_ADVISOR_SHORT", "IV_ADVISOR_SHORT", "EV_ADVISOR_SHORT"};
+                string hdr = Utils::Format(getLanguage->Get("EV_ADVISOR_DETAILS_HDR_FMT").c_str(), getLanguage->Get(SHORTKEY[view]).c_str());
+                bot.DrawSysfont(title << hdr, 24, 24, title);
                 bot.DrawRect(26, 40, 268, 1, border, true);
 
                 vector<pair<Color, string>> L;
@@ -3037,16 +3086,16 @@ namespace CTRPluginFramework {
                     }
                     if (!okNames.empty()) {
                         L.push_back({good, okNames});
-                        wrapInto(L, good, getLanguage->Get("EV_ADVISOR_OK"), 260);
+                        wrapInto(L, good, getLanguage->Get(OKKEY[view]), 260);
                     }
                 }
-                const int VIS = 10, lineH = 15, y0b = 48;
+                const int VIS = 9, y0b = 48;
                 int total = (int)L.size(), maxScroll = total > VIS ? total - VIS : 0;
                 if (scroll > maxScroll) scroll = maxScroll; if (scroll < 0) scroll = 0;
                 for (int i = 0; i < VIS; ++i) { int idx = scroll + i; if (idx >= total) break; bot.DrawSysfont(L[idx].first << L[idx].second, 30, y0b + i * 15, L[idx].first); }
                 if (scroll > 0) bot.DrawSysfont(sel << "\xE2\x96\xB2", 286, 44, sel);
-                if (scroll < maxScroll) bot.DrawSysfont(sel << "\xE2\x96\xBC", 286, 194, sel);
-                const char *h = "B exit";
+                if (scroll < maxScroll) bot.DrawSysfont(sel << "\xE2\x96\xBC", 286, 184, sel);
+                const char *h = "L/R tab   B exit";
                 bot.DrawSysfont(dim << h, 20 + (280 - (int)OSD::GetTextWidth(true, h)) / 2, 205, dim);
 
                 OSD::SwapBuffers();
@@ -3204,6 +3253,474 @@ namespace CTRPluginFramework {
                     const char *h = "X tab   B exit";
                     bot.DrawSysfont(dim << h, 20 + (280 - (int)OSD::GetTextWidth(true, h)) / 2, 205, dim);
                 }
+
+                OSD::SwapBuffers();
+            }
+        }
+
+        // ===== Breeding Compatibility Checker =====
+        // Read-only screen (Breeding folder): 3 tabs (X switches). Party scans the current party for
+        // compatible Day Care pairs (Gen 6's real rule: shares an egg group, or either side is Ditto;
+        // neither side is Undiscovered-only; and for two non-Ditto mons, opposite genders) and shows which
+        // egg moves the resulting baby could inherit from whichever parent's CURRENT moveset overlaps its
+        // egg-move list. Boxes does the same at the SPECIES level across every PC box (individual-instance
+        // pairs would explode combinatorially with duplicates, so this reports "do I own a compatible mate
+        // anywhere" per species pair, not one line per literal box slot pair). Check Two lets you test any
+        // two species via the visual Species Picker before you even own both - a species-level check only
+        // (it can't know an individual's gender), reporting whether the two species themselves CAN breed
+        // plus the full egg-move list either side could pass down. All tap targets live on the BOTTOM
+        // screen only - the 3DS top screen has no touch digitizer.
+        void BreedingCompatibility(MenuEntry *entry) {
+            (void)entry;
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+            const FwkSettings &st = FwkSettings::Get();
+            Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+            Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+            const Color good(0x1B, 0x7A, 0x3A), badColor(0xD8, 0x5A, 0x30), neutralColor(0x88, 0x87, 0x80);
+            Color dim = txt;
+            // Shared icon-row geometry (Party/Boxes top screen) - one place so the renderer and the
+            // scroll clamp never drift apart on how many rows actually fit.
+            const int BREEDING_ROW_H = 36, BREEDING_ROW_Y0 = 48, BREEDING_ROW_MAXY = 212;
+
+            u16 partySp[6] = {0, 0, 0, 0, 0, 0}; u16 partyMoves[6][4] = {}; u8 partyGender[6] = {}; int nParty = 0;
+            { u32 pbase = FindPartyBase();
+              for (int i = 0; i < 6 && pbase; ++i) {
+                  PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * 0x104, &pk) : GetPokemonRaw(pbase + i * 0x104, &pk);
+                  if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
+                      partySp[nParty] = pk.species;
+                      for (int m = 0; m < 4; ++m) partyMoves[nParty][m] = pk.move[m];
+                      int g = (pk.fatefulEncounterGenderForm >> 1) & 3; if (g > 2) g = 2;
+                      partyGender[nParty] = (u8)g;
+                      ++nParty;
+                  }
+              } }
+            Image icon[6];
+            for (int i = 0; i < nParty; ++i) { string p; BoxIconPath(p, partySp[i], false, "BoxIcons/"); icon[i].LoadFromFile(p); }
+
+            // Shared egg-group check: either side Undiscovered -> never breedable; Ditto pairs with
+            // anything else breedable (but not another Ditto); otherwise at least one group must match.
+            auto eggGroupsMatch = [&](u16 spA, u16 spB) -> bool {
+                int a1 = gEggGroups[spA - 1][0], a2 = gEggGroups[spA - 1][1];
+                int b1 = gEggGroups[spB - 1][0], b2 = gEggGroups[spB - 1][1];
+                if (a1 == 15 || b1 == 15) return false;
+                if (a1 == 13 && b1 == 13) return false;
+                if (a1 == 13 || b1 == 13) return true;
+                if (a1 == b1) return true;
+                if (a2 && a1 == b2) return true;
+                if (b2 && a2 == b1) return true;
+                if (a2 && b2 && a2 == b2) return true;
+                return false;
+            };
+            auto eggMoveNamesFor = [&](u16 childSp, const u16 donorMoves[4]) -> vector<string> {
+                vector<string> out;
+                for (int m = 0; m < 4; ++m) {
+                    u16 mv = donorMoves[m]; if (mv < 1 || mv > 621) continue;
+                    for (int k = 0; k < 18; ++k) if (gEggMoves[childSp - 1][k] == mv) { out.push_back(movesList[mv - 1]); break; }
+                }
+                return out;
+            };
+            auto fullEggMoveList = [&](u16 sp) -> vector<string> {
+                vector<string> out;
+                for (int k = 0; k < 18; ++k) { u16 mv = gEggMoves[sp - 1][k]; if (mv >= 1 && mv <= 621) out.push_back(movesList[mv - 1]); }
+                return out;
+            };
+            auto joinNames = [&](const vector<string> &v) -> string {
+                string s; for (size_t k = 0; k < v.size(); ++k) { if (k) s += ", "; s += v[k]; } return s;
+            };
+            // Short label for WHY a pair is compatible - "Ditto match" or the actual shared egg group name.
+            // Callers must have already confirmed eggGroupsMatch(spA, spB) is true.
+            auto sharedGroupLabel = [&](u16 spA, u16 spB) -> string {
+                int a1 = gEggGroups[spA - 1][0], a2 = gEggGroups[spA - 1][1];
+                int b1 = gEggGroups[spB - 1][0], b2 = gEggGroups[spB - 1][1];
+                if (a1 == 13 || b1 == 13) return getLanguage->Get("BREEDING_CHIP_DITTO");
+                int g = a1 == b1 ? a1 : (a2 && a1 == b2) ? a1 : (b2 && a2 == b1) ? a2 : (a2 && b2 && a2 == b2) ? a2 : 0;
+                return g >= 1 && g <= 15 ? string(g_eggGroupNames[g]) : string();
+            };
+
+            auto wrapInto = [&](vector<pair<Color, string>> &out, Color c, const string &text, int maxW) {
+                vector<string> words; string w;
+                for (size_t i = 0; i < text.size(); ++i) { char ch = text[i]; if (ch == ' ') { if (!w.empty()) { words.push_back(w); w.clear(); } } else w += ch; }
+                if (!w.empty()) words.push_back(w);
+                string line;
+                for (size_t k = 0; k < words.size(); ++k) {
+                    string cand = line.empty() ? words[k] : line + " " + words[k];
+                    if ((int)OSD::GetTextWidth(true, cand) > maxW && !line.empty()) { out.push_back({c, line}); line = words[k]; }
+                    else line = cand;
+                }
+                if (!line.empty()) out.push_back({c, line});
+            };
+
+            // Shared shape for both list tabs (Party and Boxes) - species-only, so the same icon-row
+            // renderer and pair-block renderer work for both regardless of where the pair came from.
+            struct DisplayPair { u16 spA, spB, childSp; vector<string> passable; };
+
+            // Party Suggestions: computed once up front - a read-only screen with no editor, the party
+            // can't change while this is open.
+            vector<DisplayPair> partyPairs;
+            for (int i = 0; i < nParty; ++i) for (int j = i + 1; j < nParty; ++j) {
+                u16 spA = partySp[i], spB = partySp[j];
+                if (!eggGroupsMatch(spA, spB)) continue;
+                bool dittoA = gEggGroups[spA - 1][0] == 13, dittoB = gEggGroups[spB - 1][0] == 13;
+                bool anyDitto = dittoA || dittoB;
+                int gA = partyGender[i], gB = partyGender[j];
+                if (!anyDitto) { if (gA == 2 || gB == 2) continue; if (gA == gB) continue; }
+                u16 childSp; int fatherIdx;
+                if (anyDitto) { childSp = dittoA ? spB : spA; fatherIdx = dittoA ? j : i; }
+                else { if (gA == 0) { childSp = spA; fatherIdx = i; } else { childSp = spB; fatherIdx = j; } }
+                partyPairs.push_back({spA, spB, childSp, eggMoveNamesFor(childSp, partyMoves[fatherIdx])});
+            }
+            // Pairs that can actually pass something down are more actionable than pure group-compatible
+            // ones - surface those first (stable_sort keeps species order within each group).
+            std::stable_sort(partyPairs.begin(), partyPairs.end(),
+                [](const DisplayPair &a, const DisplayPair &b) { return a.passable.size() > b.passable.size(); });
+
+            // Boxes: species-level scan across all 31 PC boxes (same addressing LivingDex uses). Individual
+            // box-slot pairs would explode combinatorially with duplicate species, so this tracks per-species
+            // "do I own a male/female/genderless copy anywhere" plus one sample moveset, then reports
+            // compatible SPECIES pairs (capped for the UI, not silently - a truncation note is shown).
+            static bool boxOwned[722]; static u8 boxGenderMask[722]; static u16 boxSampleMoves[722][4];
+            for (int sp = 0; sp <= 721; ++sp) { boxOwned[sp] = false; boxGenderMask[sp] = 0; }
+            { u32 boxBase = AutoGameSet((u32)0x8C861C8, (u32)0x8C9E134);
+              for (int b = 0; b < 31; ++b) for (int s = 0; s < 30; ++s) {
+                  PK6 pk; u32 addr = boxBase + b * 6960 + s * 0xE8;
+                  if (GetPokemon(addr, &pk) && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) {
+                      u16 sp = pk.species;
+                      if (!boxOwned[sp]) { boxOwned[sp] = true; for (int m = 0; m < 4; ++m) boxSampleMoves[sp][m] = pk.move[m]; }
+                      int g = (pk.fatefulEncounterGenderForm >> 1) & 3; if (g > 2) g = 2;
+                      boxGenderMask[sp] |= (u8)(1 << g);
+                  }
+              } }
+            vector<u16> ownedSpecies; for (u16 sp = 1; sp <= 721; ++sp) if (boxOwned[sp]) ownedSpecies.push_back(sp);
+            vector<DisplayPair> boxPairsList; const size_t BOX_PAIR_CAP = 60; int boxPairsTotal = 0;
+            for (size_t i = 0; i < ownedSpecies.size() && boxPairsList.size() < BOX_PAIR_CAP; ++i) {
+                for (size_t j = i + 1; j < ownedSpecies.size(); ++j) {
+                    u16 spA = ownedSpecies[i], spB = ownedSpecies[j];
+                    if (!eggGroupsMatch(spA, spB)) continue;
+                    bool dittoA = gEggGroups[spA - 1][0] == 13, dittoB = gEggGroups[spB - 1][0] == 13;
+                    bool anyDitto = dittoA || dittoB;
+                    if (!anyDitto) {
+                        bool aMaleBFemale = (boxGenderMask[spA] & 1) && (boxGenderMask[spB] & 2);
+                        bool aFemaleBMale = (boxGenderMask[spA] & 2) && (boxGenderMask[spB] & 1);
+                        if (!aMaleBFemale && !aFemaleBMale) continue;
+                    }
+                    ++boxPairsTotal;
+                    if (boxPairsList.size() >= BOX_PAIR_CAP) continue;
+                    u16 childSp = anyDitto ? (dittoA ? spB : spA) : spA; // spA is fine as default "mother" - either direction is a valid pairing
+                    const u16 *donorMoves = boxSampleMoves[childSp];
+                    boxPairsList.push_back({spA, spB, childSp, eggMoveNamesFor(childSp, donorMoves)});
+                }
+            }
+            std::stable_sort(boxPairsList.begin(), boxPairsList.end(),
+                [](const DisplayPair &a, const DisplayPair &b) { return a.passable.size() > b.passable.size(); });
+
+            // Egg Group filter (Party/Boxes only, toggled by Y) - reuses the same PFacet/PickerFilterHub
+            // machinery the Species Picker's Type/Gen/Category filter already uses, just with the 13 real
+            // egg groups as the single facet (skips index 0 "None"/13 Ditto/15 Undiscovered - none of
+            // those make sense as a filter target).
+            static const char *EGG_GROUP_OPTS[13] = {
+                g_eggGroupNames[1], g_eggGroupNames[2], g_eggGroupNames[3], g_eggGroupNames[4], g_eggGroupNames[5],
+                g_eggGroupNames[6], g_eggGroupNames[7], g_eggGroupNames[8], g_eggGroupNames[9], g_eggGroupNames[10],
+                g_eggGroupNames[11], g_eggGroupNames[12], g_eggGroupNames[14]
+            };
+            static const int EGG_GROUP_IDS[13] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14};
+            PFacet eggGroupFacet = {"Egg Group", EGG_GROUP_OPTS, 13, 0};
+            int eggGroupPanel = -1; // -1 = filter closed (normal list shown), >=0 = filter panel open
+            auto groupBit = [&](int g) -> u32 {
+                for (int i = 0; i < 13; ++i) if (EGG_GROUP_IDS[i] == g) return 1u << i;
+                return 0u;
+            };
+            auto passesGroupFilter = [&](u16 spA, u16 spB) -> bool {
+                auto bitsFor = [&](u16 sp) { return groupBit(gEggGroups[sp - 1][0]) | groupBit(gEggGroups[sp - 1][1]); };
+                return facetPass(eggGroupFacet.sel, bitsFor(spA)) || facetPass(eggGroupFacet.sel, bitsFor(spB));
+            };
+
+            // Small round-robin icon cache - Party/Boxes tabs scroll through arbitrary species (unlike the
+            // fixed 6-member party elsewhere), so icons load lazily per row and get reused across frames
+            // until evicted, rather than preloading everything up front.
+            const int ICON_CACHE_N = 12;
+            static u16 iconCacheSp[ICON_CACHE_N] = {};
+            static Image iconCache[ICON_CACHE_N];
+            static int iconCacheNext = 0;
+            auto getIcon = [&](u16 sp) -> Image& {
+                for (int k = 0; k < ICON_CACHE_N; ++k) if (iconCacheSp[k] == sp) return iconCache[k];
+                int slot = iconCacheNext; iconCacheNext = (iconCacheNext + 1) % ICON_CACHE_N;
+                iconCacheSp[slot] = sp; string p; BoxIconPath(p, sp, false, "BoxIcons/"); iconCache[slot].LoadFromFile(p);
+                return iconCache[slot];
+            };
+
+            // Icon-row renderer (top screen) shared by Party and Boxes - draws pairs starting at `scroll`
+            // (a PAIR index for these two tabs, not a line index) and a "pair X-Y of N" caption underneath.
+            // Single-line row: icon A + icon B + arrow + Baby icon, egg moves in the middle (up to 2 short
+            // lines, truncated with "..." past that), and a "why compatible" chip + N/M fraction on the
+            // right - all in the same row height as a plain icon-only row (the free space to the right of
+            // 3 icons in a 316px-wide window is what gets filled, not a second line per pair).
+            auto drawPairIconsTop = [&](vector<DisplayPair> &list, int scrollIdx) {
+                const int rowH = BREEDING_ROW_H, y0 = BREEDING_ROW_Y0, maxY = BREEDING_ROW_MAXY;
+                int maxRows = (maxY - y0) / rowH; if (maxRows < 1) maxRows = 1;
+                int shown = 0;
+                for (int idx = scrollIdx; idx < (int)list.size() && shown < maxRows; ++idx, ++shown) {
+                    const DisplayPair &pr = list[idx];
+                    int ry = y0 + shown * rowH;
+                    Image &icA = getIcon(pr.spA); Image &icB = getIcon(pr.spB); Image &icBaby = getIcon(pr.childSp);
+                    int x = 44;
+                    if (icA.IsLoaded()) icA.Draw(top, x, ry); x += 34;
+                    top.DrawSysfont(txt << "+", x, ry + 10, txt); x += 12;
+                    if (icB.IsLoaded()) icB.Draw(top, x, ry); x += 34;
+                    top.DrawSysfont(title << "\xE2\x86\x92", x, ry + 10, title); x += 14;
+                    if (icBaby.IsLoaded()) icBaby.Draw(top, x, ry); x += 34;
+                    int textX = x;
+
+                    vector<pair<Color, string>> mvLines;
+                    if (pr.passable.empty()) mvLines.push_back({neutralColor, "-"});
+                    else wrapInto(mvLines, good, joinNames(pr.passable), 84);
+                    for (size_t li = 0; li < mvLines.size() && li < 2; ++li) {
+                        string t = mvLines[li].second;
+                        if (li == 1 && mvLines.size() > 2) {
+                            while (t.size() > 1 && (int)OSD::GetTextWidth(true, t + "...") > 84) t.pop_back();
+                            t += "...";
+                        }
+                        top.DrawSysfont(mvLines[li].first << t, textX, ry + (int)li * 12, mvLines[li].first);
+                    }
+
+                    string chip = sharedGroupLabel(pr.spA, pr.spB);
+                    top.DrawSysfont(title << chip, 356 - (int)OSD::GetTextWidth(true, chip), ry, title);
+                    int totalMoves = (int)fullEggMoveList(pr.childSp).size();
+                    string frac = totalMoves > 0
+                        ? Utils::Format(getLanguage->Get("BREEDING_MOVE_FRACTION_FMT").c_str(), (int)pr.passable.size(), totalMoves)
+                        : string("-");
+                    Color fc = pr.passable.empty() ? neutralColor : good;
+                    top.DrawSysfont(fc << frac, 356 - (int)OSD::GetTextWidth(true, frac), ry + 14, fc);
+                }
+                if (!list.empty()) {
+                    string range = Utils::Format(getLanguage->Get("BREEDING_PAIR_RANGE_FMT").c_str(), scrollIdx + 1, scrollIdx + shown, (int)list.size());
+                    top.DrawSysfont(dim << range, 42 + (316 - (int)OSD::GetTextWidth(true, range)) / 2, y0 + shown * rowH + 4, dim);
+                }
+            };
+            // Detail-block renderer (bottom screen) shared by Party and Boxes - draws the SAME pairs, from
+            // the SAME `scroll` index, so both screens always advance together one pair at a time.
+            auto drawPairBlocksBottom = [&](vector<DisplayPair> &list, int scrollIdx, int listY0, const string &extraNote) -> bool {
+                int y = listY0; size_t idx = (size_t)scrollIdx;
+                for (; idx < list.size(); ++idx) {
+                    if (y > 195) break;
+                    const DisplayPair &pr = list[idx];
+                    string names = string(speciesList[pr.spA - 1]) + " + " + speciesList[pr.spB - 1];
+                    bot.DrawSysfont(title << names, 30, y, title); y += 15;
+                    string baby = Utils::Format(getLanguage->Get("BREEDING_BABY_FMT").c_str(), speciesList[pr.childSp - 1]);
+                    bot.DrawSysfont(dim << baby, 30, y, dim); y += 15;
+                    vector<pair<Color, string>> mv;
+                    if (pr.passable.empty()) wrapInto(mv, neutralColor, getLanguage->Get("BREEDING_NO_EGG_MOVES"), 260);
+                    else wrapInto(mv, good, Utils::Format(getLanguage->Get("BREEDING_PASSABLE_FMT").c_str(), joinNames(pr.passable).c_str()), 260);
+                    for (auto &ln : mv) { if (y > 195) break; bot.DrawSysfont(ln.first << ln.second, 30, y, ln.first); y += 15; }
+                    y += 15;
+                }
+                if (idx >= list.size() && !extraNote.empty() && y <= 195) {
+                    vector<pair<Color, string>> mv; wrapInto(mv, neutralColor, extraNote, 260);
+                    for (auto &ln : mv) { if (y > 195) break; bot.DrawSysfont(ln.first << ln.second, 30, y, ln.first); y += 15; }
+                }
+                if (scrollIdx > 0) bot.DrawSysfont(sel << "\xE2\x96\xB2", 286, listY0 - 2, sel);
+                bool moreBelow = idx < list.size();
+                if (moreBelow) bot.DrawSysfont(sel << "\xE2\x96\xBC", 286, 190, sel);
+                return moreBelow;
+            };
+            auto drawCenteredMsg = [&](const Screen &scr, int cx, int cw, int y, Color c, const string &text) {
+                scr.DrawSysfont(c << text, cx + (cw - (int)OSD::GetTextWidth(true, text)) / 2, y, c);
+            };
+
+            int view = 0, scroll = 0;
+            static u16 pickA = 0, pickB = 0; // persists across openings, like other pickers' cursor state
+            Image spriteA, spriteB, spriteBaby; int spriteAKey = -1, spriteBKey = -1, spriteBabyKey = -1;
+            bool filterOpen = false; // Y toggles this; jumps straight to the (only) chip subview, skipping
+                                      // PickerFilterHub's own multi-facet hub listing since we have just 1 facet.
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
+            drainKeys();
+            while (true) {
+                Controller::Update();
+                if (System::IsSleeping()) break;
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close(); break;
+                }
+                if (Controller::IsKeyPressed(Key::B)) { if (filterOpen) { filterOpen = false; eggGroupPanel = 0; } else break; }
+                if (Controller::IsKeyPressed(Key::X) && !filterOpen) { view = (view + 1) % 3; scroll = 0; }
+                if (Controller::IsKeyPressed(Key::Y) && (view == 0 || view == 1)) { filterOpen = !filterOpen; eggGroupPanel = 0; }
+                if (!filterOpen && KeyRep(Key::Up)) scroll--;
+                if (!filterOpen && KeyRep(Key::Down)) scroll++;
+
+                // Party/Boxes scroll is a PAIR index (icon-row count on top), not a line index. Filtered by
+                // the Egg Group facet (Y) before anything else touches these lists this frame.
+                vector<DisplayPair> partyPairsShown, boxPairsListShown;
+                for (auto &pr : partyPairs) if (passesGroupFilter(pr.spA, pr.spB)) partyPairsShown.push_back(pr);
+                for (auto &pr : boxPairsList) if (passesGroupFilter(pr.spA, pr.spB)) boxPairsListShown.push_back(pr);
+                if (!filterOpen && (view == 0 || view == 1)) {
+                    vector<DisplayPair> &list = (view == 0) ? partyPairsShown : boxPairsListShown;
+                    int visibleRows = (BREEDING_ROW_MAXY - BREEDING_ROW_Y0) / BREEDING_ROW_H; if (visibleRows < 1) visibleRows = 1;
+                    int totalP = (int)list.size();
+                    int maxScrollP = totalP > visibleRows ? totalP - visibleRows : 0;
+                    if (scroll > maxScrollP) scroll = maxScrollP;
+                }
+                if (scroll < 0) scroll = 0;
+
+                bool down = Touch::IsDown(); UIntVector tp = down ? Touch::GetPosition() : lastPos; if (down) lastPos = tp;
+                bool tap = armed && !down && wasDown; if (!down) armed = true; wasDown = down;
+
+                // Tap targets MUST live on the bottom screen - the 3DS top screen has no touch digitizer.
+                if (view == 2 && tap && inBox(lastPos, 26, 54, 268, 24)) {
+                    u16 pick = SpeciesPicker(pickA); if (pick) pickA = pick;
+                    drainKeys(); armed = false; wasDown = false; scroll = 0;
+                }
+                if (view == 2 && tap && inBox(lastPos, 26, 82, 268, 24)) {
+                    u16 pick = SpeciesPicker(pickB); if (pick) pickB = pick;
+                    drainKeys(); armed = false; wasDown = false; scroll = 0;
+                }
+
+                top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("MENU_BREEDING_CHECKER"), 42, 26, title);
+                top.DrawRect(42, 44, 316, 1, title, true);
+
+                if (view == 0) {
+                    if (nParty < 2) drawCenteredMsg(top, 42, 316, 110, txt, getLanguage->Get("BREEDING_NEED_TWO"));
+                    else if (partyPairsShown.empty()) drawCenteredMsg(top, 42, 316, 110, neutralColor, getLanguage->Get("BREEDING_NO_PAIRS"));
+                    else drawPairIconsTop(partyPairsShown, scroll);
+                } else if (view == 1) {
+                    if (ownedSpecies.empty()) drawCenteredMsg(top, 42, 316, 110, txt, getLanguage->Get("BREEDING_NO_BOXED"));
+                    else if (boxPairsListShown.empty()) drawCenteredMsg(top, 42, 316, 110, neutralColor, getLanguage->Get("BREEDING_NO_PAIRS"));
+                    else drawPairIconsTop(boxPairsListShown, scroll);
+                } else {
+                    // Bigger side-by-side sprites (reusing the same Assets/Spawner/normal/<dex>.bmp art the
+                    // Species Picker preview / Living Dex card already use - no new assets) plus the third
+                    // "what actually hatches" slot, so the whole compatibility question reads as one picture:
+                    // A + B -> Baby (or a plain "X" when they can't breed at all).
+                    bool bothChosen = pickA && pickB;
+                    bool compat = bothChosen && eggGroupsMatch(pickA, pickB);
+                    u16 babySp = 0;
+                    if (compat) {
+                        bool dittoA = gEggGroups[pickA - 1][0] == 13, dittoB = gEggGroups[pickB - 1][0] == 13;
+                        babySp = dittoA ? pickB : pickA; // spA is the default "mother" - matches Party/Boxes' own convention
+                    }
+                    const int SZ = 80, boxY = 56;
+                    auto drawSlot = [&](int cx, u16 sp, Image &spr, int &sprKey, bool showX) {
+                        top.DrawRect(cx, boxY, SZ, SZ, sp ? Color::White : bg2, true);
+                        top.DrawRect(cx, boxY, SZ, SZ, showX ? badColor : border, false);
+                        if (showX) {
+                            string x = "X";
+                            top.DrawSysfont(badColor << x, cx + (SZ - (int)OSD::GetTextWidth(true, x)) / 2, boxY + SZ / 2 - 8, badColor);
+                        } else if (sp) {
+                            if (sprKey != sp) { sprKey = sp; string p = string("Assets/Spawner/normal/") + Utils::Format("%03d", sp) + ".bmp"; spr.LoadFromFile(p); }
+                            if (spr.IsLoaded()) { int sw = spr.Width(), sh = spr.Height(); spr.Draw(top, cx + (SZ - sw) / 2, boxY + (SZ - sh) / 2); }
+                        } else {
+                            string q = "?";
+                            top.DrawSysfont(dim << q, cx + (SZ - (int)OSD::GetTextWidth(true, q)) / 2, boxY + SZ / 2 - 8, dim);
+                        }
+                        string nm = showX ? string("-") : (sp ? speciesList[sp - 1] : getLanguage->Get("BREEDING_NOT_CHOSEN"));
+                        Color nc = showX ? badColor : (sp ? txt : dim);
+                        while (nm.size() > 1 && (int)OSD::GetTextWidth(true, nm) > SZ + 10) nm.pop_back();
+                        top.DrawSysfont(nc << nm, cx + (SZ - (int)OSD::GetTextWidth(true, nm)) / 2, boxY + SZ + 8, nc);
+                    };
+                    const int xA = 44, xB = 140, xBaby = 236;
+                    drawSlot(xA, pickA, spriteA, spriteAKey, false);
+                    top.DrawSysfont(txt << "+", xA + SZ + 4, boxY + SZ / 2 - 8, txt);
+                    drawSlot(xB, pickB, spriteB, spriteBKey, false);
+                    top.DrawSysfont(title << "\xE2\x86\x92", xB + SZ + 4, boxY + SZ / 2 - 8, title);
+                    drawSlot(xBaby, babySp, spriteBaby, spriteBabyKey, bothChosen && !compat);
+
+                    if (bothChosen) {
+                        string verdict = compat ? getLanguage->Get("BREEDING_COMPATIBLE") : getLanguage->Get("BREEDING_NOT_COMPATIBLE");
+                        Color vc = compat ? good : badColor;
+                        string line = compat ? sharedGroupLabel(pickA, pickB) + "   " + verdict : verdict;
+                        top.DrawSysfont(vc << line, 42 + (316 - (int)OSD::GetTextWidth(true, line)) / 2, boxY + SZ + 32, vc);
+                    }
+                }
+
+                if (filterOpen) {
+                    PickerFilterHub(bot, &eggGroupFacet, 1, eggGroupPanel, tap, lastPos);
+                    if (eggGroupPanel < 0) { filterOpen = false; eggGroupPanel = 0; } // "< Back" chip closes it too
+                    OSD::SwapBuffers();
+                    continue;
+                }
+
+                bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
+                auto tabBtn = [&](int x, int w, const string &label, bool active) {
+                    bot.DrawRect(x, 24, w, 22, active ? sel : bg2, true); bot.DrawRect(x, 24, w, 22, active ? title : border, false);
+                    int tw = (int)OSD::GetTextWidth(true, label);
+                    bot.DrawSysfont((active ? bg : txt) << label, x + (w - tw) / 2, 27, txt);
+                };
+                tabBtn(26, 82, getLanguage->Get("BREEDING_TAB_PARTY"), view == 0);
+                tabBtn(112, 82, getLanguage->Get("BREEDING_TAB_BOXES"), view == 1);
+                tabBtn(198, 82, getLanguage->Get("BREEDING_TAB_CHECK_TWO"), view == 2);
+                bot.DrawRect(26, 50, 268, 1, border, true);
+
+                int listY0 = 56;
+                if (view == 2) {
+                    // The actual tap targets - drawn here on the BOTTOM screen (touch-capable), not the top.
+                    for (int s = 0; s < 2; ++s) {
+                        int y = s == 0 ? 54 : 82; u16 sp = s == 0 ? pickA : pickB;
+                        bot.DrawRect(26, y, 268, 24, bg2, true); bot.DrawRect(26, y, 268, 24, border, false);
+                        string label = (s == 0 ? getLanguage->Get("BREEDING_SPECIES_A_FMT") : getLanguage->Get("BREEDING_SPECIES_B_FMT"));
+                        string val = sp ? speciesList[sp - 1] : getLanguage->Get("BREEDING_TAP_TO_CHOOSE");
+                        bot.DrawSysfont(txt << Utils::Format(label.c_str(), val.c_str()), 30, y + 6, txt);
+                    }
+                    bot.DrawRect(26, 110, 268, 1, border, true);
+                    listY0 = 114;
+                }
+
+                if (view == 0) {
+                    if (nParty < 2) drawCenteredMsg(bot, 20, 280, listY0, txt, getLanguage->Get("BREEDING_NEED_TWO"));
+                    else if (partyPairsShown.empty()) drawCenteredMsg(bot, 20, 280, listY0, dim, getLanguage->Get("BREEDING_NO_PAIRS"));
+                    else drawPairBlocksBottom(partyPairsShown, scroll, listY0, "");
+                } else if (view == 1) {
+                    if (ownedSpecies.empty()) drawCenteredMsg(bot, 20, 280, listY0, dim, getLanguage->Get("BREEDING_NO_BOXED"));
+                    else if (boxPairsListShown.empty()) drawCenteredMsg(bot, 20, 280, listY0, dim, getLanguage->Get("BREEDING_NO_PAIRS"));
+                    else {
+                        string extra = boxPairsTotal > (int)boxPairsList.size()
+                            ? Utils::Format(getLanguage->Get("BREEDING_MORE_NOT_SHOWN_FMT").c_str(), boxPairsTotal - (int)boxPairsList.size())
+                            : string();
+                        drawPairBlocksBottom(boxPairsListShown, scroll, listY0, extra);
+                    }
+                } else {
+                    vector<pair<Color, string>> L;
+                    if (!pickA || !pickB) {
+                        wrapInto(L, dim, getLanguage->Get("BREEDING_PICK_BOTH"), 260);
+                    } else {
+                        bool compat = eggGroupsMatch(pickA, pickB);
+                        if (!compat) {
+                            Color c = badColor;
+                            bool undiscovered = gEggGroups[pickA - 1][0] == 15 || gEggGroups[pickB - 1][0] == 15;
+                            L.push_back({c, getLanguage->Get("BREEDING_NOT_COMPATIBLE")});
+                            wrapInto(L, dim, getLanguage->Get(undiscovered ? "BREEDING_REASON_UNDISCOVERED" : "BREEDING_REASON_NO_GROUP"), 260);
+                        } else {
+                            L.push_back({good, getLanguage->Get("BREEDING_COMPATIBLE")});
+                            bool dittoA = gEggGroups[pickA - 1][0] == 13, dittoB = gEggGroups[pickB - 1][0] == 13;
+                            if (dittoA || dittoB) {
+                                u16 childSp = dittoA ? pickB : pickA;
+                                wrapInto(L, dim, Utils::Format(getLanguage->Get("BREEDING_BABY_FMT").c_str(), speciesList[childSp - 1]).c_str(), 260);
+                                L.push_back({txt, ""});
+                                vector<string> el = fullEggMoveList(childSp);
+                                L.push_back({title, getLanguage->Get("BREEDING_EGG_MOVE_LIST_HDR")});
+                                if (el.empty()) wrapInto(L, neutralColor, getLanguage->Get("BREEDING_NO_EGG_MOVES"), 260);
+                                else wrapInto(L, txt, joinNames(el), 260);
+                            } else {
+                                L.push_back({txt, ""});
+                                vector<string> elA = fullEggMoveList(pickA), elB = fullEggMoveList(pickB);
+                                L.push_back({title, Utils::Format(getLanguage->Get("BREEDING_IF_MOTHER_FMT").c_str(), speciesList[pickA - 1]).c_str()});
+                                if (elA.empty()) wrapInto(L, neutralColor, getLanguage->Get("BREEDING_NO_EGG_MOVES"), 260);
+                                else wrapInto(L, txt, joinNames(elA), 260);
+                                L.push_back({txt, ""});
+                                L.push_back({title, Utils::Format(getLanguage->Get("BREEDING_IF_MOTHER_FMT").c_str(), speciesList[pickB - 1]).c_str()});
+                                if (elB.empty()) wrapInto(L, neutralColor, getLanguage->Get("BREEDING_NO_EGG_MOVES"), 260);
+                                else wrapInto(L, txt, joinNames(elB), 260);
+                            }
+                        }
+                    }
+                    int visSpace = 195 - listY0; const int lineH = 15; int VIS = visSpace / lineH;
+                    int total = (int)L.size(), maxScroll = total > VIS ? total - VIS : 0;
+                    if (scroll > maxScroll) scroll = maxScroll; if (scroll < 0) scroll = 0;
+                    for (int i = 0; i < VIS; ++i) { int idx = scroll + i; if (idx >= total) break; bot.DrawSysfont(L[idx].first << L[idx].second, 30, listY0 + i * lineH, L[idx].first); }
+                    if (scroll > 0) bot.DrawSysfont(sel << "\xE2\x96\xB2", 286, listY0 - 2, sel);
+                    if (scroll < maxScroll) bot.DrawSysfont(sel << "\xE2\x96\xBC", 286, 190, sel);
+                }
+                const char *h = (view == 2) ? "X tab   B exit" : "X tab  Y filter  B exit";
+                bot.DrawSysfont(dim << h, 20 + (280 - (int)OSD::GetTextWidth(true, h)) / 2, 205, dim);
 
                 OSD::SwapBuffers();
             }

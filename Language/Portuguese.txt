@@ -1284,18 +1284,36 @@ TEAM_COVERAGE_CART :: Carrinho
 TEAM_COVERAGE_CART_HDR :: KIT GERAL DO TIME
 TEAM_COVERAGE_CART_SUB :: Calibrado pelo nivel e pelo perfil de stats do seu time - nao e especifico de um adversario.
 TEAM_COVERAGE_SUGGESTED_CART :: Carrinho Sugerido
-MENU_EV_ADVISOR :: Conselheiro de EV
-FAV_EV_ADVISOR :: Cons. de EV
-NOTE_EV_ADVISOR :: Uma checagem só de leitura do investimento de EV do seu time: sinaliza um Pokémon cujos EVs em Ataque ou Ataque Especial não batem com os golpes que ele REALMENTE conhece (tipo EVs em Ataque Especial num Pokémon que só tem golpes Físicos), e sinaliza separadamente quem não tem golpe de ataque nenhum (os EVs de Ataque/Ataque Especial dele não servem pra nada).\n\nCruzeta Cima/Baixo rola os detalhes na tela de baixo.\n\nAtacantes mistos (conhecem golpes Físicos e Especiais) ficam de fora - não dá pra dar um veredito claro pra eles. Isso só confere se a categoria bate, não se a distribuição total é ótima.
+MENU_NATURE_IV_EV_ADVISOR :: Conselheiro de Natureza / IV / EV
+FAV_EV_ADVISOR :: Nat./IV/EV
+NOTE_NATURE_IV_EV_ADVISOR :: Uma checagem so de leitura do seu time, em 3 abas (L/R alterna):\n\nNatureza sinaliza uma Natureza que DIMINUI o status que o Pokemon realmente usa pra atacar (ou Velocidade, que importa de qualquer jeito). IV sinaliza IVs baixas (abaixo de 20) nos status que ele realmente usa. EV sinaliza investimento de EV numa categoria que ele nao usa pra atacar (tipo EVs em Ataque Especial num Pokemon que so tem golpes Fisicos).\n\nCruzeta Cima/Baixo rola os detalhes na tela de baixo. Atacantes mistos (conhecem golpes Fisicos e Especiais) ficam de fora nas abas Natureza/EV - nao da pra dar um veredito claro pra eles.
 EV_ADVISOR_NO_PARTY :: Nenhum Pokemon encontrado no seu time.
 EV_ADVISOR_TAG_OK :: OK
 EV_ADVISOR_TAG_MISMATCH :: Descompasso
 EV_ADVISOR_TAG_SUPPORT :: Suporte
 EV_ADVISOR_DETAILS_HDR :: DETALHES
+EV_ADVISOR_DETAILS_HDR_FMT :: DETALHES - %s
+NATURE_ADVISOR_SHORT :: Natureza
+IV_ADVISOR_SHORT :: IVs
+EV_ADVISOR_SHORT :: EVs
 EV_ADVISOR_NO_ATTACK :: Sem golpes de ataque - os EVs de Ataque e Ataque Especial nao vao ajudar na luta.
 EV_ADVISOR_WASTED_SPA_FMT :: %d EVs em Ataque Especial estao desperdicados - todos os golpes dele sao Fisicos.
 EV_ADVISOR_WASTED_ATK_FMT :: %d EVs em Ataque estao desperdicados - todos os golpes dele sao Especiais.
 EV_ADVISOR_OK :: Os EVs batem com as categorias dos golpes deles - nao precisa mudar nada.
+MENU_NATURE_ADVISOR_TAB :: Conselheiro de Natureza
+MENU_IV_ADVISOR_TAB :: Conselheiro de IV
+MENU_EV_ADVISOR_TAB :: Conselheiro de EV
+NATURE_ADVISOR_NO_ATTACK :: Sem golpes de ataque - o efeito da Natureza em Ataque/Ataque Especial nao importa aqui.
+NATURE_ADVISOR_LOWERS_ATK_FMT :: %s diminui o Ataque - todos os golpes dele sao Fisicos.
+NATURE_ADVISOR_LOWERS_SPA_FMT :: %s diminui o Ataque Especial - todos os golpes dele sao Especiais.
+NATURE_ADVISOR_LOWERS_SPE_FMT :: %s diminui a Velocidade, o que deixa ele mais lento de qualquer jeito.
+NATURE_ADVISOR_TAG_OK :: OK
+NATURE_ADVISOR_TAG_LOWERS :: Diminui
+NATURE_ADVISOR_OK :: A Natureza nao esta atrapalhando esses.
+IV_ADVISOR_LOW_FMT :: IVs baixas em: %s
+IV_ADVISOR_TAG_OK :: OK
+IV_ADVISOR_TAG_LOW :: IVs baixas
+IV_ADVISOR_OK :: As IVs estao solidas nos status usados.
 MENU_HELD_ITEM_ADVISOR :: Conselheiro de Itens
 FAV_HELD_ITEM_ADVISOR :: Cons. de Itens
 NOTE_HELD_ITEM_ADVISOR :: Mostra o que seu time esta segurando agora (ou Nenhum), depois sugere um item pra quem tiver as maos vazias com base num perfil simples de stats - uma stat claramente melhor puxa pra um item Choice, um atacante rapido leva Life Orb, muita resistencia leva Restos, e sem nada de destaque a sugestao padrao e uma Baga Sitrus segura.\n\nX alterna entre No Bau (voce ja tem o item sugerido - va equipar no seletor de item do PC Box ++) e A Conseguir (voce ainda nao tem - Carrinho Sugerido abre o PokeMart Anywhere com esses itens ja preenchidos).\n\nE so uma sugestao baseada em stats, nao em golpes, habilidades ou sua estrategia de verdade.
@@ -1312,3 +1330,34 @@ HELD_ADVISOR_REASON_SITRUS :: Nenhuma stat se destaca - uma escolha segura e ger
 HELD_ADVISOR_NONE_IN_BAG :: Nenhuma sugestao bate com o que tem no seu bau agora.
 HELD_ADVISOR_NONE_TO_GET :: Voce ja tem tudo que foi sugerido, ou ninguem precisa de item.
 HELD_ADVISOR_SUGGESTED_CART :: Carrinho Sugerido
+MENU_BREEDING_CHECKER :: Compatibilidade de Cria
+FAV_BREEDING_CHECKER :: Compat. de Cria
+NOTE_BREEDING_CHECKER :: Tres abas (X alterna):\n\nTime escaneia seu time atual em busca de pares compativeis na Creche (compartilham um grupo de ovo ou um dos dois e Ditto, sexos opostos) e mostra os golpes de ovo que o filhote poderia herdar dos golpes ATUAIS de um dos pais.\n\nCaixas faz o mesmo em todas as suas caixas do PC, no nivel de especie (assim os duplicados nao lotam a lista).\n\nTestar Dois deixa voce testar QUALQUER par de especies com o Seletor de Especies visual, ate mesmo umas que voce ainda nao tem - toque numa caixa na tela de baixo pra escolher. Isso e so uma checagem no nivel de especie (nao da pra saber o sexo de um individuo), entao so informa se as duas especies conseguem cruzar, mais a lista completa de golpes de ovo que cada lado poderia passar.
+BREEDING_NO_PARTY :: Nenhum Pokemon encontrado no seu time.
+BREEDING_PAIRS_FOUND_FMT :: %d par(es) compativel(is) encontrado(s)
+BREEDING_MOVES_COUNT_FMT :: %d golpe(s)
+BREEDING_CHIP_DITTO :: Ditto
+BREEDING_MOVE_FRACTION_FMT :: %d/%d golpes
+BREEDING_PAIR_RANGE_FMT :: par %d-%d de %d
+BREEDING_TAB_PARTY :: Time
+BREEDING_TAB_BOXES :: Caixas
+BREEDING_TAB_CHECK_TWO :: Testar Dois
+BREEDING_TAP_TO_CHOOSE :: Toque pra escolher
+BREEDING_NOT_CHOSEN :: Ainda nao escolhido
+BREEDING_SPECIES_A_FMT :: Especie A: %s
+BREEDING_SPECIES_B_FMT :: Especie B: %s
+BREEDING_NEED_TWO :: Precisa de pelo menos 2 Pokemon no seu time.
+BREEDING_NO_BOXED :: Nenhum Pokemon encontrado nas suas caixas do PC.
+BREEDING_SPECIES_OWNED_FMT :: %d especies na suas caixas
+BREEDING_MORE_NOT_SHOWN_FMT :: +%d par(es) nao mostrado(s)
+BREEDING_NO_PAIRS :: Nenhum par compativel encontrado.
+BREEDING_BABY_FMT :: Filhote: %s
+BREEDING_NO_EGG_MOVES :: Nenhum golpe de ovo pra herdar agora.
+BREEDING_PASSABLE_FMT :: Poderia passar: %s
+BREEDING_PICK_BOTH :: Toque nas duas caixas acima pra escolher duas especies.
+BREEDING_NOT_COMPATIBLE :: Nao compativel
+BREEDING_REASON_UNDISCOVERED :: Um dos dois nao consegue cruzar de jeito nenhum (grupo de ovo Nao Descoberto).
+BREEDING_REASON_NO_GROUP :: Eles nao compartilham um grupo de ovo.
+BREEDING_COMPATIBLE :: Compativel
+BREEDING_EGG_MOVE_LIST_HDR :: GOLPES DE OVO QUE ELE PODE APRENDER
+BREEDING_IF_MOTHER_FMT :: Se %s for a mae:

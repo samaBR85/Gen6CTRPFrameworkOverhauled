@@ -1283,18 +1283,36 @@ TEAM_COVERAGE_CART :: Carrito
 TEAM_COVERAGE_CART_HDR :: KIT GENERAL DEL EQUIPO
 TEAM_COVERAGE_CART_SUB :: Calibrado segun el nivel y el perfil de stats de tu equipo - no es especifico de un rival.
 TEAM_COVERAGE_SUGGESTED_CART :: Carrito Sugerido
-MENU_EV_ADVISOR :: Asesor de EVs
-FAV_EV_ADVISOR :: Asesor EVs
-NOTE_EV_ADVISOR :: Una revision de solo lectura de la inversion de EVs de tu equipo: marca a un Pokemon cuyos EVs en Ataque o Ataque Especial no coinciden con los movimientos que REALMENTE conoce (por ejemplo EVs en Ataque Especial en uno que solo tiene movimientos Fisicos), y marca por separado a quien no tiene movimientos de ataque (sus EVs de Ataque/Ataque Especial no sirven de nada).\n\nCruceta Arriba/Abajo desplaza los detalles en la pantalla inferior.\n\nLos atacantes mixtos (conocen movimientos Fisicos y Especiales) quedan fuera - no hay un veredicto claro para ellos. Esto solo revisa que la categoria coincida, no si la distribucion total es optima.
+MENU_NATURE_IV_EV_ADVISOR :: Asesor de Naturaleza / IV / EV
+FAV_EV_ADVISOR :: Nat./IV/EV
+NOTE_NATURE_IV_EV_ADVISOR :: Una revision de solo lectura de tu equipo, en 3 pestanas (L/R cambia):\n\nNaturaleza marca una Naturaleza que BAJA la estadistica con la que el Pokemon realmente ataca (o Velocidad, que importa de todas formas). IV marca IVs bajas (menos de 20) en las estadisticas que realmente usa. EV marca inversion de EVs en una categoria que no usa para atacar (por ejemplo EVs en Ataque Especial en uno que solo tiene movimientos Fisicos).\n\nCruceta Arriba/Abajo desplaza los detalles en la pantalla inferior. Los atacantes mixtos (conocen movimientos Fisicos y Especiales) quedan fuera en Naturaleza/EV - no hay un veredicto claro para ellos.
 EV_ADVISOR_NO_PARTY :: No se encontro ningun Pokemon en tu equipo.
 EV_ADVISOR_TAG_OK :: OK
 EV_ADVISOR_TAG_MISMATCH :: Descuadre
 EV_ADVISOR_TAG_SUPPORT :: Soporte
 EV_ADVISOR_DETAILS_HDR :: DETALLES
+EV_ADVISOR_DETAILS_HDR_FMT :: DETALLES - %s
+NATURE_ADVISOR_SHORT :: Naturaleza
+IV_ADVISOR_SHORT :: IVs
+EV_ADVISOR_SHORT :: EVs
 EV_ADVISOR_NO_ATTACK :: Sin movimientos de ataque - los EVs de Ataque y Ataque Especial no le ayudaran a luchar.
 EV_ADVISOR_WASTED_SPA_FMT :: %d EVs en Ataque Especial estan desperdiciados - todos sus movimientos son Fisicos.
 EV_ADVISOR_WASTED_ATK_FMT :: %d EVs en Ataque estan desperdiciados - todos sus movimientos son Especiales.
 EV_ADVISOR_OK :: Los EVs coinciden con las categorias de sus movimientos - no hace falta cambiar nada.
+MENU_NATURE_ADVISOR_TAB :: Asesor de Naturaleza
+MENU_IV_ADVISOR_TAB :: Asesor de IV
+MENU_EV_ADVISOR_TAB :: Asesor de EV
+NATURE_ADVISOR_NO_ATTACK :: Sin movimientos de ataque - el efecto de la Naturaleza en Ataque/Ataque Especial no importa aqui.
+NATURE_ADVISOR_LOWERS_ATK_FMT :: %s baja el Ataque - todos sus movimientos son Fisicos.
+NATURE_ADVISOR_LOWERS_SPA_FMT :: %s baja el Ataque Especial - todos sus movimientos son Especiales.
+NATURE_ADVISOR_LOWERS_SPE_FMT :: %s baja la Velocidad, lo que lo hace mas lento de todas formas.
+NATURE_ADVISOR_TAG_OK :: OK
+NATURE_ADVISOR_TAG_LOWERS :: Baja
+NATURE_ADVISOR_OK :: La Naturaleza no los esta perjudicando.
+IV_ADVISOR_LOW_FMT :: IVs bajas en: %s
+IV_ADVISOR_TAG_OK :: OK
+IV_ADVISOR_TAG_LOW :: IVs bajas
+IV_ADVISOR_OK :: Las IVs estan solidas en las estadisticas usadas.
 MENU_HELD_ITEM_ADVISOR :: Asesor de Objetos
 FAV_HELD_ITEM_ADVISOR :: Asesor Objetos
 NOTE_HELD_ITEM_ADVISOR :: Muestra lo que tu equipo tiene equipado ahora mismo (o Ninguno), y luego sugiere un objeto para quien no tenga uno, basado en un perfil simple de estadisticas - una estadistica claramente dominante apunta a un objeto Choice, un atacante rapido recibe Vidasfera, mucha resistencia recibe Restos, y sin nada destacado la sugerencia por defecto es una Baya Zidra segura.\n\nX alterna entre En la Mochila (ya tienes el objeto sugerido - equipalo desde el selector de objetos de PC Box ++) y Por Conseguir (aun no lo tienes - Carrito Sugerido abre PokeMart Anywhere con esos objetos ya agregados).\n\nSolo es una sugerencia basada en estadisticas, no en movimientos, habilidades ni tu estrategia real.
@@ -1311,3 +1329,34 @@ HELD_ADVISOR_REASON_SITRUS :: Ninguna estadistica destaca - una eleccion segura 
 HELD_ADVISOR_NONE_IN_BAG :: Ninguna sugerencia coincide con lo que tienes ahora en la mochila.
 HELD_ADVISOR_NONE_TO_GET :: Ya tienes todo lo sugerido, o nadie necesita un objeto.
 HELD_ADVISOR_SUGGESTED_CART :: Carrito Sugerido
+MENU_BREEDING_CHECKER :: Compatibilidad de Cria
+FAV_BREEDING_CHECKER :: Compat. de Cria
+NOTE_BREEDING_CHECKER :: Tres pestanas (X cambia):\n\nEquipo revisa tu equipo actual en busca de parejas compatibles en la Guarderia (comparten un grupo huevo o uno de los dos es Ditto, sexos opuestos) y muestra los movimientos huevo que la cria podria heredar de los movimientos ACTUALES de uno de los padres.\n\nCajas hace lo mismo en todas tus cajas del PC, a nivel de especie (asi los duplicados no saturan la lista).\n\nProbar Dos te deja probar CUALQUIER par de especies con el Selector de especies visual, incluso las que aun no tienes - toca una casilla en la pantalla inferior para elegir. Esto es solo una revision a nivel de especie (no puede saber el sexo de un individuo), asi que solo informa si las dos especies pueden reproducirse juntas, mas la lista completa de movimientos huevo que cada lado podria transmitir.
+BREEDING_NO_PARTY :: No se encontro ningun Pokemon en tu equipo.
+BREEDING_PAIRS_FOUND_FMT :: %d pareja(s) compatible(s) encontrada(s)
+BREEDING_MOVES_COUNT_FMT :: %d movimiento(s)
+BREEDING_CHIP_DITTO :: Ditto
+BREEDING_MOVE_FRACTION_FMT :: %d/%d movimientos
+BREEDING_PAIR_RANGE_FMT :: pareja %d-%d de %d
+BREEDING_TAB_PARTY :: Equipo
+BREEDING_TAB_BOXES :: Cajas
+BREEDING_TAB_CHECK_TWO :: Probar Dos
+BREEDING_TAP_TO_CHOOSE :: Toca para elegir
+BREEDING_NOT_CHOSEN :: Aun no elegido
+BREEDING_SPECIES_A_FMT :: Especie A: %s
+BREEDING_SPECIES_B_FMT :: Especie B: %s
+BREEDING_NEED_TWO :: Se necesitan al menos 2 Pokemon en tu equipo.
+BREEDING_NO_BOXED :: No se encontro ningun Pokemon en tus cajas del PC.
+BREEDING_SPECIES_OWNED_FMT :: %d especies en tus cajas
+BREEDING_MORE_NOT_SHOWN_FMT :: +%d pareja(s) no mostrada(s)
+BREEDING_NO_PAIRS :: No hay parejas compatibles.
+BREEDING_BABY_FMT :: Cria: %s
+BREEDING_NO_EGG_MOVES :: No hay movimientos huevo heredables por ahora.
+BREEDING_PASSABLE_FMT :: Podria transmitir: %s
+BREEDING_PICK_BOTH :: Toca ambas casillas arriba para elegir dos especies.
+BREEDING_NOT_COMPATIBLE :: No compatible
+BREEDING_REASON_UNDISCOVERED :: Uno de los dos no puede reproducirse en absoluto (grupo huevo No Descubierto).
+BREEDING_REASON_NO_GROUP :: No comparten un grupo huevo.
+BREEDING_COMPATIBLE :: Compatible
+BREEDING_EGG_MOVE_LIST_HDR :: MOVIMIENTOS HUEVO QUE PUEDE APRENDER
+BREEDING_IF_MOTHER_FMT :: Si %s es la madre:
