@@ -67,6 +67,16 @@ namespace CTRPluginFramework {
     extern u32 g_levelCapMode;
     void SetLevelCapMode(u32 value);
 
+    // Display Enemy Stats: bitmask of which of the 16 per-field toggles (Slot, Species, Gender, ...) are ON.
+    // The framework's own generic checkbox persistence is additive-only (it can re-enable a saved-ON entry but
+    // never disables one), so a menu that force-enables its toggles at construction (for a "shows everything by
+    // default" first run) can never have any of them turn back OFF again. Persisted in Data.bin (header.reserved[11])
+    // and mirrored here like g_levelCapMode; 0 = unset (fresh install - CreateEnemyStatsMenu() then defaults to
+    // all-ON, same as today) so it's applied once gameplay frames start (Preferences::LoadSettings() has run by
+    // then), not at menu-construction time. Changed via SetEnemyStatsMask() (marks Preferences dirty).
+    extern u32 g_enemyStatsMask;
+    void SetEnemyStatsMask(u32 value);
+
     // The MenuEntry* of that very "Show ON/OFF notifications" checkbox (stored as void* to avoid a
     // Menu header dependency). _TriggerEntry uses it to (a) update g_entryToggleNotif the instant
     // the checkbox is toggled and (b) give the checkbox a single "Notifications: ON/OFF" toast

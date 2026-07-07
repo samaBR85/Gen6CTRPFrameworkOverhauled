@@ -11,6 +11,7 @@ BATTLE :: Lotta
 BATTLE_ACCESS_BAG :: Borsa
 BATTLE_ALLOW_MEGAS :: 1+ Megaevol.
 BATTLE_ALWAYS_SHINY :: Sempre crom.
+BATTLE_RADAR_INFINITE_BATTERY :: Radar Poke Batteria infinita
 BATTLE_CAPTURE_RATE_100 :: Cattura 100%
 BATTLE_CAPTURE_TRAINER_POKEMON :: Cattura Pokémon altrui
 BATTLE_CONDITION :: Stato
@@ -468,7 +469,9 @@ FAV_BATTLE_CAPTURE_RATE_100 :: Cattura 100%
 NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Ti permette di catturare il Pokémon di un Allenatore in lotta.
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Catt. Allen.
 NOTE_BATTLE_ALWAYS_SHINY :: Ogni Pokémon selvatico e generato sarà cromatico. L'animazione scintillante si attiva quando appare.
+NOTE_BATTLE_RADAR_INFINITE_BATTERY :: Mantiene piena la batteria del Radar Poke nell'overworld, saltando l'attesa di ricarica di circa 50 passi tra un uso e l'altro.\n\nSolo X/Y - il Radar non esiste in Rubino Omega / Zaffiro Alpha.\n\nIMPORTANTE: per sicurezza NON resta attivo dopo un riavvio. Parte sempre spento.\n\nQuindi riattivalo a ogni sessione, quando sei gia nel gioco.\n\n(Cosi si evita un problema all'avvio in cui il gioco potrebbe non trovare il salvataggio.)
 FAV_BATTLE_ALWAYS_SHINY :: Sempre crom.
+FAV_BATTLE_RADAR_INFINITE_BATTERY :: Radar infinito
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: Permetti i cromatici negli incontri normalmente shiny-locked.
 FAV_BATTLE_DISABLE_SHINY_LOCK :: No Shiny Lock
 MENU_RENAME_ANY :: Rinomina ogni Pokémon
@@ -879,6 +882,7 @@ HUD_MILES :: Migl: %lu
 HUD_PARTY :: Squad: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: Repel: %u
+HUD_RADAR :: Radar batt: %u
 HUD_MAP_ID :: Map #%u (0x%X)
 HUD_POS_TOP_LEFT :: Alto-Sx
 HUD_POS_TOP_CENTER :: Alto-Centr
@@ -906,52 +910,52 @@ NOTE_ENEMY_ENABLE :: Vedi le statistiche dell'avversario in lotta.\n\nAll'inizio
 FAV_ENEMY_ENABLE :: Attiva stat.
 MENU_ENEMY_SLOT :: Numero slot
 NOTE_ENEMY_SLOT :: Mostra la posizione in squadra [#N] (verde quando possiedi già la specie in un box, rossa quando no).
-FAV_ENEMY_SLOT :: Mos: Slot #
+FAV_ENEMY_SLOT :: Slot #
 MENU_ENEMY_SPECIES :: Specie
 NOTE_ENEMY_SPECIES :: Mostra il nome della specie dell'avversario.
-FAV_ENEMY_SPECIES :: Mos: Specie
+FAV_ENEMY_SPECIES :: Specie
 MENU_ENEMY_GENDER :: Sesso
 NOTE_ENEMY_GENDER :: Mostra il simbolo del sesso (azzurro maschio / rosa femmina).
-FAV_ENEMY_GENDER :: Mos: Sesso
+FAV_ENEMY_GENDER :: Sesso
 MENU_ENEMY_LEVEL :: Liv.
 NOTE_ENEMY_LEVEL :: Mostra il livello dell'avversario.
-FAV_ENEMY_LEVEL :: Mos: Liv.
+FAV_ENEMY_LEVEL :: Liv.
 MENU_ENEMY_MAXHP :: PS Max
 NOTE_ENEMY_MAXHP :: Mostra i PS massimi dell'avversario.
-FAV_ENEMY_MAXHP :: Mos: PS Max
+FAV_ENEMY_MAXHP :: PS Max
 MENU_ENEMY_SHINY :: Cromatico
 NOTE_ENEMY_SHINY :: Mostra una stella dorata quando l'avversario è cromatico.
-FAV_ENEMY_SHINY :: Mostra: Cromat.
+FAV_ENEMY_SHINY :: Cromat.
 MENU_ENEMY_PKRS :: Pokérus
 NOTE_ENEMY_PKRS :: Mostra un marchio 'pkrs' quando l'avversario ha il Pokérus.
-FAV_ENEMY_PKRS :: Mos: Pokérus
+FAV_ENEMY_PKRS :: Pokérus
 MENU_ENEMY_NATURE :: Natura
 NOTE_ENEMY_NATURE :: Mostra la Natura dell'avversario.
-FAV_ENEMY_NATURE :: Mos: Natura
+FAV_ENEMY_NATURE :: Natura
 MENU_ENEMY_ABILITY :: Abilità
 NOTE_ENEMY_ABILITY :: Mostra l'Abilità dell'avversario, marcata (HA) quando è l'Abilità Nascosta.
-FAV_ENEMY_ABILITY :: Mos: Abilità
+FAV_ENEMY_ABILITY :: Abilità
 MENU_ENEMY_HIDDEN_POWER :: Hidden Power
 NOTE_ENEMY_HIDDEN_POWER :: Mostra il tipo di Hidden Power dell'avversario.
-FAV_ENEMY_HIDDEN_POWER :: Mos: Hid.Pwr
+FAV_ENEMY_HIDDEN_POWER :: Hid.Pwr
 MENU_ENEMY_HELD_ITEM :: Strumento
 NOTE_ENEMY_HELD_ITEM :: Mostra lo strumento che l'avversario sta tenendo.
-FAV_ENEMY_HELD_ITEM :: Mostra: Strum.
+FAV_ENEMY_HELD_ITEM :: Strum.
 MENU_ENEMY_MOVES :: Mosse
 NOTE_ENEMY_MOVES :: Mostra le quattro mosse dell'avversario.
-FAV_ENEMY_MOVES :: Mos: Mosse
+FAV_ENEMY_MOVES :: Mosse
 MENU_ENEMY_IVS :: IV
 NOTE_ENEMY_IVS :: Nella pagina IV/EV, mostra i sei IV per statistica (codificati a colori per qualità).
-FAV_ENEMY_IVS :: Mos: IV
+FAV_ENEMY_IVS :: IV
 MENU_ENEMY_IV_TOTAL :: Tot. IV
 NOTE_ENEMY_IV_TOTAL :: Nella pagina IV/EV, mostra il totale IV (su 186).
-FAV_ENEMY_IV_TOTAL :: Mos: Tot. IV
+FAV_ENEMY_IV_TOTAL :: Tot. IV
 MENU_ENEMY_EVS :: EV
 NOTE_ENEMY_EVS :: Nella pagina IV/EV, mostra i sei EV per statistica (codificati a colori per investimento).
-FAV_ENEMY_EVS :: Mos: EV
+FAV_ENEMY_EVS :: EV
 MENU_ENEMY_EV_TOTAL :: Tot. EV
 NOTE_ENEMY_EV_TOTAL :: Nella pagina IV/EV, mostra il totale EV (su 510).
-FAV_ENEMY_EV_TOTAL :: Mos: Tot. EV
+FAV_ENEMY_EV_TOTAL :: Tot. EV
 MENU_HUD :: Config HUD
 NOTE_HUD :: Scegli cosa mostra l'HUD e dove (schermo superiore).\n\nL'intera sovrapposizione si attiva o disattiva con 'Mostra HUD', un livello sopra.\n\nConsiglio: aggiungi 'Mostra HUD' ai preferiti (premi Y su di esso) per attivarla e disattivarla con un tocco.
 MENU_HUD_DISPLAY :: Mostra HUD
@@ -959,41 +963,44 @@ NOTE_HUD_DISPLAY :: Interruttore principale per la sovrapposizione a schermo.
 FAV_HUD_DISPLAY :: Mostra HUD
 MENU_HUD_MONEY :: Soldi
 NOTE_HUD_MONEY :: Mostra quanto denaro hai.
-FAV_HUD_MONEY :: Mos: Soldi
+FAV_HUD_MONEY :: Soldi
 MENU_HUD_CLOCK :: Tempo gioco
 NOTE_HUD_CLOCK :: Mostra il tuo tempo di gioco.
-FAV_HUD_CLOCK :: Mos: Tempo g.
+FAV_HUD_CLOCK :: Tempo g.
 MENU_HUD_INGAME :: Ora di gioco
 NOTE_HUD_INGAME :: Mostra la fase giorno/notte del gioco in base all'orologio del 3DS (la Gen 6 usa l'ora reale).\nMattino 04:00-10:59\nGiorno 11:00-17:59\nSera 18:00-20:59\nNotte 21:00-03:59
-FAV_HUD_INGAME :: Mos: Ora gioco
+FAV_HUD_INGAME :: Ora gioco
 MENU_HUD_REALTIME :: Ora reale
 NOTE_HUD_REALTIME :: Mostra l'orologio reale della console (HH:MM), la stessa ora che il gioco mostra nella schermata di salvataggio.
-FAV_HUD_REALTIME :: Mos: Ora reale
+FAV_HUD_REALTIME :: Ora reale
 HUD_TOD_MORNING :: Mattino
 HUD_TOD_DAY :: Giorno
 HUD_TOD_EVENING :: Sera
 HUD_TOD_NIGHT :: Notte
 MENU_HUD_BP :: Punti Lotta
 NOTE_HUD_BP :: Mostra i tuoi Punti Lotta attuali (BP).
-FAV_HUD_BP :: Mostra: BP
+FAV_HUD_BP :: BP
 MENU_HUD_STATUS :: Alteraz. stato
 NOTE_HUD_STATUS :: Mostra lo stato del tuo Pokémon di testa durante la lotta (PSN / BRN / SLP / PAR / FRZ).\nVisibile solo in lotta.
-FAV_HUD_STATUS :: Mos: Stato
+FAV_HUD_STATUS :: Stato
 MENU_HUD_MILES :: Pokémig.
 NOTE_HUD_MILES :: Mostra le tue Pokémiglia.
-FAV_HUD_MILES :: Mos: Pokémig.
+FAV_HUD_MILES :: Pokémig.
 MENU_HUD_PARTY :: Conta squ.
 NOTE_HUD_PARTY :: Mostra quanti Pokémon ci sono nella tua squadra.
-FAV_HUD_PARTY :: Mos: Squad.
+FAV_HUD_PARTY :: Squad.
 MENU_HUD_XY :: Pos.X/Y
 NOTE_HUD_XY :: Mostra le tue coordinate attuali sulla mappa.
-FAV_HUD_XY :: Mos: Pos.X/Y
+FAV_HUD_XY :: Pos.X/Y
 MENU_HUD_REPEL :: Passi Rep.
+MENU_HUD_RADAR :: Batteria Radar
 NOTE_HUD_REPEL :: Mostra quanti passi di Repellente restano (0 = nessun Repellente attivo).\nNon salvato dal gioco, quindi si azzera a 0 al ricaricamento.
-FAV_HUD_REPEL :: Mos: Repel.
+NOTE_HUD_RADAR :: Mostra la carica attuale della batteria del Radar Poke (0-255). Solo X/Y.
+FAV_HUD_REPEL :: Repel.
+FAV_HUD_RADAR :: Batteria Radar
 MENU_HUD_MAP_ID :: ID map
 NOTE_HUD_MAP_ID :: Mostra l'ID della mappa attuale, dal vivo (debug / per catalogare le zone per 'sei qui').
-FAV_HUD_MAP_ID :: Mos: ID map
+FAV_HUD_MAP_ID :: ID map
 MENU_HUD_PANEL :: Pann. transl.
 NOTE_HUD_PANEL :: Un riquadro scuro semitrasparente dietro il testo, per leggibilità.
 FAV_HUD_PANEL :: Pann.

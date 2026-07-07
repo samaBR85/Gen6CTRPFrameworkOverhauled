@@ -688,13 +688,22 @@ namespace CTRPluginFramework {
         // ----- "Pokémon Spawner & Trainer (PKHeX)" assembly: obtain + edit Pokémon / save -----
         // Encounters & Catching: control wild encounters, catching aids, and shiny toggles. Built as a
         // vector so the ORAS-only "Max DexNav Search Lv." can be inserted right after Capture Trainer Pokemon.
+        // Shiny Hunt Companion hub sits first (full-screen tool, gameFunc arg).
         vector<MenuEntry*> ccItems = {
+            Fav(new MenuEntry(getLanguage->Get("MENU_SHINY_HUNT"), nullptr, ShinyHuntCompanion, getLanguage->Get("NOTE_SHINY_HUNT")), "FAV_SHINY_HUNT"),
             Fav(new MenuEntry(getLanguage->Get("BATTLE_NO_WILD_POKEMON"), NoWildPokemon, getLanguage->Get("NOTE_BATTLE_NO_WILD_POKEMON")), "FAV_BATTLE_NO_WILD_POKEMON"), // <W, tested: O3DS/O2DS - Y/OR
             Fav(new MenuEntry(getLanguage->Get("BATTLE_CAPTURE_RATE_100"), CaptureRate, getLanguage->Get("NOTE_BATTLE_CAPTURE_RATE_100")), "FAV_BATTLE_CAPTURE_RATE_100"), // <W, tested: O3DS/O2DS - Y/OR
             Fav(new MenuEntry(getLanguage->Get("BATTLE_CAPTURE_TRAINER_POKEMON"), CatchTrainerPokemon, getLanguage->Get("NOTE_BATTLE_CAPTURE_TRAINER_POKEMON")), "FAV_BATTLE_CAPTURE_TRAINER_POKEMON") // <W, tested: O3DS/O2DS - Y/OR
         };
-        // Shiny Hunt Companion hub — sits right above "Max DexNav Search Lv." (full-screen tool, gameFunc arg).
-        ccItems.push_back(Fav(new MenuEntry(getLanguage->Get("MENU_SHINY_HUNT"), nullptr, ShinyHuntCompanion, getLanguage->Get("NOTE_SHINY_HUNT")), "FAV_SHINY_HUNT"));
+        // Poké Radar infinite battery (XY only — the Radar doesn't exist in OR/AS, replaced by DexNav there).
+        // Capture the entry into g_radarCheatEntry so HudCallback can force it OFF on the first frame each cold
+        // boot — this cheat must NOT auto-enable at boot or it corrupts the game's save detection (writes into
+        // the save block while it's being validated at the save-select screen). See PokeRadarKeepCharged().
+        if (currGameSeries == GameSeries::XY) {
+            MenuEntry *radarEntry = new MenuEntry(getLanguage->Get("BATTLE_RADAR_INFINITE_BATTERY"), PokeRadarKeepCharged, getLanguage->Get("NOTE_BATTLE_RADAR_INFINITE_BATTERY"));
+            g_radarCheatEntry = radarEntry;
+            ccItems.push_back(Fav(radarEntry, "FAV_BATTLE_RADAR_INFINITE_BATTERY"));
+        }
         // DexNav Search Level max (ORAS only — XY has no DexNav). One-shot, irreversible, asks to confirm,
         // so the row is flagged dangerous (solid red warning background, like the "unlocks" folder).
         if (currGameSeries == GameSeries::ORAS) {
@@ -838,7 +847,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 7, 7, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 7, 8, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized

@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.7
+# Gen6CTRPluginFrameworkOverhauled — v0.7.8
 
 **English** · [Português](README.pt-BR.md)
 
@@ -302,6 +302,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.7.5** — EV Advisor grew into **Nature / IV / EV Advisor** (three checks, one screen), and a new **Breeding Compatibility** screen (Party / Boxes / Check Two) finds Day Care pairs, the egg moves they could pass down, and lets you test any two species before you even own both.
 - **v0.7.6** — **PC Box ++** now edits your **Party**, not just the PC boxes (same visual editor), and gained a **Swap** tab to trade a Pokémon between Box and Party in two taps. Under the hood this fixes party editing for real — changes to party Pokémon now actually take effect in-game and persist to the save.
 - **v0.7.7** — **Level Cap**, a new Trainer Info screen for nuzlocke/hardcore runs: an auto level cap tied to the next Gym Leader's ace (+ your own offset), Warn or Enforce modes, a D-Pad browser to preview upcoming gyms, and a live HUD field for the over-cap count.
+- **v0.7.8** — **Poké Radar: Infinite Battery** (X/Y) — keep the Radar's battery full in the overworld so there's no ~50-step recharge wait between chains, plus a live HUD battery readout. The **Poké Radar** also returns to the PokéMart Anywhere list on X/Y. Polish: Display Enemy Stats now remembers which fields you turned on, Encounters & Catching leads with Shiny Hunt Companion, and Favorites labels are cleaner. Suggested by u/Victhordiz.
 
 ## 📥 Installing
 
@@ -415,7 +416,7 @@ This project stands on a long line of volunteer work — from the very first anc
   cap idea that became **Level Cap** (v0.7.7).
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.7.7 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.7.8 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

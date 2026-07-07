@@ -69,6 +69,15 @@ namespace CTRPluginFramework {
         Preferences::MarkDirty(); // so WriteSettings persists reserved[10] when the menu closes
     }
 
+    u32 g_enemyStatsMask = 0;                        // see OSD.hpp (synced from Data.bin reserved[11]); 0 = unset
+
+    void SetEnemyStatsMask(u32 value) {
+        if (g_enemyStatsMask == value)
+            return;
+        g_enemyStatsMask = value;
+        Preferences::MarkDirty(); // so WriteSettings persists reserved[11] when the menu closes
+    }
+
     u8 *Screen::GetFramebuffer(u32 posX, u32 posY, bool useRightFb) const {
         if (useRightFb && (!IsTop || !Is3DEnabled))
             return (nullptr);

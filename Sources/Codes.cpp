@@ -3461,6 +3461,39 @@ namespace CTRPluginFramework {
         g_entryToggleNotif = entry->IsActivated();
     }
 
+    // Poké Radar "infinite battery": pins the 10-notch charge full every frame while active, so the
+    // ~50-step recharge wait is skipped entirely. XY only - the entry is XY-gated at registration
+    // (Main.cpp), so this never runs on an OR/AS save. Addr from PokemonCheatPlugin (same game build);
+    // matches its own shipped "Unlimited Pokeradar use" cheat (writes 0xFF, XY only).
+    //
+    // SAVE-SAFETY: 0x8C7D23E is inside the game's save-data RAM block. At the title/save-select screen the game
+    // loads that block into RAM to validate it (to offer "Continue"). This cheat's ON state persists and is
+    // auto-restored by the framework at boot, so without care its gameFunc would run from frame 0 and write
+    // into the save block while it's being validated -> checksum fails -> the game finds "no save" and starts a
+    // new game (HW-confirmed). Fix: the write is gated on RadarMenuWasOpened() - the plugin menu overlay only
+    // becomes "opened" when the USER opens it (never during the framework's boot-time auto-restore), so at a
+    // fresh boot the write stays silent through the entire save-validation window with zero timing race, even
+    // if the cheat was auto-restored ON. Separately, the HudCallback boot block re-disables the entry every
+    // frame until the menu is opened, so the toggle also visibly starts OFF each cold boot; the user re-enables
+    // it once in-game and then it behaves as before (battery full in the overworld).
+    MenuEntry *g_radarCheatEntry = nullptr; // the Encounters&Catching radar cheat entry (set in Main.cpp)
+
+    // True only after the user has opened the plugin menu overlay this session (PluginMenuImpl::_wasOpened).
+    // Never true during the boot-time auto-restore of saved cheats, which is exactly what makes it a safe
+    // "we are past the fresh-boot/save-select window" signal for the radar write + boot-off logic.
+    static bool RadarMenuWasOpened(void) {
+        PluginMenu *pm = PluginMenu::GetRunningInstance();
+        return pm != nullptr && pm->WasOpened();
+    }
+
+    void PokeRadarKeepCharged(MenuEntry *entry) {
+        if (!entry->IsActivated())
+            return;
+        if (!RadarMenuWasOpened())   // never write before the user has opened the menu (save-select safety)
+            return;
+        Process::Write16(0x8C7D23E, 0xFF);
+    }
+
     void AlwaysShiny(MenuEntry *entry) {
         static bool s_was = false; NotifyToggle(entry, s_was);
         static MemoryManager manager(AutoGameSet(0x14F6A4, 0x14ECA4));
@@ -5210,6 +5243,7 @@ namespace CTRPluginFramework {
     static MenuEntry *g_hudLevelCap = nullptr; // Show: Level cap (over-cap count) - nuzlocke helper
     static MenuEntry *g_hudXY     = nullptr;   // Show: X/Y pos
     static MenuEntry *g_hudRepel  = nullptr;   // Show: Repel steps remaining
+    static MenuEntry *g_hudRadar  = nullptr;   // Show: Poké Radar battery charge (XY only)
     static MenuEntry *g_hudMapId  = nullptr;   // Show: current (fine) map id - debug / zone cataloging
     static MenuEntry *g_hudPanel  = nullptr;
     static MenuEntry *g_hudItem   = nullptr;   // Show: lead's held item
@@ -5560,6 +5594,8 @@ namespace CTRPluginFramework {
         }
     }
 
+    static void EnemyStatsSyncMask(void); // defined below CreateEnemyStatsMenu() - forward-declared for HudCallback
+
     bool HudCallback(const Screen &screen) {
         if (!screen.IsTop || g_hudMaster == nullptr)
             return false;
@@ -5567,6 +5603,19 @@ namespace CTRPluginFramework {
         // Shiny Hunt detector runs once per frame whenever a target is armed — independent of the HUD being shown,
         // so it must sit BEFORE the master-activated guard below. Cheap no-op when disarmed (g_shinyTarget == 0).
         ShinyHuntDetect(IfInBattle());
+
+        // Same reasoning: Display Enemy Stats toggle persistence must be applied/synced every frame regardless
+        // of whether the HUD overlay itself is shown.
+        EnemyStatsSyncMask();
+
+        // Poké Radar infinite-battery: force it OFF every frame until the user opens the plugin menu this
+        // session, so the toggle deterministically starts OFF each cold boot. The framework auto-restores this
+        // cheat's saved ON state ONCE during init (before the menu is ever opened), and a one-shot disable
+        // loses that race - so we re-disable while unopened, which reliably wins. Once the menu is opened (the
+        // only way to enable the cheat), we stop and the user's in-game enable sticks. Save-safety itself comes
+        // from PokeRadarKeepCharged's RadarMenuWasOpened() write-gate, so there is no timing window here to lose.
+        if (g_radarCheatEntry != nullptr && !RadarMenuWasOpened())
+            g_radarCheatEntry->Disable();
 
         if (!g_hudMaster->IsActivated())
             return false;
@@ -5752,6 +5801,14 @@ namespace CTRPluginFramework {
             // Volatile overworld counter (u8), not stored in the save. Addr from PokemonCheatPlugin (same game build).
             Process::Read8(AutoGameSet(0x8C7D23A, 0x8C8546E), repel);
             lines.push_back(Utils::Format(getLanguage->Get("HUD_REPEL").c_str(), (unsigned)repel));
+        }
+
+        if (g_hudRadar != nullptr && g_hudRadar->IsActivated()) {
+            u16 charge = 0;
+            // XY only - the Poké Radar doesn't exist in OR/AS; entry is only ever registered on XY.
+            // Volatile counter (u16), not stored in the save. Addr from PokemonCheatPlugin (same game build).
+            Process::Read16(0x8C7D23E, charge);
+            lines.push_back(Utils::Format(getLanguage->Get("HUD_RADAR").c_str(), (unsigned)charge));
         }
 
         if (g_hudMapId != nullptr && g_hudMapId->IsActivated()) {
@@ -6181,16 +6238,58 @@ namespace CTRPluginFramework {
         // Non-selectable section labels matching the in-battle ZR pages (Basic/Moves vs IV/EV).
         auto pageLbl = [](const string &t) { MenuEntry *e = new MenuEntry(t); e->CanBeSelected(false); return e; };
 
+        // NOTE: do NOT force-Enable() these here. That used to permanently defeat persistence (the framework's
+        // own checkbox load pass is additive-only - it can re-enable a saved-ON entry but never disables one,
+        // so an unconditional Enable() at construction meant nothing could ever turn back OFF again). The
+        // default-ON first-run behavior + persisted on/off state are applied later, once per boot, from
+        // EnemyStatsSyncMask() in HudCallback() (deferred because Preferences::LoadSettings() - which populates
+        // g_enemyStatsMask - hasn't run yet at this point in construction).
         *es += pageLbl(getLanguage->Get("ENEMY_PAGE_01")); // after "Display Stats"
         MenuEntry *page1[] = { g_esSlot, g_esSpecies, g_esGender, g_esLevel, g_esMaxHP, g_esShiny,
                                g_esPkrs, g_esNature, g_esAbility, g_esHiddenP, g_esItem, g_esMoves };
-        for (MenuEntry *e : page1) { e->Enable(); *es += e; } // default ON
+        for (MenuEntry *e : page1) *es += e;
 
-        *es += pageLbl(getLanguage->Get("ENEMY_PAGE_02")); // after "Show: Moves"
+        *es += pageLbl(getLanguage->Get("ENEMY_PAGE_02")); // after "Moves"
         MenuEntry *page2[] = { g_esIVs, g_esEVs, g_esIVTotal, g_esEVTotal }; // column-major: each total below its stat
-        for (MenuEntry *e : page2) { e->Enable(); *es += e; } // default ON
+        for (MenuEntry *e : page2) *es += e;
 
         return es;
+    }
+
+    // Canonical 16-entry order for the persisted bitmask (g_enemyStatsMask, bit i = this array's index i).
+    // Same order CreateEnemyStatsMenu() adds them in (page1 then page2) - keep in sync if fields are ever added.
+    static MenuEntry **EsAllToggles(void) {
+        static MenuEntry *all[16];
+        all[0] = g_esSlot;  all[1] = g_esSpecies; all[2] = g_esGender;  all[3] = g_esLevel;
+        all[4] = g_esMaxHP; all[5] = g_esShiny;   all[6] = g_esPkrs;    all[7] = g_esNature;
+        all[8] = g_esAbility; all[9] = g_esHiddenP; all[10] = g_esItem; all[11] = g_esMoves;
+        all[12] = g_esIVs;  all[13] = g_esEVs;    all[14] = g_esIVTotal; all[15] = g_esEVTotal;
+        return all;
+    }
+
+    // Runs once per frame (called from HudCallback, independent of the HUD being shown - see call site).
+    // First tick: apply g_enemyStatsMask (or default all-ON if unset/fresh install) to the 16 toggles, since
+    // Preferences::LoadSettings() has finished by the time gameplay frames start. Every tick after: recompute
+    // the live mask from the toggles' current on/off state and persist it if it changed.
+    static void EnemyStatsSyncMask(void) {
+        static bool applied = false;
+        MenuEntry **all = EsAllToggles();
+
+        if (!applied) {
+            applied = true;
+            for (int i = 0; i < 16; i++) {
+                bool on = (g_enemyStatsMask == 0) || ((g_enemyStatsMask & (1u << i)) != 0);
+                if (on) all[i]->Enable(); else all[i]->Disable();
+            }
+            return;
+        }
+
+        u32 mask = 0;
+        for (int i = 0; i < 16; i++)
+            if (all[i]->IsActivated()) mask |= (1u << i);
+
+        if (mask != g_enemyStatsMask)
+            SetEnemyStatsMask(mask);
     }
 
     MenuFolder *CreateHudMenu(void) {
@@ -6222,6 +6321,12 @@ namespace CTRPluginFramework {
         g_hudXY->SetFavoriteKey("FAV_HUD_XY"); g_hudXY->SetFavoriteAlias(getLanguage->Get("FAV_HUD_XY"));
         g_hudRepel  = new MenuEntry(getLanguage->Get("MENU_HUD_REPEL"), HudNoop, getLanguage->Get("NOTE_HUD_REPEL"));
         g_hudRepel->SetFavoriteKey("FAV_HUD_REPEL"); g_hudRepel->SetFavoriteAlias(getLanguage->Get("FAV_HUD_REPEL"));
+        // Poké Radar doesn't exist in OR/AS - only construct/register the entry on XY, so it's simply
+        // absent from Config HUD on OR/AS (no dead toggle for a feature that isn't there).
+        if (currGameSeries == GameSeries::XY) {
+            g_hudRadar = new MenuEntry(getLanguage->Get("MENU_HUD_RADAR"), HudNoop, getLanguage->Get("NOTE_HUD_RADAR"));
+            g_hudRadar->SetFavoriteKey("FAV_HUD_RADAR"); g_hudRadar->SetFavoriteAlias(getLanguage->Get("FAV_HUD_RADAR"));
+        }
         g_hudMapId  = new MenuEntry(getLanguage->Get("MENU_HUD_MAP_ID"), HudNoop, getLanguage->Get("NOTE_HUD_MAP_ID"));
         g_hudMapId->SetFavoriteKey("FAV_HUD_MAP_ID"); g_hudMapId->SetFavoriteAlias(getLanguage->Get("FAV_HUD_MAP_ID"));
         g_hudItem   = new MenuEntry(getLanguage->Get("MENU_HUD_ITEM"), HudNoop, getLanguage->Get("NOTE_HUD_ITEM"));
@@ -6276,6 +6381,7 @@ namespace CTRPluginFramework {
         *hud += g_hudLevelCap;
         *hud += g_hudXY;
         *hud += g_hudRepel;
+        if (g_hudRadar != nullptr) *hud += g_hudRadar;
         *hud += g_hudMapId;
         *hud += g_hudItem;
         *hud += g_hudEnc;

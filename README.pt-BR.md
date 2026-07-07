@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.7
+# Gen6CTRPluginFrameworkOverhauled — v0.7.8
 
 [English](README.md) · **Português**
 
@@ -306,6 +306,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.7.5** — o EV Advisor virou **Nature / IV / EV Advisor** (3 checagens, uma tela), e uma nova tela **Breeding Compatibility** (Party / Boxes / Check Two) acha pares de Creche, os golpes de ovo que eles poderiam passar, e deixa você testar qualquer par de espécies antes mesmo de ter os dois.
 - **v0.7.6** — o **PC Box ++** agora edita a sua **Equipe**, não só as boxes do PC (mesmo editor visual), e ganhou uma aba **Swap** pra trocar um Pokémon entre Box e Party em dois toques. Por baixo dos panos isso conserta a edição da equipe de verdade — mudanças em Pokémon da equipe agora surtem efeito no jogo e permanecem no save.
 - **v0.7.7** — **Limite de Nível**, uma nova tela no Trainer Info pra runs nuzlocke/hardcore: um limite de nível automático atrelado ao ás do próximo Líder de Ginásio (+ um ajuste seu), modos Avisar ou Forçar, um navegador via D-Pad pra comparar os próximos ginásios, e um campo no HUD ao vivo pra contagem de quem passou do limite.
+- **v0.7.8** — **Poké Radar: Bateria Infinita** (X/Y) — mantém a bateria do Radar cheia no overworld, sem espera de recarga de ~50 passos entre correntes, mais um indicador de bateria ao vivo no HUD. O **Poké Radar** também volta à lista do PokéMart Anywhere no X/Y. Ajustes: o Display Enemy Stats agora lembra os campos que você ligou, Encounters & Catching começa pelo Shiny Hunt Companion, e os rótulos do Favorites ficaram mais limpos. Sugestão de u/Victhordiz.
 
 ## 📥 Instalando
 
@@ -419,7 +420,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
   de nível por ginásio que virou o **Limite de Nível** (v0.7.7).
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.7.7 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.7.8 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença

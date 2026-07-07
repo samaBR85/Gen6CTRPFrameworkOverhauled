@@ -8,7 +8,7 @@
     "sheet": "gen6ctrpf.t3x",
     "sheetURL": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.t3x",
     "version": 4,
-    "revision": 21
+    "revision": 22
   },
   "storeContent": [
     {
@@ -22,7 +22,7 @@
         "sheet_index": 0,
         "last_updated": "2026-07-07 (UTC)",
         "license": "gpl-3.0",
-        "version": "0.7.7"
+        "version": "0.7.8"
       },
       "Download & Install Plugin": [
         {

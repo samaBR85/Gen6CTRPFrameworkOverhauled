@@ -11,6 +11,7 @@ BATTLE :: バトル
 BATTLE_ACCESS_BAG :: バッグを開く
 BATTLE_ALLOW_MEGAS :: メガシンカ複数可
 BATTLE_ALWAYS_SHINY :: 常に色違い
+BATTLE_RADAR_INFINITE_BATTERY :: ポケレーダー電池無限
 BATTLE_CAPTURE_RATE_100 :: 捕獲率100％
 BATTLE_CAPTURE_TRAINER_POKEMON :: トレーナーのポケモンを捕獲
 BATTLE_CONDITION :: 状態
@@ -468,7 +469,9 @@ FAV_BATTLE_CAPTURE_RATE_100 :: 捕獲率100％
 NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: バトル中にトレーナーのPokémonを捕まえられるようにします。
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: トレーナー捕獲
 NOTE_BATTLE_ALWAYS_SHINY :: すべての野生・タマゴのPokémonが色違いになります。出現時にきらめくアニメーションが再生されます。
+NOTE_BATTLE_RADAR_INFINITE_BATTERY :: オーバーワールドでポケレーダーの電池を満タンに保ち、使用後の約50歩の充電待ちを省略します。\n\nX/Y専用（オメガルビー/アルファサファイアにはレーダー自体が存在しません）。\n\n重要：安全のため、これは再起動をまたいでオンのままにはなりません。常にオフで始まります。\n\nゲームに入ってから、毎回オンにし直してください。\n\n（起動時にゲームがセーブを見つけられなくなる問題を防ぐためです。）
 FAV_BATTLE_ALWAYS_SHINY :: 常に色違い
+FAV_BATTLE_RADAR_INFINITE_BATTERY :: 無限レーダー
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: 通常は色違いロックされている遭遇でも色違いを許可します。
 FAV_BATTLE_DISABLE_SHINY_LOCK :: 色違いロック解除
 MENU_RENAME_ANY :: どのPokémonも改名
@@ -879,6 +882,7 @@ HUD_MILES :: マイル: %lu
 HUD_PARTY :: 手持ち: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: 虫よけ: %u
+HUD_RADAR :: レーダー電池: %u
 HUD_MAP_ID :: マップ #%u (0x%X)
 HUD_POS_TOP_LEFT :: 左上
 HUD_POS_TOP_CENTER :: 上中央
@@ -906,52 +910,52 @@ NOTE_ENEMY_ENABLE :: バトル中に相手の能力値を見られます。\n\n�
 FAV_ENEMY_ENABLE :: 能力値有効化
 MENU_ENEMY_SLOT :: スロット番号
 NOTE_ENEMY_SLOT :: 手持ちスロット[#N]を表示（その種族をボックスに既に持っていれば緑、いなければ赤）。
-FAV_ENEMY_SLOT :: 表示: スロット#
+FAV_ENEMY_SLOT :: スロット#
 MENU_ENEMY_SPECIES :: 種族
 NOTE_ENEMY_SPECIES :: 相手の種族名を表示します。
-FAV_ENEMY_SPECIES :: 表示: 種族
+FAV_ENEMY_SPECIES :: 種族
 MENU_ENEMY_GENDER :: 性別
 NOTE_ENEMY_GENDER :: 性別記号を表示（青はオス／ピンクはメス）。
-FAV_ENEMY_GENDER :: 表示: 性別
+FAV_ENEMY_GENDER :: 性別
 MENU_ENEMY_LEVEL :: レベル
 NOTE_ENEMY_LEVEL :: 相手のレベルを表示します。
-FAV_ENEMY_LEVEL :: 表示: レベル
+FAV_ENEMY_LEVEL :: レベル
 MENU_ENEMY_MAXHP :: 最大HP
 NOTE_ENEMY_MAXHP :: 相手の最大HPを表示します。
-FAV_ENEMY_MAXHP :: 表示: 最大HP
+FAV_ENEMY_MAXHP :: 最大HP
 MENU_ENEMY_SHINY :: 色違いマーク
 NOTE_ENEMY_SHINY :: 相手が色違いのとき金色の星を表示します。
-FAV_ENEMY_SHINY :: 表示: 色違いマーク
+FAV_ENEMY_SHINY :: 色違いマーク
 MENU_ENEMY_PKRS :: ポケルス
 NOTE_ENEMY_PKRS :: 相手がポケルスを持っているとき「pkrs」マークを表示します。
-FAV_ENEMY_PKRS :: 表示: ポケルス
+FAV_ENEMY_PKRS :: ポケルス
 MENU_ENEMY_NATURE :: せいかく
 NOTE_ENEMY_NATURE :: 相手のせいかくを表示します。
-FAV_ENEMY_NATURE :: 表示: せいかく
+FAV_ENEMY_NATURE :: せいかく
 MENU_ENEMY_ABILITY :: とくせい
 NOTE_ENEMY_ABILITY :: 相手のとくせいを表示し、隠れ特性のときは(HA)と表示します。
-FAV_ENEMY_ABILITY :: 表示: とくせい
+FAV_ENEMY_ABILITY :: とくせい
 MENU_ENEMY_HIDDEN_POWER :: Hidden Power
 NOTE_ENEMY_HIDDEN_POWER :: 相手のHidden Powerのタイプを表示します。
-FAV_ENEMY_HIDDEN_POWER :: 表示: 隠P
+FAV_ENEMY_HIDDEN_POWER :: 隠P
 MENU_ENEMY_HELD_ITEM :: 持ち物
 NOTE_ENEMY_HELD_ITEM :: 相手が持っている道具を表示します。
-FAV_ENEMY_HELD_ITEM :: 表示: 持ち物
+FAV_ENEMY_HELD_ITEM :: 持ち物
 MENU_ENEMY_MOVES :: わざ
 NOTE_ENEMY_MOVES :: 相手の4つのわざを表示します。
-FAV_ENEMY_MOVES :: 表示: わざ
+FAV_ENEMY_MOVES :: わざ
 MENU_ENEMY_IVS :: IV
 NOTE_ENEMY_IVS :: IV/EVページで、6つの能力値ごとのIVを表示（質に応じて色分け）。
-FAV_ENEMY_IVS :: 表示: IV
+FAV_ENEMY_IVS :: IV
 MENU_ENEMY_IV_TOTAL :: IV合計
 NOTE_ENEMY_IV_TOTAL :: IV/EVページで、IVの合計（186中）を表示します。
-FAV_ENEMY_IV_TOTAL :: 表示: IV合計
+FAV_ENEMY_IV_TOTAL :: IV合計
 MENU_ENEMY_EVS :: EV
 NOTE_ENEMY_EVS :: IV/EVページで、6つの能力値ごとのEVを表示（投資量に応じて色分け）。
-FAV_ENEMY_EVS :: 表示: EV
+FAV_ENEMY_EVS :: EV
 MENU_ENEMY_EV_TOTAL :: EV合計
 NOTE_ENEMY_EV_TOTAL :: IV/EVページで、EVの合計（510中）を表示します。
-FAV_ENEMY_EV_TOTAL :: 表示: EV合計
+FAV_ENEMY_EV_TOTAL :: EV合計
 MENU_HUD :: HUD設定
 NOTE_HUD :: HUDの表示内容と位置を選びます（上画面）。\n\nオーバーレイ全体のオン/オフは、一つ上の「HUDを表示」で切り替えます。\n\nヒント：「HUDを表示」をお気に入りにする（Yを押す）と、ワンタップでオン/オフできます。
 MENU_HUD_DISPLAY :: HUDを表示
@@ -959,41 +963,44 @@ NOTE_HUD_DISPLAY :: 画面オーバーレイのマスタースイッチ。
 FAV_HUD_DISPLAY :: HUDを表示
 MENU_HUD_MONEY :: おこづかい
 NOTE_HUD_MONEY :: 所持金を表示します。
-FAV_HUD_MONEY :: 表示: おこづかい
+FAV_HUD_MONEY :: おこづかい
 MENU_HUD_CLOCK :: プレイ時間
 NOTE_HUD_CLOCK :: プレイ時間を表示します。
-FAV_HUD_CLOCK :: 表示: プレイ時間
+FAV_HUD_CLOCK :: プレイ時間
 MENU_HUD_INGAME :: ゲーム内時刻
 NOTE_HUD_INGAME :: 3DSの時計に基づくゲームの昼夜の時間帯を表示します（第6世代は実時刻を使用）。\n朝 04:00-10:59\n昼 11:00-17:59\n夕方 18:00-20:59\n夜 21:00-03:59
-FAV_HUD_INGAME :: 表示: ゲーム内時刻
+FAV_HUD_INGAME :: ゲーム内時刻
 MENU_HUD_REALTIME :: 実時刻
 NOTE_HUD_REALTIME :: 本体の実時刻（時:分）を表示します。セーブ画面に表示される時刻と同じです。
-FAV_HUD_REALTIME :: 表示: 実時刻
+FAV_HUD_REALTIME :: 実時刻
 HUD_TOD_MORNING :: 朝
 HUD_TOD_DAY :: 昼
 HUD_TOD_EVENING :: 夕方
 HUD_TOD_NIGHT :: 夜
 MENU_HUD_BP :: バトルポイント
 NOTE_HUD_BP :: 現在のバトルポイント(BP)を表示します。
-FAV_HUD_BP :: 表示: BP
+FAV_HUD_BP :: BP
 MENU_HUD_STATUS :: 状態異常
 NOTE_HUD_STATUS :: バトル中、先頭Pokémonの状態を表示します（PSN / BRN / SLP / PAR / FRZ）。\nバトル中のみ表示されます。
-FAV_HUD_STATUS :: 表示: 状態
+FAV_HUD_STATUS :: 状態
 MENU_HUD_MILES :: ポケマイル
 NOTE_HUD_MILES :: ポケマイルを表示します。
-FAV_HUD_MILES :: 表示: ポケマイル
+FAV_HUD_MILES :: ポケマイル
 MENU_HUD_PARTY :: 手持ち数
 NOTE_HUD_PARTY :: 手持ちのPokémonの数を表示します。
-FAV_HUD_PARTY :: 表示: 手持ち
+FAV_HUD_PARTY :: 手持ち
 MENU_HUD_XY :: X/Y座標
 NOTE_HUD_XY :: 現在のマップ座標を表示します。
-FAV_HUD_XY :: 表示: X/Y座標
+FAV_HUD_XY :: X/Y座標
 MENU_HUD_REPEL :: 虫よけ歩数
+MENU_HUD_RADAR :: レーダー電池
 NOTE_HUD_REPEL :: 虫よけの残り歩数を表示します（0 = 虫よけ無効）。\nゲームに保存されないので、リロード時に0に戻ります。
-FAV_HUD_REPEL :: 表示: 虫よけ
+NOTE_HUD_RADAR :: ポケレーダーの現在の電池残量を表示します(0-255)。X/Y専用。
+FAV_HUD_REPEL :: 虫よけ
+FAV_HUD_RADAR :: レーダー電池
 MENU_HUD_MAP_ID :: マップID
 NOTE_HUD_MAP_ID :: 現在のマップIDをリアルタイム表示（デバッグ／「現在地」用のゾーン分類）。
-FAV_HUD_MAP_ID :: 表示: マップID
+FAV_HUD_MAP_ID :: マップID
 MENU_HUD_PANEL :: 半透明パネル
 NOTE_HUD_PANEL :: 読みやすさのため、テキストの背後に置く暗い透けたボックス。
 FAV_HUD_PANEL :: パネル

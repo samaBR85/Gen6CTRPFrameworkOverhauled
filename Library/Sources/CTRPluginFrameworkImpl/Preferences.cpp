@@ -120,6 +120,7 @@ namespace CTRPluginFramework {
             g_trainerCardTemplate = header.reserved[8]; // Trainer Card background palette choice
             g_levelCapOffset = header.reserved[9];  // Level Cap offset, biased +8 (0 = unset -> default below)
             g_levelCapMode   = header.reserved[10]; // Level Cap mode (0 = Warn default on a fresh file)
+            g_enemyStatsMask = header.reserved[11]; // Display Enemy Stats field toggles (0 = unset -> all ON default)
             Flags = header.flags;
             memcpy(reinterpret_cast<void*>(Backlights), &header.lcdbacklights, sizeof(Backlights));
         }
@@ -304,6 +305,7 @@ namespace CTRPluginFramework {
             header.reserved[8] = g_trainerCardTemplate; // Trainer Card background palette (see SetTrainerCardTemplate)
             header.reserved[9] = g_levelCapOffset;      // Level Cap offset, biased +8 (see SetLevelCapOffset)
             header.reserved[10] = g_levelCapMode;       // Level Cap mode Warn/Enforce/Off (see SetLevelCapMode)
+            header.reserved[11] = g_enemyStatsMask;     // Display Enemy Stats field toggles (see SetEnemyStatsMask)
             header.flags = Flags;
             memcpy(&header.lcdbacklights, Backlights, sizeof(header.lcdbacklights));
 
