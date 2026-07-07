@@ -176,7 +176,12 @@ over-cap count while you play.
 
 <p align="center">
   <img src="Screenshots/v0.7.7/level_cap.png" width="330" alt="Level Cap — party vs. the next gym's ace level, and the Warn/Enforce manager" />
+  <img src="Screenshots/v0.7.7/level_cap_enforce.png" width="330" alt="Level Cap — the Enforce confirmation, showing how many Pokémon drop and to what level" />
 </p>
+
+Enforce **applies and saves right away** (only level and stats drop); the number shown in your in-game party
+menu refreshes after your next battle or a PC-box visit. For the live over-cap warning on the HUD, turn on
+**Level cap** in Screen Overlays → Config HUD.
 
 ### Win the battle
 

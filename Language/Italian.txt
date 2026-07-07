@@ -1422,7 +1422,7 @@ BREEDING_IF_MOTHER_FMT :: Se %s e la madre:
 
 # ==== Level Cap (nuzlocke) ====
 MENU_LEVEL_CAP :: Livello max
-NOTE_LEVEL_CAP :: Aiuto Nuzlocke: imposta un livello massimo dal livello dell'asso del PROSSIMO capopalestra (letto dalle tue medaglie) piu uno scarto a tua scelta, quindi avanza da solo man mano che ottieni medaglie.\n\nLo schermo in alto elenca la tua squadra rispetto al max - chiunque lo superi viene segnalato. Schermo in basso: tocca Avvisa/Forza/Off, tocca - / + per lo scarto e (in modo Forza) tocca 'Forza ora' per riportare al max i Pokemon oltre il limite. Forza modifica la tua squadra e salva - abbassa solo livello e statistiche, nient'altro.\n\nDopo 8 medaglie il max si blocca sull'asso del Campione. Attiva 'Mostra: Livello max' nell'HUD per vedere il conteggio mentre giochi. Su/Giu del D-Pad scorre le prossime palestre per confrontare la tua squadra - questo non cambia mai cio che Forza applica davvero, lo decide solo la vera palestra PROSSIMA.
+NOTE_LEVEL_CAP :: Aiuto Nuzlocke / hardcore: imposta un livello massimo dal livello dell'asso della PROSSIMA palestra (letto dalle medaglie) piu uno scarto a tua scelta, quindi il max avanza da solo man mano che ottieni medaglie.\n\nSchermo in alto: la squadra rispetto al max, chi lo supera viene segnalato. Su/Giu del D-Pad scorre le prossime palestre per confrontare - solo anteprima, non cambia mai cio che Forza applica.\n\nSchermo in basso: tocca Avvisa / Forza / Off e usa - / + per lo scarto. Avvisa solo segnala; Forza attiva il tasto 'Forza ora'; Off mette in pausa.\n\nForza ora abbassa al max i Pokemon oltre il limite. Si applica e si SALVA subito (calano solo livello e statistiche). Il livello mostrato nel menu squadra, pero, si aggiorna solo dopo la PROSSIMA LOTTA o una visita al PC - e li che il gioco lo ricostruisce.\n\nPer un conteggio dal vivo attiva 'Livello max' in Overlay schermo > Config HUD (nascosto se il modo e Off).\n\nDopo 8 medaglie il max si blocca sull'asso del Campione.
 FAV_LEVEL_CAP :: Livello max
 LEVEL_CAP :: Livello max
 LC_CAP :: Max
@@ -1438,10 +1438,12 @@ LC_MODE_WARN :: Avvisa
 LC_MODE_ENFORCE :: Forza
 LC_MODE_OFF :: Off
 LC_ENFORCE_NOW_FMT :: Forza ora (%d)
-LC_CONFIRM_ENFORCE_FMT :: Abbassare %d Pokemon al Lv %d?\nModifica la tua squadra.
+LC_CONFIRM_ENFORCE_FMT :: Abbassare %d Pokemon al Lv %d? Modifica la tua squadra.
 LC_ENFORCED_FMT :: %d portati al Lv %d
-MENU_HUD_LEVELCAP :: Mostra: Livello max
+MENU_HUD_LEVELCAP :: Livello max
 NOTE_HUD_LEVELCAP :: Avviso Nuzlocke dal vivo sull'HUD: quanti Pokemon della squadra superano il livello massimo attuale (impostato in Livello max, sotto Info Allenatore). Nascosto quando il modo e Off.
 FAV_HUD_LEVELCAP :: Livello max
 LC_HUD_OVER_FMT :: Oltre max: %d (Lv %d)
 LC_PREVIEW :: (anteprima)
+LC_APPLIED_NOTE :: Salvato. I livelli a schermo si aggiornano dopo la prossima lotta o visita al PC.
+LC_ENFORCE_TITLE :: Forza livello max

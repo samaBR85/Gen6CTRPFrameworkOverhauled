@@ -179,7 +179,12 @@ joga.
 
 <p align="center">
   <img src="Screenshots/v0.7.7/level_cap.png" width="330" alt="Limite de Nível — a equipe contra o ás do próximo ginásio, e o gerenciador Avisar/Forçar" />
+  <img src="Screenshots/v0.7.7/level_cap_enforce.png" width="330" alt="Limite de Nível — a confirmação do Forçar, mostrando quantos Pokémon caem e para qual nível" />
 </p>
+
+O Forçar **aplica e salva na hora** (só nível e atributos caem); o número mostrado no menu da party in-game
+atualiza após a sua próxima batalha ou uma visita à box do PC. Para o aviso ao vivo no HUD, ligue
+**Level cap** em Screen Overlays → Config HUD.
 
 ### Vença a batalha
 

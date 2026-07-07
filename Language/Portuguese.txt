@@ -1373,7 +1373,7 @@ BREEDING_IF_MOTHER_FMT :: Se %s for a mae:
 
 # ==== Level Cap (nuzlocke) ====
 MENU_LEVEL_CAP :: Limite de nivel
-NOTE_LEVEL_CAP :: Ajuda para Nuzlocke: define um limite de nivel a partir do nivel do ace do PROXIMO lider de ginasio (lido pelas suas insignias) mais um ajuste que voce escolhe, entao ele sobe sozinho conforme voce ganha insignias.\n\nA tela de cima lista sua equipe contra o limite - quem passa e destacado. Tela de baixo: toque Avisar/Forcar/Off, toque - / + para mudar o ajuste e (no modo Forcar) toque 'Forcar agora' para puxar de volta ao limite os Pokemon acima dele. Forcar edita sua equipe e salva - so abaixa nivel e atributos, nada mais muda.\n\nApos 8 insignias o limite congela no ace do Campeao. Ligue 'Mostrar: Limite nivel' no HUD para ver a contagem enquanto joga. Cima/Baixo do D-Pad percorre os proximos ginasios para comparar sua equipe - isso nunca muda o que Forcar realmente aplica, so o ginasio PROXIMO de verdade decide isso.
+NOTE_LEVEL_CAP :: Ajuda para Nuzlocke / hardcore: define um limite de nivel a partir do nivel do ace do PROXIMO lider de ginasio (lido pelas suas insignias) mais um ajuste que voce escolhe, entao o limite sobe sozinho conforme voce ganha insignias.\n\nTela de cima: sua equipe contra o limite, com quem passa destacado. Cima/Baixo do D-Pad percorre os proximos ginasios para comparar - apenas previa, nunca muda o que Forcar aplica.\n\nTela de baixo: toque Avisar / Forcar / Off e use - / + para o ajuste. Avisar so destaca; Forcar liga o botao 'Forcar agora'; Off pausa a funcao.\n\nForcar agora abaixa ao limite os Pokemon acima dele. Aplica e SALVA na hora (so caem nivel e atributos). Porem o nivel mostrado no menu da equipe so atualiza apos a sua PROXIMA BATALHA ou uma visita a box do PC - e ai que o jogo o reconstroi.\n\nPara ver a contagem ao vivo no HUD, ligue 'Limite nivel' em Sobreposicoes de Tela > Config HUD (oculto se o modo estiver em Off).\n\nApos 8 insignias o limite congela no ace do Campeao.
 FAV_LEVEL_CAP :: Limite nivel
 LEVEL_CAP :: Limite de nivel
 LC_CAP :: Max
@@ -1389,10 +1389,12 @@ LC_MODE_WARN :: Avisar
 LC_MODE_ENFORCE :: Forcar
 LC_MODE_OFF :: Off
 LC_ENFORCE_NOW_FMT :: Forcar agora (%d)
-LC_CONFIRM_ENFORCE_FMT :: Baixar %d Pokemon para Nv %d?\nIsso altera sua equipe.
+LC_CONFIRM_ENFORCE_FMT :: Baixar %d Pokemon para Nv %d? Isso altera sua equipe.
 LC_ENFORCED_FMT :: %d ajustado(s) p/ Nv %d
-MENU_HUD_LEVELCAP :: Mostrar: Limite nivel
+MENU_HUD_LEVELCAP :: Limite nivel
 NOTE_HUD_LEVELCAP :: Aviso Nuzlocke ao vivo no HUD: quantos Pokemon da equipe estao acima do limite de nivel atual (definido em Limite de nivel, em Info do Treinador). Oculto quando o modo esta em Off.
 FAV_HUD_LEVELCAP :: Limite nivel
 LC_HUD_OVER_FMT :: Acima do max: %d (Nv %d)
 LC_PREVIEW :: (previa)
+LC_APPLIED_NOTE :: Salvo. Os niveis na tela atualizam apos a proxima batalha ou visita ao PC.
+LC_ENFORCE_TITLE :: Forcar limite de nivel

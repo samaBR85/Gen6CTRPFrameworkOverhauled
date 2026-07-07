@@ -1369,7 +1369,7 @@ BREEDING_IF_MOTHER_FMT :: If %s is the mother:
 
 # ==== Level Cap (nuzlocke) ====
 MENU_LEVEL_CAP :: Level Cap
-NOTE_LEVEL_CAP :: Nuzlocke helper: sets a level cap from the NEXT gym leader's ace level (read from your badges) plus an offset you pick, so it advances on its own as you earn badges.\n\nTop screen lists your party against the cap - anyone over it is flagged. Bottom screen: tap Warn/Enforce/Off, tap - / + to change the offset, and (in Enforce mode) tap 'Enforce now' to pull over-cap Pokemon back down to the cap. Enforce edits your party and saves - it only lowers level and stats, nothing else changes.\n\nAfter 8 badges the cap freezes at the Champion's ace. Turn on 'Show: Level cap' in the HUD to watch the over-cap count while you play. D-Pad Up/Down browses the upcoming gyms to preview how your party compares against them - it never changes what Enforce actually targets, only the real NEXT gym's cap does that.
+NOTE_LEVEL_CAP :: A nuzlocke / hardcore helper: it sets a level cap from the NEXT Gym Leader's ace level (read from your badges) plus an offset you pick, so the cap advances on its own as you earn badges.\n\nTop screen: your party against the cap, with anyone over it flagged. D-Pad Up/Down browses the upcoming gyms to preview how your team compares further ahead - preview only, it never changes what Enforce targets.\n\nBottom screen: tap Warn / Enforce / Off and use - / + to set the offset. Warn only flags over-cap Pokemon; Enforce turns on the 'Enforce now' button; Off idles the feature.\n\nEnforce now lowers over-cap Pokemon to the cap. It applies and SAVES immediately (only level and stats drop). The level shown in your in-game party menu, however, only refreshes after your NEXT BATTLE or a PC-box visit - that is when the game rebuilds it.\n\nFor a live over-cap count while you play, turn ON 'Level cap' in Screen Overlays > Config HUD (hidden while the mode is Off).\n\nAfter 8 badges the cap freezes at the Champion's ace.
 FAV_LEVEL_CAP :: Level Cap
 LEVEL_CAP :: Level Cap
 LC_CAP :: Cap
@@ -1385,10 +1385,12 @@ LC_MODE_WARN :: Warn
 LC_MODE_ENFORCE :: Enforce
 LC_MODE_OFF :: Off
 LC_ENFORCE_NOW_FMT :: Enforce now (%d)
-LC_CONFIRM_ENFORCE_FMT :: Lower %d Pokemon to Lv %d?\nThis changes your party.
+LC_CONFIRM_ENFORCE_FMT :: Lower %d Pokemon to Lv %d? This changes your party.
 LC_ENFORCED_FMT :: Clamped %d to Lv %d
-MENU_HUD_LEVELCAP :: Show: Level cap
+MENU_HUD_LEVELCAP :: Level cap
 NOTE_HUD_LEVELCAP :: Live nuzlocke over-cap warning on the HUD: how many of your party Pokemon are above the current level cap (set in Level Cap, under Trainer Info). Hidden when Level Cap mode is Off.
 FAV_HUD_LEVELCAP :: Level cap
 LC_HUD_OVER_FMT :: Over cap: %d (Lv %d)
 LC_PREVIEW :: (preview)
+LC_APPLIED_NOTE :: Saved. On-screen levels refresh after your next battle or PC visit.
+LC_ENFORCE_TITLE :: Enforce Level Cap

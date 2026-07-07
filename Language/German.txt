@@ -1371,7 +1371,7 @@ BREEDING_IF_MOTHER_FMT :: Wenn %s die Mutter ist:
 
 # ==== Level Cap (nuzlocke) ====
 MENU_LEVEL_CAP :: Level-Limit
-NOTE_LEVEL_CAP :: Nuzlocke-Helfer: setzt ein Level-Limit aus dem Ass-Level des NAECHSTEN Arenaleiters (aus deinen Orden gelesen) plus einem Versatz deiner Wahl - es steigt also von selbst, wenn du Orden sammelst.\n\nDer obere Bildschirm listet dein Team gegen das Limit - wer darueber liegt, wird markiert. Unterer Bildschirm: tippe Warnen/Erzwingen/Aus, tippe - / + fuer den Versatz, und (im Modus Erzwingen) tippe 'Jetzt erzwingen', um Pokemon ueber dem Limit auf das Limit zu senken. Erzwingen aendert dein Team und speichert - es senkt nur Level und Werte, sonst nichts.\n\nNach 8 Orden friert das Limit beim Ass des Champions ein. Aktiviere 'Zeige: Level-Limit' im HUD, um den Zaehler im Spiel zu sehen. Steuerkreuz Hoch/Runter durchblattert die naechsten Arenen zum Vergleich - das aendert nie, was Erzwingen wirklich anwendet, das bestimmt allein die echte NAECHSTE Arena.
+NOTE_LEVEL_CAP :: Nuzlocke-/Hardcore-Helfer: setzt ein Level-Limit aus dem Ass-Level der NAECHSTEN Arena (aus deinen Orden) plus einem Versatz deiner Wahl - das Limit steigt also von selbst, wenn du Orden sammelst.\n\nOberer Bildschirm: dein Team gegen das Limit, wer darueber liegt, wird markiert. Steuerkreuz Hoch/Runter blaettert durch die naechsten Arenen zum Vergleich - nur Vorschau, es aendert nie, was Erzwingen anwendet.\n\nUnterer Bildschirm: tippe Warnen / Erzwingen / Aus und nutze - / + fuer den Versatz. Warnen markiert nur; Erzwingen aktiviert 'Jetzt erzwingen'; Aus pausiert die Funktion.\n\nJetzt erzwingen senkt Pokemon ueber dem Limit. Es wird sofort angewendet und GESPEICHERT (nur Level und Werte sinken). Das im Team-Menue angezeigte Level aktualisiert sich aber erst nach deinem NAECHSTEN KAMPF oder einem PC-Besuch - dann baut das Spiel es neu auf.\n\nFuer eine Live-Anzeige aktiviere 'Level-Limit' in Bildschirm-Overlays > Config HUD (ausgeblendet, wenn der Modus Aus ist).\n\nNach 8 Orden friert das Limit beim Ass des Champions ein.
 FAV_LEVEL_CAP :: Level-Limit
 LEVEL_CAP :: Level-Limit
 LC_CAP :: Limit
@@ -1387,10 +1387,12 @@ LC_MODE_WARN :: Warnen
 LC_MODE_ENFORCE :: Erzwingen
 LC_MODE_OFF :: Aus
 LC_ENFORCE_NOW_FMT :: Erzwingen (%d)
-LC_CONFIRM_ENFORCE_FMT :: %d Pokemon auf Lv %d senken?\nDies aendert dein Team.
+LC_CONFIRM_ENFORCE_FMT :: %d Pokemon auf Lv %d senken? Dies aendert dein Team.
 LC_ENFORCED_FMT :: %d auf Lv %d gesenkt
-MENU_HUD_LEVELCAP :: Zeige: Level-Limit
+MENU_HUD_LEVELCAP :: Level-Limit
 NOTE_HUD_LEVELCAP :: Live-Nuzlocke-Warnung im HUD: wie viele Team-Pokemon ueber dem aktuellen Level-Limit liegen (in Level-Limit unter Trainer-Info gesetzt). Ausgeblendet, wenn der Modus Aus ist.
 FAV_HUD_LEVELCAP :: Level-Limit
 LC_HUD_OVER_FMT :: Ueber Limit: %d (Lv %d)
 LC_PREVIEW :: (Vorschau)
+LC_APPLIED_NOTE :: Gespeichert. Die angezeigten Level aktualisieren sich nach dem naechsten Kampf oder PC-Besuch.
+LC_ENFORCE_TITLE :: Level-Limit erzwingen

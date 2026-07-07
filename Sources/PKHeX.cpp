@@ -894,6 +894,14 @@ namespace CTRPluginFramework {
         // game keeps for menus (writes there never reach the real party/save). All party reads/writes stride
         // by this so both the fixed base (0x1E4) and the fallback scan (0x104) stay self-consistent.
         static u32  gPartyStride = 0x1E4;
+        // The DECRYPTED 0x104-packed MIRROR the game rebuilds for its overworld party MENU on a "party reload"
+        // event (enter/leave a battle, deposit/withdraw at the PC). Our authoritative write (fixed base, 0x1E4)
+        // persists to the save, but the on-screen level/stats read this mirror and stay stale until such an
+        // event — so after a party write we ALSO refresh this mirror so the change shows immediately. It's a
+        // volatile display copy (NOT the save): a wrong write self-heals on the game's next rebuild.
+        static u32  gPartyMirrorBase = 0;      // 0 = not located; located lazily by FindPartyMirrorBase()
+        static bool gPartyMirrorEncrypted = true;
+        static bool gPartyMirrorScanned = false; // scanned once per session (found or not)
         // SAFETY GATE for party identity WRITES (Swap commit into a party slot, Party-edit save-to-party).
         // Fase 1 kept this false to verify the fixed address/stride/encryption read-only. HW-confirmed the
         // reads on 2026-07-06 → Fase 2 flips it true so party writes hit the authoritative party.
@@ -1030,6 +1038,79 @@ namespace CTRPluginFramework {
             }
 
             return 0; // not found
+        }
+
+        // Locate the DECRYPTED 0x104-packed party MIRROR the game keeps for its overworld menu (see gPartyMirrorBase).
+        // Read-only, scanned once per session. Same ±512KB / TID-SID / 0x104-run scan the FindPartyBase fallback uses,
+        // but it runs ALWAYS (independent of the fixed authoritative base) and EXCLUDES the PC box block AND the
+        // authoritative fixed party region, so it lands on the distinct menu mirror. Returns 0 if not present.
+        u32 FindPartyMirrorBase(void) {
+            if (gPartyMirrorScanned) return gPartyMirrorBase;
+            gPartyMirrorScanned = true;
+
+            const u32 boxBase = AutoGameSet((u32)0x8C861C8, (u32)0x8C9E134);
+            const u32 authBase = AutoGameSet((u32)0x8CE1CF8, (u32)0x8CFB26C); // fixed authoritative party to exclude
+            u16 tid = 0, sid = 0;
+            PK6 boxpk;
+            if (GetPokemon(boxBase, &boxpk)) { tid = boxpk.TID; sid = boxpk.SID; }
+            if (tid == 0 && sid == 0) ReadPlayerTrainerID(tid, sid);
+            if (tid == 0 && sid == 0) return 0;
+
+            const u32 SLOT = 0x104;
+            const u32 BOX_SPAN = 31u * 30u * 0xE8;
+            const u32 scanStart = boxBase - 0x80000;
+            const u32 scanEnd   = boxBase + 0x80000;
+            const u32 CHUNK = 0x8000;
+            static u8 buf[CHUNK];
+            static u32 matchAddr[256];
+            static u8  matchEnc[256];
+            int n = 0;
+
+            auto excluded = [&](u32 X) -> bool {
+                if (X >= boxBase && X < boxBase + BOX_SPAN) return true;       // PC box block
+                if (X >= authBase && X < authBase + 6u * 0x1E4) return true;   // authoritative party
+                return false;
+            };
+
+            for (u32 chunk = scanStart; chunk + SLOT < scanEnd && n < 256; chunk += (CHUNK - SLOT)) {
+                if (!Process::CopyMemory(buf, (u8*)chunk, CHUNK)) continue;
+                for (u32 off = 0; off + SLOT <= CHUNK && n < 256; off += 4) {
+                    if (*(u32*)(buf + off) == 0)        continue;
+                    if (*(u16*)(buf + off + 0x04) != 0) continue;
+                    u32 X = chunk + off;
+                    if (excluded(X)) continue;
+                    bool owned = false, enc = false;
+                    u16 sp = *(u16*)(buf + off + 0x08), t = *(u16*)(buf + off + 0x0C), s = *(u16*)(buf + off + 0x0E);
+                    if (sp >= 1 && sp <= 721 && t == tid && s == sid) { owned = true; enc = false; }
+                    if (!owned) { PK6 pk; if (GetPokemon(X, &pk) && pk.TID == tid && pk.SID == sid) { owned = true; enc = true; } }
+                    if (!owned) continue;
+                    matchAddr[n] = X; matchEnc[n] = enc; n++;
+                }
+            }
+
+            // The mirror is the longest run of owned mons at exactly 0x104 stride; tie -> lowest address.
+            auto ownedIdx = [&](u32 a) -> int { for (int k = 0; k < n; k++) if (matchAddr[k] == a) return k; return -1; };
+            int bestIdx = -1, bestRun = 0;
+            for (int i = 0; i < n; i++) {
+                if (ownedIdx(matchAddr[i] + SLOT) < 0) continue;
+                int run = 1;
+                while (run < 6 && ownedIdx(matchAddr[i] + (u32)run * SLOT) >= 0) run++;
+                if (run > bestRun || (run == bestRun && bestIdx >= 0 && matchAddr[i] < matchAddr[bestIdx])) { bestRun = run; bestIdx = i; }
+            }
+            if (bestIdx < 0) return 0; // no 0x104 pair -> no menu mirror in this state; skip (fallback note covers it)
+
+            // Walk backward over contiguous valid PK6 slots (any OT) to land on the mirror's slot 0.
+            gPartyMirrorEncrypted = matchEnc[bestIdx];
+            u32 b = matchAddr[bestIdx];
+            { PK6 tmp;
+              for (int back = 0; back < 6 && b >= scanStart + SLOT; back++) {
+                  u32 prev = b - SLOT;
+                  bool ok = gPartyMirrorEncrypted ? GetPokemon(prev, &tmp) : GetPokemonRaw(prev, &tmp);
+                  if (!(ok && tmp.species >= 1 && tmp.species <= 721)) break;
+                  b = prev;
+              } }
+            gPartyMirrorBase = b;
+            return gPartyMirrorBase;
         }
 
         // Count occupied slots in the overworld party (same source the View Party Summary viewer uses: the
@@ -1176,12 +1257,14 @@ namespace CTRPluginFramework {
         // the change persists to save. An empty/invalid species clears the party-PK6 region of the slot.
         // Tail offsets (plaintext, absolute within the slot) match RefillPartyOverworld: 0xE8 status(u32),
         // 0xEC level(u8), 0xF0 curHP, 0xF2 maxHP, 0xF4 Atk, 0xF6 Def, 0xF8 Spe, 0xFA SpA, 0xFC SpD.
-        static bool WritePartyMemberFull(u32 addr, PK6 &pk) {
+        // Low-level: write ONE 0x104-based party slot (used for both the authoritative party AND the menu mirror).
+        // Body via SetPokemon/SetPokemonRaw (enc-aware) + the recomputed plaintext tail. Empty species clears it.
+        static bool WritePartySlot(u32 addr, PK6 &pk, bool enc) {
             if (pk.species < 1 || pk.species > 721) {
                 static const u8 zero[0x104] = {0};
                 return Process::Patch(addr, (u8*)zero, 0x104); // clear body + stat tail
             }
-            bool ok = gPartyEncrypted ? SetPokemon(addr, &pk) : SetPokemonRaw(addr, &pk); // body [0..0xE7]
+            bool ok = enc ? SetPokemon(addr, &pk) : SetPokemonRaw(addr, &pk); // body [0..0xE7]
             if (!ok) return false;
             int level = LevelFromExp(pk.species, pk.exp);
             u16 st[6]; CalcStats(pk.species, level, pk.nature, pk.iv32, pk.EV, st); // display order HP,Atk,Def,SpA,SpD,Spe
@@ -1195,6 +1278,19 @@ namespace CTRPluginFramework {
             Process::Write16(addr + 0xFA, st[3]);        // SpA
             Process::Write16(addr + 0xFC, st[4]);        // SpD
             return true;
+        }
+        static bool WritePartyMemberFull(u32 addr, PK6 &pk) {
+            bool ok = WritePartySlot(addr, pk, gPartyEncrypted);
+            // Also refresh the game's overworld-menu MIRROR (see gPartyMirrorBase) at the SAME slot, so a level/
+            // stat/species edit shows in the in-game party menu IMMEDIATELY instead of only after the next battle
+            // or PC-box visit. The mirror is a volatile display copy, not the save, so a stray write self-heals.
+            if (ok && PARTY_WRITE_ENABLED && gPartyBase && addr >= gPartyBase && addr < gPartyBase + 6u * gPartyStride) {
+                int slot = (int)((addr - gPartyBase) / gPartyStride);
+                u32 mbase = FindPartyMirrorBase();
+                if (mbase && slot >= 0 && slot < 6)
+                    WritePartySlot(mbase + (u32)slot * 0x104, pk, gPartyMirrorEncrypted);
+            }
+            return ok;
         }
 
         // ---- Pokemon type chips (colored badges). Index 0=None..18=Fairy (matches gMoveExtra / spawnerType1-2). ----
@@ -4186,7 +4282,30 @@ namespace CTRPluginFramework {
             static int viewIdx = 0, viewScroll = 0;
 
             bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
+            bool confirming = false; int cfOver = 0, cfCap = 0; // custom colored Enforce confirm overlay
             drainKeys();
+
+            // Draw a list of colored segments centered on `scrW` at row y. Handles our own centering + color
+            // (a plain MessageBox can't color inline and clipped the confirm text).
+            auto centerSegs = [&](const Screen &scr, int scrW, int y, const std::vector<std::pair<string, Color>> &segs) {
+                int w = 0; for (auto &s : segs) w += (int)OSD::GetTextWidth(true, s.first);
+                int x = (scrW - w) / 2;
+                for (auto &s : segs) { scr.DrawSysfont(s.second << s.first, x, y, s.second); x += (int)OSD::GetTextWidth(true, s.first); }
+            };
+            // Word-wrap `s` to lines no wider than maxW px.
+            auto wrapWords = [&](const string &s, int maxW) -> std::vector<string> {
+                std::vector<string> lines; string cur; size_t i = 0;
+                while (i <= s.size()) {
+                    size_t sp = s.find(' ', i);
+                    string word = s.substr(i, sp == string::npos ? string::npos : sp - i);
+                    string cand = cur.empty() ? word : cur + " " + word;
+                    if ((int)OSD::GetTextWidth(true, cand) > maxW && !cur.empty()) { lines.push_back(cur); cur = word; }
+                    else cur = cand;
+                    if (sp == string::npos) break; i = sp + 1;
+                }
+                if (!cur.empty()) lines.push_back(cur);
+                return lines;
+            };
 
             while (true) {
                 Controller::Update();
@@ -4195,6 +4314,49 @@ namespace CTRPluginFramework {
                     while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
                     PluginMenu::Close(); break;
                 }
+
+                // ===== Enforce confirmation overlay (custom, colored, centered) =====
+                if (confirming) {
+                    bool cdown = Touch::IsDown(); if (cdown) lastPos = Touch::GetPosition();
+                    bool ctap = armed && !cdown && wasDown; if (!cdown) armed = true; wasDown = cdown;
+                    const int byY = 152, byH = 40, yesX = 44, yesW = 108, noX = 168, noW = 108;
+                    bool doYes = Controller::IsKeyPressed(Key::A) || (ctap && inBox(lastPos, yesX, byY, yesW, byH));
+                    bool doNo  = Controller::IsKeyPressed(Key::B) || (ctap && inBox(lastPos, noX,  byY, noW,  byH));
+                    if (doYes) {
+                        int n = ClampPartyToCap(cfCap);
+                        string msg = Utils::Format(getLanguage->Get("LC_ENFORCED_FMT").c_str(), n, cfCap);
+                        // Always tell the player how it lands in-game: applied + saved now, but the party menu's
+                        // on-screen level refreshes after the next battle or PC-box visit (the game rebuilds it then).
+                        if (n > 0) msg += string("\n") + getLanguage->Get("LC_APPLIED_NOTE");
+                        OSD::Notify(msg);
+                        confirming = false; drainKeys(); armed = false; wasDown = false;
+                    } else if (doNo) { confirming = false; drainKeys(); armed = false; wasDown = false; }
+
+                    // TOP: a centered modal card with a red header + word-wrapped question + a colored summary.
+                    top.DrawRect(48, 46, 304, 150, bg, true); top.DrawRect(48, 46, 304, 150, enfC, false); top.DrawRect(49, 47, 302, 148, enfC, false);
+                    top.DrawRect(48, 46, 304, 24, enfC, true);
+                    { string t = getLanguage->Get("LC_ENFORCE_TITLE"); top.DrawSysfont(AutoContrastText(enfC) << t, (400 - (int)OSD::GetTextWidth(true, t)) / 2, 51, AutoContrastText(enfC)); }
+                    {
+                        string q = Utils::Format(getLanguage->Get("LC_CONFIRM_ENFORCE_FMT").c_str(), cfOver, cfCap);
+                        for (size_t p; (p = q.find("\\n")) != string::npos; ) q.replace(p, 2, " "); // flatten stored breaks; we wrap ourselves
+                        std::vector<string> ln = wrapWords(q, 272);
+                        int y = 84; for (size_t i = 0; i < ln.size() && i < 3; ++i) { top.DrawSysfont(txt << ln[i], (400 - (int)OSD::GetTextWidth(true, ln[i])) / 2, y, txt); y += 18; }
+                    }
+                    centerSegs(top, 400, 150, { {to_string(cfOver), overC}, {"  >  ", mutedC}, {string("Lv ") + to_string(cfCap), okC} });
+
+                    // BOTTOM: big Yes / No buttons (tappable) + key hints.
+                    bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
+                    bot.DrawSysfont(title << getLanguage->Get("LC_ENFORCE_TITLE"), 34, 40, title);
+                    { Color etc = AutoContrastText(okC); bot.DrawRect(yesX, byY, yesW, byH, okC, true); bot.DrawRect(yesX, byY, yesW, byH, border, false);
+                      string y = getLanguage->Get("NOTE_YES"); bot.DrawSysfont(etc << y, yesX + (yesW - (int)OSD::GetTextWidth(true, y)) / 2, byY + 13, etc); }
+                    { Color ntc = AutoContrastText(mutedC); bot.DrawRect(noX, byY, noW, byH, mutedC, true); bot.DrawRect(noX, byY, noW, byH, border, false);
+                      string nn = getLanguage->Get("NOTE_NO"); bot.DrawSysfont(ntc << nn, noX + (noW - (int)OSD::GetTextWidth(true, nn)) / 2, byY + 13, ntc); }
+                    { string h = "A / B"; bot.DrawSysfont(mutedC << h, (320 - (int)OSD::GetTextWidth(true, h)) / 2, byY + byH + 6, mutedC); }
+
+                    OSD::SwapBuffers();
+                    continue;
+                }
+
                 if (Controller::IsKeyPressed(Key::B)) break;
 
                 // Offset quick-adjust with the D-pad too (touch buttons below do the same). Offset is stored
@@ -4259,7 +4421,7 @@ namespace CTRPluginFramework {
                 { int gap = 6, tot = 0; for (int i = 0; i < 3; ++i) { pillW[i] = (int)OSD::GetTextWidth(true, getLanguage->Get(modes[i].key)) + 18; tot += pillW[i]; } tot += gap * 2;
                   int sx = 20 + (280 - tot) / 2; for (int i = 0; i < 3; ++i) { pillX[i] = sx; sx += pillW[i] + gap; } }
                 const int offY = 84, minusX = 96, plusX = 150, offBtnW = 20;
-                const int enfX = 34, enfY = 176, enfW = 232, enfH = 26;
+                const int enfX = 34, enfY = 176, enfW = 252, enfH = 26; // 252 = 34..286 (symmetric 14px margins) -> centered on the 280-wide panel
                 bool enfActive = (g_levelCapMode == 1 && over > 0 && cap > 0);
 
                 // ---- input: touch ----
@@ -4271,11 +4433,8 @@ namespace CTRPluginFramework {
                     if (inBox(lastPos, plusX,  offY, offBtnW, 20) && g_levelCapOffset < 16) SetLevelCapOffset(g_levelCapOffset + 1);
                     for (int r = 0; r < GVIS && r < nUp; ++r) { int gy = GY0 + r * GRH; if (inBox(lastPos, 28, gy - 1, 244, GRH)) viewIdx = viewScroll + r; }
                     if (enfActive && inBox(lastPos, enfX, enfY, enfW, enfH)) {
-                        string q = Utils::Format(getLanguage->Get("LC_CONFIRM_ENFORCE_FMT").c_str(), over, cap);
-                        if (MessageBox(CenterAlign(q), DialogType::DialogYesNo, ClearScreen::Both)()) {
-                            int n = ClampPartyToCap(cap);
-                            OSD::Notify(Utils::Format(getLanguage->Get("LC_ENFORCED_FMT").c_str(), n, cap));
-                        }
+                        // Open the custom colored confirm overlay (handled at the top of the loop).
+                        confirming = true; cfOver = over; cfCap = cap;
                         drainKeys(); armed = false; wasDown = false;
                     }
                 }
@@ -4327,7 +4486,7 @@ namespace CTRPluginFramework {
                 // ---- BOTTOM: manager (mode pills, offset stepper, upcoming-gym caps, Enforce) ----
                 bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
                 bot.DrawSysfont(title << getLanguage->Get("LEVEL_CAP"), 34, 28, title);
-                bot.DrawRect(34, 46, 232, 1, title, true);
+                bot.DrawRect(34, 46, 252, 1, title, true); // extend to a symmetric right margin (x34..286)
                 for (int i = 0; i < 3; ++i) {
                     bool on = ((int)g_levelCapMode == i);
                     Color fill = on ? modes[i].col : bg2;
@@ -4347,21 +4506,33 @@ namespace CTRPluginFramework {
 
                 // upcoming gyms + their own caps (auto ace + offset); the real NEXT one is fill+tagged, the
                 // BROWSED one (D-Pad Up/Down or tap) gets a selection outline - both can be the same row.
+                // "Cap NN" right-aligns to a FIXED column across all rows (capRightX); the "Next" tag (next row
+                // only) sits to its RIGHT at the panel edge so it never shoves the cap number. The selection
+                // highlight/outline hugs the row's rightmost text instead of a fixed band.
+                const int capRightX = 244, nextRightX = 286;
                 for (int r = 0; r < GVIS && r < nUp; ++r) {
                     int li = viewScroll + r; if (li >= nUp) break;
                     int ti = upList[li], gy = GY0 + r * GRH;
                     bool isNext = (ti == nextTi); bool isViewed = (li == viewIdx);
-                    if (isNext) bot.DrawRect(28, gy - 1, 244, GRH, bg2, true);
-                    if (isViewed) bot.DrawRect(28, gy - 1, 244, GRH, sel, false);
+                    string nx = getLanguage->Get("GYM_COACH_NEXT");
+                    int hiRight = isNext ? nextRightX : capRightX;          // right edge of the last drawn text on this row
+                    int hiX = 28, hiW = (hiRight + 4) - hiX;                // hug the content (+4px pad), start at x28
+                    if (isNext)   bot.DrawRect(hiX, gy - 1, hiW, GRH, bg2, true);
+                    if (isViewed) bot.DrawRect(hiX, gy - 1, hiW, GRH, sel, false);
                     bot.DrawRect(34, gy + 4, 10, 10, TypeColor(gymTrainerType[ti]), true);
                     string suffix = (gymTrainerKind[ti] == 0) ? Utils::Format(getLanguage->Get("GYM_COACH_BADGE_FMT").c_str(), gymTrainerOrder[ti]) : getLanguage->Get("GYM_COACH_CHAMPION");
                     string nm = string(gymTrainerNames[ti]) + " - " + suffix;
-                    bot.DrawSysfont(txt << nm, 50, gy + 2, txt);
                     int c2 = LevelCapAceOf(ti) + offVal; if (c2 < 1) c2 = 1; if (c2 > 100) c2 = 100;
-                    int rightX = 288;
-                    if (isNext) { string nx = getLanguage->Get("GYM_COACH_NEXT"); bot.DrawSysfont(okC << nx, rightX - (int)OSD::GetTextWidth(true, nx), gy + 2, okC); rightX -= (int)OSD::GetTextWidth(true, nx) + 8; }
                     string caps = getLanguage->Get("LC_CAP") + " " + to_string(c2);
-                    bot.DrawSysfont(txt << caps, rightX - (int)OSD::GetTextWidth(true, caps), gy + 2, txt);
+                    // Clip a long trainer name (e.g. "Tate and Liza - Badge 7") so it never overlaps the cap column.
+                    int nameMax = (capRightX - (int)OSD::GetTextWidth(true, caps)) - 8 - 50;
+                    if ((int)OSD::GetTextWidth(true, nm) > nameMax) {
+                        while (nm.size() > 4 && (int)OSD::GetTextWidth(true, nm + "..") > nameMax) nm.pop_back();
+                        nm += "..";
+                    }
+                    bot.DrawSysfont(txt << nm, 50, gy + 2, txt);
+                    bot.DrawSysfont(txt << caps, capRightX - (int)OSD::GetTextWidth(true, caps), gy + 2, txt);
+                    if (isNext) bot.DrawSysfont(okC << nx, nextRightX - (int)OSD::GetTextWidth(true, nx), gy + 2, okC);
                 }
 
                 {
@@ -8019,7 +8190,11 @@ namespace CTRPluginFramework {
         bool HandlePokemonData(PK6 &pokemon, MenuEntry *entry, const function<bool(PK6&)> &processFunc, const function<string()> &getMessage) {
             if (VerifyPokemonData(CurrentPtr(), &pokemon)) {
                 if (processFunc(pokemon)) {
-                    bool wrote = (gPartyMode && !gPartyEncrypted) ? SetPokemonRaw(CurrentPtr(), &pokemon) : SetPokemon(CurrentPtr(), &pokemon);
+                    // For a live party slot, write the FULL member (EK6 body + recomputed level/stat tail +
+                    // the menu mirror) so the edit shows in-game - NOT a body-only SetPokemon that leaves the
+                    // 0xEC level/stat tail stale. The PC box keeps the plain box write.
+                    bool wrote = gPartyMode ? WritePartyMemberFull(CurrentPtr(), pokemon)
+                                            : SetPokemon(CurrentPtr(), &pokemon);
 
                     if (wrote) {
                         string msg = getMessage();
