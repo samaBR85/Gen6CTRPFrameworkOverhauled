@@ -1368,3 +1368,29 @@ BREEDING_REASON_NO_GROUP :: Ils ne partagent pas de groupe d'oeufs.
 BREEDING_COMPATIBLE :: Compatible
 BREEDING_EGG_MOVE_LIST_HDR :: CAPACITES OEUF QU'IL PEUT APPRENDRE
 BREEDING_IF_MOTHER_FMT :: Si %s est la mere :
+
+# ==== Level Cap (nuzlocke) ====
+MENU_LEVEL_CAP :: Niveau max
+NOTE_LEVEL_CAP :: Aide Nuzlocke : fixe un niveau maximum a partir du niveau de l'as du PROCHAIN champion d'arene (lu depuis vos badges), plus un decalage que vous choisissez ; il avance donc tout seul a mesure que vous gagnez des badges.\n\nL'ecran du haut liste votre equipe face au max - tout Pokemon au-dessus est signale. Ecran du bas : touchez Alerte/Forcer/Off, touchez - / + pour changer le decalage, et (en mode Forcer) touchez 'Forcer' pour ramener les Pokemon au-dessus du max jusqu'au max. Forcer modifie votre equipe et sauvegarde - cela ne baisse que le niveau et les stats, rien d'autre.\n\nApres 8 badges, le max se fige sur l'as du Maitre. Activez 'Afficher : Niveau max' dans le HUD pour suivre le compte en jeu. Haut/Bas du D-Pad parcourt les prochains gymnases pour comparer votre equipe - cela ne change jamais ce que Forcer applique reellement, seul le prochain gymnase reel (SUIVANT) determine ca.
+FAV_LEVEL_CAP :: Niveau max
+LEVEL_CAP :: Niveau max
+LC_CAP :: Max
+LC_OVER_FMT :: %d au-dessus
+LC_ALL_WITHIN :: Tous sous le max
+LC_OK :: OK
+LC_OVER_TAG_FMT :: +%d
+LC_EMPTY :: - vide -
+LC_ACE_FMT :: as de %s %d
+LC_ACE_SHORT_FMT :: as %d
+LC_OFFSET :: Decalage
+LC_MODE_WARN :: Alerte
+LC_MODE_ENFORCE :: Forcer
+LC_MODE_OFF :: Off
+LC_ENFORCE_NOW_FMT :: Forcer (%d)
+LC_CONFIRM_ENFORCE_FMT :: Ramener %d Pokemon au Niv %d ?\nCela modifie votre equipe.
+LC_ENFORCED_FMT :: %d ramene(s) au Niv %d
+MENU_HUD_LEVELCAP :: Afficher : Niveau max
+NOTE_HUD_LEVELCAP :: Alerte Nuzlocke en direct sur le HUD : combien de Pokemon de votre equipe depassent le niveau max actuel (regle dans Niveau max, sous Infos Dresseur). Masque quand le mode est sur Off.
+FAV_HUD_LEVELCAP :: Niveau max
+LC_HUD_OVER_FMT :: Au-dessus : %d (Niv %d)
+LC_PREVIEW :: (apercu)

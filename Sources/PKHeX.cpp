@@ -1079,6 +1079,16 @@ namespace CTRPluginFramework {
             return lvl;
         }
 
+        // Minimum EXP to be exactly `level` for this species' growth rate - the inverse of LevelFromExp
+        // (reads the same growthTable/growthGroupOf). Used by the Level Cap "Enforce" clamp: setting a mon's
+        // exp to this value puts it at exactly `level` with no excess EXP carried over.
+        static u32 MinExpForLevel(u16 species, int level) {
+            if (level < 1)   level = 1;
+            if (level > 100) level = 100;
+            int type = (species < 808 && growthGroupOf[species] != 0xFF) ? growthGroupOf[species] : 0;
+            return (u32)growthTable[level - 1][type];
+        }
+
         string BuildSheet(void) {
             PK6 pk;
             // PC box is always encrypted; the located party may be encrypted or already decrypted in RAM.
@@ -1237,6 +1247,75 @@ namespace CTRPluginFramework {
         }
         // True if the slot at `ptr` holds a still-masked egg (valid egg PK6 not yet peeked this session).
         static bool EggMasked(u32 ptr, const PK6 &pk) { return IsEggBit(pk) && !EggRevealed(ptr); }
+
+        // ===== Level Cap (nuzlocke) core =====
+        // Which gym-challenge is "next" (same badge->leader mapping the Gym Coach uses) and its ACE (highest)
+        // Pokemon level, from GymData.hpp. Past 8 badges the E4/Champion aren't badge-tracked, so we freeze the
+        // reference at the Champion (kind 2) - the highest levels in the game - a stable postgame cap.
+        static int LevelCapNextTrainer(void) {
+            int gi = (currGameSeries == GameSeries::ORAS) ? 1 : 0;
+            u8 gymBadges = 0; Process::Read8(AutoGameSet((u32)0x8C6A6B0, (u32)0x8C71DC4), gymBadges);
+            int badgeCount = 0; for (int i = 0; i < 8; ++i) if ((gymBadges >> i) & 1) ++badgeCount;
+            if (badgeCount >= 8) {
+                for (int i = 0; i < 26; ++i) if (gymTrainerGame[i] == gi && gymTrainerKind[i] == 2) return i; // Champion
+            } else {
+                for (int i = 0; i < 26; ++i)
+                    if (gymTrainerGame[i] == gi && gymTrainerKind[i] == 0 && gymTrainerOrder[i] == badgeCount + 1) return i;
+            }
+            return -1;
+        }
+        static int LevelCapAceOf(int ti) {
+            if (ti < 0) return 0;
+            int base = gymTrainerMonOff[ti], cnt = gymTrainerMonOff[ti + 1] - base, ace = 0;
+            for (int i = 0; i < cnt; ++i) if (gymMonLevel[base + i] > ace) ace = gymMonLevel[base + i];
+            return ace;
+        }
+        // The current cap = next challenge's ace + the user's offset (g_levelCapOffset is biased +8). 0 if unknown.
+        static int LevelCapCurrent(int *outNextTi) {
+            int ti = LevelCapNextTrainer();
+            if (outNextTi) *outNextTi = ti;
+            if (ti < 0) return 0;
+            int cap = LevelCapAceOf(ti) + ((int)g_levelCapOffset - 8);
+            if (cap < 1)   cap = 1;
+            if (cap > 100) cap = 100;
+            return cap;
+        }
+        // Lower every party mon above `cap` down to exactly `cap` (exp -> MinExpForLevel), recomputing the full
+        // party member via WritePartyMemberFull so the real in-game party + save reflect it. Species/IV/EV/nature/
+        // moves/held item are untouched; only the level/exp/stats drop. Eggs skipped. Returns how many changed.
+        static int ClampPartyToCap(int cap) {
+            if (cap <= 0) return 0;
+            u32 base = FindPartyBase();
+            if (!base) return 0;
+            int clamped = 0;
+            for (int i = 0; i < 6; ++i) {
+                u32 addr = base + i * gPartyStride;
+                PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(addr, &pk) : GetPokemonRaw(addr, &pk);
+                if (!ok || pk.species < 1 || pk.species > 721 || IsEggBit(pk)) continue;
+                if (LevelFromExp(pk.species, pk.exp) <= cap) continue;
+                pk.exp = MinExpForLevel(pk.species, cap);
+                if (WritePartyMemberFull(addr, pk)) ++clamped;
+            }
+            return clamped;
+        }
+        // Exposed for the HUD (Codes.cpp): how many party mons currently exceed the cap; writes the cap to
+        // *outCap. Returns -1 when the feature is Off or the cap/party can't be resolved (HUD then shows nothing).
+        int LevelCapOverCount(int *outCap) {
+            if (outCap) *outCap = 0;
+            if (g_levelCapMode == 2) return -1; // Off
+            int cap = LevelCapCurrent(nullptr);
+            if (outCap) *outCap = cap;
+            if (cap <= 0) return -1;
+            u32 base = FindPartyBase();
+            if (!base) return -1;
+            int over = 0;
+            for (int i = 0; i < 6; ++i) {
+                PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(base + i * gPartyStride, &pk) : GetPokemonRaw(base + i * gPartyStride, &pk);
+                if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk) && LevelFromExp(pk.species, pk.exp) > cap)
+                    ++over;
+            }
+            return over;
+        }
         // Blocking Yes/No confirm before revealing (keeps the anti-spoiler opt-in). Returns true if the user peeks.
         static bool EggPeekConfirm(void) {
             return MessageBox(CenterAlign(getLanguage->Get("NOTE_EGG_PEEK_CONFIRM")), DialogType::DialogYesNo, ClearScreen::Both)();
@@ -4079,6 +4158,218 @@ namespace CTRPluginFramework {
                     bot.DrawRect(30, 178, 260, 26, shopColor, true); bot.DrawRect(30, 178, 260, 26, title, false);
                     string sl = getLanguage->Get("GYM_COACH_SHOPPING_LIST");
                     bot.DrawSysfont(shTxt << sl, 30 + (260 - (int)OSD::GetTextWidth(true, sl)) / 2, 185, shTxt);
+                }
+
+                OSD::SwapBuffers();
+            }
+        }
+
+        // ===== Level Cap (nuzlocke) =====
+        // Trainer Info manager: shows your 6 party mons against an auto level cap (next gym leader's ace + your
+        // offset, from GymData.hpp + the save's badge count) and, in Enforce mode, pulls any over-cap mon back
+        // down to the cap. The cap auto-advances as you earn badges, so nothing to re-enter between sessions;
+        // only the offset and the Warn/Enforce/Off mode persist (Data.bin). A live "Over cap" HUD line mirrors this.
+        void LevelCapTool(MenuEntry *entry) {
+            (void)entry;
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+            const FwkSettings &st = FwkSettings::Get();
+            Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+            Color title = st.WindowTitleColor, border = st.BackgroundBorderColor, sel = st.MenuSelectedItemColor;
+            const Color overC(0xC0, 0x39, 0x2B), okC(0x1D, 0x9E, 0x75), enfC(0xA3, 0x2D, 0x2D), mutedC(0x88, 0x87, 0x80);
+            const Color warnCol(0xE0, 0x8A, 0x2E);
+            struct ModeDef { const char *key; Color col; };
+            ModeDef modes[3] = { {"LC_MODE_WARN", warnCol}, {"LC_MODE_ENFORCE", enfC}, {"LC_MODE_OFF", mutedC} };
+
+            // D-Pad Up/Down browse cursor over the upcoming-gyms list (compare-only - see below; it never
+            // changes what "Enforce now" targets, only what the top screen previews against).
+            static int viewIdx = 0, viewScroll = 0;
+
+            bool wasDown = false, armed = false; UIntVector lastPos = Touch::GetPosition();
+            drainKeys();
+
+            while (true) {
+                Controller::Update();
+                if (System::IsSleeping()) break;
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close(); break;
+                }
+                if (Controller::IsKeyPressed(Key::B)) break;
+
+                // Offset quick-adjust with the D-pad too (touch buttons below do the same). Offset is stored
+                // biased by +8 (8 == 0), valid biased range [1..16] = offset -7..+8.
+                if (Controller::IsKeyPressed(Key::Left)  && g_levelCapOffset > 1)  SetLevelCapOffset(g_levelCapOffset - 1);
+                if (Controller::IsKeyPressed(Key::Right) && g_levelCapOffset < 16) SetLevelCapOffset(g_levelCapOffset + 1);
+
+                int nextTi; int cap = LevelCapCurrent(&nextTi); // REAL cap: drives Enforce/mode only, never the browse preview
+                int offVal = (int)g_levelCapOffset - 8;
+
+                // Read the 6 party slots once this frame (cheap; also gives live feedback right after Enforce).
+                u16 pSpec[6] = {0}; int pLvl[6] = {0}; bool pEgg[6] = {false}, pOcc[6] = {false};
+                u32 pbase = FindPartyBase();
+                int over = 0; // count vs the REAL cap - only used for the Enforce button label/confirm
+                for (int i = 0; i < 6 && pbase; ++i) {
+                    PK6 pk; bool ok = gPartyEncrypted ? GetPokemon(pbase + i * gPartyStride, &pk) : GetPokemonRaw(pbase + i * gPartyStride, &pk);
+                    if (ok && pk.species >= 1 && pk.species <= 721) {
+                        pOcc[i] = true; pSpec[i] = pk.species; pEgg[i] = IsEggBit(pk);
+                        if (!pEgg[i]) { pLvl[i] = LevelFromExp(pk.species, pk.exp); if (cap > 0 && pLvl[i] > cap) ++over; }
+                    }
+                }
+
+                // Upcoming gyms list (built here, before rendering, since BOTH screens need it now: the
+                // bottom list to scroll/highlight, the top screen to preview against the browsed one).
+                int gi = (currGameSeries == GameSeries::ORAS) ? 1 : 0;
+                u8 gb = 0; Process::Read8(AutoGameSet((u32)0x8C6A6B0, (u32)0x8C71DC4), gb);
+                int bc = 0; for (int i = 0; i < 8; ++i) if ((gb >> i) & 1) ++bc;
+                int upList[16], nUp = 0;
+                for (int ord = (bc < 8 ? bc + 1 : 9); ord <= 8 && nUp < 16; ++ord)
+                    for (int i = 0; i < 26; ++i) if (gymTrainerGame[i] == gi && gymTrainerKind[i] == 0 && gymTrainerOrder[i] == ord) { upList[nUp++] = i; break; }
+                for (int i = 0; i < 26 && nUp < 16; ++i) if (gymTrainerGame[i] == gi && gymTrainerKind[i] == 2) { upList[nUp++] = i; break; }
+                if (viewIdx >= nUp) viewIdx = (nUp > 0) ? nUp - 1 : 0;
+                if (viewIdx < 0) viewIdx = 0;
+                const int GY0 = 112, GRH = 20, GVIS = 3;
+
+                // D-Pad Up/Down moves the browse cursor (same held-repeat idiom Gym Coach uses).
+                static int heldDir = 0, repTimer = 0;
+                int dir = Controller::IsKeyDown(Key::Down) ? 1 : (Controller::IsKeyDown(Key::Up) ? -1 : 0);
+                if (dir != 0 && nUp > 1) {
+                    bool fire = false;
+                    if (dir != heldDir) { heldDir = dir; repTimer = 16; fire = true; }
+                    else if (--repTimer <= 0) { repTimer = 4; fire = true; }
+                    if (fire) viewIdx = (viewIdx + dir + nUp) % nUp;
+                } else if (dir == 0) heldDir = 0;
+                if (viewIdx < viewScroll) viewScroll = viewIdx;
+                if (viewIdx >= viewScroll + GVIS) viewScroll = viewIdx - GVIS + 1;
+                if (viewScroll > nUp - GVIS) viewScroll = (nUp > GVIS) ? nUp - GVIS : 0;
+                if (viewScroll < 0) viewScroll = 0;
+
+                // The PREVIEW cap: whichever gym is highlighted in the bottom list (defaults to the real
+                // next gym - upList[0] always IS nextTi). Only used for the top screen's comparison; never
+                // for Enforce, which always targets the REAL `cap`/`nextTi` above.
+                int viewTi = (nUp > 0) ? upList[viewIdx] : -1;
+                int viewCap = 0;
+                if (viewTi >= 0) { viewCap = LevelCapAceOf(viewTi) + offVal; if (viewCap < 1) viewCap = 1; if (viewCap > 100) viewCap = 100; }
+                bool previewing = (viewTi >= 0 && viewTi != nextTi);
+                int viewOver = 0;
+                for (int i = 0; i < 6; ++i) if (pOcc[i] && !pEgg[i] && viewCap > 0 && pLvl[i] > viewCap) ++viewOver;
+
+                // Layout geometry (recomputed each frame so hit-tests stay in sync with what's drawn).
+                int pillY = 54, pillW[3], pillX[3];
+                { int gap = 6, tot = 0; for (int i = 0; i < 3; ++i) { pillW[i] = (int)OSD::GetTextWidth(true, getLanguage->Get(modes[i].key)) + 18; tot += pillW[i]; } tot += gap * 2;
+                  int sx = 20 + (280 - tot) / 2; for (int i = 0; i < 3; ++i) { pillX[i] = sx; sx += pillW[i] + gap; } }
+                const int offY = 84, minusX = 96, plusX = 150, offBtnW = 20;
+                const int enfX = 34, enfY = 176, enfW = 232, enfH = 26;
+                bool enfActive = (g_levelCapMode == 1 && over > 0 && cap > 0);
+
+                // ---- input: touch ----
+                bool down = Touch::IsDown(); UIntVector tp = down ? Touch::GetPosition() : lastPos; if (down) lastPos = tp;
+                bool tap = armed && !down && wasDown; if (!down) armed = true; wasDown = down;
+                if (tap) {
+                    for (int i = 0; i < 3; ++i) if (inBox(lastPos, pillX[i], pillY, pillW[i], 20)) SetLevelCapMode(i);
+                    if (inBox(lastPos, minusX, offY, offBtnW, 20) && g_levelCapOffset > 1)  SetLevelCapOffset(g_levelCapOffset - 1);
+                    if (inBox(lastPos, plusX,  offY, offBtnW, 20) && g_levelCapOffset < 16) SetLevelCapOffset(g_levelCapOffset + 1);
+                    for (int r = 0; r < GVIS && r < nUp; ++r) { int gy = GY0 + r * GRH; if (inBox(lastPos, 28, gy - 1, 244, GRH)) viewIdx = viewScroll + r; }
+                    if (enfActive && inBox(lastPos, enfX, enfY, enfW, enfH)) {
+                        string q = Utils::Format(getLanguage->Get("LC_CONFIRM_ENFORCE_FMT").c_str(), over, cap);
+                        if (MessageBox(CenterAlign(q), DialogType::DialogYesNo, ClearScreen::Both)()) {
+                            int n = ClampPartyToCap(cap);
+                            OSD::Notify(Utils::Format(getLanguage->Get("LC_ENFORCED_FMT").c_str(), n, cap));
+                        }
+                        drainKeys(); armed = false; wasDown = false;
+                    }
+                }
+
+                // ---- TOP: cap header + party list (compares against the PREVIEWED gym, viewCap/viewOver) ----
+                top.DrawRect(30, 20, 340, 200, bg, true); top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("LEVEL_CAP"), 42, 28, title);
+                {
+                    string ov = viewOver > 0 ? Utils::Format(getLanguage->Get("LC_OVER_FMT").c_str(), viewOver) : getLanguage->Get("LC_ALL_WITHIN");
+                    Color oc = viewOver > 0 ? overC : okC;
+                    top.DrawSysfont(oc << ov, 358 - (int)OSD::GetTextWidth(true, ov), 28, oc);
+                }
+                top.DrawRect(42, 46, 316, 1, title, true);
+                {
+                    Color capCol = previewing ? mutedC : title;
+                    string capL = getLanguage->Get("LC_CAP") + " " + (viewCap > 0 ? to_string(viewCap) : string("-"));
+                    if (previewing) capL += " " + getLanguage->Get("LC_PREVIEW");
+                    top.DrawSysfont(capCol << capL, 42, 54, capCol);
+                    if (viewTi >= 0) {
+                        string der = Utils::Format(getLanguage->Get("LC_ACE_FMT").c_str(), gymTrainerNames[viewTi], LevelCapAceOf(viewTi))
+                                   + Utils::Format("  %+d", offVal);
+                        top.DrawSysfont(txt << der, 358 - (int)OSD::GetTextWidth(true, der), 54, txt);
+                    }
+                }
+                const int RY0 = 78, RH = 22;
+                for (int i = 0; i < 6; ++i) {
+                    int ry = RY0 + i * RH;
+                    if (!pOcc[i]) { top.DrawSysfont(mutedC << getLanguage->Get("LC_EMPTY"), 54, ry + 3, mutedC); continue; }
+                    bool isOver = (!pEgg[i] && viewCap > 0 && pLvl[i] > viewCap);
+                    if (isOver) top.DrawRect(42, ry, 316, 20, bg2, true);
+                    top.DrawSysfont(txt << speciesList[pSpec[i] - 1], 54, ry + 3, txt);
+                    if (pEgg[i]) {
+                        top.DrawSysfont(mutedC << string("-"), 246, ry + 3, mutedC);
+                        continue;
+                    }
+                    string lv = "Lv " + to_string(pLvl[i]);
+                    top.DrawSysfont(txt << lv, 250 - (int)OSD::GetTextWidth(true, lv), ry + 3, txt);
+                    if (isOver) {
+                        string tag = Utils::Format(getLanguage->Get("LC_OVER_TAG_FMT").c_str(), pLvl[i] - viewCap);
+                        int tw = (int)OSD::GetTextWidth(true, tag) + 10;
+                        top.DrawRect(358 - tw, ry + 2, tw, 15, overC, true);
+                        top.DrawSysfont(AutoContrastText(overC) << tag, 358 - tw + 5, ry + 3, AutoContrastText(overC));
+                    } else {
+                        string okS = getLanguage->Get("LC_OK");
+                        top.DrawSysfont(okC << okS, 358 - (int)OSD::GetTextWidth(true, okS), ry + 3, okC);
+                    }
+                }
+
+                // ---- BOTTOM: manager (mode pills, offset stepper, upcoming-gym caps, Enforce) ----
+                bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
+                bot.DrawSysfont(title << getLanguage->Get("LEVEL_CAP"), 34, 28, title);
+                bot.DrawRect(34, 46, 232, 1, title, true);
+                for (int i = 0; i < 3; ++i) {
+                    bool on = ((int)g_levelCapMode == i);
+                    Color fill = on ? modes[i].col : bg2;
+                    bot.DrawRect(pillX[i], pillY, pillW[i], 20, fill, true);
+                    bot.DrawRect(pillX[i], pillY, pillW[i], 20, border, false);
+                    Color tc = on ? AutoContrastText(modes[i].col) : txt;
+                    string lb = getLanguage->Get(modes[i].key);
+                    bot.DrawSysfont(tc << lb, pillX[i] + (pillW[i] - (int)OSD::GetTextWidth(true, lb)) / 2, pillY + 4, tc);
+                }
+                bot.DrawSysfont(txt << getLanguage->Get("LC_OFFSET"), 34, offY + 4, txt);
+                bot.DrawRect(minusX, offY, offBtnW, 20, bg2, true); bot.DrawRect(minusX, offY, offBtnW, 20, border, false);
+                bot.DrawSysfont(txt << string("-"), minusX + (offBtnW - (int)OSD::GetTextWidth(true, "-")) / 2, offY + 4, txt);
+                bot.DrawRect(plusX, offY, offBtnW, 20, bg2, true); bot.DrawRect(plusX, offY, offBtnW, 20, border, false);
+                bot.DrawSysfont(txt << string("+"), plusX + (offBtnW - (int)OSD::GetTextWidth(true, "+")) / 2, offY + 4, txt);
+                { string ov = Utils::Format("%+d", offVal); bot.DrawSysfont(title << ov, 133 - (int)OSD::GetTextWidth(true, ov) / 2, offY + 4, title); }
+                if (nextTi >= 0) { string a = Utils::Format(getLanguage->Get("LC_ACE_SHORT_FMT").c_str(), LevelCapAceOf(nextTi)); bot.DrawSysfont(mutedC << a, 182, offY + 4, mutedC); }
+
+                // upcoming gyms + their own caps (auto ace + offset); the real NEXT one is fill+tagged, the
+                // BROWSED one (D-Pad Up/Down or tap) gets a selection outline - both can be the same row.
+                for (int r = 0; r < GVIS && r < nUp; ++r) {
+                    int li = viewScroll + r; if (li >= nUp) break;
+                    int ti = upList[li], gy = GY0 + r * GRH;
+                    bool isNext = (ti == nextTi); bool isViewed = (li == viewIdx);
+                    if (isNext) bot.DrawRect(28, gy - 1, 244, GRH, bg2, true);
+                    if (isViewed) bot.DrawRect(28, gy - 1, 244, GRH, sel, false);
+                    bot.DrawRect(34, gy + 4, 10, 10, TypeColor(gymTrainerType[ti]), true);
+                    string suffix = (gymTrainerKind[ti] == 0) ? Utils::Format(getLanguage->Get("GYM_COACH_BADGE_FMT").c_str(), gymTrainerOrder[ti]) : getLanguage->Get("GYM_COACH_CHAMPION");
+                    string nm = string(gymTrainerNames[ti]) + " - " + suffix;
+                    bot.DrawSysfont(txt << nm, 50, gy + 2, txt);
+                    int c2 = LevelCapAceOf(ti) + offVal; if (c2 < 1) c2 = 1; if (c2 > 100) c2 = 100;
+                    int rightX = 288;
+                    if (isNext) { string nx = getLanguage->Get("GYM_COACH_NEXT"); bot.DrawSysfont(okC << nx, rightX - (int)OSD::GetTextWidth(true, nx), gy + 2, okC); rightX -= (int)OSD::GetTextWidth(true, nx) + 8; }
+                    string caps = getLanguage->Get("LC_CAP") + " " + to_string(c2);
+                    bot.DrawSysfont(txt << caps, rightX - (int)OSD::GetTextWidth(true, caps), gy + 2, txt);
+                }
+
+                {
+                    Color bcol = enfActive ? enfC : mutedC;
+                    bot.DrawRect(enfX, enfY, enfW, enfH, bcol, true); bot.DrawRect(enfX, enfY, enfW, enfH, border, false);
+                    string el = Utils::Format(getLanguage->Get("LC_ENFORCE_NOW_FMT").c_str(), over);
+                    Color etc = AutoContrastText(bcol);
+                    bot.DrawSysfont(etc << el, enfX + (enfW - (int)OSD::GetTextWidth(true, el)) / 2, enfY + 6, etc);
                 }
 
                 OSD::SwapBuffers();

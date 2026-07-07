@@ -1368,3 +1368,29 @@ BREEDING_REASON_NO_GROUP :: タマゴグループが一致しません。
 BREEDING_COMPATIBLE :: 相性が良い
 BREEDING_EGG_MOVE_LIST_HDR :: 覚えられるタマゴ技
 BREEDING_IF_MOTHER_FMT :: %sが母親の場合:
+
+# ==== Level Cap (nuzlocke) ====
+MENU_LEVEL_CAP :: レベル上限
+NOTE_LEVEL_CAP :: ヌズロック向け機能：次のジムリーダーのエースのレベル（バッジ数から判定）に、自分で決めた補正を足した「レベル上限」を設定します。バッジを集めるほど自動で上がります。\n\n上画面は手持ちを上限と比較して表示し、超えている個体を強調します。下画面：警告/強制/オフを切り替え、- / + で補正を変更、（強制モードで）「今すぐ強制」を押すと上限を超えた個体を上限まで下げます。強制は手持ちを書き換えて保存します（下がるのはレベルと能力値だけ、他は変わりません）。\n\nバッジ8個以降はチャンピオンのエースで上限が固定されます。HUDの「表示：レベル上限」をオンにすると、プレイ中に超過数を確認できます。 十字キーの上下で今後のジムを見て比較できます。実際に「強制」が適用する上限は変わりません（それは本当の「次」のジムだけが決めます）。
+FAV_LEVEL_CAP :: レベル上限
+LEVEL_CAP :: レベル上限
+LC_CAP :: 上限
+LC_OVER_FMT :: %d体が超過
+LC_ALL_WITHIN :: 全員が上限内
+LC_OK :: OK
+LC_OVER_TAG_FMT :: +%d
+LC_EMPTY :: - 空き -
+LC_ACE_FMT :: %sのエース %d
+LC_ACE_SHORT_FMT :: エース%d
+LC_OFFSET :: 補正
+LC_MODE_WARN :: 警告
+LC_MODE_ENFORCE :: 強制
+LC_MODE_OFF :: オフ
+LC_ENFORCE_NOW_FMT :: 今すぐ強制 (%d)
+LC_CONFIRM_ENFORCE_FMT :: %d体をLv%dまで下げますか？\n手持ちが変更されます。
+LC_ENFORCED_FMT :: %d体をLv%dにしました
+MENU_HUD_LEVELCAP :: 表示：レベル上限
+NOTE_HUD_LEVELCAP :: HUDにヌズロックの超過警告を表示：手持ちのうち何体が現在のレベル上限（トレーナー情報の「レベル上限」で設定）を超えているか。モードがオフのときは非表示。
+FAV_HUD_LEVELCAP :: レベル上限
+LC_HUD_OVER_FMT :: 超過: %d (Lv%d)
+LC_PREVIEW :: (プレビュー)

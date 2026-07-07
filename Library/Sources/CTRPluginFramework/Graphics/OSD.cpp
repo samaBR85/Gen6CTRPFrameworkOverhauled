@@ -51,6 +51,24 @@ namespace CTRPluginFramework {
         Preferences::MarkDirty(); // so WriteSettings persists reserved[8] when the menu closes
     }
 
+    u32 g_levelCapOffset = 8;                        // see OSD.hpp (synced from Data.bin reserved[9]); stored as offset+8, so 8 == 0
+
+    void SetLevelCapOffset(u32 value) {
+        if (g_levelCapOffset == value)
+            return;
+        g_levelCapOffset = value;
+        Preferences::MarkDirty(); // so WriteSettings persists reserved[9] when the menu closes
+    }
+
+    u32 g_levelCapMode = 0;                          // see OSD.hpp (synced from Data.bin reserved[10]); 0 = Warn
+
+    void SetLevelCapMode(u32 value) {
+        if (g_levelCapMode == value)
+            return;
+        g_levelCapMode = value;
+        Preferences::MarkDirty(); // so WriteSettings persists reserved[10] when the menu closes
+    }
+
     u8 *Screen::GetFramebuffer(u32 posX, u32 posY, bool useRightFb) const {
         if (useRightFb && (!IsTop || !Is3DEnabled))
             return (nullptr);

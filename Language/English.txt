@@ -1366,3 +1366,29 @@ BREEDING_REASON_NO_GROUP :: They don't share an egg group.
 BREEDING_COMPATIBLE :: Compatible
 BREEDING_EGG_MOVE_LIST_HDR :: EGG MOVES IT CAN LEARN
 BREEDING_IF_MOTHER_FMT :: If %s is the mother:
+
+# ==== Level Cap (nuzlocke) ====
+MENU_LEVEL_CAP :: Level Cap
+NOTE_LEVEL_CAP :: Nuzlocke helper: sets a level cap from the NEXT gym leader's ace level (read from your badges) plus an offset you pick, so it advances on its own as you earn badges.\n\nTop screen lists your party against the cap - anyone over it is flagged. Bottom screen: tap Warn/Enforce/Off, tap - / + to change the offset, and (in Enforce mode) tap 'Enforce now' to pull over-cap Pokemon back down to the cap. Enforce edits your party and saves - it only lowers level and stats, nothing else changes.\n\nAfter 8 badges the cap freezes at the Champion's ace. Turn on 'Show: Level cap' in the HUD to watch the over-cap count while you play. D-Pad Up/Down browses the upcoming gyms to preview how your party compares against them - it never changes what Enforce actually targets, only the real NEXT gym's cap does that.
+FAV_LEVEL_CAP :: Level Cap
+LEVEL_CAP :: Level Cap
+LC_CAP :: Cap
+LC_OVER_FMT :: %d over cap
+LC_ALL_WITHIN :: All within cap
+LC_OK :: OK
+LC_OVER_TAG_FMT :: OVER +%d
+LC_EMPTY :: - empty -
+LC_ACE_FMT :: %s ace %d
+LC_ACE_SHORT_FMT :: ace %d
+LC_OFFSET :: Offset
+LC_MODE_WARN :: Warn
+LC_MODE_ENFORCE :: Enforce
+LC_MODE_OFF :: Off
+LC_ENFORCE_NOW_FMT :: Enforce now (%d)
+LC_CONFIRM_ENFORCE_FMT :: Lower %d Pokemon to Lv %d?\nThis changes your party.
+LC_ENFORCED_FMT :: Clamped %d to Lv %d
+MENU_HUD_LEVELCAP :: Show: Level cap
+NOTE_HUD_LEVELCAP :: Live nuzlocke over-cap warning on the HUD: how many of your party Pokemon are above the current level cap (set in Level Cap, under Trainer Info). Hidden when Level Cap mode is Off.
+FAV_HUD_LEVELCAP :: Level cap
+LC_HUD_OVER_FMT :: Over cap: %d (Lv %d)
+LC_PREVIEW :: (preview)

@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.6
+# Gen6CTRPluginFrameworkOverhauled — v0.7.7
 
 **English** · [Português](README.pt-BR.md)
 
@@ -166,6 +166,18 @@ side.
   <img src="Screenshots/v0.7.5/breeding_compat_checktwo.png" width="330" alt="Breeding Compatibility — Check Two, two species and what hatches between them" />
 </p>
 
+**Level Cap** is a nuzlocke/hardcore helper: it sets a level cap from the **next Gym Leader's ace** (read
+live from your badges) plus an offset you pick, so it advances on its own as you earn badges — nothing to
+re-enter between sessions. Your party is listed against the cap with anyone over it flagged; **D-Pad
+Up/Down** browses the upcoming gyms to preview how your team compares further ahead. Switch between
+**Warn** (just flag it) and **Enforce** (a one-tap button pulls over-cap Pokémon back down to the cap,
+recalculating their stats), or turn it **Off** for the postgame — and a live HUD field can show the
+over-cap count while you play.
+
+<p align="center">
+  <img src="Screenshots/v0.7.7/level_cap.png" width="330" alt="Level Cap — party vs. the next gym's ace level, and the Warn/Enforce manager" />
+</p>
+
 ### Win the battle
 
 The **In-Battle Tools** are the things you reach for mid-fight. **Enemy Helper** is a coach card for the foe — it
@@ -284,6 +296,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.7.4** — **EV Advisor** and **Held Item Advisor**, two more Trainer Info screens: one flags EV investment mismatched with your Pokémon's actual moves, the other suggests held items (split In Bag / To Get) — plus Team Coverage gained a third **Cart** tab for a general team-support shopping list.
 - **v0.7.5** — EV Advisor grew into **Nature / IV / EV Advisor** (three checks, one screen), and a new **Breeding Compatibility** screen (Party / Boxes / Check Two) finds Day Care pairs, the egg moves they could pass down, and lets you test any two species before you even own both.
 - **v0.7.6** — **PC Box ++** now edits your **Party**, not just the PC boxes (same visual editor), and gained a **Swap** tab to trade a Pokémon between Box and Party in two taps. Under the hood this fixes party editing for real — changes to party Pokémon now actually take effect in-game and persist to the save.
+- **v0.7.7** — **Level Cap**, a new Trainer Info screen for nuzlocke/hardcore runs: an auto level cap tied to the next Gym Leader's ace (+ your own offset), Warn or Enforce modes, a D-Pad browser to preview upcoming gyms, and a live HUD field for the over-cap count.
 
 ## 📥 Installing
 
@@ -392,8 +405,12 @@ This project stands on a long line of volunteer work — from the very first anc
 - **Johnstone** and **Chaotic Meatball** — for helping the r/ProfessorOak community grow.
 - **Dynamite** — for the O-Power order info; **Likemeon** — for the Granite Cave chaining tip.
 
+**Community suggestions**
+- **[u/Cold_Birthday_2807](https://www.reddit.com/user/Cold_Birthday_2807)** — suggested the per-gym level
+  cap idea that became **Level Cap** (v0.7.7).
+
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.7.6 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.7.7 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

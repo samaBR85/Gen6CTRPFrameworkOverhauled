@@ -1369,3 +1369,29 @@ BREEDING_REASON_NO_GROUP :: No comparten un grupo huevo.
 BREEDING_COMPATIBLE :: Compatible
 BREEDING_EGG_MOVE_LIST_HDR :: MOVIMIENTOS HUEVO QUE PUEDE APRENDER
 BREEDING_IF_MOTHER_FMT :: Si %s es la madre:
+
+# ==== Level Cap (nuzlocke) ====
+MENU_LEVEL_CAP :: Limite de nivel
+NOTE_LEVEL_CAP :: Ayuda Nuzlocke: fija un limite de nivel a partir del nivel del as del SIGUIENTE lider de gimnasio (leido de tus medallas) mas un ajuste que elijas, asi que sube solo a medida que ganas medallas.\n\nLa pantalla superior lista tu equipo frente al limite - se marca a quien lo supere. Pantalla inferior: toca Avisar/Forzar/Off, toca - / + para cambiar el ajuste y (en modo Forzar) toca 'Forzar ahora' para bajar al limite a los Pokemon que lo superan. Forzar edita tu equipo y guarda - solo baja nivel y estadisticas, nada mas.\n\nTras 8 medallas el limite se fija en el as del Campeon. Activa 'Mostrar: Limite nivel' en el HUD para ver el conteo mientras juegas. Arriba/Abajo del D-Pad recorre los proximos gimnasios para comparar tu equipo - esto nunca cambia lo que Forzar aplica de verdad, solo lo decide el gimnasio SIGUIENTE real.
+FAV_LEVEL_CAP :: Limite nivel
+LEVEL_CAP :: Limite de nivel
+LC_CAP :: Max
+LC_OVER_FMT :: %d sobre el max
+LC_ALL_WITHIN :: Todos bajo el max
+LC_OK :: OK
+LC_OVER_TAG_FMT :: +%d
+LC_EMPTY :: - vacio -
+LC_ACE_FMT :: as de %s %d
+LC_ACE_SHORT_FMT :: as %d
+LC_OFFSET :: Ajuste
+LC_MODE_WARN :: Avisar
+LC_MODE_ENFORCE :: Forzar
+LC_MODE_OFF :: Off
+LC_ENFORCE_NOW_FMT :: Forzar ahora (%d)
+LC_CONFIRM_ENFORCE_FMT :: Bajar %d Pokemon a Nv %d?\nEsto cambia tu equipo.
+LC_ENFORCED_FMT :: %d ajustado(s) a Nv %d
+MENU_HUD_LEVELCAP :: Mostrar: Limite nivel
+NOTE_HUD_LEVELCAP :: Aviso Nuzlocke en vivo en el HUD: cuantos Pokemon de tu equipo superan el limite de nivel actual (fijado en Limite de nivel, en Info de Entrenador). Oculto cuando el modo esta en Off.
+FAV_HUD_LEVELCAP :: Limite nivel
+LC_HUD_OVER_FMT :: Sobre max: %d (Nv %d)
+LC_PREVIEW :: (vista previa)

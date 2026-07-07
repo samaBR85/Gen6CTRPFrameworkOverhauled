@@ -139,6 +139,8 @@
       void TrainerCard(MenuEntry *entry);    // read-only shareable card (root menu, after View Party Summary)
       void LivingDex(MenuEntry *entry);      // read-only collection dashboard (Trainer Info): owned/shiny/missing grid
       void GymCoach(MenuEntry *entry);  // Gym Coach (Trainer Info): browse the next Gym Leader/E4/Champion's team + matchup verdict vs your party
+      void LevelCapTool(MenuEntry *entry); // Level Cap (Trainer Info): nuzlocke per-gym level cap manager (auto ace+offset, Warn/Enforce/Off)
+      int  LevelCapOverCount(int *outCap); // HUD helper: # party mons over the current cap (writes cap); -1 if Off/unavailable
       void TeamCoverage(MenuEntry *entry);  // Team Coverage (Trainer Info): party types at a glance + Defense/Offense/Cart breakdown
       void EVAdvisor(MenuEntry *entry);     // EV Advisor (Trainer Info): flags EV investment mismatched with actual known moves
       void HeldItemAdvisor(MenuEntry *entry); // Held Item Advisor (Trainer Info): held-item suggestions, split In Bag / To Get

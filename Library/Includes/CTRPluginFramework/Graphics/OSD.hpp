@@ -54,6 +54,19 @@ namespace CTRPluginFramework {
     extern u32 g_trainerCardTemplate;
     void SetTrainerCardTemplate(u32 value);
 
+    // Level Cap (nuzlocke) adjustable offset: the cap = next gym leader's ace level + offset. Stored BIASED by +8
+    // (so 8 == offset 0, range 0..16 == offset -8..+8) to keep it unsigned in Data.bin (header.reserved[9]).
+    // Mirrored here like g_bagPayMode so PLUGIN code (Codes.cpp LevelCapTool / HudCallback) can read it every frame
+    // and change it through SetLevelCapOffset() (which marks Preferences dirty). Default 8 (offset 0).
+    extern u32 g_levelCapOffset;
+    void SetLevelCapOffset(u32 value);
+
+    // Level Cap mode: 0 = Warn (only flag over-cap mons, incl. the live HUD line), 1 = Enforce (Warn + allow the
+    // "Enforce now" clamp), 2 = Off (feature idle, HUD line hidden). Persisted in Data.bin (header.reserved[10])
+    // and mirrored here like the toggles so PLUGIN code can read/flip it through SetLevelCapMode(). Default 0 (Warn).
+    extern u32 g_levelCapMode;
+    void SetLevelCapMode(u32 value);
+
     // The MenuEntry* of that very "Show ON/OFF notifications" checkbox (stored as void* to avoid a
     // Menu header dependency). _TriggerEntry uses it to (a) update g_entryToggleNotif the instant
     // the checkbox is toggled and (b) give the checkbox a single "Notifications: ON/OFF" toast

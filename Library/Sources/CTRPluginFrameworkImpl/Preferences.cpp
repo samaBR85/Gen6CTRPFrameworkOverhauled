@@ -118,6 +118,8 @@ namespace CTRPluginFramework {
             g_hiLoBest      = header.reserved[6]; // Fun Stuff "Higher or Lower" best streak
             g_trainerBadges = header.reserved[7]; // Trainer Card badges (manual, bit i = badge i+1)
             g_trainerCardTemplate = header.reserved[8]; // Trainer Card background palette choice
+            g_levelCapOffset = header.reserved[9];  // Level Cap offset, biased +8 (0 = unset -> default below)
+            g_levelCapMode   = header.reserved[10]; // Level Cap mode (0 = Warn default on a fresh file)
             Flags = header.flags;
             memcpy(reinterpret_cast<void*>(Backlights), &header.lcdbacklights, sizeof(Backlights));
         }
@@ -147,6 +149,15 @@ namespace CTRPluginFramework {
 
         // Mirror to the public global so plugin code (PKHeX.cpp card view) can read it.
         g_cardStatHotkey = CardStatHotkeys;
+
+        // Level Cap offset is stored biased by +8 (8 == offset 0). A fresh/reset Data.bin has 0 here, which we
+        // treat as "unset" -> default 8. Clamp to the valid biased range [1..16] (offset -7..+8).
+        if (g_levelCapOffset == 0)
+            g_levelCapOffset = 8;
+        if (g_levelCapOffset > 16)
+            g_levelCapOffset = 16;
+        if (g_levelCapMode > 2)
+            g_levelCapMode = 0;
     }
 
     void Preferences::LoadSavedEnabledCheats(void) {
@@ -291,6 +302,8 @@ namespace CTRPluginFramework {
             header.reserved[6] = g_hiLoBest;   // Fun Stuff "Higher or Lower" best streak (see SetHiLoBest)
             header.reserved[7] = g_trainerBadges;       // Trainer Card badges (see SetTrainerBadges)
             header.reserved[8] = g_trainerCardTemplate; // Trainer Card background palette (see SetTrainerCardTemplate)
+            header.reserved[9] = g_levelCapOffset;      // Level Cap offset, biased +8 (see SetLevelCapOffset)
+            header.reserved[10] = g_levelCapMode;       // Level Cap mode Warn/Enforce/Off (see SetLevelCapMode)
             header.flags = Flags;
             memcpy(&header.lcdbacklights, Backlights, sizeof(header.lcdbacklights));
 

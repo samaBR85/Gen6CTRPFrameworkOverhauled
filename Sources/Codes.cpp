@@ -5207,6 +5207,7 @@ namespace CTRPluginFramework {
     static MenuEntry *g_hudStatus = nullptr;   // Show: Status Condition
     static MenuEntry *g_hudMiles  = nullptr;   // Show: Pokémiles
     static MenuEntry *g_hudParty  = nullptr;   // Show: Party count
+    static MenuEntry *g_hudLevelCap = nullptr; // Show: Level cap (over-cap count) - nuzlocke helper
     static MenuEntry *g_hudXY     = nullptr;   // Show: X/Y pos
     static MenuEntry *g_hudRepel  = nullptr;   // Show: Repel steps remaining
     static MenuEntry *g_hudMapId  = nullptr;   // Show: current (fine) map id - debug / zone cataloging
@@ -5728,6 +5729,15 @@ namespace CTRPluginFramework {
             lines.push_back(Utils::Format(getLanguage->Get("HUD_PARTY").c_str(), count));
         }
 
+        if (g_hudLevelCap != nullptr && g_hudLevelCap->IsActivated()) {
+            // Live nuzlocke over-cap warning: how many party mons exceed the auto cap (next gym ace + offset).
+            // LevelCapOverCount returns -1 when the feature's mode is Off or the cap/party can't be resolved.
+            int cap = 0;
+            int over = PKHeX::LevelCapOverCount(&cap);
+            if (over >= 0)
+                lines.push_back(Utils::Format(getLanguage->Get("LC_HUD_OVER_FMT").c_str(), over, cap));
+        }
+
         if (g_hudXY != nullptr && g_hudXY->IsActivated()) {
             u32 rawX = 0, rawY = 0;
             Process::Read32(AutoGameSet(0x8C671A0, 0x8C6E894), rawX);
@@ -6206,6 +6216,8 @@ namespace CTRPluginFramework {
         g_hudMiles->SetFavoriteKey("FAV_HUD_MILES"); g_hudMiles->SetFavoriteAlias(getLanguage->Get("FAV_HUD_MILES"));
         g_hudParty  = new MenuEntry(getLanguage->Get("MENU_HUD_PARTY"), HudNoop, getLanguage->Get("NOTE_HUD_PARTY"));
         g_hudParty->SetFavoriteKey("FAV_HUD_PARTY"); g_hudParty->SetFavoriteAlias(getLanguage->Get("FAV_HUD_PARTY"));
+        g_hudLevelCap = new MenuEntry(getLanguage->Get("MENU_HUD_LEVELCAP"), HudNoop, getLanguage->Get("NOTE_HUD_LEVELCAP"));
+        g_hudLevelCap->SetFavoriteKey("FAV_HUD_LEVELCAP"); g_hudLevelCap->SetFavoriteAlias(getLanguage->Get("FAV_HUD_LEVELCAP"));
         g_hudXY     = new MenuEntry(getLanguage->Get("MENU_HUD_XY"), HudNoop, getLanguage->Get("NOTE_HUD_XY"));
         g_hudXY->SetFavoriteKey("FAV_HUD_XY"); g_hudXY->SetFavoriteAlias(getLanguage->Get("FAV_HUD_XY"));
         g_hudRepel  = new MenuEntry(getLanguage->Get("MENU_HUD_REPEL"), HudNoop, getLanguage->Get("NOTE_HUD_REPEL"));
@@ -6261,6 +6273,7 @@ namespace CTRPluginFramework {
         *hud += g_hudStatus;
         *hud += g_hudMiles;
         *hud += g_hudParty;
+        *hud += g_hudLevelCap;
         *hud += g_hudXY;
         *hud += g_hudRepel;
         *hud += g_hudMapId;

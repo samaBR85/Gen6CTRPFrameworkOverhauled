@@ -1419,3 +1419,29 @@ BREEDING_REASON_NO_GROUP :: Non condividono un gruppo Uovo.
 BREEDING_COMPATIBLE :: Compatibile
 BREEDING_EGG_MOVE_LIST_HDR :: MOSSE UOVO CHE PUO IMPARARE
 BREEDING_IF_MOTHER_FMT :: Se %s e la madre:
+
+# ==== Level Cap (nuzlocke) ====
+MENU_LEVEL_CAP :: Livello max
+NOTE_LEVEL_CAP :: Aiuto Nuzlocke: imposta un livello massimo dal livello dell'asso del PROSSIMO capopalestra (letto dalle tue medaglie) piu uno scarto a tua scelta, quindi avanza da solo man mano che ottieni medaglie.\n\nLo schermo in alto elenca la tua squadra rispetto al max - chiunque lo superi viene segnalato. Schermo in basso: tocca Avvisa/Forza/Off, tocca - / + per lo scarto e (in modo Forza) tocca 'Forza ora' per riportare al max i Pokemon oltre il limite. Forza modifica la tua squadra e salva - abbassa solo livello e statistiche, nient'altro.\n\nDopo 8 medaglie il max si blocca sull'asso del Campione. Attiva 'Mostra: Livello max' nell'HUD per vedere il conteggio mentre giochi. Su/Giu del D-Pad scorre le prossime palestre per confrontare la tua squadra - questo non cambia mai cio che Forza applica davvero, lo decide solo la vera palestra PROSSIMA.
+FAV_LEVEL_CAP :: Livello max
+LEVEL_CAP :: Livello max
+LC_CAP :: Max
+LC_OVER_FMT :: %d oltre il max
+LC_ALL_WITHIN :: Tutti nel max
+LC_OK :: OK
+LC_OVER_TAG_FMT :: +%d
+LC_EMPTY :: - vuoto -
+LC_ACE_FMT :: asso di %s %d
+LC_ACE_SHORT_FMT :: asso %d
+LC_OFFSET :: Scarto
+LC_MODE_WARN :: Avvisa
+LC_MODE_ENFORCE :: Forza
+LC_MODE_OFF :: Off
+LC_ENFORCE_NOW_FMT :: Forza ora (%d)
+LC_CONFIRM_ENFORCE_FMT :: Abbassare %d Pokemon al Lv %d?\nModifica la tua squadra.
+LC_ENFORCED_FMT :: %d portati al Lv %d
+MENU_HUD_LEVELCAP :: Mostra: Livello max
+NOTE_HUD_LEVELCAP :: Avviso Nuzlocke dal vivo sull'HUD: quanti Pokemon della squadra superano il livello massimo attuale (impostato in Livello max, sotto Info Allenatore). Nascosto quando il modo e Off.
+FAV_HUD_LEVELCAP :: Livello max
+LC_HUD_OVER_FMT :: Oltre max: %d (Lv %d)
+LC_PREVIEW :: (anteprima)

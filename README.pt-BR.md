@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.6
+# Gen6CTRPluginFrameworkOverhauled — v0.7.7
 
 [English](README.md) · **Português**
 
@@ -168,6 +168,19 @@ tem, mostrando os dois pais e o que realmente nasce lado a lado.
   <img src="Screenshots/v0.7.5/breeding_compat_checktwo.png" width="330" alt="Breeding Compatibility — Check Two, duas especies e o que nasce entre elas" />
 </p>
 
+**Limite de Nível** é uma ajuda pra runs nuzlocke/hardcore: define um limite de nível a partir do **ás do
+próximo Líder de Ginásio** (lido ao vivo das suas insígnias) mais um ajuste que você escolhe, então ele
+sobe sozinho conforme você ganha insígnias — nada pra reconfigurar entre sessões. A sua equipe é listada
+contra o limite, com quem passar sinalizado; **D-Pad Cima/Baixo** percorre os próximos ginásios pra
+comparar como a sua equipe fica mais adiante. Alterne entre **Avisar** (só sinaliza) e **Forçar** (um
+botão puxa os Pokémon acima do limite de volta pra ele, recalculando os atributos), ou desligue (**Off**)
+pra pós-jogo — e um campo no HUD ao vivo pode mostrar a contagem de quem passou do limite enquanto você
+joga.
+
+<p align="center">
+  <img src="Screenshots/v0.7.7/level_cap.png" width="330" alt="Limite de Nível — a equipe contra o ás do próximo ginásio, e o gerenciador Avisar/Forçar" />
+</p>
+
 ### Vença a batalha
 
 As **In-Battle Tools** são o que você usa no meio da luta. O **Enemy Helper** é uma carta de treinador pro inimigo —
@@ -287,6 +300,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.7.4** — **EV Advisor** e **Held Item Advisor**, mais duas telas em Trainer Info: uma sinaliza EVs que não batem com os golpes reais do seu Pokémon, a outra sugere itens pra segurar (dividido em No Baú / A Conseguir) — e o Team Coverage ganhou uma 3ª aba **Cart** com uma lista de compras geral pro time.
 - **v0.7.5** — o EV Advisor virou **Nature / IV / EV Advisor** (3 checagens, uma tela), e uma nova tela **Breeding Compatibility** (Party / Boxes / Check Two) acha pares de Creche, os golpes de ovo que eles poderiam passar, e deixa você testar qualquer par de espécies antes mesmo de ter os dois.
 - **v0.7.6** — o **PC Box ++** agora edita a sua **Equipe**, não só as boxes do PC (mesmo editor visual), e ganhou uma aba **Swap** pra trocar um Pokémon entre Box e Party em dois toques. Por baixo dos panos isso conserta a edição da equipe de verdade — mudanças em Pokémon da equipe agora surtem efeito no jogo e permanecem no save.
+- **v0.7.7** — **Limite de Nível**, uma nova tela no Trainer Info pra runs nuzlocke/hardcore: um limite de nível automático atrelado ao ás do próximo Líder de Ginásio (+ um ajuste seu), modos Avisar ou Forçar, um navegador via D-Pad pra comparar os próximos ginásios, e um campo no HUD ao vivo pra contagem de quem passou do limite.
 
 ## 📥 Instalando
 
@@ -395,8 +409,12 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 - **Johnstone** e **Chaotic Meatball** — por ajudarem a comunidade r/ProfessorOak a crescer.
 - **Dynamite** — pela ordem das O-Powers; **Likemeon** — pela dica de chaining na Granite Cave.
 
+**Sugestões da comunidade**
+- **[u/Cold_Birthday_2807](https://www.reddit.com/user/Cold_Birthday_2807)** — sugeriu a ideia do limite
+  de nível por ginásio que virou o **Limite de Nível** (v0.7.7).
+
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.7.6 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.7.7 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença
