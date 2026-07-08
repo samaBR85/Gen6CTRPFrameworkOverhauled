@@ -711,7 +711,7 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">Nintendo 3DS &amp; Azahar &bull; v0.7.8</div>
+  <div class="hero-badge">Nintendo 3DS &amp; Azahar &bull; v0.7.9</div>
   <h1>
     <span class="hl">Gen6</span> CTRPlugin<br/>
     <span class="hl2">Framework</span> Overhauled
@@ -747,7 +747,7 @@
       <div class="stat-label" data-i18n="stat_dl">Total Downloads</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">v0.7.8</div>
+      <div class="stat-num">v0.7.9</div>
       <div class="stat-label" data-i18n="stat_version">Latest Version</div>
     </div>
     <div class="stat-item">
@@ -1196,8 +1196,12 @@
     </div>
     <ul class="history-list fade-in" style="max-width:680px;margin:0 auto;list-style:none;padding:0;">
       <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
-        <span style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;flex:0 0 56px;">v0.7.8</span>
-        <span style="color:var(--text);">Poke Radar: Infinite Battery (X/Y) — keep the Radar's battery full in the overworld, no ~50-step recharge wait between chains, plus a live HUD battery readout. The Poke Radar also returns to the PokeMart Anywhere list on X/Y, with a few UI polish tweaks.</span>
+        <span style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;flex:0 0 56px;">v0.7.9</span>
+        <span style="color:var(--text);">A polish pass: the Shiny Hunt Companion / Radar Chain screens got a cleaner look (theme-matched colors, no boxes around rows, a moving cursor arrow, fixed-width odds chips). Party Stats Summary now shows each move's description (press Y), and Config HUD gained All ON / All OFF buttons plus an L/R shortcut for the RNG Tracking fields.</span>
+      </li>
+      <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
+        <span style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;flex:0 0 56px;">v0.7.8</span>
+        <span style="color:var(--muted);">Poke Radar: Infinite Battery (X/Y) — keep the Radar's battery full in the overworld, no ~50-step recharge wait between chains, plus a live HUD battery readout. The Poke Radar also returns to the PokeMart Anywhere list on X/Y, with a few UI polish tweaks.</span>
       </li>
       <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
         <span style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;flex:0 0 56px;">v0.7.7</span>
@@ -1332,15 +1336,15 @@
           <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>
           Latest Release
         </div>
-        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.7.8</div>
+        <div class="dl-title">Gen6CTRPluginFrameworkOverhauled v0.7.9</div>
         <div class="dl-meta">
-          Released <span>July 7, 2026</span> &bull;
+          Released <span>July 8, 2026</span> &bull;
           Platform <span>Nintendo 3DS (3gx)</span> &bull;
           License <span>GNU GPL-3.0</span>
         </div>
         <div class="dl-buttons">
-          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.7.8/Gen6CTRPluginFramework-v0.7.8.zip" target="_blank" rel="noopener">
-            ⬇ Download v0.7.8 (.zip)
+          <a class="btn-primary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.7.9/Gen6CTRPluginFramework-v0.7.9.zip" target="_blank" rel="noopener">
+            ⬇ Download v0.7.9 (.zip)
           </a>
           <a class="btn-secondary" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases" target="_blank" rel="noopener">
             All Releases
@@ -1354,6 +1358,12 @@
     </div>
 
     <div class="releases-list fade-in">
+      <div class="release-row">
+        <span class="release-tag">v0.7.9</span>
+        <span class="release-date">Jul 8, 2026</span>
+        <span class="release-downloads" id="dl-v079">Loading…</span>
+        <a class="release-link" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.7.9/Gen6CTRPluginFramework-v0.7.9.zip" target="_blank" rel="noopener">Download</a>
+      </div>
       <div class="release-row">
         <span class="release-tag">v0.7.8</span>
         <span class="release-date">Jul 7, 2026</span>
@@ -1609,6 +1619,7 @@
         release.assets.forEach(asset => { total += asset.download_count; });
       });
 
+      const v079 = data.find(r => r.tag_name === 'v0.7.9');
       const v078 = data.find(r => r.tag_name === 'v0.7.8');
       const v077 = data.find(r => r.tag_name === 'v0.7.7');
       const v076 = data.find(r => r.tag_name === 'v0.7.6');
@@ -1632,6 +1643,7 @@
       const v021 = data.find(r => r.tag_name === 'v0.2.1');
       const v020 = data.find(r => r.tag_name === 'v0.2.0');
 
+      const count079 = v079 ? v079.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count078 = v078 ? v078.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count077 = v077 ? v077.assets.reduce((s, a) => s + a.download_count, 0) : 0;
       const count076 = v076 ? v076.assets.reduce((s, a) => s + a.download_count, 0) : 0;
@@ -1658,6 +1670,7 @@
       animateCount('total-downloads', total);
       animateCount('download-count', total);
 
+      const el079 = document.getElementById('dl-v079');
       const el078 = document.getElementById('dl-v078');
       const el077 = document.getElementById('dl-v077');
       const el076 = document.getElementById('dl-v076');
@@ -1680,6 +1693,7 @@
       const el030 = document.getElementById('dl-v030');
       const el021 = document.getElementById('dl-v021');
       const el020 = document.getElementById('dl-v020');
+      if (el079) el079.textContent = count079 + ' downloads';
       if (el078) el078.textContent = count078 + ' downloads';
       if (el077) el077.textContent = count077 + ' downloads';
       if (el076) el076.textContent = count076 + ' downloads';
