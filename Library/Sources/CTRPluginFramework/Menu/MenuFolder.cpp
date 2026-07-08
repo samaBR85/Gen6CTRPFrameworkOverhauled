@@ -86,6 +86,12 @@ namespace CTRPluginFramework {
         _item->Flags.twoColumn = enable;
     }
 
+    void MenuFolder::SetQuickJumpTargets(const vector<MenuEntry*> &entries) const {
+        _item->quickJump.clear();
+        for (MenuEntry *entry : entries)
+            _item->quickJump.push_back(entry->_item.get());
+    }
+
     string &MenuFolder::Note(void) const {
         return (_item->note);
     }

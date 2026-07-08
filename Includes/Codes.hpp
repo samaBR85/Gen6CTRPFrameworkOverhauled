@@ -52,6 +52,9 @@ namespace CTRPluginFramework {
     int BagOwnedCount(int id); // current bag quantity of an item id (0 = not owned) - Held Item Advisor
     void PokeRadarKeepCharged(MenuEntry *entry); // XY-only: pins the Poké Radar battery full every frame
     extern MenuEntry *g_radarCheatEntry; // the radar cheat entry; Main.cpp sets it so HudCallback can force it OFF at boot
+    void RepelKeepUp(MenuEntry *entry); // keeps the Repel step counter topped up (volatile address, no boot gate needed)
+    extern MenuEntry *g_repelCheatEntry; // the Repel Auto-Refresh entry; mirrored as a row in the Radar Chain tab
+    extern MenuEntry *g_noWildEntry;     // the No Wild Pokémon entry; mirrored as a row in the Radar Chain tab
     void AlwaysShiny(MenuEntry *entry);
     void ShinyHuntCompanion(MenuEntry *entry); // Shiny Hunt Companion hub (Encounters & Catching)
     void DisableShinyLock(MenuEntry *entry);
@@ -95,6 +98,7 @@ namespace CTRPluginFramework {
     MenuFolder *CreateHudMenu(void);
     MenuEntry *HudMasterEntry(void); // "Display HUD" master toggle (lives in Screen Overlays, not Config HUD)
     bool HudCallback(const Screen &screen);
+    void HudMenuFrame(Time); // PluginMenu::OnNewFrame handler - runs while the menu is open (instant All ON/OFF feedback)
     void LoadHudConfig(void);
 }
 

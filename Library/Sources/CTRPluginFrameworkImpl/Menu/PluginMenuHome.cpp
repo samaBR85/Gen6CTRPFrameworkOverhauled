@@ -387,32 +387,36 @@ namespace CTRPluginFramework {
                         case Key::CPadUp:
                         case Key::DPadUp: {
                             if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteUp();
-                            else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 0); // flagged folder: grid up
-                        else ScrollUp(_selector, *folder, _starMode ? 2 : 1); // 2-col favorites: prev row
+                            else if (_starMode && _starred == _starredConst) ScrollUp(_selector, *folder, 2); // top-level favorites: prev row
+                            else if (_starMode || folder->Flags.twoColumn) TwoColMove(_selector, *folder, 0); // in-folder / flagged folder
+                            else ScrollUp(_selector, *folder, 1);
                             break;
                         }
 
                         case Key::CPadDown:
                         case Key::DPadDown: {
                             if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteDown();
-                            else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 1); // flagged folder: grid down
-                        else ScrollDown(_selector, *folder, _starMode ? 2 : 1); // 2-col favorites: next row
+                            else if (_starMode && _starred == _starredConst) ScrollDown(_selector, *folder, 2); // top-level favorites: next row
+                            else if (_starMode || folder->Flags.twoColumn) TwoColMove(_selector, *folder, 1); // grid down
+                            else ScrollDown(_selector, *folder, 1);
                             break;
                         }
 
                         case Key::CPadLeft:
                         case Key::DPadLeft: {
                             if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteLeft();
-                            else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 2); // flagged folder: grid left
-                        else ScrollUp(_selector, *folder, _starMode ? 1 : 4); // 2-col favorites: switch column
+                            else if (_starMode && _starred == _starredConst) ScrollUp(_selector, *folder, 1); // top-level favorites: switch column
+                            else if (_starMode || folder->Flags.twoColumn) TwoColMove(_selector, *folder, 2); // grid left
+                            else ScrollUp(_selector, *folder, 4);
                             break;
                         }
 
                         case Key::CPadRight:
                         case Key::DPadRight: {
                             if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteRight();
-                            else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 3); // flagged folder: grid right
-                        else ScrollDown(_selector, *folder, _starMode ? 1 : 4); // 2-col favorites: switch column
+                            else if (_starMode && _starred == _starredConst) ScrollDown(_selector, *folder, 1); // top-level favorites: switch column
+                            else if (_starMode || folder->Flags.twoColumn) TwoColMove(_selector, *folder, 3); // grid right
+                            else ScrollDown(_selector, *folder, 4);
                             break;
                         }
 
@@ -429,8 +433,9 @@ namespace CTRPluginFramework {
                     case Key::CPadUp:
                     case Key::DPadUp: {
                         if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteUp();
-                        else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 0); // flagged folder: grid up
-                        else ScrollUp(_selector, *folder, _starMode ? 2 : 1); // 2-col favorites: prev row
+                        else if (_starMode && _starred == _starredConst) ScrollUp(_selector, *folder, 2); // top-level favorites: prev row
+                        else if (_starMode || folder->Flags.twoColumn) TwoColMove(_selector, *folder, 0); // in-folder / flagged folder
+                        else ScrollUp(_selector, *folder, 1);
                         fastScroll.Restart();
                         break;
                     }
@@ -438,8 +443,9 @@ namespace CTRPluginFramework {
                     case Key::CPadDown:
                     case Key::DPadDown: {
                         if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteDown();
-                        else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 1); // flagged folder: grid down
-                        else ScrollDown(_selector, *folder, _starMode ? 2 : 1); // 2-col favorites: next row
+                        else if (_starMode && _starred == _starredConst) ScrollDown(_selector, *folder, 2); // top-level favorites: next row
+                        else if (_starMode || folder->Flags.twoColumn) TwoColMove(_selector, *folder, 1); // grid down
+                        else ScrollDown(_selector, *folder, 1);
                         fastScroll.Restart();
                         break;
                     }
@@ -447,8 +453,9 @@ namespace CTRPluginFramework {
                     case Key::CPadLeft:
                     case Key::DPadLeft: {
                         if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteLeft();
-                        else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 2); // flagged folder: grid left
-                        else ScrollUp(_selector, *folder, _starMode ? 1 : 4); // 2-col favorites: switch column
+                        else if (_starMode && _starred == _starredConst) ScrollUp(_selector, *folder, 1); // top-level favorites: switch column
+                        else if (_starMode || folder->Flags.twoColumn) TwoColMove(_selector, *folder, 2); // grid left
+                        else ScrollUp(_selector, *folder, 4);
                         fastScroll.Restart();
                         break;
                     }
@@ -456,9 +463,30 @@ namespace CTRPluginFramework {
                     case Key::CPadRight:
                     case Key::DPadRight: {
                         if (_starMode && Controller::IsKeyDown(Key::L)) _MoveFavoriteRight();
-                        else if (!_starMode && folder->Flags.twoColumn) TwoColMove(_selector, *folder, 3); // flagged folder: grid right
-                        else ScrollDown(_selector, *folder, _starMode ? 1 : 4); // 2-col favorites: switch column
+                        else if (_starMode && _starred == _starredConst) ScrollDown(_selector, *folder, 1); // top-level favorites: switch column
+                        else if (_starMode || folder->Flags.twoColumn) TwoColMove(_selector, *folder, 3); // grid right
+                        else ScrollDown(_selector, *folder, 4);
                         fastScroll.Restart();
+                        break;
+                    }
+
+                    case Key::L:
+                    case Key::R: {
+                        // Quick-jump: cycle the selector between a folder-chosen subset of entries (see
+                        // MenuFolder::SetQuickJumpTargets), regardless of where those entries actually sit in
+                        // the grid. _starMode already owns L (combined with a direction) for reordering favorites.
+                        if (!_starMode && !folder->quickJump.empty()) {
+                            int n = static_cast<int>(folder->quickJump.size());
+                            int itemCount = static_cast<int>(folder->ItemsCount());
+                            MenuItem *cur = (_selector >= 0 && _selector < itemCount) ? folder->_items[_selector] : nullptr;
+                            int idx = -1;
+                            for (int i = 0; i < n; i++) if (folder->quickJump[i] == cur) { idx = i; break; }
+                            int next = (event.key.code == Key::R) ? (idx < 0 ? 0 : (idx + 1) % n)
+                                                                   : (idx < 0 ? n - 1 : (idx - 1 + n) % n);
+                            MenuItem *target = folder->quickJump[next];
+                            for (int i = 0; i < itemCount; i++)
+                                if (folder->_items[i] == target) { _selector = i; break; }
+                        }
                         break;
                     }
 
@@ -606,36 +634,103 @@ namespace CTRPluginFramework {
             if (pad > 0) posY += pad;
         }
 
-        // Favorites: render as a 2-column grid (more items per screen). Everything here is gated on
-        // _starMode, so the normal/root menu keeps its single-column layout untouched. Marquee runs only
-        // on the selected cell (offset = _scrollOffset), which is the desired behavior for long names.
         if (_starMode) {
+            // Top-level Favorites list: the classic 2-column grid that pairs EVERY item side by side (menu-func
+            // entries and folders included), regardless of per-item grid flags - this is the layout users expect
+            // for their favorites. Only once you navigate INTO a favorited sub-folder (below) do we switch to the
+            // structure-aware TwoColLayout so e.g. Config HUD keeps its native toggle arrangement.
+            if (_starred == _starredConst) {
+                const int leftX = posX, rightX = posX + 165; // two columns
+                const int rowH = 20;
+                const int baseY = posY;
+
+                // Guard: _selector can be stale (bigger than this folder) right after a mode switch.
+                if (_selector < 0 || _selector >= static_cast<int>(folder->ItemsCount()))
+                    _selector = 0;
+
+                int rowSel = _selector / 2;
+                int firstRow = std::max(0, rowSel - 6);
+                int firstIdx = firstRow * 2;
+                int lastIdx = std::min(max, firstIdx + 14); // 7 rows x 2 columns
+
+                for (int i = firstIdx; i < lastIdx; i++) {
+                    MenuItem *item = folder->_items[i];
+                    const char *name = (!item->favAlias.empty() ? item->favAlias : item->name).c_str(); // favorites alias
+                    Color fg = i == _selector ? selected : unselected;
+                    float offset = i == _selector ? _scrollOffset : 0.f;
+
+                    int col = i & 1;
+                    int cellX = col ? rightX : leftX;
+                    int cellY = baseY + ((i - firstIdx) / 2) * rowH;
+                    int colXLimit = col ? 370 : leftX + 152; // clip long unselected names at the column edge
+
+                    if (drawSelector && i == _selector) {
+                        if (item->Flags.isDangerous) { // sensitive entry -> solid red warning bar + white text
+                            Renderer::DrawRect(cellX - 5, cellY - 3, 160, 20, Color(0xE5, 0x43, 0x3C), true);
+                            fg = Color::White;
+                        } else
+                            Renderer::MenuSelector(cellX - 5, cellY - 3, 160, 20);
+                    }
+
+                    if (item->_type == MenuType::Entry) {
+                        MenuEntryImpl *entry = reinterpret_cast<MenuEntryImpl*>(item);
+                        int yy = cellY;
+                        if (entry->GameFunc != nullptr)
+                            Renderer::DrawSysCheckBox(name, cellX, yy, colXLimit, fg, entry->IsActivated(), offset);
+                        else {
+                            if (entry->MenuFunc != nullptr && !entry->_flags.isUnselectable)
+                                Icon::DrawSettings(cellX, cellY);
+                            Renderer::DrawSysString(name, cellX + 20, yy, colXLimit, fg, offset);
+                        }
+                    }
+                    else {
+                        Icon::DrawFolder(cellX, cellY);
+                        Renderer::DrawSysString(name, cellX + 20, cellY, colXLimit, fg, offset);
+                    }
+                }
+                return;
+            }
+
+            // Inside a favorited sub-folder: reuse the structure-aware TwoColLayout (full-width rows for labels /
+            // menu-func entries / folders; checkbox toggles paired) so the arrangement matches the native folder.
             const int leftX = posX, rightX = posX + 165; // two columns
             const int rowH = 20;
             const int baseY = posY;
 
-            int rowSel = _selector / 2;
-            int firstRow = std::max(0, rowSel - 6);
-            int firstIdx = firstRow * 2;
-            int lastIdx = std::min(max, firstIdx + 14); // 7 rows x 2 columns
+            std::vector<int> rowOf, colOf;
+            int rows = TwoColLayout(*folder, rowOf, colOf);
+            int rowsVisible = std::max(1, (220 - baseY) / rowH);
 
-            for (int i = firstIdx; i < lastIdx; i++) {
-                MenuItem *item = folder->_items[i];
+            // Guard: _selector can be stale (bigger than this folder) right after a mode switch, before
+            // _ProcessEvent re-clamps it - indexing rowOf here with a bad _selector is an OOB read.
+            if (_selector < 0 || _selector >= static_cast<int>(folder->ItemsCount()))
+                _selector = 0;
+
+            int selRow = rowOf[_selector];
+            int firstRow = selRow - (rowsVisible - 2);
+            if (firstRow > rows - rowsVisible) firstRow = rows - rowsVisible;
+            if (firstRow < 0) firstRow = 0;
+
+            for (int k = 0; k < max; k++) {
+                int r = rowOf[k];
+                if (r < firstRow || r >= firstRow + rowsVisible)
+                    continue;
+
+                MenuItem *item = folder->_items[k];
                 const char *name = (!item->favAlias.empty() ? item->favAlias : item->name).c_str(); // favorites alias
-                Color fg = i == _selector ? selected : unselected;
-                float offset = i == _selector ? _scrollOffset : 0.f;
+                Color fg = k == _selector ? selected : unselected;
+                float offset = k == _selector ? _scrollOffset : 0.f;
+                bool full = !IsTwoColToggle(item);
+                int cellX = (full || colOf[k] == 0) ? leftX : rightX;
+                int cellY = baseY + (r - firstRow) * rowH;
+                int colXLimit = full ? 360 : (colOf[k] ? 343 : leftX + 152);
 
-                int col = i & 1;
-                int cellX = col ? rightX : leftX;
-                int cellY = baseY + ((i - firstIdx) / 2) * rowH;
-                int colXLimit = col ? 370 : leftX + 152; // clip long unselected names at the column edge
-
-                if (drawSelector && i == _selector) {
+                if (drawSelector && k == _selector) {
                     if (item->Flags.isDangerous) { // sensitive entry -> solid red warning bar + white text
-                        Renderer::DrawRect(cellX - 5, cellY - 3, 160, 20, Color(0xE5, 0x43, 0x3C), true);
+                        Renderer::DrawRect(cellX - 5, cellY - 3, full ? 330 : 160, 20, Color(0xE5, 0x43, 0x3C), true);
                         fg = Color::White;
                     } else
-                        Renderer::MenuSelector(cellX - 5, cellY - 3, 160, 20);
+                        Renderer::MenuSelector(cellX - 5, cellY - 3, full ? 330 : 160, 20);
                 }
 
                 if (item->_type == MenuType::Entry) {
@@ -673,6 +768,11 @@ namespace CTRPluginFramework {
             std::vector<int> rowOf, colOf;
             int rows = TwoColLayout(*folder, rowOf, colOf);
             int rowsVisible = std::max(1, (220 - baseY) / rowH);
+
+            // Defense-in-depth: same clamp as the star block. _folder's _selector is normally already valid by
+            // the time Draw runs, but keep the OOB read impossible here too.
+            if (_selector < 0 || _selector >= static_cast<int>(folder->ItemsCount()))
+                _selector = 0;
 
             int selRow = rowOf[_selector];
             int firstRow = selRow - (rowsVisible - 2);
@@ -1030,6 +1130,13 @@ namespace CTRPluginFramework {
         swap(bak, _selector);
         _starMode = !_starMode;
         MenuFolderImpl *f = _starMode ? _starred : _folder;
+
+        // The restored cursor (bak) belongs to the last time we were in THIS mode - but the folder may have
+        // shrunk since (e.g. an item was un-favorited while browsing the normal menu, shrinking _starred
+        // without bak being resynced). Clamp before indexing f->_items[_selector] below, or we read a garbage
+        // MenuEntryImpl* off the end of the vector and render/deref junk.
+        if (_selector < 0 || _selector >= static_cast<int>(f->ItemsCount()))
+            _selector = 0;
 
         if (f->ItemsCount() == 0) {
             _InfoBtn.Enable(false);

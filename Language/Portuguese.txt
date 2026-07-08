@@ -12,6 +12,7 @@ BATTLE_ACCESS_BAG :: Abrir Bag
 BATTLE_ALLOW_MEGAS :: Mais Megas
 BATTLE_ALWAYS_SHINY :: Sempre Shiny
 BATTLE_RADAR_INFINITE_BATTERY :: Radar Poke Bateria infinita
+BATTLE_REPEL_AUTO_REFRESH :: Repelente Auto-Renovacao
 BATTLE_CAPTURE_RATE_100 :: Captura 100%
 BATTLE_CAPTURE_TRAINER_POKEMON :: Capturar Pokémon Alheio
 BATTLE_CONDITION :: Condição
@@ -471,8 +472,10 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Permite que você capture o Pokémon de u
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Pegar Treino
 NOTE_BATTLE_ALWAYS_SHINY :: Todo Pokémon selvagem e nascido de ovo será shiny. A animação de brilho toca quando ele aparece.
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: Mantem a bateria do Radar Poke cheia no overworld, pulando a espera de recarga de uns 50 passos entre usos.\n\nSomente X/Y - o Radar nao existe em Rubi Omega / Safira Alfa.\n\nIMPORTANTE: por seguranca isto NAO fica ligado entre reinicios. Ele sempre comeca desligado.\n\nEntao ligue de novo a cada sessao, quando ja estiver dentro do seu jogo.\n\n(Isso evita um problema na inicializacao em que o jogo poderia nao encontrar o seu save.)
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: Mantem um Repelente sempre ativo, para que ele nunca acabe. O Repelente bloqueia Pokemon selvagens mais fracos que o seu lider - ele nao impede todos os encontros.\n\nSeguro deixar ligado entre reinicios; esse endereco nao faz parte do seu save.
 FAV_BATTLE_ALWAYS_SHINY :: Sempre Shiny
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: Radar infinito
+FAV_BATTLE_REPEL_AUTO_REFRESH :: Repelente Renov.
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: Permite shininess em encontros normalmente travados contra shiny.
 FAV_BATTLE_DISABLE_SHINY_LOCK :: Sem Trava Sh.
 MENU_RENAME_ANY :: Renomear Qualquer
@@ -547,8 +550,9 @@ FAV_SHOW_NOTIFICATIONS :: Notificações
 MENU_PLUGIN_SETTINGS :: Config. Plugin
 NOTE_PLUGIN_SETTINGS :: As configurações do próprio plugin (ex.: idioma) - não as opções do seu jogo.
 MENU_VIEW_PARTY_SUMMARY :: Ver Resumo do Time
-NOTE_VIEW_PARTY_SUMMARY :: Veja os atributos ocultos do seu time (atributos, IVs, EVs, natureza, habilidade, item, OT...). Escolha um slot para ver seu cartão completo.\n\nMostra seu ÚLTIMO TIME SALVO — se você mudou seu time, salve o jogo primeiro.\n\nControles do cartão:\n\nCima/Baixo: move a caixa para escolher um atributo (HP, Atk, Def, SpA, SpD, Spe).\n\nA: pula para o membro do time com o valor MAIOR (ou MENOR) daquele atributo. Se vários empatam, aperte A de novo para alternar entre eles.\n\nL (reconfigurável em Ferramentas > Hotkeys): alterna entre MAIOR e MENOR, mostrado no canto inferior direito da tela superior.\n\nUm pequeno triângulo à esquerda de um atributo significa que este Pokémon tem o melhor (cima) ou o pior (baixo) valor do time naquele atributo.\n\nEsquerda/Direita: troca de cartões. B: voltar. Select: sair para o jogo.
+NOTE_VIEW_PARTY_SUMMARY :: Veja os atributos ocultos do seu time (atributos, IVs, EVs, natureza, habilidade, item, OT...). Escolha um slot para ver seu cartão completo.\n\nMostra seu ÚLTIMO TIME SALVO — se você mudou seu time, salve o jogo primeiro.\n\nControles do cartão:\n\nCima/Baixo: move a caixa para escolher um atributo (HP, Atk, Def, SpA, SpD, Spe).\n\nA: pula para o membro do time com o valor MAIOR (ou MENOR) daquele atributo. Se vários empatam, aperte A de novo para alternar entre eles.\n\nL (reconfigurável em Ferramentas > Hotkeys): alterna entre MAIOR e MENOR, mostrado no canto inferior direito da tela superior.\n\nUm pequeno triângulo à esquerda de um atributo significa que este Pokémon tem o melhor (cima) ou o pior (baixo) valor do time naquele atributo.\n\nY: percorre os 4 golpes na tela inferior para ler o que cada um faz.\n\nEsquerda/Direita: troca de cartões. B: voltar. Select: sair para o jogo.
 FAV_VIEW_PARTY_SUMMARY :: Resumo Time
+PARTY_CARD_HINT :: L/R Cartão   Y Golpe   B Voltar
 MENU_MINI_GAME_CORNER :: ★ Cant. Minigames ★
 NOTE_MINI_GAME_CORNER :: Minigames pra se divertir: jogue por um encontro selvagem aleatório, abra caixas de loot, aposte seu Pokémon num atributo, gire a roleta, jogue caça-níquel e mais.\n\nNa tela inferior, alterne entre:\n\nJOGAR DE GRAÇA: você ainda ganha os itens, Pokémon e spawns que conquista, mas seu dinheiro nunca muda.\n\nGASTAR PokeDólares: dinheiro de verdade está em jogo - os jogos cobram uma entrada/aposta e pagam (ou tiram) Pokédólares de verdade.\n\nSua escolha GRÁTIS/PAGO é lembrada entre sessões.\n\nAtenção: os itens que você ganha e quaisquer mudanças de dinheiro só ficam se você SALVAR O JOGO depois. A Caixa de Loot nunca dá TMs/HMs ou Itens-Chave, então ela não pode afetar seu progresso na história.
 FAV_MINI_GAME_CORNER :: Cant. Minigame
@@ -884,6 +888,8 @@ HUD_PARTY :: Time: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: Repel: %u
 HUD_RADAR :: Radar bat: %u
+HUD_RADAR_CHAIN :: Chain: %u
+HUD_RADAR_RECHARGE :: Recarga: %u/50
 HUD_MAP_ID :: Mapa #%u(0x%X)
 HUD_POS_TOP_LEFT :: Sup-Esq
 HUD_POS_TOP_CENTER :: Sup-Centro
@@ -995,10 +1001,16 @@ NOTE_HUD_XY :: Mostra suas coordenadas atuais no mapa.
 FAV_HUD_XY :: Pos X/Y
 MENU_HUD_REPEL :: Passos Rep.
 MENU_HUD_RADAR :: Bateria Radar
+MENU_HUD_RADAR_CHAIN :: Contagem de Chain
+MENU_HUD_RADAR_RECHARGE :: Recarga do Radar
 NOTE_HUD_REPEL :: Mostra quantos passos de Repel restam (0 = nenhum Repel ativo).\nNão é salvo pelo jogo, então volta a 0 ao recarregar.
 NOTE_HUD_RADAR :: Mostra a carga atual da bateria do Radar Poke (0-255). Somente X/Y.
+NOTE_HUD_RADAR_CHAIN :: Mostra a contagem de chain do Radar Chain Assistant (uma estimativa, não o valor real do jogo). Somente X/Y.
+NOTE_HUD_RADAR_RECHARGE :: Mostra o progresso até os 50 passos seguros de recarga. Somente X/Y.
 FAV_HUD_REPEL :: Repel
 FAV_HUD_RADAR :: Bateria Radar
+FAV_HUD_RADAR_CHAIN :: Contagem Chain
+FAV_HUD_RADAR_RECHARGE :: Recarga Radar
 MENU_HUD_MAP_ID :: ID map
 NOTE_HUD_MAP_ID :: Mostra o id do mapa atual, ao vivo (debug / para catalogar zonas para o 'você está aqui').
 FAV_HUD_MAP_ID :: ID mapa
@@ -1115,6 +1127,12 @@ NOTE_HUD_ITEM :: Mostra o item segurado pelo Pokémon líder no HUD ('-' se nenh
 NOTE_HUD_ENC :: Conta as batalhas iniciadas nesta sessão - útil para shiny hunting.\n\nAperte o atalho de edição (START padrão) nesta entrada para zerar.
 NOTE_HUD_STEPS :: Conta os passos dados nesta sessão.\n\nAperte o atalho de edição (START padrão) nesta entrada para zerar.
 MENU_HUD_RNGHDR :: RNG Tracking
+MENU_HUD_RNG_ALL_ON :: Tudo ON
+FAV_HUD_RNG_ALL_ON :: RNG Tudo ON
+NOTE_HUD_RNG_ALL_ON :: Ativa todos os campos de Rastreamento de RNG abaixo de uma vez, exceto Freeze. Use Tudo OFF para desativá-los.\n\nEste é um botão momentâneo: ele se desmarca sozinho quando você sai do menu.
+MENU_HUD_RNG_ALL_OFF :: Tudo OFF
+FAV_HUD_RNG_ALL_OFF :: RNG Tudo OFF
+NOTE_HUD_RNG_ALL_OFF :: Desativa todos os campos de Rastreamento de RNG abaixo de uma vez, exceto Freeze. Use Tudo ON para ativá-los.\n\nEste é um botão momentâneo: ele se desmarca sozinho quando você sai do menu.
 MENU_HUD_FREEZE :: Freeze
 FAV_HUD_FREEZE :: Freeze
 NOTE_HUD_FREEZE :: Segura todos os valores do HUD parados (um snapshot) pra você copiar — como o lock X+Y do PokeReader. Desligue pra voltar ao vivo.
@@ -1170,7 +1188,7 @@ EGG_PEEK_HINT :: Aperte A para espiar
 NOTE_EGG_PEEK_CONFIRM :: Revelar o conteúdo deste ovo?
 MENU_SHINY_HUNT :: Assistente de Caça Shiny
 FAV_SHINY_HUNT :: Caça Shiny
-NOTE_SHINY_HUNT :: Abra o hub, escolha o Pokémon que você está caçando, e ele conta seus encontros selvagens dessa espécie em segundo plano.\n\nQuando um shiny de verdade aparece, ele avisa e pausa. Conta só batalhas selvagens (aproximado). Sua contagem é salva por alvo.
+NOTE_SHINY_HUNT :: Abra o hub, escolha o Pokémon que você está caçando, e ele conta seus encontros selvagens dessa espécie em segundo plano.\n\nQuando um shiny de verdade aparece, ele avisa e pausa. Conta só batalhas selvagens (aproximado). Sua contagem é salva por alvo.\n\nEm X/Y, aperte R para a aba do Radar Chain Assistant: escolha manchas de grama no 4º anel ou além, combinando com o tremor anterior, e evite manchas na borda da área de grama. Fugir sempre quebra uma chain do Poké Radar - não existe fuga segura. Se nenhuma mancha parecer segura, ande 50 passos fora da grama para recarregar o Radar sem perder a chain.
 SHINY_TARGET :: Alvo:
 SHINY_ENCOUNTERS :: Encontros
 SHINY_METHOD :: Método:
@@ -1189,6 +1207,25 @@ SHINY_FOUND :: Shiny encontrado! Zere para caçar de novo.
 SHINY_CLOSE :: Fechar
 SHINY_ONLY_NOTE :: Conta só quando o líder selvagem é o seu alvo.
 EGG_PEEK_SKIP :: A para pular
+
+# ==== Radar Chain Assistant (Fase 01) - Aba 2 do Shiny Hunt Companion, somente X/Y ====
+MENU_RADAR_CHAIN :: Radar Chain Assistant
+RADAR_CHAIN_LABEL :: Chain (estimativa)
+RADAR_CHAIN_ESTIMATE_NOTE :: Conta batalhas iniciadas; não é o valor real de chain do jogo.
+RADAR_RECHARGE_LABEL :: Bateria do Radar
+RADAR_CHAIN_TAB_HINT :: A confirmar   L/R aba
+RADAR_CHAIN_TAP_HINT :: A alternar   L/R aba
+RADAR_CHAIN_RESET_DONE :: Contagem de chain reiniciada
+RADAR_CHAIN_RECHARGE_READY :: Radar pronto para reativar
+RADAR_CHAIN_ROW_BATTERY :: Bateria infinita do Radar
+RADAR_CHAIN_ROW_REPEL :: Repelente Auto-Renovação
+RADAR_CHAIN_ROW_NOWILD :: Sem Pokémon Selvagens
+RADAR_CHAIN_ROW_HUD_CHAIN :: Mostrar Chain no HUD
+RADAR_CHAIN_ROW_HUD_RECHARGE :: Mostrar Bateria do Radar no HUD
+RADAR_CHAIN_ROW_RESET :: Reiniciar contagem de chain
+RADAR_CHAIN_SHORT :: Radar Chain
+RADAR_BATTERY_LIVE_NOTE :: Valor em tempo real - cai 5 por uso, recarrega andando.
+RADAR_BATTERY_INFINITE_NOTE :: Bateria Infinita do Radar está ATIVADA.
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: Cartão de Treinador

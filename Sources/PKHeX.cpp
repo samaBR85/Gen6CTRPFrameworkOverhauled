@@ -1654,6 +1654,11 @@ namespace CTRPluginFramework {
             if (frames > 0) { if (IfInBattle()) RefillBattleWrite(false, true); --frames; }
         }
 
+        // Forward-declared: defined later in this file (used by MovePicker/AbilityPicker), reused here for the
+        // Y-selected move's description in card mode.
+        static void DrawMarquee(const Screen &s, const char *d, int x, int y, int w, Color col,
+                                 int &mid, int curId, int &mStart, int &mTick, int &mDelay);
+
         void ViewPartyInfo(MenuEntry *entry) {
             (void)entry;
             gRevealedEggN = 0; // re-mask eggs on every open of the viewer (peeks last only while it's open)
@@ -1715,6 +1720,8 @@ namespace CTRPluginFramework {
             int selStat = 0;     // card-mode stat selector: 0..5 = HP,Atk,Def,SpA,SpD,Spe
             bool higher = true;  // A jumps to the party HIGHEST (true) or LOWEST (false) of selStat
             Image partySprite; int partySpriteKey = -1; // list-view sprite of the selected member; reload on species change
+            int selMove = 0;     // card-mode move selector (0..3): Y cycles which move's description scrolls below
+            int mMid = -1, mMStart = 0, mMTick = 0, mMDelay = 0; // DrawMarquee state for the move description
 
             // Swallow the A/B that opened this view so it doesn't bleed into the first frame.
             while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B)) { Controller::Update(); OSD::SwapBuffers(); }
@@ -1735,20 +1742,22 @@ namespace CTRPluginFramework {
                     if (Controller::IsKeyPressed(Key::B)) break; // exit the viewer
                     if (KeyRep(Key::Up))   cursor = (cursor + 5) % 6;
                     if (KeyRep(Key::Down)) cursor = (cursor + 1) % 6;
-                    if (Controller::IsKeyPressed(Key::A))    mode = 1;
+                    if (Controller::IsKeyPressed(Key::A))    { mode = 1; selMove = 0; }
                 }
                 else {
                     // Rebindable key (Tools > Hotkeys, default L) flips the jump direction. Checked
                     // independently of the else-if chain so it can combine with a D-Pad press.
                     if (g_cardStatHotkey && Controller::IsKeysPressed(g_cardStatHotkey))
                         higher = !higher;
+                    // Y cycles which of the 4 moves has its description scrolling below the moves list.
+                    if (Controller::IsKeyPressed(Key::Y)) selMove = (selMove + 1) % 4;
 
                     u32 curPtr = base + cursor * gPartyStride;
                     bool cardMasked = slotEgg[cursor] && !EggRevealed(curPtr);
                     bool cardAnimating = EggRevealAnimating(curPtr); // egg mid-reveal cascade
                     if (Controller::IsKeyPressed(Key::B))          mode = 0;                  // back to list
-                    else if (KeyRep(Key::Left))  cursor = (cursor + 5) % 6;  // previous card
-                    else if (KeyRep(Key::Right)) cursor = (cursor + 1) % 6;  // next card
+                    else if (KeyRep(Key::Left))  { cursor = (cursor + 5) % 6; selMove = 0; }  // previous card
+                    else if (KeyRep(Key::Right)) { cursor = (cursor + 1) % 6; selMove = 0; }  // next card
                     else if (KeyRep(Key::Up) && !cardMasked && !cardAnimating)    selStat = (selStat + 5) % 6; // move stat selector
                     else if (KeyRep(Key::Down) && !cardMasked && !cardAnimating)  selStat = (selStat + 1) % 6;
                     else if (Controller::IsKeyPressed(Key::A) && cardMasked) {
@@ -1886,25 +1895,34 @@ namespace CTRPluginFramework {
                     bot.DrawSysfont(title << "Acc", 252, 34, title);
                     bot.DrawRect(40, 52, 248, 1, title, true); // title underline
                     int my = 62;
+                    u16 selMv = 0; // the move id at selMove, for the description line below
                     for (int i = 0; i < 4; i++) {
                         u16 mv = mok ? mp.move[i] : 0;
+                        if (i == selMove) selMv = mv;
                         string nm = (mv >= 1 && mv <= 621) ? string(movesList[mv - 1]) : "-";
                         int pw = (mv >= 1 && mv <= 621) ? gMoveInfo[mv - 1][0] : 0;
                         int ac = (mv >= 1 && mv <= 621) ? gMoveInfo[mv - 1][1] : 0;
+                        bool isSel = (i == selMove);
+                        Color numC = isSel ? title : sel;
                         Color c = mv ? sel : Color::Gray;
-                        bot.DrawSysfont(sel << (to_string(i + 1) + ": ") << c << nm, 40, my, txt);
+                        string prefix = (isSel ? string("\xE2\x86\x92 ") : string()) + to_string(i + 1) + ": ";
+                        bot.DrawSysfont(numC << prefix << c << nm, 40, my, txt);
                         bot.DrawSysfont(c << (pw ? to_string(pw) : "-"), 204, my, txt); // Power
                         bot.DrawSysfont(c << (ac ? to_string(ac) : "-"), 252, my, txt); // Accuracy
                         my += 22;
                     }
 
-                    // Control hints, centered, below the moves list.
+                    // Description of the Y-selected move (marquee-scrolls if too long to fit one line), reusing
+                    // the exact helper MovePicker() already uses for the same gMoveShortDesc data.
+                    if (selMv >= 1 && selMv <= 621)
+                        DrawMarquee(bot, gMoveShortDesc[selMv - 1], 40, 176, 248, txt, mMid, (int)selMv, mMStart, mMTick, mMDelay);
+
+                    // Control hint, centered, below the description.
                     auto centerHint = [&](const string &s, int yy) {
                         int w = (int)OSD::GetTextWidth(true, s);
                         bot.DrawSysfont(s, 20 + (280 - w) / 2, yy, txt);
                     };
-                    centerHint("< / > : switch",   170);
-                    centerHint("B : back to list", 194);
+                    centerHint(getLanguage->Get("PARTY_CARD_HINT"), 200);
                 }
 
                 OSD::SwapBuffers();

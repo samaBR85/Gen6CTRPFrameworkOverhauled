@@ -110,6 +110,12 @@ namespace CTRPluginFramework {
              */
             void SetTwoColumns(bool enable) const;
             /**
+             * \brief Bind L/R, while this folder is open, to cycle the selector between the given entries
+             *        in order (wrapping around). Pass an empty vector to clear it (the default).
+             * \param entries The entries L/R should jump between, in order
+             */
+            void SetQuickJumpTargets(const vector<MenuEntry*> &entries) const;
+            /**
              * \brief Get a reference of the string that hold the note of this folder
              * \return A reference of the string
              */

@@ -690,11 +690,26 @@ namespace CTRPluginFramework {
         // vector so the ORAS-only "Max DexNav Search Lv." can be inserted right after Capture Trainer Pokemon.
         // Shiny Hunt Companion hub sits first (full-screen tool, gameFunc arg).
         vector<MenuEntry*> ccItems = {
-            Fav(new MenuEntry(getLanguage->Get("MENU_SHINY_HUNT"), nullptr, ShinyHuntCompanion, getLanguage->Get("NOTE_SHINY_HUNT")), "FAV_SHINY_HUNT"),
-            Fav(new MenuEntry(getLanguage->Get("BATTLE_NO_WILD_POKEMON"), NoWildPokemon, getLanguage->Get("NOTE_BATTLE_NO_WILD_POKEMON")), "FAV_BATTLE_NO_WILD_POKEMON"), // <W, tested: O3DS/O2DS - Y/OR
-            Fav(new MenuEntry(getLanguage->Get("BATTLE_CAPTURE_RATE_100"), CaptureRate, getLanguage->Get("NOTE_BATTLE_CAPTURE_RATE_100")), "FAV_BATTLE_CAPTURE_RATE_100"), // <W, tested: O3DS/O2DS - Y/OR
-            Fav(new MenuEntry(getLanguage->Get("BATTLE_CAPTURE_TRAINER_POKEMON"), CatchTrainerPokemon, getLanguage->Get("NOTE_BATTLE_CAPTURE_TRAINER_POKEMON")), "FAV_BATTLE_CAPTURE_TRAINER_POKEMON") // <W, tested: O3DS/O2DS - Y/OR
+            Fav(new MenuEntry(getLanguage->Get("MENU_SHINY_HUNT"), nullptr, ShinyHuntCompanion, getLanguage->Get("NOTE_SHINY_HUNT")), "FAV_SHINY_HUNT")
         };
+        // No Wild Pokémon: captured into g_noWildEntry so the Radar Chain Assistant tab (inside Shiny Hunt
+        // Companion) can mirror it as a tap-to-toggle row — same entry, same state, either place.
+        {
+            MenuEntry *noWildEntry = new MenuEntry(getLanguage->Get("BATTLE_NO_WILD_POKEMON"), NoWildPokemon, getLanguage->Get("NOTE_BATTLE_NO_WILD_POKEMON"));
+            g_noWildEntry = noWildEntry;
+            ccItems.push_back(Fav(noWildEntry, "FAV_BATTLE_NO_WILD_POKEMON")); // <W, tested: O3DS/O2DS - Y/OR
+        }
+        ccItems.push_back(Fav(new MenuEntry(getLanguage->Get("BATTLE_CAPTURE_RATE_100"), CaptureRate, getLanguage->Get("NOTE_BATTLE_CAPTURE_RATE_100")), "FAV_BATTLE_CAPTURE_RATE_100")); // <W, tested: O3DS/O2DS - Y/OR
+        ccItems.push_back(Fav(new MenuEntry(getLanguage->Get("BATTLE_CAPTURE_TRAINER_POKEMON"), CatchTrainerPokemon, getLanguage->Get("NOTE_BATTLE_CAPTURE_TRAINER_POKEMON")), "FAV_BATTLE_CAPTURE_TRAINER_POKEMON")); // <W, tested: O3DS/O2DS - Y/OR
+        // Repel Auto-Refresh: keeps the Repel step counter topped up. Address is a documented volatile,
+        // non-save counter (see HUD_REPEL read in Codes.cpp), so it's safe to auto-enable at boot like any
+        // normal cheat - no boot-safety gate needed (unlike the Radar battery address below). Captured into
+        // g_repelCheatEntry so the Radar Chain Assistant tab can mirror it. Available on both XY and OR/AS.
+        {
+            MenuEntry *repelEntry = new MenuEntry(getLanguage->Get("BATTLE_REPEL_AUTO_REFRESH"), RepelKeepUp, getLanguage->Get("NOTE_BATTLE_REPEL_AUTO_REFRESH"));
+            g_repelCheatEntry = repelEntry;
+            ccItems.push_back(Fav(repelEntry, "FAV_BATTLE_REPEL_AUTO_REFRESH"));
+        }
         // Poké Radar infinite battery (XY only — the Radar doesn't exist in OR/AS, replaced by DexNav there).
         // Capture the entry into g_radarCheatEntry so HudCallback can force it OFF on the first frame each cold
         // boot — this cheat must NOT auto-enable at boot or it corrupts the game's save detection (writes into
@@ -847,7 +862,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 7, 8, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 7, 9, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized
@@ -861,6 +876,9 @@ namespace CTRPluginFramework {
         InitMenu(*menu);
         // Set the battle offset callback for the menu
         menu->Callback(SetBattleOffset);
+        // Per-frame hook that runs WHILE THE MENU IS OPEN - drives the Config HUD "All ON"/"All OFF" masters so
+        // their child checkboxes flip live/instantly in the menu (HudCallback only runs while the menu is closed).
+        menu->OnNewFrame = HudMenuFrame;
         // Run the menu, allowing user interaction
         menu->Run();
         // After the menu is closed, delete the menu object to free up memory

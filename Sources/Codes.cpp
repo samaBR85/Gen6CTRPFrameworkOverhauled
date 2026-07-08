@@ -3478,12 +3478,23 @@ namespace CTRPluginFramework {
     // it once in-game and then it behaves as before (battery full in the overworld).
     MenuEntry *g_radarCheatEntry = nullptr; // the Encounters&Catching radar cheat entry (set in Main.cpp)
 
-    // True only after the user has opened the plugin menu overlay this session (PluginMenuImpl::_wasOpened).
-    // Never true during the boot-time auto-restore of saved cheats, which is exactly what makes it a safe
-    // "we are past the fresh-boot/save-select window" signal for the radar write + boot-off logic.
+    // Latched version of "the user has opened the plugin menu overlay this session". PluginMenuImpl::_wasOpened
+    // is NOT a sticky session flag - the framework's own Run() loop resets it back to false one game-frame after
+    // the menu closes (PluginMenuImpl.cpp: "if (_wasOpened) _wasOpened = false;" runs every closed-menu frame,
+    // right after ExecuteBuiltin()). Forwarding _wasOpened directly meant the radar write - and the HudCallback
+    // boot-disable block below - saw "not opened" again almost immediately after closing the menu, so the toggle
+    // visibly turned itself off (and the battery-keep-full write silently stopped) every time the player closed
+    // the menu and returned to the game. Latching it here into a static bool that only ever flips false->true
+    // fixes that: still never true during the boot-time auto-restore (the menu hasn't been opened yet), but once
+    // true it stays true for the rest of the session, matching the intended "past the save-select window" signal.
     static bool RadarMenuWasOpened(void) {
-        PluginMenu *pm = PluginMenu::GetRunningInstance();
-        return pm != nullptr && pm->WasOpened();
+        static bool s_pastBootWindow = false;
+        if (!s_pastBootWindow) {
+            PluginMenu *pm = PluginMenu::GetRunningInstance();
+            if (pm != nullptr && pm->WasOpened())
+                s_pastBootWindow = true;
+        }
+        return s_pastBootWindow;
     }
 
     void PokeRadarKeepCharged(MenuEntry *entry) {
@@ -3492,6 +3503,19 @@ namespace CTRPluginFramework {
         if (!RadarMenuWasOpened())   // never write before the user has opened the menu (save-select safety)
             return;
         Process::Write16(0x8C7D23E, 0xFF);
+    }
+
+    MenuEntry *g_repelCheatEntry = nullptr; // the Encounters&Catching Repel Auto-Refresh entry (set in Main.cpp)
+    MenuEntry *g_noWildEntry     = nullptr; // the Encounters&Catching No Wild Pokémon entry (set in Main.cpp)
+
+    // Repel Auto-Refresh: keeps the Repel step counter topped up so it never lapses mid-hunt. Unlike the Radar
+    // battery address, this one is a documented VOLATILE overworld counter, not stored in the save (same address
+    // the HUD's "Repel" readout already reads read-only) - so it's safe to auto-enable at boot like any normal
+    // cheat, no RadarMenuWasOpened()-style gate needed.
+    void RepelKeepUp(MenuEntry *entry) {
+        if (!entry->IsActivated())
+            return;
+        Process::Write8(AutoGameSet(0x8C7D23A, 0x8C8546E), 250);
     }
 
     void AlwaysShiny(MenuEntry *entry) {
@@ -5243,9 +5267,12 @@ namespace CTRPluginFramework {
     static MenuEntry *g_hudLevelCap = nullptr; // Show: Level cap (over-cap count) - nuzlocke helper
     static MenuEntry *g_hudXY     = nullptr;   // Show: X/Y pos
     static MenuEntry *g_hudRepel  = nullptr;   // Show: Repel steps remaining
-    static MenuEntry *g_hudRadar  = nullptr;   // Show: Poké Radar battery charge (XY only)
+    static MenuEntry *g_hudRadar  = nullptr;   // Show: Poké Radar battery charge (XY only) — also mirrored in the Radar Chain Assistant tab
+    static MenuEntry *g_hudChain  = nullptr;   // Show: Radar Chain Assistant chain count (estimate, XY only)
     static MenuEntry *g_hudMapId  = nullptr;   // Show: current (fine) map id - debug / zone cataloging
     static MenuEntry *g_hudPanel  = nullptr;
+    static MenuEntry *g_hudRngAllOn  = nullptr; // RNG Tracking group master: All ON toggles the 8 RNG entries at once (Freeze excluded)
+    static MenuEntry *g_hudRngAllOff = nullptr; // RNG Tracking group master: All OFF, same group, opposite direction
     static MenuEntry *g_hudItem   = nullptr;   // Show: lead's held item
     static MenuEntry *g_hudEnc    = nullptr;   // Show: encounter counter (battles entered this session)
     static MenuEntry *g_hudSteps  = nullptr;   // Show: steps walked this session
@@ -5267,6 +5294,13 @@ namespace CTRPluginFramework {
     static bool s_wasInBattle = false;
     static int  s_lastTX = 0, s_lastTY = 0;
     static bool s_haveTile = false;
+
+    // ===== Radar Chain Assistant (Fase 01) — session-only counter, reused by the Shiny Hunt Companion's Tab 2 =====
+    // Chain is a deliberate APPROXIMATION, not the game's real internal chain value (no known RAM address for
+    // that exists) - it just counts every battle entered while hunting, regardless of catch/faint/flee outcome.
+    // The Radar's battery/recharge state, by contrast, IS directly readable (0x8C7D23E, same address HUD_RADAR
+    // already uses) - no approximation needed there, so no separate counter for it.
+    static u32  g_chainCount = 0;
 
     // ===== Shiny Hunt Companion (Encounters & Catching hub) =====
     // The hub picks a target species; the detector below (in HudCallback) then counts wild encounters of that
@@ -5322,6 +5356,61 @@ namespace CTRPluginFramework {
         u32 v = g_rngTarget;
         if (kb.Open(v, g_rngTarget) == 0) g_rngTarget = v;
         OSD::Notify(Utils::Format(getLanguage->Get("HUD_TARGET_SET").c_str(), (unsigned long)g_rngTarget));
+    }
+
+    // RNG Tracking "All ON"/"All OFF" masters: filled in CreateHudMenu right after the 8 controllable RNG
+    // entries exist. Freeze is deliberately NOT in this list - it holds the whole HUD display still, and
+    // neither master is allowed to touch it (user request: All ON must never turn Freeze on).
+    static MenuEntry *RngGroupPtrs[8] = { nullptr };
+
+    // Edge-tracking bookkeeping for the two masters (previous-frame activated state).
+    static bool s_rngAllOnPrev = false, s_rngAllOffPrev = false;
+
+    // All ON / All OFF masters, driven from HudCallback EVERY frame (menu open or closed) - the same model as
+    // EnemyStatsSyncMask. This is why it gives instant in-menu feedback: a MenuEntry GameFunc only runs while
+    // the menu is CLOSED, but this OSD callback runs while the menu is OPEN too, so the moment the user checks
+    // a master here the 8 child checkboxes flip live. Everything (batch push + mutual exclusion + auto-off) is
+    // resolved in this one deterministic pass, so there is no cross-thread race with a per-entry GameFunc.
+    //   - Only RISING edges act (checked this frame, wasn't last). Un-checking a master is a deliberate no-op:
+    //     that is what makes the auto-off safe (auto-off unchecks a master without cascading a child change).
+    //   - Freeze is never in RngGroupPtrs, so neither master ever touches it.
+    void RngAllMasterSync(bool menuOpen) {
+        if (g_hudRngAllOn == nullptr || g_hudRngAllOff == nullptr)
+            return;
+
+        bool onNow  = g_hudRngAllOn->IsActivated();
+        bool offNow = g_hudRngAllOff->IsActivated();
+
+        if (onNow && !s_rngAllOnPrev) {                 // rising edge: user just checked All ON
+            for (int i = 0; i < 8; i++)
+                if (RngGroupPtrs[i] != nullptr) RngGroupPtrs[i]->Enable();
+            g_hudRngAllOff->Disable(); offNow = false;  // mutual exclusion
+        }
+        if (offNow && !s_rngAllOffPrev) {               // rising edge: user just checked All OFF
+            for (int i = 0; i < 8; i++)
+                if (RngGroupPtrs[i] != nullptr) RngGroupPtrs[i]->Disable();
+            g_hudRngAllOn->Disable(); onNow = false;
+        }
+
+        // Auto-off: these are momentary action buttons, they must not stay checked once you're back in the
+        // game. The batch above already ran on the rising edge (while the menu was open), so unchecking here
+        // can never preempt it.
+        if (!menuOpen) {
+            if (onNow)  { g_hudRngAllOn->Disable();  onNow = false; }
+            if (offNow) { g_hudRngAllOff->Disable(); offNow = false; }
+        }
+
+        s_rngAllOnPrev  = onNow;
+        s_rngAllOffPrev = offNow;
+    }
+
+    // Registered as PluginMenu::OnNewFrame (see Main.cpp). The framework calls this every frame WHILE THE MENU
+    // IS OPEN (PluginMenuImpl::Run, _isOpen branch) - which is exactly when HudCallback does NOT run - so this
+    // is what gives All ON / All OFF their instant, in-menu visual feedback: the moment the user checks a master
+    // the 8 child checkboxes flip live here. menuOpen is always true here (this only fires while open); auto-off
+    // stays with HudCallback's menu-closed pass.
+    void HudMenuFrame(Time) {
+        RngAllMasterSync(true);
     }
 
     // 9 positions, reading order: 0=TL 1=TC 2=TR 3=ML 4=C 5=MR 6=BL 7=BC 8=BR
@@ -5481,7 +5570,6 @@ namespace CTRPluginFramework {
         const FwkSettings &st = FwkSettings::Get();
         Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
         Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
-        (void)bg2;
 
         // shiny "rolls" per method -> per-encounter probability p = rolls/4096 (order = g_shinyMethod 0..3).
         static const int ROLLS[4] = {1, 6, 3, 8};        // Full, Masuda, Shiny Charm, Masuda+Charm
@@ -5489,25 +5577,110 @@ namespace CTRPluginFramework {
 
         Image sprite; int spriteKey = -1;
 
-        // Word-wrap a string to fit maxW px, drawing multiple lines. Breaks at spaces when present; falls back to
-        // UTF-8 codepoint boundaries (so CJK, which has no spaces, wraps too) — keeps long notes inside the window.
-        auto drawWrap = [](const Screen &scr, const string &s, int x, int y, int maxW, int lineH, Color c) {
+        // Centered word-wrap: same fit logic as the app's usual left-aligned drawWrap, but each line is
+        // horizontally centered around cx - used inside the Radar Chain cards, which are narrow enough that
+        // captions routinely wrap to 2-3 lines.
+        auto drawWrapCenter = [](const Screen &scr, const string &s, int cx, int y, int maxW, int lineH, Color c) {
             size_t i = 0, n = s.size();
             int cy = y;
             while (i < n) {
                 size_t k = i, fit = i, lastSpace = string::npos;
                 while (k < n) {
-                    size_t cp = k + 1; while (cp < n && ((unsigned char)s[cp] & 0xC0) == 0x80) cp++; // next codepoint
+                    size_t cp = k + 1; while (cp < n && ((unsigned char)s[cp] & 0xC0) == 0x80) cp++;
                     if ((int)OSD::GetTextWidth(true, s.substr(i, cp - i)) > maxW) break;
                     if (s[k] == ' ') lastSpace = k;
                     fit = cp; k = cp;
                 }
-                if (fit >= n) { scr.DrawSysfont(c << s.substr(i), x, cy, c); break; }
-                size_t brk = (lastSpace != string::npos && lastSpace > i) ? lastSpace : fit;
-                scr.DrawSysfont(c << s.substr(i, brk - i), x, cy, c);
-                i = (brk == lastSpace) ? brk + 1 : brk; // skip the break space
+                size_t brk = (fit >= n) ? n : ((lastSpace != string::npos && lastSpace > i) ? lastSpace : fit);
+                string line = s.substr(i, brk - i);
+                scr.DrawSysfont(c << line, cx - (int)OSD::GetTextWidth(true, line) / 2, cy, c);
+                if (fit >= n) break;
+                i = (brk == lastSpace) ? brk + 1 : brk;
                 cy += lineH;
             }
+        };
+        auto drawCentered = [](const Screen &scr, const string &s, int cx, int y, Color c) {
+            scr.DrawSysfont(c << s, cx - (int)OSD::GetTextWidth(true, s) / 2, y, c);
+        };
+
+        // Small pill/box drawn with a fill + border and its label centered inside. FIXED width w (center-anchored
+        // at cx) so the Method/Odds chips (Tab 1) never resize as the user cycles methods - the caller passes the
+        // widest text it will ever need to hold.
+        auto drawChip = [&](const Screen &scr, const string &s, int cx, int y, int w, int h, Color fill, Color line, Color txtc) {
+            int x = cx - w / 2;
+            scr.DrawRect(x, y, w, h, fill, true);
+            scr.DrawRect(x, y, w, h, line, false);
+            scr.DrawSysfont(txtc << s, cx - (int)OSD::GetTextWidth(true, s) / 2, y + (h - 9) / 2, txtc);
+        };
+
+        // Tab 2 ("Radar Chain Assistant") only exists on XY - the Radar itself doesn't exist on OR/AS, so the
+        // tab is simply absent there rather than shown with a "not available" message.
+        const int tabCount = (currGameSeries == GameSeries::XY) ? 2 : 1;
+        // Remembers the last tab used across repeated opens this session (e.g. a player who's mostly working
+        // the Radar Chain tab shouldn't have to L/R back to it every time). Session-only, not saved to disk -
+        // resets to Shiny Hunt on the next cold boot, same as this tool's other session state (sprite cache etc).
+        static int s_lastTab = 0;
+        if (s_lastTab >= tabCount) s_lastTab = 0; // e.g. was on Radar Chain, then reopened on OR/AS
+        int &tab = s_lastTab;
+
+        // Tab 1 (Shiny Hunt) action rows and Tab 2 (Radar Chain) checklist rows, both driven by the SAME
+        // D-Pad cursor pattern: Up/Down move the highlighted row, A fires it. Neither list shows per-row
+        // button badges anymore - A is the only button that acts on the highlighted row.
+        struct Row { const char *labelKey; int kind; MenuEntry *entry; }; // kind: 0=cheat checkbox, 1=HUD checkbox,
+                                                                            // 2=action (Tab 2); 10=target,11=method,
+                                                                            // 12=reset,13=close (Tab 1)
+        Row rows1[4] = {
+            { "SHINY_CHANGE_TARGET", 10, nullptr },
+            { "SHINY_METHOD",        11, nullptr },
+            { "SHINY_RESET",         12, nullptr },
+            { "SHINY_CLOSE",         13, nullptr }
+        };
+        Row rows2[6] = {
+            { "RADAR_CHAIN_ROW_BATTERY", 0, g_radarCheatEntry },
+            { "RADAR_CHAIN_ROW_REPEL",   0, g_repelCheatEntry },
+            { "RADAR_CHAIN_ROW_NOWILD",  0, g_noWildEntry },
+            { "RADAR_CHAIN_ROW_HUD_CHAIN",    1, g_hudChain },
+            { "RADAR_CHAIN_ROW_HUD_RECHARGE", 1, g_hudRadar }, // label now reads "Show Radar Battery on HUD"
+            { "RADAR_CHAIN_ROW_RESET",   2, nullptr }
+        };
+        const int GROUP1[4] = { 0, 0, 1, 1 };    // Tab 1 groups: target/method, reset/close
+        const int GROUP2[6] = { 0, 0, 0, 1, 1, 2 }; // Tab 2 groups: 3 cheats, 2 HUD toggles, 1 action
+        int cursor1 = 0, cursor2 = 0;
+        bool wasTouchDown = false;
+
+        // Row Y positions, laid out below the tab-pill header (04..24 pill, divider at 28, rows start 34),
+        // 18px tall rows with a 2px intra-group gap and a 6px inter-group gap - matches the approved mockup.
+        auto layoutRows = [](int n, const int *group, int *outY) {
+            int y = 54;
+            for (int i = 0; i < n; i++) {
+                if (i > 0 && group[i - 1] != group[i]) y += 4; // extra gap on top of the standard 2px
+                outY[i] = y;
+                y += 20;
+            }
+        };
+        int rowY1[4]; layoutRows(4, GROUP1, rowY1);
+        int rowY2[6]; layoutRows(6, GROUP2, rowY2);
+
+        auto fireRow1 = [&](int i) {
+            if (i == 0) {
+                u16 pick = PKHeX::SpeciesPicker(g_shinyTarget);
+                if (pick >= 1 && pick <= 721) SetShinyTarget(pick);
+                spriteKey = -1; // force sprite reload (screens were repainted by the picker)
+            } else if (i == 1) {
+                g_shinyMethod = (u8)((g_shinyMethod + 1) & 3);
+                SaveShinyHunts();
+            } else if (i == 2) {
+                if (g_shinyTarget && MessageBox(CenterAlign(getLanguage->Get("SHINY_RESET_CONFIRM")), DialogType::DialogYesNo, ClearScreen::Both)()) {
+                    HuntSetCount(g_shinyTarget, 0); g_shinyCount = 0; g_shinyPaused = false; SaveShinyHunts();
+                }
+            }
+            // i == 3 ("Close") is handled by the caller breaking the loop - same as pressing B, it only
+            // exits this tool and leaves the plugin menu itself open (SELECT is still the one that closes it).
+        };
+        auto fireRow2 = [&](int i) {
+            Row &r = rows2[i];
+            if (r.kind == 2) { g_chainCount = 0; OSD::Notify(getLanguage->Get("RADAR_CHAIN_RESET_DONE")); }
+            else if (r.entry != nullptr) { if (r.entry->IsActivated()) r.entry->Disable(); else r.entry->Enable(); }
         };
 
         // Swallow the A/B that opened the hub.
@@ -5524,71 +5697,185 @@ namespace CTRPluginFramework {
             }
             if (Controller::IsKeyPressed(Key::B)) break;
 
+            if (tabCount > 1 && Controller::IsKeyPressed(Key::R)) tab = (tab + 1) % tabCount;
+            if (tabCount > 1 && Controller::IsKeyPressed(Key::L)) tab = (tab + tabCount - 1) % tabCount;
+
+            int rowCount = tab == 0 ? 4 : 6;
+            int *cursor = tab == 0 ? &cursor1 : &cursor2;
+            if (Controller::IsKeyPressed(Key::Up))   *cursor = (*cursor - 1 + rowCount) % rowCount;
+            if (Controller::IsKeyPressed(Key::Down)) *cursor = (*cursor + 1) % rowCount;
             if (Controller::IsKeyPressed(Key::A)) {
-                u16 pick = PKHeX::SpeciesPicker(g_shinyTarget);
-                if (pick >= 1 && pick <= 721) SetShinyTarget(pick);
-                spriteKey = -1; // force sprite reload (screens were repainted by the picker)
+                if (tab == 0) fireRow1(*cursor); else fireRow2(*cursor);
                 while (Controller::IsKeyDown(Key::A)) { Controller::Update(); OSD::SwapBuffers(); }
+                if (tab == 0 && *cursor == 3) break; // "Close" row
             }
-            if (Controller::IsKeyPressed(Key::X)) {
-                g_shinyMethod = (u8)((g_shinyMethod + 1) & 3);
-                SaveShinyHunts();
-            }
-            if (Controller::IsKeyPressed(Key::Y) && g_shinyTarget) {
-                if (MessageBox(CenterAlign(getLanguage->Get("SHINY_RESET_CONFIRM")), DialogType::DialogYesNo, ClearScreen::Both)()) {
-                    HuntSetCount(g_shinyTarget, 0); g_shinyCount = 0; g_shinyPaused = false; SaveShinyHunts();
+
+            // Touch fallback: tapping a row selects it AND fires it in one go (same rects the rows are drawn
+            // in below - real x range on the bottom screen is 26..294, mirrored here for the hit-test).
+            bool touchClosedTab1 = false;
+            {
+                const int *rowY = tab == 0 ? rowY1 : rowY2;
+                bool down = Touch::IsDown();
+                if (down && !wasTouchDown) {
+                    UIntVector tp = Touch::GetPosition();
+                    for (int i = 0; i < rowCount; i++) {
+                        if ((int)tp.x >= 26 && (int)tp.x < 294 && (int)tp.y >= rowY[i] - 3 && (int)tp.y < rowY[i] + 21) {
+                            *cursor = i;
+                            if (tab == 0) fireRow1(i); else fireRow2(i);
+                            if (tab == 0 && i == 3) touchClosedTab1 = true; // "Close" row
+                            break;
+                        }
+                    }
                 }
-                while (Controller::IsKeyDown(Key::Y)) { Controller::Update(); OSD::SwapBuffers(); }
+                wasTouchDown = down;
             }
+            if (touchClosedTab1) break;
 
-            // ---- TOP ----
-            top.DrawRect(30, 20, 340, 200, bg, true);
-            top.DrawRect(30, 20, 340, 200, border, false);
-            top.DrawSysfont(title << getLanguage->Get("MENU_SHINY_HUNT"), 42, 30, title);
-            top.DrawRect(42, 48, 200, 1, title, true);
+            if (tab == 0) {
+                // ---- TOP: Tab 1 (Shiny Hunt) ----
+                top.DrawRect(30, 20, 340, 200, bg, true);
+                top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("MENU_SHINY_HUNT"), 42, 26, title);
+                top.DrawRect(42, 40, 316, 1, title, true);
 
-            if (g_shinyTarget == 0) {
-                top.DrawSysfont(txt << getLanguage->Get("SHINY_CHANGE_TARGET"), 60, 110, txt);
+                if (g_shinyTarget == 0) {
+                    drawCentered(top, getLanguage->Get("SHINY_CHANGE_TARGET"), 200, 110, txt);
+                } else {
+                    if (spriteKey != (int)g_shinyTarget) {
+                        spriteKey = (int)g_shinyTarget;
+                        sprite.LoadFromFile(string("Assets/Spawner/normal/") + SpawnerPad3(g_shinyTarget) + ".bmp");
+                    }
+                    // Sprite (left) + name / encounters / last (right), the WHOLE block centered horizontally
+                    // in the window. Box is sized to the largest sprite in the assets (72x72) + a small margin;
+                    // the block's width is measured from the longest of its 3 text lines so it truly centers.
+                    const int SPS = 76, SPY = 52; // sprite box: 52..128, vertical center = 90
+                    string nameStr = speciesList[g_shinyTarget - 1];
+                    string encStr  = getLanguage->Get("SHINY_ENCOUNTERS") + ": " + to_string(g_shinyCount);
+                    string lastStr = (s_shinyLastEnc >= 1 && s_shinyLastEnc <= 721)
+                        ? getLanguage->Get("SHINY_LAST") + " " + speciesList[s_shinyLastEnc - 1] : string();
+                    int textW = (int)OSD::GetTextWidth(true, nameStr);
+                    if ((int)OSD::GetTextWidth(true, encStr) > textW) textW = (int)OSD::GetTextWidth(true, encStr);
+                    if (!lastStr.empty() && (int)OSD::GetTextWidth(true, lastStr) > textW) textW = (int)OSD::GetTextWidth(true, lastStr);
+                    const int GAP = 12;
+                    int groupW = SPS + GAP + textW;
+                    int groupX = 30 + (340 - groupW) / 2; // window is x=30..370
+                    if (groupX < 42) groupX = 42;         // never cross the window's inner padding
+                    int spriteX = groupX, textX = groupX + SPS + GAP;
+
+                    top.DrawRect(spriteX, SPY, SPS, SPS, Color::White, true);
+                    top.DrawRect(spriteX, SPY, SPS, SPS, border, false);
+                    if (sprite.IsLoaded()) { int sw = sprite.Width(), sh = sprite.Height(); sprite.Draw(top, spriteX + (SPS - sw) / 2, SPY + (SPS - sh) / 2); }
+
+                    // 3 lines centered vertically on the sprite (center 90): 62 / 84 / 106.
+                    top.DrawSysfont(sel   << nameStr, textX, 62, sel);
+                    top.DrawSysfont(title << encStr,  textX, 84, title);
+                    if (!lastStr.empty()) top.DrawSysfont(txt << lastStr, textX, 106, txt);
+
+                    top.DrawRect(42, 144, 316, 1, bg2, true);
+
+                    int rolls = ROLLS[g_shinyMethod & 3];
+                    int denom = 4096 / rolls;
+                    float p = (float)rolls / 4096.0f;
+                    float cum = (1.0f - PowInt(1.0f - p, g_shinyCount)) * 100.0f;
+                    int cumI = (int)(cum * 10.0f + 0.5f); // one decimal
+                    string methodStr = getLanguage->Get(MKEY[g_shinyMethod & 3]);
+                    string oddsStr = "1/" + to_string(denom) + "  " + to_string(cumI / 10) + "." + to_string(cumI % 10) + "%";
+                    // One fixed chip width = widest of the 4 method labels + the odds line, so cycling the method
+                    // never resizes the chips. Both chips share it, drawn as a centered pair around x=200.
+                    int chipW = (int)OSD::GetTextWidth(true, oddsStr);
+                    for (int m = 0; m < 4; m++) { int w = (int)OSD::GetTextWidth(true, getLanguage->Get(MKEY[m])); if (w > chipW) chipW = w; }
+                    chipW += 24;
+                    const int CHIP_GAP = 12;
+                    drawChip(top, methodStr, 200 - CHIP_GAP / 2 - chipW / 2, 154, chipW, 18, bg2, sel, sel);
+                    drawChip(top, oddsStr,   200 + CHIP_GAP / 2 + chipW / 2, 154, chipW, 18, bg2, border, txt);
+
+                    if (g_shinyPaused) drawCentered(top, getLanguage->Get("SHINY_FOUND"), 200, 192, Color::Yellow);
+                }
+
+                // ---- BOTTOM: Tab 1 - tab pills + D-Pad action list ----
+                bot.DrawRect(20, 20, 280, 200, bg, true);
+                bot.DrawRect(20, 20, 280, 200, border, false);
+                if (tabCount > 1) {
+                    bot.DrawRect(26, 24, 128, 20, sel, true);  bot.DrawRect(26, 24, 128, 20, title, false);
+                    drawCentered(bot, getLanguage->Get("FAV_SHINY_HUNT"), 90, 28, bg);
+                    bot.DrawRect(160, 24, 134, 20, bg2, true); bot.DrawRect(160, 24, 134, 20, border, false);
+                    drawCentered(bot, getLanguage->Get("RADAR_CHAIN_SHORT"), 227, 28, txt);
+                    bot.DrawRect(26, 48, 268, 1, border, true);
+                } else {
+                    bot.DrawSysfont(title << getLanguage->Get("MENU_SHINY_HUNT"), 26, 28, title);
+                    bot.DrawRect(26, 44, 268, 1, title, true);
+                }
+                for (int i = 0; i < 4; i++) {
+                    bool isSel = i == cursor1;
+                    Row &r = rows1[i];
+                    string label = getLanguage->Get(r.labelKey);
+                    if (r.kind == 11) label += " " + getLanguage->Get(MKEY[g_shinyMethod & 3]);
+                    else if (r.kind == 10 && g_shinyTarget) label += " " + string(speciesList[g_shinyTarget - 1]);
+                    // No box: selection = the label in the title accent + a → arrow that moves with the cursor
+                    // (fixed arrow column at x=28, label always at x=44 so it never shifts).
+                    Color c = isSel ? title : txt;
+                    if (isSel) bot.DrawSysfont(title << "\xE2\x86\x92", 28, rowY1[i] + 4, title);
+                    bot.DrawSysfont(c << label, 44, rowY1[i] + 4, c);
+                }
+                drawWrapCenter(bot, getLanguage->Get("SHINY_ONLY_NOTE"), 160, 160, 250, 12, txt);
+                drawCentered(bot, getLanguage->Get("RADAR_CHAIN_TAB_HINT"), 160, 202, txt);
             } else {
-                // sprite (reload on species change)
-                if (spriteKey != (int)g_shinyTarget) {
-                    spriteKey = (int)g_shinyTarget;
-                    sprite.LoadFromFile(string("Assets/Spawner/normal/") + SpawnerPad3(g_shinyTarget) + ".bmp");
+                // ---- TOP: Tab 2 (Radar Chain Assistant) — read-only stats, two cards side by side ----
+                top.DrawRect(30, 20, 340, 200, bg, true);
+                top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("MENU_RADAR_CHAIN"), 42, 26, title);
+                top.DrawRect(42, 40, 316, 1, title, true);
+
+                const int CY = 44, CH = 150, C1X = 42, C2X = 208, CW = 150;
+                top.DrawRect(200, CY, 1, CH, bg2, true);
+
+                top.DrawRect(C1X, CY, CW, CH, bg2, true);
+                top.DrawRect(C1X, CY, CW, CH, border, false);
+                drawCentered(top, getLanguage->Get("RADAR_CHAIN_LABEL"), C1X + CW / 2, CY + 10, sel);
+                drawCentered(top, to_string(g_chainCount), C1X + CW / 2, CY + 30, title);
+                drawWrapCenter(top, getLanguage->Get("RADAR_CHAIN_ESTIMATE_NOTE"), C1X + CW / 2, CY + 58, CW - 16, 11, txt);
+
+                bool infinite = g_radarCheatEntry != nullptr && g_radarCheatEntry->IsActivated();
+                u16 charge = 0;
+                Process::Read16(0x8C7D23E, charge); // same live address the HUD_RADAR line already reads
+                top.DrawRect(C2X, CY, CW, CH, bg2, true);
+                top.DrawRect(C2X, CY, CW, CH, border, false);
+                drawCentered(top, getLanguage->Get("RADAR_RECHARGE_LABEL"), C2X + CW / 2, CY + 10, sel);
+                drawCentered(top, infinite ? "255" : (to_string(charge) + "/50"), C2X + CW / 2, CY + 30, infinite ? sel : title);
+                const int BX = C2X + 10, BY = CY + 54, BW = CW - 20, BH = 8;
+                top.DrawRect(BX, BY, BW, BH, border, false);
+                int fillW = infinite ? (BW - 2) : (int)(((float)(charge > 50 ? 50 : charge) / 50.0f) * (BW - 2));
+                if (fillW > 0) top.DrawRect(BX + 1, BY + 1, fillW, BH - 2, infinite ? title : sel, true);
+                drawWrapCenter(top, getLanguage->Get(infinite ? "RADAR_BATTERY_INFINITE_NOTE" : "RADAR_BATTERY_LIVE_NOTE"), C2X + CW / 2, BY + 16, CW - 16, 11, txt);
+
+                // ---- BOTTOM: Tab 2 - tab pills + D-Pad checklist ----
+                bot.DrawRect(20, 20, 280, 200, bg, true);
+                bot.DrawRect(20, 20, 280, 200, border, false);
+                bot.DrawRect(26, 24, 128, 20, bg2, true);  bot.DrawRect(26, 24, 128, 20, border, false);
+                drawCentered(bot, getLanguage->Get("FAV_SHINY_HUNT"), 90, 28, txt);
+                bot.DrawRect(160, 24, 134, 20, sel, true); bot.DrawRect(160, 24, 134, 20, title, false);
+                drawCentered(bot, getLanguage->Get("RADAR_CHAIN_SHORT"), 227, 28, bg);
+                bot.DrawRect(26, 48, 268, 1, border, true);
+
+                for (int i = 0; i < 6; i++) {
+                    bool isSel = i == cursor2;
+                    Row &r = rows2[i];
+                    bool isToggle = r.kind != 2;
+                    bool on = isToggle && r.entry != nullptr && r.entry->IsActivated();
+                    // No box: selection = title accent + moving → arrow; an enabled toggle reads in `sel`;
+                    // idle rows in `txt`. On/off is shown purely by the check square on the right.
+                    Color c = isSel ? title : (on ? sel : txt);
+                    if (isSel) bot.DrawSysfont(title << "\xE2\x86\x92", 28, rowY2[i] + 4, title);
+                    bot.DrawSysfont(c << getLanguage->Get(r.labelKey), 44, rowY2[i] + 4, c);
+                    if (!isToggle) {
+                        bot.DrawSysfont(sel << ">>", 272, rowY2[i] + 4, sel);
+                    } else {
+                        bot.DrawRect(272, rowY2[i] + 4, 10, 10, on ? sel : border, false);
+                        if (on) bot.DrawRect(274, rowY2[i] + 6, 6, 6, sel, true);
+                    }
                 }
-                const int FX = 250, FY = 70;
-                top.DrawRect(FX, FY, 88, 88, Color::White, true);
-                top.DrawRect(FX, FY, 88, 88, border, false);
-                if (sprite.IsLoaded()) { int sw = sprite.Width(), sh = sprite.Height(); sprite.Draw(top, FX + (88 - sw) / 2, FY + (88 - sh) / 2); }
-
-                top.DrawSysfont(sel << getLanguage->Get("SHINY_TARGET") << " " << txt << speciesList[g_shinyTarget - 1], 42, 62, txt);
-                top.DrawSysfont(sel << getLanguage->Get("SHINY_ENCOUNTERS"), 42, 90, sel);
-                top.DrawSysfont(title << to_string(g_shinyCount), 42, 108, title);
-
-                int rolls = ROLLS[g_shinyMethod & 3];
-                int denom = 4096 / rolls;
-                float p = (float)rolls / 4096.0f;
-                float cum = (1.0f - PowInt(1.0f - p, g_shinyCount)) * 100.0f;
-                int cumI = (int)(cum * 10.0f + 0.5f); // one decimal
-                top.DrawSysfont(sel << getLanguage->Get("SHINY_METHOD") << " " << txt << getLanguage->Get(MKEY[g_shinyMethod & 3]), 42, 140, txt);
-                top.DrawSysfont(sel << getLanguage->Get("SHINY_ODDS") << " " << txt << "1/" << to_string(denom)
-                                    << "  " << to_string(cumI / 10) << "." << to_string(cumI % 10) << "%", 42, 160, txt);
-
-                if (s_shinyLastEnc >= 1 && s_shinyLastEnc <= 721)
-                    top.DrawSysfont(txt << getLanguage->Get("SHINY_LAST") << " " << speciesList[s_shinyLastEnc - 1], 42, 180, txt);
-                if (g_shinyPaused)
-                    top.DrawSysfont(Color::Yellow << getLanguage->Get("SHINY_FOUND"), 42, 200, Color::Yellow);
+                drawCentered(bot, getLanguage->Get("RADAR_CHAIN_TAP_HINT"), 160, 202, txt);
             }
-
-            // ---- BOTTOM: controls ----
-            bot.DrawRect(20, 20, 280, 200, bg, true);
-            bot.DrawRect(20, 20, 280, 200, border, false);
-            bot.DrawSysfont(title << getLanguage->Get("MENU_SHINY_HUNT"), 40, 34, title);
-            bot.DrawRect(40, 52, 240, 1, title, true);
-            bot.DrawSysfont(sel << "A " << txt << getLanguage->Get("SHINY_CHANGE_TARGET"), 40, 66, txt);
-            bot.DrawSysfont(sel << "X " << txt << getLanguage->Get("SHINY_METHOD"), 40, 88, txt);
-            bot.DrawSysfont(sel << "Y " << txt << getLanguage->Get("SHINY_RESET"), 40, 110, txt);
-            bot.DrawSysfont(sel << "B " << txt << getLanguage->Get("SHINY_CLOSE"), 40, 132, txt);
-            drawWrap(bot, getLanguage->Get("SHINY_ONLY_NOTE"), 40, 164, 254, 16, txt); // wrap: window is 20..300 wide
 
             OSD::SwapBuffers();
         }
@@ -5616,6 +5903,25 @@ namespace CTRPluginFramework {
         // from PokeRadarKeepCharged's RadarMenuWasOpened() write-gate, so there is no timing window here to lose.
         if (g_radarCheatEntry != nullptr && !RadarMenuWasOpened())
             g_radarCheatEntry->Disable();
+
+        // RNG Tracking "All ON"/"All OFF" masters: batch push + mutual exclusion + auto-off, resolved every
+        // frame here (menu open or closed) so the child checkboxes flip live in the menu. See RngAllMasterSync.
+        {
+            PluginMenu *pm = PluginMenu::GetRunningInstance();
+            RngAllMasterSync(pm != nullptr && pm->IsOpen());
+        }
+
+        // Radar Chain Assistant chain counter: must run regardless of the "Display HUD" master toggle, since
+        // the Tab 2 tool (and its optional "Show Chain on HUD" row) need a live number even when the overlay
+        // is off. XY only - the whole tab is gated to XY. The Radar's actual battery/recharge state is read
+        // directly from live RAM elsewhere (same address the HUD_RADAR line already reads) - no separate
+        // approximation needed, so there is no step-counter here anymore.
+        if (currGameSeries == GameSeries::XY) {
+            bool nowBattleForChain = IfInBattle();
+            static bool s_wasInBattleForChain = false;
+            if (nowBattleForChain && !s_wasInBattleForChain) g_chainCount++;
+            s_wasInBattleForChain = nowBattleForChain;
+        }
 
         if (!g_hudMaster->IsActivated())
             return false;
@@ -5810,6 +6116,9 @@ namespace CTRPluginFramework {
             Process::Read16(0x8C7D23E, charge);
             lines.push_back(Utils::Format(getLanguage->Get("HUD_RADAR").c_str(), (unsigned)charge));
         }
+
+        if (g_hudChain != nullptr && g_hudChain->IsActivated())
+            lines.push_back(Utils::Format(getLanguage->Get("HUD_RADAR_CHAIN").c_str(), (unsigned)g_chainCount));
 
         if (g_hudMapId != nullptr && g_hudMapId->IsActivated()) {
             u16 mid = 0;
@@ -6326,6 +6635,9 @@ namespace CTRPluginFramework {
         if (currGameSeries == GameSeries::XY) {
             g_hudRadar = new MenuEntry(getLanguage->Get("MENU_HUD_RADAR"), HudNoop, getLanguage->Get("NOTE_HUD_RADAR"));
             g_hudRadar->SetFavoriteKey("FAV_HUD_RADAR"); g_hudRadar->SetFavoriteAlias(getLanguage->Get("FAV_HUD_RADAR"));
+            // Radar Chain Assistant's own HUD readout (also mirrored as a row inside that tool's Tab 2).
+            g_hudChain = new MenuEntry(getLanguage->Get("MENU_HUD_RADAR_CHAIN"), HudNoop, getLanguage->Get("NOTE_HUD_RADAR_CHAIN"));
+            g_hudChain->SetFavoriteKey("FAV_HUD_RADAR_CHAIN"); g_hudChain->SetFavoriteAlias(getLanguage->Get("FAV_HUD_RADAR_CHAIN"));
         }
         g_hudMapId  = new MenuEntry(getLanguage->Get("MENU_HUD_MAP_ID"), HudNoop, getLanguage->Get("NOTE_HUD_MAP_ID"));
         g_hudMapId->SetFavoriteKey("FAV_HUD_MAP_ID"); g_hudMapId->SetFavoriteAlias(getLanguage->Get("FAV_HUD_MAP_ID"));
@@ -6367,6 +6679,19 @@ namespace CTRPluginFramework {
         g_hudPanel->SetFavoriteKey("FAV_HUD_PANEL"); g_hudPanel->SetFavoriteAlias(getLanguage->Get("FAV_HUD_PANEL"));
         g_hudPanel->SetGridFullWidth(true); // panel toggle spans the whole row
 
+        // RNG Tracking "All ON"/"All OFF" masters - first two items in the group, a pair of normal
+        // (non-full-width) checkboxes so they land side by side in the 2-column grid. Built after the 8
+        // controllable RNG entries exist so RngGroupPtrs can capture them; Freeze is excluded on purpose.
+        // Plain HudNoop checkboxes - all the master behavior lives in RngAllMasterSync (driven from HudCallback
+        // every frame), NOT in a per-entry GameFunc, so it works live while the menu is open. See that function.
+        g_hudRngAllOn = new MenuEntry(getLanguage->Get("MENU_HUD_RNG_ALL_ON"), HudNoop, getLanguage->Get("NOTE_HUD_RNG_ALL_ON"));
+        g_hudRngAllOn->SetFavoriteKey("FAV_HUD_RNG_ALL_ON"); g_hudRngAllOn->SetFavoriteAlias(getLanguage->Get("FAV_HUD_RNG_ALL_ON"));
+        g_hudRngAllOff = new MenuEntry(getLanguage->Get("MENU_HUD_RNG_ALL_OFF"), HudNoop, getLanguage->Get("NOTE_HUD_RNG_ALL_OFF"));
+        g_hudRngAllOff->SetFavoriteKey("FAV_HUD_RNG_ALL_OFF"); g_hudRngAllOff->SetFavoriteAlias(getLanguage->Get("FAV_HUD_RNG_ALL_OFF"));
+        RngGroupPtrs[0] = g_hudSeed;   RngGroupPtrs[1] = g_hudFrame;   RngGroupPtrs[2] = g_hudAdv;
+        RngGroupPtrs[3] = g_hudTarget; RngGroupPtrs[4] = g_hudTinyAdv; RngGroupPtrs[5] = g_hudTinySt;
+        RngGroupPtrs[6] = g_hudEgg;    RngGroupPtrs[7] = g_hudTsv;
+
         // NOTE: g_hudMaster ("Display HUD") is intentionally NOT added here — it lives one level up, in the
         // Screen Overlays folder (added via HudMasterEntry() in Main.cpp, below Notifications). Config HUD keeps
         // only the field toggles + opacity/position.
@@ -6382,11 +6707,14 @@ namespace CTRPluginFramework {
         *hud += g_hudXY;
         *hud += g_hudRepel;
         if (g_hudRadar != nullptr) *hud += g_hudRadar;
+        if (g_hudChain != nullptr) *hud += g_hudChain;
         *hud += g_hudMapId;
         *hud += g_hudItem;
         *hud += g_hudEnc;
         *hud += g_hudSteps;
         *hud += rngHdr;
+        *hud += g_hudRngAllOn;  // All ON        (master: flips the 8 RNG toggles below at once, Freeze excluded)
+        *hud += g_hudRngAllOff; // All OFF       (same group, opposite direction)
         *hud += g_hudFreeze;    // Freeze        (PokeReader "Lock X+Y" - holds the whole HUD still)
         *hud += g_hudSeed;      // Initial seed  ┐ MT block
         *hud += g_hudFrame;     // Current seed  │
@@ -6406,6 +6734,8 @@ namespace CTRPluginFramework {
         hudPos->SetFavoriteKey("FAV_HUD_SET_POSITION"); hudPos->SetFavoriteAlias(getLanguage->Get("FAV_HUD_SET_POSITION"));
         *hud += hudPos;
         hud->SetTwoColumns(true);
+        // L/R quick-jumps between these 3 toggles regardless of where the cursor currently sits in the grid.
+        hud->SetQuickJumpTargets({ g_hudMoney, g_hudRngAllOn, g_hudPanel });
 
         return hud;
     }

@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.8
+# Gen6CTRPluginFrameworkOverhauled — v0.7.9
 
 **English** · [Português](README.pt-BR.md)
 
@@ -303,6 +303,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.7.6** — **PC Box ++** now edits your **Party**, not just the PC boxes (same visual editor), and gained a **Swap** tab to trade a Pokémon between Box and Party in two taps. Under the hood this fixes party editing for real — changes to party Pokémon now actually take effect in-game and persist to the save.
 - **v0.7.7** — **Level Cap**, a new Trainer Info screen for nuzlocke/hardcore runs: an auto level cap tied to the next Gym Leader's ace (+ your own offset), Warn or Enforce modes, a D-Pad browser to preview upcoming gyms, and a live HUD field for the over-cap count.
 - **v0.7.8** — **Poké Radar: Infinite Battery** (X/Y) — keep the Radar's battery full in the overworld so there's no ~50-step recharge wait between chains, plus a live HUD battery readout. The **Poké Radar** also returns to the PokéMart Anywhere list on X/Y. Polish: Display Enemy Stats now remembers which fields you turned on, Encounters & Catching leads with Shiny Hunt Companion, and Favorites labels are cleaner. Suggested by u/Victhordiz.
+- **v0.7.9** — a polish pass. **Shiny Hunt Companion & Radar Chain** got a cleaner look (theme-matched colors, no boxes around rows, a moving arrow for the cursor, and fixed-width odds chips). **Party Stats Summary** now shows each move's description — press **Y** to cycle through the four. **Config HUD** gained **All ON / All OFF** buttons for the RNG Tracking fields and an **L/R** shortcut to jump between Money, All ON and the Panel toggle, and the **Favorites** list keeps its two-column layout throughout.
 
 ## 📥 Installing
 
@@ -416,7 +417,7 @@ This project stands on a long line of volunteer work — from the very first anc
   cap idea that became **Level Cap** (v0.7.7).
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.7.8 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.7.9 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

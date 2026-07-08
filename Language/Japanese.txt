@@ -12,6 +12,7 @@ BATTLE_ACCESS_BAG :: バッグを開く
 BATTLE_ALLOW_MEGAS :: メガシンカ複数可
 BATTLE_ALWAYS_SHINY :: 常に色違い
 BATTLE_RADAR_INFINITE_BATTERY :: ポケレーダー電池無限
+BATTLE_REPEL_AUTO_REFRESH :: 虫よけ自動補充
 BATTLE_CAPTURE_RATE_100 :: 捕獲率100％
 BATTLE_CAPTURE_TRAINER_POKEMON :: トレーナーのポケモンを捕獲
 BATTLE_CONDITION :: 状態
@@ -470,8 +471,10 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: バトル中にトレーナーのPokémon
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: トレーナー捕獲
 NOTE_BATTLE_ALWAYS_SHINY :: すべての野生・タマゴのPokémonが色違いになります。出現時にきらめくアニメーションが再生されます。
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: オーバーワールドでポケレーダーの電池を満タンに保ち、使用後の約50歩の充電待ちを省略します。\n\nX/Y専用（オメガルビー/アルファサファイアにはレーダー自体が存在しません）。\n\n重要：安全のため、これは再起動をまたいでオンのままにはなりません。常にオフで始まります。\n\nゲームに入ってから、毎回オンにし直してください。\n\n（起動時にゲームがセーブを見つけられなくなる問題を防ぐためです。）
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: 虫よけを永久に切れないよう保ちます。虫よけは先頭のPokémonより弱い野生Pokémonの出現を防ぎますが、すべてのエンカウントを止めるわけではありません。\n\n再起動をまたいでオンのままでも安全です。このアドレスはセーブデータの一部ではありません。
 FAV_BATTLE_ALWAYS_SHINY :: 常に色違い
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: 無限レーダー
+FAV_BATTLE_REPEL_AUTO_REFRESH :: 虫よけ補充
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: 通常は色違いロックされている遭遇でも色違いを許可します。
 FAV_BATTLE_DISABLE_SHINY_LOCK :: 色違いロック解除
 MENU_RENAME_ANY :: どのPokémonも改名
@@ -546,8 +549,9 @@ FAV_SHOW_NOTIFICATIONS :: 通知
 MENU_PLUGIN_SETTINGS :: プラグイン設定
 NOTE_PLUGIN_SETTINGS :: このプラグイン自身の設定（例：言語）- ゲームのオプションではありません。
 MENU_VIEW_PARTY_SUMMARY :: 手持ちサマリーを表示
-NOTE_VIEW_PARTY_SUMMARY :: チームの隠れた能力値（能力値、IV、EV、せいかく、とくせい、持ち物、親など）を表示します。スロットを選ぶとフルカードが見られます。\n\n最後に保存した手持ちを表示します — チームを変えた場合は先にゲームを保存してください。\n\nカード操作：\n\n上下：枠を動かして能力値（HP、Atk、Def、SpA、SpD、Spe）を選びます。\n\nA：その能力値が最も高い（または低い）メンバーへ飛びます。同値が複数あればAを再度押して順に切り替えます。\n\nL（Tools > Hotkeysで変更可）：高い／低いを切り替え、上画面の右下に表示されます。\n\n能力値の左の小さな三角は、このPokémonがチーム最高（上向き）または最低（下向き）の値であることを示します。\n\n左右：カード切替。B：戻る。Select：ゲームに戻る。
+NOTE_VIEW_PARTY_SUMMARY :: チームの隠れた能力値（能力値、IV、EV、せいかく、とくせい、持ち物、親など）を表示します。スロットを選ぶとフルカードが見られます。\n\n最後に保存した手持ちを表示します — チームを変えた場合は先にゲームを保存してください。\n\nカード操作：\n\n上下：枠を動かして能力値（HP、Atk、Def、SpA、SpD、Spe）を選びます。\n\nA：その能力値が最も高い（または低い）メンバーへ飛びます。同値が複数あればAを再度押して順に切り替えます。\n\nL（Tools > Hotkeysで変更可）：高い／低いを切り替え、上画面の右下に表示されます。\n\n能力値の左の小さな三角は、このPokémonがチーム最高（上向き）または最低（下向き）の値であることを示します。\n\nY：下画面に表示される4つのわざを順に切り替えて、それぞれの説明を確認できます。\n\n左右：カード切替。B：戻る。Select：ゲームに戻る。
 FAV_VIEW_PARTY_SUMMARY :: 手持ちサマリー
+PARTY_CARD_HINT :: L/R カード、Y わざ、B 戻る
 MENU_MINI_GAME_CORNER :: ★ ミニゲームコーナー ★
 NOTE_MINI_GAME_CORNER :: 楽しむためのミニゲーム：ランダムな野生遭遇を引く、ルートボックスを開ける、能力値でPokémonを賭ける、ホイールを回す、スロットを遊ぶなど。\n\n下画面で切り替えられます：\n\n無料プレイ：勝ち取った道具、Pokémon、出現は手に入りますが、おこづかいは変わりません。\n\nおこづかいを使う：本物のお金を賭けます - ゲームは参加費/賭け金を取り、おこづかいを実際に支払う（または奪う）。\n\n無料/有料の選択はセッション間で記憶されます。\n\n注意：勝ち取った道具やおこづかいの変化は、後でゲームを保存した場合のみ残ります。ルートボックスはTM/HMやたいせつなものを出さないので、ストーリーの進行に影響しません。
 FAV_MINI_GAME_CORNER :: ミニゲーム
@@ -883,6 +887,8 @@ HUD_PARTY :: 手持ち: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: 虫よけ: %u
 HUD_RADAR :: レーダー電池: %u
+HUD_RADAR_CHAIN :: 連鎖数: %u
+HUD_RADAR_RECHARGE :: 充電: %u/50
 HUD_MAP_ID :: マップ #%u (0x%X)
 HUD_POS_TOP_LEFT :: 左上
 HUD_POS_TOP_CENTER :: 上中央
@@ -994,10 +1000,16 @@ NOTE_HUD_XY :: 現在のマップ座標を表示します。
 FAV_HUD_XY :: X/Y座標
 MENU_HUD_REPEL :: 虫よけ歩数
 MENU_HUD_RADAR :: レーダー電池
+MENU_HUD_RADAR_CHAIN :: 連鎖数
+MENU_HUD_RADAR_RECHARGE :: レーダー充電
 NOTE_HUD_REPEL :: 虫よけの残り歩数を表示します（0 = 虫よけ無効）。\nゲームに保存されないので、リロード時に0に戻ります。
 NOTE_HUD_RADAR :: ポケレーダーの現在の電池残量を表示します(0-255)。X/Y専用。
+NOTE_HUD_RADAR_CHAIN :: レーダー連鎖アシスタントの連鎖数を表示します（目安で、ゲーム内部の実際の値ではありません）。X/Y専用。
+NOTE_HUD_RADAR_RECHARGE :: 安全な充電に必要な50歩への進捗を表示します。X/Y専用。
 FAV_HUD_REPEL :: 虫よけ
 FAV_HUD_RADAR :: レーダー電池
+FAV_HUD_RADAR_CHAIN :: 連鎖数
+FAV_HUD_RADAR_RECHARGE :: レーダー充電
 MENU_HUD_MAP_ID :: マップID
 NOTE_HUD_MAP_ID :: 現在のマップIDをリアルタイム表示（デバッグ／「現在地」用のゾーン分類）。
 FAV_HUD_MAP_ID :: マップID
@@ -1113,6 +1125,12 @@ NOTE_HUD_ITEM :: 先頭のポケモンのもちものをHUDに表示します（
 NOTE_HUD_ENC :: このセッションで開始したバトル数を数えます（色違い厳選に便利）。\n\nこの項目でエディタのショートカット（既定はSTART）を押すとリセットします。
 NOTE_HUD_STEPS :: このセッションで歩いた歩数を数えます。\n\nこの項目でエディタのショートカット（既定はSTART）を押すとリセットします。
 MENU_HUD_RNGHDR :: RNG Tracking
+MENU_HUD_RNG_ALL_ON :: 全てON
+FAV_HUD_RNG_ALL_ON :: RNG全てON
+NOTE_HUD_RNG_ALL_ON :: 以下のRNGトラッキング項目を(Freezeを除き)一度に全てONにします。OFFにするには「全てOFF」を使ってください。\n\nこれは一時的なボタンです。メニューを閉じると自動的にチェックが外れます。
+MENU_HUD_RNG_ALL_OFF :: 全てOFF
+FAV_HUD_RNG_ALL_OFF :: RNG全てOFF
+NOTE_HUD_RNG_ALL_OFF :: 以下のRNGトラッキング項目を(Freezeを除き)一度に全てOFFにします。ONにするには「全てON」を使ってください。\n\nこれは一時的なボタンです。メニューを閉じると自動的にチェックが外れます。
 MENU_HUD_FREEZE :: Freeze
 FAV_HUD_FREEZE :: Freeze
 NOTE_HUD_FREEZE :: HUDのすべての値を静止（スナップショット）させ、書き写せるようにします — PokeReaderのX+Yロックと同じ。オフで再びライブに。
@@ -1168,7 +1186,7 @@ EGG_PEEK_HINT :: Aで中身を見る
 NOTE_EGG_PEEK_CONFIRM :: このタマゴの中身を見ますか？
 MENU_SHINY_HUNT :: 色違いハント補助
 FAV_SHINY_HUNT :: 色違いハント
-NOTE_SHINY_HUNT :: パネルを開いて狙うポケモンを選ぶと、その種の野生エンカウントを裏で数えます。\n\n本物の色違いが出ると通知して一時停止します。数えるのは野生戦のみ（目安）。カウントは対象ごとに保存されます。
+NOTE_SHINY_HUNT :: パネルを開いて狙うポケモンを選ぶと、その種の野生エンカウントを裏で数えます。\n\n本物の色違いが出ると通知して一時停止します。数えるのは野生戦のみ（目安）。カウントは対象ごとに保存されます。\n\nX/Yでは、Rボタンでレーダー連鎖アシスタントのタブを開けます。草むらは4輪目以降で、直前の揺れと同じ場所を選び、草むらの端は避けてください。逃げると必ずポケレーダーの連鎖が途切れます（安全に逃げる方法はありません）。安全そうな草むらがない場合は、草むらの外を50歩歩けば連鎖を失わずにレーダーを充電できます。
 SHINY_TARGET :: 対象：
 SHINY_ENCOUNTERS :: エンカウント
 SHINY_METHOD :: 方法：
@@ -1187,6 +1205,25 @@ SHINY_FOUND :: 色違い発見！リセットで再開。
 SHINY_CLOSE :: 閉じる
 SHINY_ONLY_NOTE :: 野生の先頭が対象と一致した時だけ数えます。
 EGG_PEEK_SKIP :: Aでスキップ
+
+# ==== Radar Chain Assistant (Fase 01) - Tab 2 of Shiny Hunt Companion, X/Y only ====
+MENU_RADAR_CHAIN :: レーダー連鎖アシスタント
+RADAR_CHAIN_LABEL :: 連鎖数（目安）
+RADAR_CHAIN_ESTIMATE_NOTE :: 突入したバトル数を数えます。ゲーム内部の実際の連鎖数ではありません。
+RADAR_RECHARGE_LABEL :: レーダー電池
+RADAR_CHAIN_TAB_HINT :: A 決定   L/R タブ切替
+RADAR_CHAIN_TAP_HINT :: A 切替   L/R タブ切替
+RADAR_CHAIN_RESET_DONE :: 連鎖数をリセットしました
+RADAR_CHAIN_RECHARGE_READY :: レーダーを再起動できます
+RADAR_CHAIN_ROW_BATTERY :: ポケレーダー電池無限
+RADAR_CHAIN_ROW_REPEL :: 虫よけ自動補充
+RADAR_CHAIN_ROW_NOWILD :: 野生Pokémon出現なし
+RADAR_CHAIN_ROW_HUD_CHAIN :: HUDに連鎖数を表示
+RADAR_CHAIN_ROW_HUD_RECHARGE :: HUDにレーダー電池を表示
+RADAR_CHAIN_ROW_RESET :: 連鎖数をリセット
+RADAR_CHAIN_SHORT :: レーダー連鎖
+RADAR_BATTERY_LIVE_NOTE :: 現在値 - 使用ごとに5減少し、歩くと回復します。
+RADAR_BATTERY_INFINITE_NOTE :: レーダー電池無限がオンです。
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: トレーナーカード

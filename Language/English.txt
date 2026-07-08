@@ -12,6 +12,7 @@ BATTLE_ACCESS_BAG :: Access Bag
 BATTLE_ALLOW_MEGAS :: Allow 1+ Megas
 BATTLE_ALWAYS_SHINY :: Always Shiny
 BATTLE_RADAR_INFINITE_BATTERY :: Poke Radar Infinite Battery
+BATTLE_REPEL_AUTO_REFRESH :: Repel Auto-Refresh
 BATTLE_CAPTURE_RATE_100 :: Capture Rate 100%
 BATTLE_CAPTURE_TRAINER_POKEMON :: Capture Trainer Pokémon
 BATTLE_CONDITION :: Condition
@@ -471,8 +472,10 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Let you catch a trainer's Pokémon in bat
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Catch Trainer
 NOTE_BATTLE_ALWAYS_SHINY :: Every wild and bred Pokémon will be shiny. The sparkle animation plays when it appears.
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: Keeps the Poke Radar's battery full in the overworld, skipping the ~50-step recharge wait between uses.\n\nX/Y only - the Radar doesn't exist in Omega Ruby / Alpha Sapphire.\n\nIMPORTANT: for safety this does NOT stay on across reboots. It always starts OFF.\n\nSo turn it back on each session, once you are already in your game.\n\n(This prevents a startup issue where the game could fail to find your save.)
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: Keeps a Repel active forever, so it never runs out. Repel blocks wild Pokémon weaker than your lead - it does not stop every encounter.\n\nSafe to leave on across reboots; this address is not part of your save data.
 FAV_BATTLE_ALWAYS_SHINY :: Always Shiny
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: Infinite Radar
+FAV_BATTLE_REPEL_AUTO_REFRESH :: Repel Refresh
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: Allow shininess on normally shiny-locked encounters.
 FAV_BATTLE_DISABLE_SHINY_LOCK :: No Shiny Lock
 MENU_RENAME_ANY :: Rename Any Pokémon
@@ -547,8 +550,9 @@ FAV_SHOW_NOTIFICATIONS :: Notifications
 MENU_PLUGIN_SETTINGS :: Plugin Settings
 NOTE_PLUGIN_SETTINGS :: This plugin's own settings (e.g. language) - not your game options.
 MENU_VIEW_PARTY_SUMMARY :: View Party Summary
-NOTE_VIEW_PARTY_SUMMARY :: View your team's hidden stats (stats, IVs, EVs, nature, ability, item, OT...). Pick a slot to see its full card.\n\nShows your LAST SAVED party — if you changed your team, save the game first.\n\nCard controls:\n\nUp/Down: move the box to pick a stat (HP, Atk, Def, SpA, SpD, Spe).\n\nA: jump to the team member with the HIGHER (or LOWER) value of that stat. If several tie, press A again to cycle through them.\n\nL (rebindable in Tools > Hotkeys): flip between HIGHER and LOWER, shown at the bottom-right of the top screen.\n\nA small triangle left of a stat means this Pokemon has the team's best (up) or worst (down) value of it.\n\nLeft/Right: switch cards. B: back. Select: exit to the game.
+NOTE_VIEW_PARTY_SUMMARY :: View your team's hidden stats (stats, IVs, EVs, nature, ability, item, OT...). Pick a slot to see its full card.\n\nShows your LAST SAVED party — if you changed your team, save the game first.\n\nCard controls:\n\nUp/Down: move the box to pick a stat (HP, Atk, Def, SpA, SpD, Spe).\n\nA: jump to the team member with the HIGHER (or LOWER) value of that stat. If several tie, press A again to cycle through them.\n\nL (rebindable in Tools > Hotkeys): flip between HIGHER and LOWER, shown at the bottom-right of the top screen.\n\nA small triangle left of a stat means this Pokemon has the team's best (up) or worst (down) value of it.\n\nY: cycle through the 4 moves on the bottom screen to read what each one does.\n\nLeft/Right: switch cards. B: back. Select: exit to the game.
 FAV_VIEW_PARTY_SUMMARY :: Party Summary
+PARTY_CARD_HINT :: L/R Card   Y Move   B Back
 MENU_MINI_GAME_CORNER :: ★ Mini Game Corner ★
 NOTE_MINI_GAME_CORNER :: Mini-games for fun: roll for a random wild encounter, open loot boxes, bet your Pokemon on a stat, spin the wheel, play slots and more.\n\nOn the bottom screen, switch between:\n\nFREE TO PLAY: you still get the items, Pokemon and spawns you win, but your money never changes.\n\nSPEND PokeDollars: real money is at stake - games charge an entry/bet and pay out (or take) Pokedollars for real.\n\nYour FREE/PAID choice is remembered between sessions.\n\nHeads up: items you win and any money changes only stick if you SAVE THE GAME afterwards. Loot Box never gives out TMs/HMs or Key Items, so it can't affect your story progress.
 FAV_MINI_GAME_CORNER :: MinGame Corner
@@ -884,6 +888,8 @@ HUD_PARTY :: Party: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: Repel: %u
 HUD_RADAR :: Radar batt: %u
+HUD_RADAR_CHAIN :: Chain: %u
+HUD_RADAR_RECHARGE :: Recharge: %u/50
 HUD_MAP_ID :: Map #%u (0x%X)
 HUD_POS_TOP_LEFT :: Top-Left
 HUD_POS_TOP_CENTER :: Top-Center
@@ -995,10 +1001,16 @@ NOTE_HUD_XY :: Show your current map coordinates.
 FAV_HUD_XY :: X/Y pos
 MENU_HUD_REPEL :: Repel steps
 MENU_HUD_RADAR :: Radar battery
+MENU_HUD_RADAR_CHAIN :: Chain count
+MENU_HUD_RADAR_RECHARGE :: Radar recharge
 NOTE_HUD_REPEL :: Show how many steps of Repel are left (0 = no Repel active).\nNot saved by the game, so it resets to 0 on reload.
 NOTE_HUD_RADAR :: Show the Poke Radar's current battery charge (0-255). X/Y only.
+NOTE_HUD_RADAR_CHAIN :: Show the Radar Chain Assistant's chain count (an estimate, not the game's real value). X/Y only.
+NOTE_HUD_RADAR_RECHARGE :: Show progress toward the 50 safe recharge steps. X/Y only.
 FAV_HUD_REPEL :: Repel
 FAV_HUD_RADAR :: Radar battery
+FAV_HUD_RADAR_CHAIN :: Chain count
+FAV_HUD_RADAR_RECHARGE :: Radar recharge
 MENU_HUD_MAP_ID :: Map id
 NOTE_HUD_MAP_ID :: Show the current map id, live (debug / for cataloging zones for 'you are here').
 FAV_HUD_MAP_ID :: Map id
@@ -1114,6 +1126,12 @@ NOTE_HUD_ITEM :: Shows your lead Pokémon's held item on the HUD ('-' if none).
 NOTE_HUD_ENC :: Counts battles entered this session - handy for shiny hunting.\n\nPress the editor hotkey (default START) on this entry to reset.
 NOTE_HUD_STEPS :: Counts steps walked this session.\n\nPress the editor hotkey (default START) on this entry to reset.
 MENU_HUD_RNGHDR :: RNG Tracking
+MENU_HUD_RNG_ALL_ON :: All ON
+FAV_HUD_RNG_ALL_ON :: RNG All ON
+NOTE_HUD_RNG_ALL_ON :: Turns every RNG Tracking field below ON at once, except Freeze. Use All OFF to turn them off.\n\nThis is a momentary button: it unchecks itself when you leave the menu.
+MENU_HUD_RNG_ALL_OFF :: All OFF
+FAV_HUD_RNG_ALL_OFF :: RNG All OFF
+NOTE_HUD_RNG_ALL_OFF :: Turns every RNG Tracking field below OFF at once, except Freeze. Use All ON to turn them on.\n\nThis is a momentary button: it unchecks itself when you leave the menu.
 MENU_HUD_FREEZE :: Freeze
 FAV_HUD_FREEZE :: Freeze
 NOTE_HUD_FREEZE :: Hold all HUD values still (a snapshot) so you can copy them down — like the X+Y lock in PokeReader. Turn it off to go live again.
@@ -1169,7 +1187,7 @@ EGG_PEEK_HINT :: Press A to peek
 NOTE_EGG_PEEK_CONFIRM :: Reveal this egg's contents?
 MENU_SHINY_HUNT :: Shiny Hunt Companion
 FAV_SHINY_HUNT :: Shiny Hunt
-NOTE_SHINY_HUNT :: Open the hub, pick the Pokémon you are hunting, and it counts your wild encounters of that species in the background.\n\nWhen a real shiny appears it alerts you and pauses. Counts wild battles only (best-effort). Your count is saved per target.
+NOTE_SHINY_HUNT :: Open the hub, pick the Pokémon you are hunting, and it counts your wild encounters of that species in the background.\n\nWhen a real shiny appears it alerts you and pauses. Counts wild battles only (best-effort). Your count is saved per target.\n\nOn X/Y, press R for the Radar Chain Assistant tab: pick grass patches in the 4th ring or further, matching the previous shake, and avoid patches on the edge of the grassy area. Running away always breaks a Poké Radar chain - there is no safe flee. If no patch looks safe, walk 50 steps outside the grass to recharge the Radar without losing the chain.
 SHINY_TARGET :: Target:
 SHINY_ENCOUNTERS :: Encounters
 SHINY_METHOD :: Method:
@@ -1188,6 +1206,25 @@ SHINY_FOUND :: Shiny found! Reset to hunt again.
 SHINY_CLOSE :: Close
 SHINY_ONLY_NOTE :: Counts only when the wild lead matches your target.
 EGG_PEEK_SKIP :: Press A to skip
+
+# ==== Radar Chain Assistant (Fase 01) - Tab 2 of Shiny Hunt Companion, X/Y only ====
+MENU_RADAR_CHAIN :: Radar Chain Assistant
+RADAR_CHAIN_LABEL :: Chain (estimate)
+RADAR_CHAIN_ESTIMATE_NOTE :: Counts battles entered; not the game's real chain value.
+RADAR_RECHARGE_LABEL :: Radar battery
+RADAR_CHAIN_TAB_HINT :: A confirm   L/R tab
+RADAR_CHAIN_TAP_HINT :: A toggle   L/R tab
+RADAR_CHAIN_SHORT :: Radar Chain
+RADAR_BATTERY_LIVE_NOTE :: Live value - drops 5 per use, recharges by walking.
+RADAR_BATTERY_INFINITE_NOTE :: Infinite Radar Battery is ON.
+RADAR_CHAIN_RESET_DONE :: Chain count reset
+RADAR_CHAIN_RECHARGE_READY :: Radar ready to reactivate
+RADAR_CHAIN_ROW_BATTERY :: Infinite Radar Battery
+RADAR_CHAIN_ROW_REPEL :: Repel Auto-Refresh
+RADAR_CHAIN_ROW_NOWILD :: No Wild Pokémon
+RADAR_CHAIN_ROW_HUD_CHAIN :: Show Chain on HUD
+RADAR_CHAIN_ROW_HUD_RECHARGE :: Show Radar Battery on HUD
+RADAR_CHAIN_ROW_RESET :: Reset chain count
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: Trainer Card

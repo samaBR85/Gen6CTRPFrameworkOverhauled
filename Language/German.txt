@@ -12,6 +12,7 @@ BATTLE_ACCESS_BAG :: Beutel
 BATTLE_ALLOW_MEGAS :: Mehr. Megas OK
 BATTLE_ALWAYS_SHINY :: Immer Shiny
 BATTLE_RADAR_INFINITE_BATTERY :: Poke-Radar Unendliche Batterie
+BATTLE_REPEL_AUTO_REFRESH :: Schutz Auto-Auffrischung
 BATTLE_CAPTURE_RATE_100 :: Fangrate 100 %
 BATTLE_CAPTURE_TRAINER_POKEMON :: Trainer-Pkmn fangen
 BATTLE_CONDITION :: Zustand
@@ -470,8 +471,10 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Lässt dich im Kampf die Pokémon eines T
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Trainer fangen
 NOTE_BATTLE_ALWAYS_SHINY :: Jedes wilde und gezüchtete Pokémon wird schillernd sein. Die Funkel-Animation spielt, wenn es erscheint.
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: Haelt die Batterie des Poke-Radars in der Oberwelt voll, ohne die ca. 50 Schritte Aufladezeit zwischen den Einsaetzen.\n\nNur X/Y - das Radar gibt es in Omega Rubin / Alpha Saphir nicht.\n\nWICHTIG: aus Sicherheitsgruenden bleibt dies nach einem Neustart NICHT an. Es startet immer AUS.\n\nSchalte es also jede Sitzung wieder ein, sobald du bereits im Spiel bist.\n\n(Das verhindert ein Startproblem, bei dem das Spiel deinen Spielstand nicht finden koennte.)
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: Haelt einen Schutz dauerhaft aktiv, sodass er nie ausgeht. Schutz blockiert nur wilde Pokemon, die schwaecher sind als dein Anfuehrer - nicht jede Begegnung wird verhindert.\n\nKann gefahrlos ueber Neustarts hinweg aktiv bleiben; diese Adresse gehoert nicht zu deinem Spielstand.
 FAV_BATTLE_ALWAYS_SHINY :: Immer Shiny
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: Endlos-Radar
+FAV_BATTLE_REPEL_AUTO_REFRESH :: Schutz-Auffrisch.
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: Erlaube Schillern bei normalerweise schillernd-gesperrten Begegnungen.
 FAV_BATTLE_DISABLE_SHINY_LOCK :: Kein Shiny-Lock
 MENU_RENAME_ANY :: Jedes Pkmn umbenennen
@@ -546,8 +549,9 @@ FAV_SHOW_NOTIFICATIONS :: Hinweise
 MENU_PLUGIN_SETTINGS :: Plugin-Einstell.
 NOTE_PLUGIN_SETTINGS :: Die eigenen Einstellungen dieses Plugins (z.B. Sprache) - nicht deine Spieloptionen.
 MENU_VIEW_PARTY_SUMMARY :: Team-Übersicht
-NOTE_VIEW_PARTY_SUMMARY :: Sieh die verborgenen Werte deines Teams (Werte, DVs, FPs, Wesen, Fähigkeit, Item, OT...). Wähle einen Platz, um seine volle Karte zu sehen.\n\nZeigt dein ZULETZT GESPEICHERTES Team — wenn du dein Team geändert hast, speichere zuerst das Spiel.\n\nKarten-Steuerung:\n\nHoch/Runter: bewege den Rahmen, um einen Wert zu wählen (KP, Ang, Vert, SpAng, SpVert, Init).\n\nA: springe zum Teammitglied mit dem HÖHEREN (oder NIEDRIGEREN) Wert davon. Bei Gleichstand drücke A erneut, um durchzuwechseln.\n\nL (in Werkzeuge > Hotkeys neu belegbar): wechsle zwischen HÖHER und NIEDRIGER, angezeigt unten rechts am oberen Bildschirm.\n\nEin kleines Dreieck links eines Werts bedeutet, dass dieses Pokémon den besten (oben) oder schlechtesten (unten) Wert davon im Team hat.\n\nLinks/Rechts: Karten wechseln. B: zurück. Select: zum Spiel beenden.
+NOTE_VIEW_PARTY_SUMMARY :: Sieh die verborgenen Werte deines Teams (Werte, DVs, FPs, Wesen, Fähigkeit, Item, OT...). Wähle einen Platz, um seine volle Karte zu sehen.\n\nZeigt dein ZULETZT GESPEICHERTES Team — wenn du dein Team geändert hast, speichere zuerst das Spiel.\n\nKarten-Steuerung:\n\nHoch/Runter: bewege den Rahmen, um einen Wert zu wählen (KP, Ang, Vert, SpAng, SpVert, Init).\n\nA: springe zum Teammitglied mit dem HÖHEREN (oder NIEDRIGEREN) Wert davon. Bei Gleichstand drücke A erneut, um durchzuwechseln.\n\nL (in Werkzeuge > Hotkeys neu belegbar): wechsle zwischen HÖHER und NIEDRIGER, angezeigt unten rechts am oberen Bildschirm.\n\nEin kleines Dreieck links eines Werts bedeutet, dass dieses Pokémon den besten (oben) oder schlechtesten (unten) Wert davon im Team hat.\n\nY: gehe durch die 4 Attacken auf dem unteren Bildschirm, um zu lesen, was jede davon bewirkt.\n\nLinks/Rechts: Karten wechseln. B: zurück. Select: zum Spiel beenden.
 FAV_VIEW_PARTY_SUMMARY :: Team-Übersicht
+PARTY_CARD_HINT :: L/R Karte   Y Attacke   B Zurück
 MENU_MINI_GAME_CORNER :: ★ Mini Game Corner ★
 NOTE_MINI_GAME_CORNER :: Minispiele zum Spaß: würfle eine zufällige wilde Begegnung, öffne Loot Boxes, setze dein Pokémon auf einen Wert, dreh das Rad, spiel Slots und mehr.\n\nWechsle auf dem unteren Bildschirm zwischen:\n\nGRATIS SPIELEN: du bekommst die Items, Pokémon und Spawns, die du gewinnst, weiterhin, aber dein Geld ändert sich nie.\n\nPOKÉDOLLAR AUSGEBEN: echtes Geld steht auf dem Spiel - Spiele verlangen einen Einsatz und zahlen Pokédollar aus (oder nehmen sie) für echt.\n\nDeine GRATIS/BEZAHLT-Wahl wird zwischen Sitzungen gemerkt.\n\nAchtung: gewonnene Items und Geldänderungen bleiben nur, wenn du danach DAS SPIEL SPEICHERST. Die Loot Box gibt nie TMs/VMs oder Basis-Items aus, sie kann deinen Story-Fortschritt also nicht beeinflussen.
 FAV_MINI_GAME_CORNER :: MinGame Corner
@@ -883,6 +887,8 @@ HUD_PARTY :: Team: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: Schutz: %u
 HUD_RADAR :: Radar-Akku: %u
+HUD_RADAR_CHAIN :: Kette: %u
+HUD_RADAR_RECHARGE :: Aufladung: %u/50
 HUD_MAP_ID :: Karte #%u (0x%X)
 HUD_POS_TOP_LEFT :: Oben-Li.
 HUD_POS_TOP_CENTER :: Oben-Mitte
@@ -994,10 +1000,16 @@ NOTE_HUD_XY :: Zeige deine aktuellen Kartenkoordinaten.
 FAV_HUD_XY :: X/Y
 MENU_HUD_REPEL :: Schutz-Schr.
 MENU_HUD_RADAR :: Radar-Batterie
+MENU_HUD_RADAR_CHAIN :: Kettenzähler
+MENU_HUD_RADAR_RECHARGE :: Radar-Aufladung
 NOTE_HUD_REPEL :: Zeige, wie viele Schritte Schutz übrig sind (0 = kein Schutz aktiv).\nWird vom Spiel nicht gespeichert, setzt sich beim Neuladen also auf 0 zurück.
 NOTE_HUD_RADAR :: Zeigt die aktuelle Batterieladung des Poke-Radars (0-255). Nur X/Y.
+NOTE_HUD_RADAR_CHAIN :: Zeigt den Kettenzähler des Radar-Ketten-Assistenten (eine Schätzung, nicht der echte Spielwert). Nur X/Y.
+NOTE_HUD_RADAR_RECHARGE :: Zeigt den Fortschritt zu den 50 sicheren Aufladeschritten. Nur X/Y.
 FAV_HUD_REPEL :: Schutz
 FAV_HUD_RADAR :: Radar-Batterie
+FAV_HUD_RADAR_CHAIN :: Kettenzähler
+FAV_HUD_RADAR_RECHARGE :: Radar-Aufladung
 MENU_HUD_MAP_ID :: Karten-ID
 NOTE_HUD_MAP_ID :: Zeige die aktuelle Karten-ID, live (Debug / zum Katalogisieren von Zonen für 'du bist hier').
 FAV_HUD_MAP_ID :: Karte
@@ -1113,6 +1125,12 @@ NOTE_HUD_ITEM :: Zeigt das getragene Item deines ersten Pokémon im HUD ('-' wen
 NOTE_HUD_ENC :: Zählt die in dieser Sitzung begonnenen Kämpfe - praktisch für die Schillernd-Jagd.\n\nDrücke das Editor-Tastenkürzel (Standard START) auf diesem Eintrag zum Zurücksetzen.
 NOTE_HUD_STEPS :: Zählt die in dieser Sitzung gelaufenen Schritte.\n\nDrücke das Editor-Tastenkürzel (Standard START) auf diesem Eintrag zum Zurücksetzen.
 MENU_HUD_RNGHDR :: RNG Tracking
+MENU_HUD_RNG_ALL_ON :: Alle AN
+FAV_HUD_RNG_ALL_ON :: RNG Alle AN
+NOTE_HUD_RNG_ALL_ON :: Schaltet alle RNG-Tracking-Felder unten gleichzeitig EIN, außer Freeze. Mit „Alle AUS“ schaltest du sie wieder aus.\n\nDies ist eine Moment-Taste: Sie deaktiviert sich selbst, wenn du das Menü verlässt.
+MENU_HUD_RNG_ALL_OFF :: Alle AUS
+FAV_HUD_RNG_ALL_OFF :: RNG Alle AUS
+NOTE_HUD_RNG_ALL_OFF :: Schaltet alle RNG-Tracking-Felder unten gleichzeitig AUS, außer Freeze. Mit „Alle AN“ schaltest du sie wieder ein.\n\nDies ist eine Moment-Taste: Sie deaktiviert sich selbst, wenn du das Menü verlässt.
 MENU_HUD_FREEZE :: Freeze
 FAV_HUD_FREEZE :: Freeze
 NOTE_HUD_FREEZE :: Hält alle HUD-Werte fest (ein Snapshot), damit du sie abschreiben kannst — wie die X+Y-Sperre in PokeReader. Aus = wieder live.
@@ -1168,7 +1186,7 @@ EGG_PEEK_HINT :: A drücken zum Spähen
 NOTE_EGG_PEEK_CONFIRM :: Inhalt dieses Eis zeigen?
 MENU_SHINY_HUNT :: Shiny-Jagd-Begleiter
 FAV_SHINY_HUNT :: Shiny-Jagd
-NOTE_SHINY_HUNT :: Öffne das Menü, wähle das Pokémon, das du jagst, und es zählt deine wilden Begegnungen dieser Art im Hintergrund.\n\nWenn ein echtes Shiny erscheint, wird es gemeldet und pausiert. Zählt nur wilde Kämpfe (näherungsweise). Dein Zähler wird pro Ziel gespeichert.
+NOTE_SHINY_HUNT :: Öffne das Menü, wähle das Pokémon, das du jagst, und es zählt deine wilden Begegnungen dieser Art im Hintergrund.\n\nWenn ein echtes Shiny erscheint, wird es gemeldet und pausiert. Zählt nur wilde Kämpfe (näherungsweise). Dein Zähler wird pro Ziel gespeichert.\n\nDrücke auf X/Y die R-Taste für den Radar-Ketten-Assistenten-Tab: wähle Grasflecken im 4. Ring oder weiter, passend zum vorherigen Rascheln, und meide Flecken am Rand der Graszone. Weglaufen unterbricht immer eine Poké-Radar-Kette - es gibt kein sicheres Fliehen. Wenn kein Fleck sicher aussieht, geh 50 Schritte außerhalb des Grases, um das Radar aufzuladen, ohne die Kette zu verlieren.
 SHINY_TARGET :: Ziel:
 SHINY_ENCOUNTERS :: Begegnungen
 SHINY_METHOD :: Methode:
@@ -1187,6 +1205,25 @@ SHINY_FOUND :: Shiny gefunden! Zurücksetzen zum Weiterjagen.
 SHINY_CLOSE :: Schließen
 SHINY_ONLY_NOTE :: Zählt nur, wenn das wilde Pokémon dein Ziel ist.
 EGG_PEEK_SKIP :: A zum Überspringen
+
+# ==== Radar Chain Assistant (Fase 01) - Tab 2 of Shiny Hunt Companion, X/Y only ====
+MENU_RADAR_CHAIN :: Radar-Ketten-Assistent
+RADAR_CHAIN_LABEL :: Kette (Schätzung)
+RADAR_CHAIN_ESTIMATE_NOTE :: Zählt begonnene Kämpfe; nicht der echte Kettenwert des Spiels.
+RADAR_RECHARGE_LABEL :: Radar-Batterie
+RADAR_CHAIN_TAB_HINT :: A bestätigen   L/R Tab
+RADAR_CHAIN_TAP_HINT :: A umschalten   L/R Tab
+RADAR_CHAIN_RESET_DONE :: Kettenzähler zurückgesetzt
+RADAR_CHAIN_RECHARGE_READY :: Radar bereit zur Reaktivierung
+RADAR_CHAIN_ROW_BATTERY :: Unendliche Radar-Batterie
+RADAR_CHAIN_ROW_REPEL :: Schutz Auto-Auffrischung
+RADAR_CHAIN_ROW_NOWILD :: Keine wilden Pokémon
+RADAR_CHAIN_ROW_HUD_CHAIN :: Kette im HUD zeigen
+RADAR_CHAIN_ROW_HUD_RECHARGE :: Radar-Batterie im HUD zeigen
+RADAR_CHAIN_ROW_RESET :: Kettenzähler zurücksetzen
+RADAR_CHAIN_SHORT :: Radar-Kette
+RADAR_BATTERY_LIVE_NOTE :: Live-Wert - sinkt bei Nutzung um 5, lädt sich beim Laufen wieder auf.
+RADAR_BATTERY_INFINITE_NOTE :: Unendliche Radar-Batterie ist AN.
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: Trainerkarte

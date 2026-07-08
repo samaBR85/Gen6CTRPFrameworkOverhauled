@@ -29,6 +29,10 @@ namespace CTRPluginFramework {
             void Remove(u32 start, u32 count = 1, bool destroy = false);
             void Clear(void);
 
+            // Items L/R cycles the selector between when this folder is open (see MenuFolder::SetQuickJumpTargets).
+            // Empty = L/R does nothing extra in this folder (the default).
+            vector<MenuItem*> quickJump;
+
             using MenuItemIter = vector<MenuItem*>::iterator;
 
             MenuItemIter begin(void) {

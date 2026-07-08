@@ -12,6 +12,7 @@ BATTLE_ACCESS_BAG :: Ouvrir Sac
 BATTLE_ALLOW_MEGAS :: 1+ Méga-Évol.
 BATTLE_ALWAYS_SHINY :: Tjs chromat.
 BATTLE_RADAR_INFINITE_BATTERY :: Radar Poke Batterie infinie
+BATTLE_REPEL_AUTO_REFRESH :: Repousse Auto-Recharge
 BATTLE_CAPTURE_RATE_100 :: Capture 100 %
 BATTLE_CAPTURE_TRAINER_POKEMON :: Capturer Pkmn dresseur
 BATTLE_CONDITION :: État
@@ -470,8 +471,10 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Vous permet de capturer le Pokémon d'un 
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Capt. dress.
 NOTE_BATTLE_ALWAYS_SHINY :: Chaque Pokémon sauvage ou issu de l'élevage sera chromatique. L'animation de scintillement joue à son apparition.
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: Garde la batterie du Radar Poke pleine dans le monde, sans les ~50 pas de recharge entre deux utilisations.\n\nX/Y uniquement - le Radar n'existe pas dans Rubis Omega / Saphir Alpha.\n\nIMPORTANT : par securite, ceci ne reste PAS active apres un redemarrage. Il demarre toujours desactive.\n\nReactivez-le donc a chaque session, une fois deja dans votre partie.\n\n(Cela evite un souci au demarrage ou le jeu pourrait ne pas trouver votre sauvegarde.)
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: Garde une Repousse active en permanence, sans jamais l'épuiser. La Repousse bloque les Pokémon sauvages plus faibles que ton premier Pokémon - elle n'empêche pas toutes les rencontres.\n\nPeut rester activée sans risque, même après un redémarrage ; cette adresse ne fait pas partie de ta sauvegarde.
 FAV_BATTLE_ALWAYS_SHINY :: Touj. chrom.
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: Radar infini
+FAV_BATTLE_REPEL_AUTO_REFRESH :: Repousse Auto
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: Autorise le chromatique sur les rencontres normalement verrouillées.
 FAV_BATTLE_DISABLE_SHINY_LOCK :: Sans verrou
 MENU_RENAME_ANY :: Renom. tout Pkmn
@@ -546,8 +549,9 @@ FAV_SHOW_NOTIFICATIONS :: Notifications
 MENU_PLUGIN_SETTINGS :: Réglages plugin
 NOTE_PLUGIN_SETTINGS :: Les réglages propres à ce plugin (ex. langue) - pas vos options de jeu.
 MENU_VIEW_PARTY_SUMMARY :: Voir résumé équipe
-NOTE_VIEW_PARTY_SUMMARY :: Voyez les stats cachées de votre équipe (stats, IV, EV, nature, talent, objet, D.O...). Choisissez un emplacement pour voir sa fiche complète.\n\nAffiche votre DERNIÈRE équipe SAUVEGARDÉE — si vous avez changé d'équipe, sauvegardez d'abord la partie.\n\nCommandes de la fiche :\n\nHaut/Bas : déplacez la case pour choisir une stat (PV, Atk, Def, SpA, SpD, Spe).\n\nA : passe au membre de l'équipe avec la valeur la PLUS ÉLEVÉE (ou la PLUS FAIBLE) de cette stat. En cas d'égalité, rappuyez sur A pour les parcourir.\n\nL (réassignable dans Outils > Raccourcis) : bascule entre PLUS ÉLEVÉ et PLUS FAIBLE, indiqué en bas à droite de l'écran supérieur.\n\nUn petit triangle à gauche d'une stat signifie que ce Pokémon a la meilleure (haut) ou la pire (bas) valeur de l'équipe.\n\nGauche/Droite : changer de fiche. B : retour. Select : quitter vers le jeu.
+NOTE_VIEW_PARTY_SUMMARY :: Voyez les stats cachées de votre équipe (stats, IV, EV, nature, talent, objet, D.O...). Choisissez un emplacement pour voir sa fiche complète.\n\nAffiche votre DERNIÈRE équipe SAUVEGARDÉE — si vous avez changé d'équipe, sauvegardez d'abord la partie.\n\nCommandes de la fiche :\n\nHaut/Bas : déplacez la case pour choisir une stat (PV, Atk, Def, SpA, SpD, Spe).\n\nA : passe au membre de l'équipe avec la valeur la PLUS ÉLEVÉE (ou la PLUS FAIBLE) de cette stat. En cas d'égalité, rappuyez sur A pour les parcourir.\n\nL (réassignable dans Outils > Raccourcis) : bascule entre PLUS ÉLEVÉ et PLUS FAIBLE, indiqué en bas à droite de l'écran supérieur.\n\nUn petit triangle à gauche d'une stat signifie que ce Pokémon a la meilleure (haut) ou la pire (bas) valeur de l'équipe.\n\nY : parcourez les 4 capacités affichées sur l'écran inférieur pour lire ce que fait chacune.\n\nGauche/Droite : changer de fiche. B : retour. Select : quitter vers le jeu.
 FAV_VIEW_PARTY_SUMMARY :: Résumé équipe
+PARTY_CARD_HINT :: L/R Fiche   Y Capacité   B Retour
 MENU_MINI_GAME_CORNER :: ★ Coin Mini-Jeux ★
 NOTE_MINI_GAME_CORNER :: Mini-jeux pour s'amuser : lancez un dé pour une rencontre sauvage aléatoire, ouvrez des coffres à butin, pariez votre Pokémon sur une stat, faites tourner la roue, jouez aux machines à sous et plus.\n\nSur l'écran inférieur, basculez entre :\n\nGRATUIT : vous gagnez toujours les objets, Pokémon et apparitions remportés, mais votre argent ne change jamais.\n\nDÉPENSER POKÉDOLLARS : de l'argent réel est en jeu - les jeux facturent une entrée/mise et versent (ou prennent) des Pokédollars pour de vrai.\n\nVotre choix GRATUIT/PAYANT est mémorisé entre les sessions.\n\nAttention : les objets gagnés et tout changement d'argent ne sont conservés que si vous SAUVEGARDEZ LA PARTIE ensuite. Le Coffre à butin ne donne jamais de CT/CS ni d'objets clés, donc il ne peut pas affecter votre progression.
 FAV_MINI_GAME_CORNER :: Coin Mini-Jeux
@@ -883,6 +887,8 @@ HUD_PARTY :: Équipe : %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: Repousse : %u
 HUD_RADAR :: Radar batt. : %u
+HUD_RADAR_CHAIN :: Chaîne : %u
+HUD_RADAR_RECHARGE :: Recharge : %u/50
 HUD_MAP_ID :: Carte #%u (0x%X)
 HUD_POS_TOP_LEFT :: Ht-Gche
 HUD_POS_TOP_CENTER :: Ht-Centre
@@ -994,10 +1000,16 @@ NOTE_HUD_XY :: Affiche vos coordonnées actuelles sur la carte.
 FAV_HUD_XY :: Pos X/Y
 MENU_HUD_REPEL :: Pas Repouss
 MENU_HUD_RADAR :: Batterie Radar
+MENU_HUD_RADAR_CHAIN :: Nombre de chaîne
+MENU_HUD_RADAR_RECHARGE :: Recharge Radar
 NOTE_HUD_REPEL :: Affiche combien de pas de Repousse il reste (0 = aucune Repousse active).\nNon sauvegardé par le jeu, donc remis à 0 au rechargement.
 NOTE_HUD_RADAR :: Affiche la charge actuelle de la batterie du Radar Poke (0-255). X/Y uniquement.
+NOTE_HUD_RADAR_CHAIN :: Affiche le nombre de chaîne de l'Assistant Chaîne Radar (une estimation, pas la vraie valeur du jeu). X/Y uniquement.
+NOTE_HUD_RADAR_RECHARGE :: Affiche la progression vers les 50 pas de recharge sûrs. X/Y uniquement.
 FAV_HUD_REPEL :: Repous
 FAV_HUD_RADAR :: Batterie Radar
+FAV_HUD_RADAR_CHAIN :: Nb chaîne
+FAV_HUD_RADAR_RECHARGE :: Recharge Radar
 MENU_HUD_MAP_ID :: ID carte
 NOTE_HUD_MAP_ID :: Affiche l'ID de la carte actuelle, en direct (débogage / pour cataloguer les zones du 'vous êtes ici').
 FAV_HUD_MAP_ID :: IDcarte
@@ -1113,6 +1125,12 @@ NOTE_HUD_ITEM :: Affiche l'objet tenu par votre Pokémon de tête sur le HUD ('-
 NOTE_HUD_ENC :: Compte les combats engagés cette session - pratique pour la chasse aux chromatiques.\n\nAppuyez sur le raccourci d'édition (START par défaut) sur cette entrée pour remettre à zéro.
 NOTE_HUD_STEPS :: Compte les pas effectués cette session.\n\nAppuyez sur le raccourci d'édition (START par défaut) sur cette entrée pour remettre à zéro.
 MENU_HUD_RNGHDR :: RNG Tracking
+MENU_HUD_RNG_ALL_ON :: Tout ON
+FAV_HUD_RNG_ALL_ON :: RNG Tout ON
+NOTE_HUD_RNG_ALL_ON :: Active d'un coup tous les champs RNG Tracking ci-dessous, sauf Freeze. Utilisez Tout OFF pour les désactiver.\n\nC'est un bouton momentané : il se décoche automatiquement quand vous quittez le menu.
+MENU_HUD_RNG_ALL_OFF :: Tout OFF
+FAV_HUD_RNG_ALL_OFF :: RNG Tout OFF
+NOTE_HUD_RNG_ALL_OFF :: Désactive d'un coup tous les champs RNG Tracking ci-dessous, sauf Freeze. Utilisez Tout ON pour les activer.\n\nC'est un bouton momentané : il se décoche automatiquement quand vous quittez le menu.
 MENU_HUD_FREEZE :: Freeze
 FAV_HUD_FREEZE :: Freeze
 NOTE_HUD_FREEZE :: Fige toutes les valeurs du HUD (un instantané) pour pouvoir les recopier — comme le verrou X+Y de PokeReader. Désactivez pour repasser en direct.
@@ -1168,7 +1186,7 @@ EGG_PEEK_HINT :: Appuie sur A pour observer
 NOTE_EGG_PEEK_CONFIRM :: Révéler le contenu de cet œuf ?
 MENU_SHINY_HUNT :: Assistant de chasse chromatique
 FAV_SHINY_HUNT :: Chasse Shiny
-NOTE_SHINY_HUNT :: Ouvre le panneau, choisis le Pokémon que tu chasses, et il compte tes rencontres sauvages de cette espèce en arrière-plan.\n\nQuand un vrai chromatique apparaît, il t'alerte et met en pause. Ne compte que les combats sauvages (approximatif). Ton compteur est enregistré par cible.
+NOTE_SHINY_HUNT :: Ouvre le panneau, choisis le Pokémon que tu chasses, et il compte tes rencontres sauvages de cette espèce en arrière-plan.\n\nQuand un vrai chromatique apparaît, il t'alerte et met en pause. Ne compte que les combats sauvages (approximatif). Ton compteur est enregistré par cible.\n\nSur X/Y, appuie sur R pour l'onglet Assistant Chaîne Radar : choisis les hautes herbes du 4e cercle ou au-delà, en suivant le tremblement précédent, et évite les herbes en bordure de la zone. Fuir un combat casse toujours une chaîne de Radar Poke - il n'y a pas de fuite sûre. Si aucune herbe ne semble sûre, marche 50 pas hors des hautes herbes pour recharger le Radar sans perdre la chaîne.
 SHINY_TARGET :: Cible :
 SHINY_ENCOUNTERS :: Rencontres
 SHINY_METHOD :: Méthode :
@@ -1187,6 +1205,25 @@ SHINY_FOUND :: Chromatique trouvé ! Réinitialise pour rechasser.
 SHINY_CLOSE :: Fermer
 SHINY_ONLY_NOTE :: Ne compte que si le Pokémon sauvage est ta cible.
 EGG_PEEK_SKIP :: A pour passer
+
+# ==== Radar Chain Assistant (Fase 01) - Tab 2 of Shiny Hunt Companion, X/Y only ====
+MENU_RADAR_CHAIN :: Assistant Chaîne Radar
+RADAR_CHAIN_LABEL :: Chaîne (estimation)
+RADAR_CHAIN_ESTIMATE_NOTE :: Compte les combats engagés ; pas la vraie valeur de chaîne du jeu.
+RADAR_RECHARGE_LABEL :: Batterie du Radar
+RADAR_CHAIN_TAB_HINT :: A valider   L/R onglet
+RADAR_CHAIN_TAP_HINT :: A basculer   L/R onglet
+RADAR_CHAIN_RESET_DONE :: Nombre de chaîne réinitialisé
+RADAR_CHAIN_RECHARGE_READY :: Radar prêt à être réactivé
+RADAR_CHAIN_ROW_BATTERY :: Radar Batterie infinie
+RADAR_CHAIN_ROW_REPEL :: Repousse Auto-Recharge
+RADAR_CHAIN_ROW_NOWILD :: Aucun Pokémon sauvage
+RADAR_CHAIN_ROW_HUD_CHAIN :: Afficher la chaîne sur le HUD
+RADAR_CHAIN_ROW_HUD_RECHARGE :: Afficher la batterie du Radar sur le HUD
+RADAR_CHAIN_ROW_RESET :: Réinitialiser le nombre de chaîne
+RADAR_CHAIN_SHORT :: Chaîne Radar
+RADAR_BATTERY_LIVE_NOTE :: Valeur en direct - diminue de 5 par utilisation, se recharge en marchant.
+RADAR_BATTERY_INFINITE_NOTE :: La batterie Radar infinie est activée.
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: Carte de Dresseur
