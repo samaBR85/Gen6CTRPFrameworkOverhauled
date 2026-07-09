@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.9
+# Gen6CTRPluginFrameworkOverhauled — v0.8.0
 
 [English](README.md) · **Português**
 
@@ -70,6 +70,32 @@ quatro golpes que ele sabe no seu nível — então defina forma, nível e Norma
 
 Derrubou um lendário, ou viu um fugir? O **Respawn Legendary** lista todos com a localização real e manda o que você
 escolher de volta pro lugar onde você o encontrou.
+
+### Cace shinies com o Radar
+
+**Só X/Y.** O **Shiny Hunt Companion** conta seus encontros selvagens de uma espécie-alvo, avisa e pausa quando um
+shiny real aparece, e — reorganizado na v0.8.0 — se divide em três abas que você alterna com **L/R**: **Hunt**,
+**PokeRadar** e **Chain**.
+
+<p align="center">
+  <img src="Screenshots/v0.8.0/shc_hunt.png" width="250" alt="Shiny Hunt Companion — aba Hunt, espécie-alvo e as chances de shiny ao vivo" />
+  <img src="Screenshots/v0.8.0/shc_pokeradar.png" width="250" alt="Shiny Hunt Companion — aba PokeRadar, a bateria do Radar e os ajudantes de item" />
+  <img src="Screenshots/v0.8.0/shc_chain.png" width="250" alt="Shiny Hunt Companion — aba Chain, Species Lock, Secure Chain e a contagem da corrente" />
+</p>
+
+A aba **Chain** é o novo coração da coisa. O **Species Lock (beta)** força a espécie que você está encadeando em
+cada moita de grama da área a partir da corrente 2, então você só precisa evitar as vazias — espécie e forma ficam
+fixas, enquanto nível, IVs e nature continuam naturais. O **Secure Chain (beta)** impede o contador da corrente do
+Poké Radar de zerar, e o **Choose Chain Value** deixa você definir a contagem inicial. Combine com o **Infinite
+Repel** e a **Infinite Radar Battery** pra encadear sem interrupção, e leia a corrente e as chances de shiny ao vivo
+direto no HUD.
+
+<p align="center">
+  <img src="Screenshots/v0.8.0/shc_hud.png" width="330" alt="O HUD do overworld mostrando a contagem da corrente do Radar e as chances de shiny ao vivo" />
+</p>
+
+> 🧪 Species Lock e Secure Chain são **beta** — confirmados que agem na RAM do jogo, mas o efeito deles no próprio
+> RNG de shiny do jogo ainda está sendo testado. Experimente e conte o que você viu.
 
 ### Carregue um Poké Mart na bag
 
@@ -272,7 +298,7 @@ de cor ao lado de cada nome e sua escolha lembrada entre as sessões. Fixe os re
 
 <p align="center">
   <img src="Screenshots/v0.3.3/export/26_themes.png" width="330" alt="O seletor de temas com amostras de cor" />
-  <img src="Screenshots/v0.3.3/export/27_appguide.png" width="330" alt="O leitor do App Guide embutido" />
+  <img src="Screenshots/v0.8.0/favorites.png" width="330" alt="A lista de Favoritos — seus recursos mais usados fixados em duas colunas" />
 </p>
 
 E se você se sentir perdido, o **App Guide** (23 páginas, escrito como uma aventura guiada em vez de um manual) e uma
@@ -308,6 +334,7 @@ Uma breve história, do mais antigo ao mais novo — sem detalhe, só o formato 
 - **v0.7.7** — **Limite de Nível**, uma nova tela no Trainer Info pra runs nuzlocke/hardcore: um limite de nível automático atrelado ao ás do próximo Líder de Ginásio (+ um ajuste seu), modos Avisar ou Forçar, um navegador via D-Pad pra comparar os próximos ginásios, e um campo no HUD ao vivo pra contagem de quem passou do limite.
 - **v0.7.8** — **Poké Radar: Bateria Infinita** (X/Y) — mantém a bateria do Radar cheia no overworld, sem espera de recarga de ~50 passos entre correntes, mais um indicador de bateria ao vivo no HUD. O **Poké Radar** também volta à lista do PokéMart Anywhere no X/Y. Ajustes: o Display Enemy Stats agora lembra os campos que você ligou, Encounters & Catching começa pelo Shiny Hunt Companion, e os rótulos do Favorites ficaram mais limpos. Sugestão de u/Victhordiz.
 - **v0.7.9** — uma rodada de polimento. **Shiny Hunt Companion & Radar Chain** ganharam um visual mais limpo (cores do tema, sem caixas em volta das linhas, uma seta que acompanha o cursor e chips de chance com largura fixa). O **Party Stats Summary** agora mostra a descrição de cada golpe — aperte **Y** para alternar entre os quatro. O **Config HUD** ganhou botões **All ON / All OFF** para os campos de RNG Tracking e um atalho **L/R** para pular entre Money, All ON e o toggle do Panel, e a lista de **Favorites** mantém o layout em duas colunas em todo lugar.
+- **v0.8.0** — **Radar Chain Update** (X/Y). O **Shiny Hunt Companion** se divide em abas **Hunt / PokeRadar / Chain** (L/R pra alternar), e a aba Chain adiciona dois ajudantes experimentais: o **Species Lock**, que força a espécie que você está encadeando em cada moita de grama da área a partir da corrente 2 (só espécie + forma — nível, IVs e nature continuam naturais), e o **Secure Chain**, que impede o contador da corrente de zerar. Além do **Choose Chain Value** pra definir a contagem inicial, uma **leitura de corrente sem limite** (o número real acima de 40, não "40+"), o **Infinite Repel** (renomeado do Repel Auto-Refresh), um toggle de **Transparent Notifications** pra avisos sem caixa, um tipo de busca **"Changed"** na Busca, e um lote de correções de texto. Species Lock e Secure Chain são beta — reporte seus resultados.
 
 ## 📥 Instalando
 
@@ -421,7 +448,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
   de nível por ginásio que virou o **Limite de Nível** (v0.7.7).
 
 **Este fork**
-- Fork, repaginação e adições da v0.3.0 → v0.7.9 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
+- Fork, repaginação e adições da v0.3.0 → v0.8.0 por [samaBR85](https://github.com/samaBR85), feitos em colaboração
   com o **Claude** (Anthropic).
 
 ## Licença

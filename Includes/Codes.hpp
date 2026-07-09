@@ -50,11 +50,16 @@ namespace CTRPluginFramework {
     void BagCartAdd(int id, int pocket, int qty, int unit); // pre-fill the PokeMart Anywhere cart (Gym Coach's Shopping List)
     void BagCartClear(void); // empty the cart before Gym Coach builds a fresh suggestion for a different trainer
     int BagOwnedCount(int id); // current bag quantity of an item id (0 = not owned) - Held Item Advisor
+    int BagGiveItem(int id); // add 1x item id to its bag pocket, always free - 0 ok, 4 fail (bad id / full)
     void PokeRadarKeepCharged(MenuEntry *entry); // XY-only: pins the Poké Radar battery full every frame
     extern MenuEntry *g_radarCheatEntry; // the radar cheat entry; Main.cpp sets it so HudCallback can force it OFF at boot
     void RepelKeepUp(MenuEntry *entry); // keeps the Repel step counter topped up (volatile address, no boot gate needed)
     extern MenuEntry *g_repelCheatEntry; // the Repel Auto-Refresh entry; mirrored as a row in the Radar Chain tab
-    extern MenuEntry *g_noWildEntry;     // the No Wild Pokémon entry; mirrored as a row in the Radar Chain tab
+    extern MenuEntry *g_noWildEntry;     // the No Wild Pokémon entry (Encounters & Catching only - not mirrored in the Radar Chain tab, it works against Species Lock's workflow)
+    void RadarChainGuardHold(MenuEntry *entry); // "Unbreakable Chain (Experimental)" checkbox placeholder; real logic runs in HudCallback
+    extern MenuEntry *g_chainGuardEntry; // the Unbreakable Chain entry; mirrored as a row in the Radar Chain tab
+    void RespawnLastHold(MenuEntry *entry); // "Species Lock" checkbox placeholder; real logic runs in HudCallback
+    extern MenuEntry *g_respawnLastEntry; // the Species Lock entry; mirrored as a row in the Radar Chain tab
     void AlwaysShiny(MenuEntry *entry);
     void ShinyHuntCompanion(MenuEntry *entry); // Shiny Hunt Companion hub (Encounters & Catching)
     void DisableShinyLock(MenuEntry *entry);
@@ -86,6 +91,7 @@ namespace CTRPluginFramework {
     void NoOutlines(MenuEntry *entry);
     void FastDialogs(MenuEntry *entry);
     void ShowNotifications(MenuEntry *entry);
+    void TransparentNotifications(MenuEntry *entry); // toast background on/off (Library g_notifTransparentBg bridge)
     void BypassTextRestrictions(MenuEntry *entry);
     void CustomKeyboardConfig(MenuEntry *entry);
     void CustomKeys(MenuEntry *entry);

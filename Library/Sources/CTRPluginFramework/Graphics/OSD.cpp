@@ -4,6 +4,7 @@ namespace CTRPluginFramework {
     using namespace CTRPluginFrameworkImpl::Services;
 
     bool g_entryToggleNotif = false;     // see OSD.hpp
+    bool g_notifTransparentBg = false;   // see OSD.hpp - default OFF keeps the classic black-background toast
     void *g_entryToggleNotifSrc = nullptr; // see OSD.hpp
     u32 g_cardStatHotkey = static_cast<u32>(Key::L); // see OSD.hpp (synced from Preferences::CardStatHotkeys)
     u32 g_bagPayMode = 0;                            // see OSD.hpp (synced from Data.bin reserved[4]); 0 = FREE

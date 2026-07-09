@@ -211,7 +211,7 @@
    // Force the next wild encounter to a given species/level (reuses the Wild Spawner mechanism; defined in
    // Codes.cpp). form 0 = default form; updateRadar true on ORAS also refreshes the DexNav table. Used by the
    // Fun Stuff "Random Challenge" mini-game.
-   void UpdateWildSpawner(int spawn, int form, int level, bool updateRadar);
+   void UpdateWildSpawner(int spawn, int form, int level, bool updateRadar, bool lockLevel = true);
 
    // The current theme's Nth preview-square color (defined in Main.cpp). Lets tools accent text with a theme
    // color the user can see/count in the Change Theme list (sq[] order). i out of range -> window title color.

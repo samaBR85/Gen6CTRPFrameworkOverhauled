@@ -12,7 +12,8 @@ BATTLE_ACCESS_BAG :: Beutel
 BATTLE_ALLOW_MEGAS :: Mehr. Megas OK
 BATTLE_ALWAYS_SHINY :: Immer Shiny
 BATTLE_RADAR_INFINITE_BATTERY :: Poke-Radar Unendliche Batterie
-BATTLE_REPEL_AUTO_REFRESH :: Schutz Auto-Auffrischung
+BATTLE_RADAR_UNBREAKABLE_CHAIN :: Sichere Kette
+BATTLE_REPEL_AUTO_REFRESH :: Unendl. Schutz
 BATTLE_CAPTURE_RATE_100 :: Fangrate 100 %
 BATTLE_CAPTURE_TRAINER_POKEMON :: Trainer-Pkmn fangen
 BATTLE_CONDITION :: Zustand
@@ -471,10 +472,12 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Lässt dich im Kampf die Pokémon eines T
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Trainer fangen
 NOTE_BATTLE_ALWAYS_SHINY :: Jedes wilde und gezüchtete Pokémon wird schillernd sein. Die Funkel-Animation spielt, wenn es erscheint.
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: Haelt die Batterie des Poke-Radars in der Oberwelt voll, ohne die ca. 50 Schritte Aufladezeit zwischen den Einsaetzen.\n\nNur X/Y - das Radar gibt es in Omega Rubin / Alpha Saphir nicht.\n\nWICHTIG: aus Sicherheitsgruenden bleibt dies nach einem Neustart NICHT an. Es startet immer AUS.\n\nSchalte es also jede Sitzung wieder ein, sobald du bereits im Spiel bist.\n\n(Das verhindert ein Startproblem, bei dem das Spiel deinen Spielstand nicht finden koennte.)
-NOTE_BATTLE_REPEL_AUTO_REFRESH :: Haelt einen Schutz dauerhaft aktiv, sodass er nie ausgeht. Schutz blockiert nur wilde Pokemon, die schwaecher sind als dein Anfuehrer - nicht jede Begegnung wird verhindert.\n\nKann gefahrlos ueber Neustarts hinweg aktiv bleiben; diese Adresse gehoert nicht zu deinem Spielstand.
+NOTE_BATTLE_RADAR_UNBREAKABLE_CHAIN :: EXPERIMENTELL - wir brauchen deine Hilfe beim Testen.\n\nWenn AN, wird der Ketten-ZÄHLER in dem Moment wiederhergestellt, in dem er brechen würde (Flucht, ein schlechtes Feld, ein Randfeld) - er fällt sichtbar nie auf 0.\n\nDas ist NICHT dasselbe wie die Spezies-Sperre. Es erzwingt nicht, dass das nächste Pokémon passt - die Feld-RNG des Spiels entscheidet weiterhin, was erscheint. Den Zähler wiederherzustellen beweist nicht, dass der echte Kettenzustand des Spiels einer ungebrochenen Kette entspricht.\n\nWir wissen noch nicht, ob dies deine Shiny-Chance wirklich erhöht wie eine echte ungebrochene Kette oder ob es nur die Zahl auf dem Bildschirm vortäuscht. Bitte melde deine Ergebnisse (erreichte Kettenlänge, ob die Spezies passte, Shiny oder nicht).\n\nNur X/Y - das Radar gibt es in Omega Rubin / Alpha Saphir nicht.\n\nWICHTIG: aus Sicherheitsgründen bleibt dies nach einem Neustart NICHT an. Es startet immer AUS.\n\nSchalte es also jede Sitzung wieder ein, sobald du bereits im Spiel bist.
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: Hält einen Schutz dauerhaft aktiv, sodass er nie ausgeht. Schutz blockiert wilde Pokémon, die schwächer sind als dein Anführer - nicht jede Begegnung wird verhindert.\n\nWICHTIG: aus Sicherheitsgründen bleibt dies nach einem Neustart NICHT an. Es startet immer AUS.\n\nSchalte es also jede Sitzung wieder ein, sobald du bereits im Spiel bist.\n\n(Das verhindert ein Startproblem, bei dem das Spiel deinen Spielstand nicht finden könnte.)
 FAV_BATTLE_ALWAYS_SHINY :: Immer Shiny
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: Endlos-Radar
-FAV_BATTLE_REPEL_AUTO_REFRESH :: Schutz-Auffrisch.
+FAV_BATTLE_RADAR_UNBREAKABLE_CHAIN :: Sich. Kette
+FAV_BATTLE_REPEL_AUTO_REFRESH :: Unendl. Schutz
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: Erlaube Schillern bei normalerweise schillernd-gesperrten Begegnungen.
 FAV_BATTLE_DISABLE_SHINY_LOCK :: Kein Shiny-Lock
 MENU_RENAME_ANY :: Jedes Pkmn umbenennen
@@ -546,6 +549,9 @@ FAV_PATCH_COLOR_CRASHES :: Farbtext-Fix
 MENU_SHOW_NOTIFICATIONS :: Bildschirm-Benachrichtigungen anzeigen
 NOTE_SHOW_NOTIFICATIONS :: Hinweis am oberen Bildschirm, wenn du einen Cheat ein-/ausschaltest.
 FAV_SHOW_NOTIFICATIONS :: Hinweise
+MENU_NOTIF_TRANSPARENT :: Transparente Meldungen
+NOTE_NOTIF_TRANSPARENT :: Meldungen (die kleinen Popups für Cheats, Ketten-Ereignisse usw.) haben normalerweise einen deckend schwarzen Hintergrund.\n\nSchalte dies AN, um nur den Text zu zeichnen, ohne Hintergrundbox, sodass er sich über das legt, was gerade auf dem Bildschirm ist.
+FAV_NOTIF_TRANSPARENT :: Transp. Meld.
 MENU_PLUGIN_SETTINGS :: Plugin-Einstell.
 NOTE_PLUGIN_SETTINGS :: Die eigenen Einstellungen dieses Plugins (z.B. Sprache) - nicht deine Spieloptionen.
 MENU_VIEW_PARTY_SUMMARY :: Team-Übersicht
@@ -678,7 +684,7 @@ SPAWN_FILTERS :: Filter
 SPAWN_IN_INVENTORY :: Im Inventar
 SPAWN_ON :: AN
 SPAWN_SEARCH_PROMPT :: Suche nach Name oder National-Dex-Nr.
-SPAWN_NAME_NUM :: Name / #
+SPAWN_NAME_NUM :: Name / Nr.
 SPAWN_GENERATION :: Generation
 SPAWN_TYPE :: Typ
 SPAWN_TRAITS :: Merkmale
@@ -791,8 +797,8 @@ MART_FILTERS :: Filter
 MART_IN_BAG :: Beutel
 MART_ON :: AN
 MART_ANY :: alle
-MART_SEARCH_PROMPT :: Suche: Name oder Nr.
-MART_NAME_NUM :: Name/Nr.
+MART_SEARCH_PROMPT :: Suche nach Name oder Item-Nr.
+MART_NAME_NUM :: Name / Nr.
 MART_ALL_FMT :: Alle %s
 MART_POCKET :: Tasche
 MART_EFFECT :: Effekt
@@ -887,9 +893,9 @@ HUD_PARTY :: Team: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: Schutz: %u
 HUD_RADAR :: Radar-Akku: %u
-HUD_RADAR_CHAIN :: Kette: %u
+HUD_RADAR_CHAIN :: Kette: %s
 HUD_RADAR_RECHARGE :: Aufladung: %u/50
-HUD_MAP_ID :: Karte #%u (0x%X)
+HUD_MAP_ID :: Karte Nr.%u (0x%X)
 HUD_POS_TOP_LEFT :: Oben-Li.
 HUD_POS_TOP_CENTER :: Oben-Mitte
 HUD_POS_TOP_RIGHT :: Oben-Re.
@@ -915,7 +921,7 @@ MENU_ENEMY_ENABLE :: Werte aktiv.
 NOTE_ENEMY_ENABLE :: Sieh die Werte des Gegners im Kampf.\n\nAnfangs ist dieser Schalter GESPERRT (mit einem Zahnrad-Symbol gezeigt), weil er nur während eines Kampfes aktiviert werden kann.\n\nZum Freischalten: betrete einen beliebigen Kampf, wähle diesen Eintrag und tippe dann AKTIVIEREN auf dem unteren Touchscreen - das musst du nur einmal tun.\n\nDanach ist der Schalter entsperrt; hak ihn an, um die Funktion einzuschalten.\n\nIm Kampf: ZR wechselt zwischen den zwei Seiten (Basis/Attacken und IV/EV), und L/R wechseln zwischen den Pokémon des Gegners.\n\nUm die Einblendung ganz auszublenden, schalte einfach diesen Schalter Werte aktivieren wieder AUS.
 FAV_ENEMY_ENABLE :: Werte aktiv.
 MENU_ENEMY_SLOT :: Platznummer
-NOTE_ENEMY_SLOT :: Zeige den Teamplatz [#N] (grün, wenn du die Spezies bereits in einer Box besitzt, rot, wenn nicht).
+NOTE_ENEMY_SLOT :: Zeige den Teamplatz [N] (grün, wenn du die Spezies bereits in einer Box besitzt, rot, wenn nicht).
 FAV_ENEMY_SLOT :: Platz #
 MENU_ENEMY_SPECIES :: Spezies
 NOTE_ENEMY_SPECIES :: Zeige den Speziesnamen des Gegners.
@@ -1004,7 +1010,7 @@ MENU_HUD_RADAR_CHAIN :: Kettenzähler
 MENU_HUD_RADAR_RECHARGE :: Radar-Aufladung
 NOTE_HUD_REPEL :: Zeige, wie viele Schritte Schutz übrig sind (0 = kein Schutz aktiv).\nWird vom Spiel nicht gespeichert, setzt sich beim Neuladen also auf 0 zurück.
 NOTE_HUD_RADAR :: Zeigt die aktuelle Batterieladung des Poke-Radars (0-255). Nur X/Y.
-NOTE_HUD_RADAR_CHAIN :: Zeigt den Kettenzähler des Radar-Ketten-Assistenten (eine Schätzung, nicht der echte Spielwert). Nur X/Y.
+NOTE_HUD_RADAR_CHAIN :: Zeigt den Kettenzähler des Radar-Ketten-Assistenten, direkt aus dem Spiel ausgelesen. Nur X/Y.
 NOTE_HUD_RADAR_RECHARGE :: Zeigt den Fortschritt zu den 50 sicheren Aufladeschritten. Nur X/Y.
 FAV_HUD_REPEL :: Schutz
 FAV_HUD_RADAR :: Radar-Batterie
@@ -1085,7 +1091,8 @@ OPC_HINT_KEEP :: Halten: Anzeige bleibt voll, kein Warten
 OPC_BTN_KEEPFULL :: Halten
 
 
-REFILL_DONE :: Team aufgefüllt!
+REFILL_HEALTH_DONE :: KP aufgefüllt
+REFILL_MANA_DONE :: AP aufgefüllt
 
 MENU_HEALTH_MANA :: Gesundheit & Mana
 NOTE_HEALTH_MANA :: Fülle die KP und AP deines Teams auf oder fixiere sie.\n\nImmer MAX (Schalter): KP/AP im Kampf dauerhaft voll halten - keiner wird besiegt, keine AP gehen aus.\nSofort-Auffüllen (Schalter): einen einschalten, um sein Tastenkürzel zu aktivieren, dann drücken, um einmal aufzufüllen (Standard AUS - optional; AUS gibt die Taste frei). KP-Auffüllen funktioniert in der Oberwelt; im Kampf nutze Unendliche Gesundheit.
@@ -1139,22 +1146,22 @@ MENU_HUD_SEED :: Initial seed
 FAV_HUD_SEED :: Initial seed
 MENU_HUD_FRAME :: Current seed
 FAV_HUD_FRAME :: Current seed
-MENU_HUD_ADV :: Frame
-FAV_HUD_ADV :: Frame
-HUD_SEED :: iSeed: %08X
-HUD_FRAME :: cSeed: %08X
-HUD_ADV :: Frame: %lu
+MENU_HUD_ADV :: MT-Advances
+FAV_HUD_ADV :: MT-Advances
+HUD_SEED :: Init-Seed: %08X
+HUD_FRAME :: Akt. Status: %08X
+HUD_ADV :: MT-Advances: %lu
 NOTE_HUD_SEED :: Der "initial seed" deines Spiels - die Zahl hinter jedem Zufallsergebnis dieser Sitzung. Wird nach einem Soft-Reset erfasst (zeigt vorher ----). Gib ihn in 3DSRNGTool am PC ein, um ein Shiny zu planen.
 NOTE_HUD_FRAME :: Der RNG-Wert gerade jetzt (der "current seed"). Er ändert sich, wenn das Spiel weiterzählt, und bleibt stehen, wenn du stehst.
 NOTE_HUD_ADV :: Der RNG-"frame" - die absolute Zahl der Advances seit dem initial seed. RNG-Jäger timen ihre Aktion auf einen Ziel-Frame. Zeigt ----, bis der Seed erfasst ist.
 MENU_HUD_EGG :: Egg seed
 FAV_HUD_EGG :: Egg seed
 HUD_EGG :: Egg: %08X
-HUD_SEED_PENDING :: iSeed: ----
+HUD_SEED_PENDING :: Init-Seed: ----
 NOTE_HUD_EGG :: Der "Egg Seed" - der RNG-Schnappschuss des Spielstands, für Zucht- / Pensions-RNG (z. B. PKSeed). Aktualisiert beim Speichern.
 MENU_HUD_TSV :: TSV / TRV
 FAV_HUD_TSV :: TSV / TRV
-HUD_TSV :: TSV:%u TRV:%X
+HUD_TSV :: TSV: %u, TRV: %u
 NOTE_HUD_TSV :: Dein "TSV" (Trainer Shiny Value) und "TRV" in einer Zeile. Ein Ei oder Encounter ist für dich schillernd, wenn sein PSV zum TSV passt. Für RNG brauchst du den TSV; TRV ist ein Gen-8+-Extra.
 MENU_HUD_TRV :: TRV
 FAV_HUD_TRV :: TRV
@@ -1167,9 +1174,9 @@ HUD_TINYST2 :: [1]%08X [0]%08X
 NOTE_HUD_TINYST :: Der Live-TinyMT-Status (4 Wörter) - der zweite RNG, der wilde Begegnungen, Synchronisation, versteckte Fähigkeit und Horden bestimmt. Gib ihn an 3DSRNGTool für Wild-RNG.
 MENU_HUD_TINYADV :: TinyMT adv
 FAV_HUD_TINYADV :: TinyMT adv
-HUD_TINYADV :: tAdv: %lu
+HUD_TINYADV :: Advances: %lu
 NOTE_HUD_TINYADV :: Wie weit der Wild-Begegnungs-RNG (TinyMT) seit Beobachtungsbeginn vorgerückt ist. Damit timest du ein wildes Ziel.
-HUD_ADV_PENDING :: Frame: ----
+HUD_ADV_PENDING :: MT-Advances: ----
 MENU_HUD_TARGET :: Target frame
 FAV_HUD_TARGET :: Target frame
 HUD_TARGET :: Tgt:%+ld %s
@@ -1186,7 +1193,7 @@ EGG_PEEK_HINT :: A drücken zum Spähen
 NOTE_EGG_PEEK_CONFIRM :: Inhalt dieses Eis zeigen?
 MENU_SHINY_HUNT :: Shiny-Jagd-Begleiter
 FAV_SHINY_HUNT :: Shiny-Jagd
-NOTE_SHINY_HUNT :: Öffne das Menü, wähle das Pokémon, das du jagst, und es zählt deine wilden Begegnungen dieser Art im Hintergrund.\n\nWenn ein echtes Shiny erscheint, wird es gemeldet und pausiert. Zählt nur wilde Kämpfe (näherungsweise). Dein Zähler wird pro Ziel gespeichert.\n\nDrücke auf X/Y die R-Taste für den Radar-Ketten-Assistenten-Tab: wähle Grasflecken im 4. Ring oder weiter, passend zum vorherigen Rascheln, und meide Flecken am Rand der Graszone. Weglaufen unterbricht immer eine Poké-Radar-Kette - es gibt kein sicheres Fliehen. Wenn kein Fleck sicher aussieht, geh 50 Schritte außerhalb des Grases, um das Radar aufzuladen, ohne die Kette zu verlieren.
+NOTE_SHINY_HUNT :: Öffne das Menü, wähle das Pokémon, das du jagst, und es zählt deine wilden Begegnungen dieser Art im Hintergrund.\n\nWenn ein echtes Shiny erscheint, wird es gemeldet und pausiert. Zählt nur wilde Kämpfe (näherungsweise). Dein Zähler wird pro Ziel gespeichert.\n\nAuf X/Y wechselt L/R zwischen 3 Tabs: Jagd, PokeRadar und Kette.\n\nOhne Spezies-Sperre: Wähle Grasflecken im 4. Ring oder weiter, passend zum vorherigen Rascheln, und meide Flecken am Rand der Graszone. Weglaufen unterbricht immer eine Poké-Radar-Kette - es gibt kein sicheres Fliehen.\n\nMit aktivierter Spezies-Sperre (Tab Kette): Ab Kette 2 passt jeder Fleck der Umgebung zu deinem Ziel, du musst also nur die leeren meiden. Details in ihrem eigenen (i).\n\nSpezies-Sperre-Rezept: Aktiviere Unendliche Radar-Batterie und Unendl. Schutz, benutze den Poké-Radar, fliehe und benutze das Radar erneut, bis du eine gewünschte Spezies findest, und schalte dann die Spezies-Sperre ein.\n\nWenn kein Fleck sicher aussieht, geh 50 Schritte außerhalb des Grases, um das Radar aufzuladen, ohne die Kette zu verlieren. Ein legendärer Vogel, der mitten in der Kette auftaucht, unterbricht sie NICHT - er läuft einfach von selbst weg.\n\nKette Start ab lässt dich wählen, wo die Zählung beginnt. Längste Kette (Tab Kette) verfolgt deinen besten Wert in dieser Sitzung.\n\nDie Odds im Tab Jagd und die Fangchance im Tab PokeRadar sind verschiedene Zahlen: Odds ist deine gesamte begegnungsbasierte Chance, die Fangchance beruht nur auf der aktuellen Kettenlänge und zählt nur beim aktiven Ketten.
 SHINY_TARGET :: Ziel:
 SHINY_ENCOUNTERS :: Begegnungen
 SHINY_METHOD :: Methode:
@@ -1208,22 +1215,39 @@ EGG_PEEK_SKIP :: A zum Überspringen
 
 # ==== Radar Chain Assistant (Fase 01) - Tab 2 of Shiny Hunt Companion, X/Y only ====
 MENU_RADAR_CHAIN :: Radar-Ketten-Assistent
-RADAR_CHAIN_LABEL :: Kette (Schätzung)
-RADAR_CHAIN_ESTIMATE_NOTE :: Zählt begonnene Kämpfe; nicht der echte Kettenwert des Spiels.
+RADAR_CHAIN_LABEL :: Kette
+RADAR_CHAIN_GUARD_SAVED :: Kette erhalten
+RADAR_CHAIN_BROKEN :: Kette gebrochen
+RADAR_CHAIN_GUARD_MARK :: *
 RADAR_RECHARGE_LABEL :: Radar-Batterie
 RADAR_CHAIN_TAB_HINT :: A bestätigen   L/R Tab
 RADAR_CHAIN_TAP_HINT :: A umschalten   L/R Tab
-RADAR_CHAIN_RESET_DONE :: Kettenzähler zurückgesetzt
 RADAR_CHAIN_RECHARGE_READY :: Radar bereit zur Reaktivierung
+MENU_CHAIN_TOOLS :: Ketten-Tools
+TAB_HUNT :: Jagd
+TAB_POKERADAR :: PokeRadar
+TAB_CHAIN :: Kette
+CHAIN_TOOLS_ROW_START :: Kettenwert wählen
+CHAIN_TOOLS_SAVES :: Ungebr.:
+CHAIN_TOOLS_LONGEST :: Längste:
+CHAIN_TOOLS_HINT :: < > ändern   L/R Tab
+RADAR_CHAIN_ODDS_LABEL :: Fangchance
+POKERADAR_IN_BAG :: Poke Radar: im Beutel
+POKERADAR_GET_ITEM :: Poke Radar: holen
+POKERADAR_GET_ITEM_CONFIRM :: Der Poké-Radar wird normalerweise erst spät im Spielverlauf durch die Story vergeben.\n\nStattdessen jetzt in den Beutel legen?
+CHAIN_TOOLS_TOP_UNBREAKABLE :: Sichere Kette schützt den Zähler - Spezies nicht garantiert.
+CHAIN_TOOLS_TOP_START :: Kettenwert wählen legt fest, wo die Zählung beginnt.
+CHAIN_TOOLS_TOP_RESPAWN :: Spezies-Sperre gleicht ab Kette 2 an deine Kette an.
+CHAIN_TOOLS_TOP_BETA :: Beta: im RAM bestätigt, kein RNG-Effekt bestätigt. Braucht Tests.
 RADAR_CHAIN_ROW_BATTERY :: Unendliche Radar-Batterie
-RADAR_CHAIN_ROW_REPEL :: Schutz Auto-Auffrischung
-RADAR_CHAIN_ROW_NOWILD :: Keine wilden Pokémon
+RADAR_CHAIN_ROW_REPEL :: Unendl. Schutz
+RADAR_CHAIN_ROW_UNBREAKABLE :: Sichere Kette
 RADAR_CHAIN_ROW_HUD_CHAIN :: Kette im HUD zeigen
+RADAR_CHAIN_ROW_RESPAWN :: Spez.-Sperre
+FAV_RADAR_CHAIN_ROW_RESPAWN :: Spez.-Sperre
+NOTE_RADAR_CHAIN_RESPAWN :: So nutzt du es: Aktiviere Unendliche Radar-Batterie und Unendl. Schutz, benutze den Poké-Radar, fliehe und benutze das Radar erneut, bis du eine gewünschte Spezies findest, und schalte dann die Spezies-Sperre ein.\n\nAuf Hardware bestätigt: Sobald deine Kette 2 erreicht, erscheint auf jedem Grasfleck der Umgebung die Spezies, die du kettest - nicht nur auf dem, der zum vorherigen Rascheln passt. Du musst nur die leeren Flecken ohne Pokémon meiden.\n\nNur Spezies/Form werden erzwungen. Level, DVs, Wesen und PID bleiben dem Spiel überlassen - dies ist kein vollständiger Klon.\n\nEXPERIMENTELLE Änderung: Das Level war früher fest auf das Level gesetzt, gegen das du gekämpft hast, ist es aber nicht mehr - wir wissen noch nicht, ob die Begegnungs-RNG des Spiels von selbst ein sinnvolles Level wählt oder ob etwas kaputtgeht. Bitte melde, auf welchem Level die erzwungene Spezies landet.\n\nDer Effekt bleibt auf JEDEM Fleck der Umgebung, bis du sie verlässt und wieder betrittst - dieses Umschalten auszuschalten macht bereits erzwungene Flecken nicht rückgängig.\n\nEin wirklich leerer Fleck bricht die Kette trotzdem, genau wie beim normalen Poké-Radar-Ketten - dieses Tool nimmt nur das Risiko, die falsche Spezies zu raten, nicht das Risiko eines leeren Flecks.\n\nBewirkt nichts, bis deine Kette 2 erreicht - der allererste Fang hat noch nichts zu wiederholen.
+RADAR_CHAIN_RESPAWN_APPLIED :: Spez.-Sperre aktiv
 RADAR_CHAIN_ROW_HUD_RECHARGE :: Radar-Batterie im HUD zeigen
-RADAR_CHAIN_ROW_RESET :: Kettenzähler zurücksetzen
-RADAR_CHAIN_SHORT :: Radar-Kette
-RADAR_BATTERY_LIVE_NOTE :: Live-Wert - sinkt bei Nutzung um 5, lädt sich beim Laufen wieder auf.
-RADAR_BATTERY_INFINITE_NOTE :: Unendliche Radar-Batterie ist AN.
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: Trainerkarte

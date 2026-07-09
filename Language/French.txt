@@ -12,7 +12,8 @@ BATTLE_ACCESS_BAG :: Ouvrir Sac
 BATTLE_ALLOW_MEGAS :: 1+ Méga-Évol.
 BATTLE_ALWAYS_SHINY :: Tjs chromat.
 BATTLE_RADAR_INFINITE_BATTERY :: Radar Poke Batterie infinie
-BATTLE_REPEL_AUTO_REFRESH :: Repousse Auto-Recharge
+BATTLE_RADAR_UNBREAKABLE_CHAIN :: Chaîne Sécurisée
+BATTLE_REPEL_AUTO_REFRESH :: Repousse infinie
 BATTLE_CAPTURE_RATE_100 :: Capture 100 %
 BATTLE_CAPTURE_TRAINER_POKEMON :: Capturer Pkmn dresseur
 BATTLE_CONDITION :: État
@@ -471,10 +472,12 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Vous permet de capturer le Pokémon d'un 
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Capt. dress.
 NOTE_BATTLE_ALWAYS_SHINY :: Chaque Pokémon sauvage ou issu de l'élevage sera chromatique. L'animation de scintillement joue à son apparition.
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: Garde la batterie du Radar Poke pleine dans le monde, sans les ~50 pas de recharge entre deux utilisations.\n\nX/Y uniquement - le Radar n'existe pas dans Rubis Omega / Saphir Alpha.\n\nIMPORTANT : par securite, ceci ne reste PAS active apres un redemarrage. Il demarre toujours desactive.\n\nReactivez-le donc a chaque session, une fois deja dans votre partie.\n\n(Cela evite un souci au demarrage ou le jeu pourrait ne pas trouver votre sauvegarde.)
-NOTE_BATTLE_REPEL_AUTO_REFRESH :: Garde une Repousse active en permanence, sans jamais l'épuiser. La Repousse bloque les Pokémon sauvages plus faibles que ton premier Pokémon - elle n'empêche pas toutes les rencontres.\n\nPeut rester activée sans risque, même après un redémarrage ; cette adresse ne fait pas partie de ta sauvegarde.
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: Garde une Repousse active en permanence, sans jamais s'épuiser. La Repousse bloque les Pokémon sauvages plus faibles que ton premier Pokémon - elle n'empêche pas toutes les rencontres.\n\nIMPORTANT : par sécurité, ceci ne reste PAS actif après un redémarrage. Il démarre toujours désactivé.\n\nRéactive-le donc à chaque session, une fois déjà dans ta partie.\n\n(Cela évite un souci au démarrage où le jeu pourrait ne pas trouver ta sauvegarde.)
+NOTE_BATTLE_RADAR_UNBREAKABLE_CHAIN :: EXPÉRIMENTAL - nous avons besoin de ton aide pour tester celle-ci.\n\nUne fois activé, le COMPTEUR de chaîne est restauré à l'instant où il se briserait (Fuite, mauvaise herbe, herbe en bordure) - il ne retombe jamais visiblement à 0.\n\nCe n'est PAS la même chose que le Verrou d'Espèce. Cela ne force pas le prochain Pokémon à correspondre - la RNG des herbes du jeu décide toujours de ce qui apparaît. Restaurer le compteur ne prouve pas que l'état réel de la chaîne dans le jeu corresponde à une chaîne intacte.\n\nNous ne savons pas encore si cela augmente vraiment tes chances de chromatique comme le ferait une vraie chaîne intacte, ou si cela ne fait que truquer le nombre à l'écran. Merci de rapporter tes résultats (longueur de chaîne atteinte, si l'espèce correspondait, chromatique ou non).\n\nX/Y uniquement - le Radar n'existe pas dans Rubis Omega / Saphir Alpha.\n\nIMPORTANT : par sécurité, ceci ne reste PAS actif après un redémarrage. Il démarre toujours désactivé.\n\nRéactive-le donc à chaque session, une fois déjà dans ta partie.
 FAV_BATTLE_ALWAYS_SHINY :: Touj. chrom.
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: Radar infini
-FAV_BATTLE_REPEL_AUTO_REFRESH :: Repousse Auto
+FAV_BATTLE_RADAR_UNBREAKABLE_CHAIN :: Chaîne Séc.
+FAV_BATTLE_REPEL_AUTO_REFRESH :: Repousse infinie
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: Autorise le chromatique sur les rencontres normalement verrouillées.
 FAV_BATTLE_DISABLE_SHINY_LOCK :: Sans verrou
 MENU_RENAME_ANY :: Renom. tout Pkmn
@@ -546,6 +549,9 @@ FAV_PATCH_COLOR_CRASHES :: Fix txt coloré
 MENU_SHOW_NOTIFICATIONS :: Afficher les notifications à l'écran
 NOTE_SHOW_NOTIFICATIONS :: Notification sur l'écran supérieur quand vous activez/désactivez un cheat.
 FAV_SHOW_NOTIFICATIONS :: Notifications
+MENU_NOTIF_TRANSPARENT :: Notifications transparentes
+NOTE_NOTIF_TRANSPARENT :: Les notifications (les petites bulles affichées pour les codes, les événements de chaîne, etc.) ont normalement un fond noir opaque.\n\nActive ceci pour n'afficher que le texte, sans cadre de fond, superposé à ce qui est à l'écran.
+FAV_NOTIF_TRANSPARENT :: Notif. transp.
 MENU_PLUGIN_SETTINGS :: Réglages plugin
 NOTE_PLUGIN_SETTINGS :: Les réglages propres à ce plugin (ex. langue) - pas vos options de jeu.
 MENU_VIEW_PARTY_SUMMARY :: Voir résumé équipe
@@ -791,7 +797,7 @@ MART_FILTERS :: Filtres
 MART_IN_BAG :: Au sac
 MART_ON :: OUI
 MART_ANY :: tous
-MART_SEARCH_PROMPT :: Cherchez par nom ou n°
+MART_SEARCH_PROMPT :: Cherchez par nom ou n° d'objet
 MART_NAME_NUM :: Nom / n°
 MART_ALL_FMT :: Tous %s
 MART_POCKET :: Poche
@@ -887,9 +893,9 @@ HUD_PARTY :: Équipe : %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: Repousse : %u
 HUD_RADAR :: Radar batt. : %u
-HUD_RADAR_CHAIN :: Chaîne : %u
+HUD_RADAR_CHAIN :: Chaîne: %s
 HUD_RADAR_RECHARGE :: Recharge : %u/50
-HUD_MAP_ID :: Carte #%u (0x%X)
+HUD_MAP_ID :: Carte n°%u (0x%X)
 HUD_POS_TOP_LEFT :: Ht-Gche
 HUD_POS_TOP_CENTER :: Ht-Centre
 HUD_POS_TOP_RIGHT :: Ht-Droit
@@ -915,8 +921,8 @@ MENU_ENEMY_ENABLE :: Activ. stats
 NOTE_ENEMY_ENABLE :: Voyez les stats de l'adversaire en combat.\n\nAu début, cette option est VERROUILLÉE (avec une icône d'engrenage) car elle ne peut être armée que pendant un combat.\n\nPour la déverrouiller : entrez dans n'importe quel combat, sélectionnez cet élément, puis touchez ACTIVER sur l'écran tactile inférieur - à faire une seule fois.\n\nEnsuite, l'option est déverrouillée ; cochez-la pour activer la fonction.\n\nEn combat : ZR bascule entre les deux pages (Base/Capacités et IV/EV), et L/R changent de Pokémon ennemi.\n\nPour masquer entièrement la superposition, désactivez simplement cette option Activer les stats.
 FAV_ENEMY_ENABLE :: Activ. stats
 MENU_ENEMY_SLOT :: Emplacement
-NOTE_ENEMY_SLOT :: Affiche l'emplacement d'équipe [#N] (vert si vous possédez déjà l'espèce en boîte, rouge sinon).
-FAV_ENEMY_SLOT :: Empl.#
+NOTE_ENEMY_SLOT :: Affiche l'emplacement d'équipe [N] (vert si tu possèdes déjà l'espèce en boîte, rouge sinon).
+FAV_ENEMY_SLOT :: Empl. n°
 MENU_ENEMY_SPECIES :: Espèce
 NOTE_ENEMY_SPECIES :: Affiche le nom de l'espèce de l'adversaire.
 FAV_ENEMY_SPECIES :: Espèce
@@ -1004,7 +1010,7 @@ MENU_HUD_RADAR_CHAIN :: Nombre de chaîne
 MENU_HUD_RADAR_RECHARGE :: Recharge Radar
 NOTE_HUD_REPEL :: Affiche combien de pas de Repousse il reste (0 = aucune Repousse active).\nNon sauvegardé par le jeu, donc remis à 0 au rechargement.
 NOTE_HUD_RADAR :: Affiche la charge actuelle de la batterie du Radar Poke (0-255). X/Y uniquement.
-NOTE_HUD_RADAR_CHAIN :: Affiche le nombre de chaîne de l'Assistant Chaîne Radar (une estimation, pas la vraie valeur du jeu). X/Y uniquement.
+NOTE_HUD_RADAR_CHAIN :: Affiche le nombre de chaîne de l'Assistant Chaîne Radar, lu directement dans le jeu. X/Y uniquement.
 NOTE_HUD_RADAR_RECHARGE :: Affiche la progression vers les 50 pas de recharge sûrs. X/Y uniquement.
 FAV_HUD_REPEL :: Repous
 FAV_HUD_RADAR :: Batterie Radar
@@ -1085,7 +1091,8 @@ OPC_HINT_KEEP :: Garder : jauge toujours pleine, sans attente
 OPC_BTN_KEEPFULL :: Garder
 
 
-REFILL_DONE :: Équipe rechargée !
+REFILL_HEALTH_DONE :: PV restaurés
+REFILL_MANA_DONE :: PP restaurés
 
 MENU_HEALTH_MANA :: Santé et Mana
 NOTE_HEALTH_MANA :: Faites le plein ou bloquez les PV et PP de votre équipe.\n\nToujours au MAX (bascules) : maintient les PV/PP au max pendant le combat - aucun K.O., aucune panne de PP.\nRecharge instantanée (bascules) : activez-en une pour armer son raccourci, puis appuyez pour recharger une fois (OFF par défaut - optionnel ; OFF libère le bouton). La recharge PV fonctionne dans l'overworld ; en combat, utilisez Santé Infinie.
@@ -1139,22 +1146,22 @@ MENU_HUD_SEED :: Initial seed
 FAV_HUD_SEED :: Initial seed
 MENU_HUD_FRAME :: Current seed
 FAV_HUD_FRAME :: Current seed
-MENU_HUD_ADV :: Frame
-FAV_HUD_ADV :: Frame
-HUD_SEED :: iSeed: %08X
-HUD_FRAME :: cSeed: %08X
-HUD_ADV :: Frame: %lu
+MENU_HUD_ADV :: Avancées MT
+FAV_HUD_ADV :: Avancées MT
+HUD_SEED :: Graine init: %08X
+HUD_FRAME :: État actuel: %08X
+HUD_ADV :: Avancées MT: %lu
 NOTE_HUD_SEED :: La "initial seed" de votre partie - le nombre derrière chaque résultat aléatoire de cette session. Capturée après un soft-reset (affiche ---- avant). Saisissez-la dans 3DSRNGTool sur PC pour viser un shiny.
 NOTE_HUD_FRAME :: La valeur du RNG en ce moment (la "current seed"). Elle change quand le jeu avance, et reste fixe quand tu ne bouges pas.
 NOTE_HUD_ADV :: La "frame" RNG - le nombre absolu d'advances depuis l'initial seed. Les chasseurs RNG calent leur action sur une frame cible. Affiche ---- tant que la seed n'est pas capturée.
 MENU_HUD_EGG :: Egg seed
 FAV_HUD_EGG :: Egg seed
 HUD_EGG :: Egg: %08X
-HUD_SEED_PENDING :: iSeed: ----
+HUD_SEED_PENDING :: Graine init: ----
 NOTE_HUD_EGG :: La "egg seed" - l'instantané RNG de la sauvegarde, pour le RNG d'élevage / Pension (ex. PKSeed). Mise à jour quand tu sauvegardes.
 MENU_HUD_TSV :: TSV / TRV
 FAV_HUD_TSV :: TSV / TRV
-HUD_TSV :: TSV:%u TRV:%X
+HUD_TSV :: TSV: %u, TRV: %u
 NOTE_HUD_TSV :: Votre "TSV" (Trainer Shiny Value) et le "TRV" sur une ligne. Un œuf ou une rencontre est chromatique pour vous quand son PSV correspond au TSV. Le TSV est requis pour le RNG ; le TRV est un extra Gen 8+.
 MENU_HUD_TRV :: TRV
 FAV_HUD_TRV :: TRV
@@ -1167,9 +1174,9 @@ HUD_TINYST2 :: [1]%08X [0]%08X
 NOTE_HUD_TINYST :: L'état TinyMT en direct (4 mots) - le second RNG, qui choisit les rencontres sauvages, Synchro, Talent Caché et hordes. Donnez-le à 3DSRNGTool pour le RNG sauvage.
 MENU_HUD_TINYADV :: TinyMT adv
 FAV_HUD_TINYADV :: TinyMT adv
-HUD_TINYADV :: tAdv: %lu
+HUD_TINYADV :: Avancées: %lu
 NOTE_HUD_TINYADV :: De combien le RNG de rencontre sauvage (TinyMT) a avancé depuis que vous regardez. Sert à caler une cible sauvage.
-HUD_ADV_PENDING :: Frame: ----
+HUD_ADV_PENDING :: Avancées MT: ----
 MENU_HUD_TARGET :: Target frame
 FAV_HUD_TARGET :: Target frame
 HUD_TARGET :: Tgt:%+ld %s
@@ -1186,7 +1193,7 @@ EGG_PEEK_HINT :: Appuie sur A pour observer
 NOTE_EGG_PEEK_CONFIRM :: Révéler le contenu de cet œuf ?
 MENU_SHINY_HUNT :: Assistant de chasse chromatique
 FAV_SHINY_HUNT :: Chasse Shiny
-NOTE_SHINY_HUNT :: Ouvre le panneau, choisis le Pokémon que tu chasses, et il compte tes rencontres sauvages de cette espèce en arrière-plan.\n\nQuand un vrai chromatique apparaît, il t'alerte et met en pause. Ne compte que les combats sauvages (approximatif). Ton compteur est enregistré par cible.\n\nSur X/Y, appuie sur R pour l'onglet Assistant Chaîne Radar : choisis les hautes herbes du 4e cercle ou au-delà, en suivant le tremblement précédent, et évite les herbes en bordure de la zone. Fuir un combat casse toujours une chaîne de Radar Poke - il n'y a pas de fuite sûre. Si aucune herbe ne semble sûre, marche 50 pas hors des hautes herbes pour recharger le Radar sans perdre la chaîne.
+NOTE_SHINY_HUNT :: Ouvre le panneau, choisis le Pokémon que tu chasses, et il compte tes rencontres sauvages de cette espèce en arrière-plan.\n\nQuand un vrai chromatique apparaît, il t'alerte et met en pause. Ne compte que les combats sauvages (approximatif). Ton compteur est enregistré par cible.\n\nSur X/Y, L/R bascule entre 3 onglets : Chasse, PokeRadar et Chaîne.\n\nSans Verrou d'Espèce : choisis les touffes d'herbe du 4e cercle ou au-delà, correspondant au tremblement précédent, et évite les touffes en bordure de la zone herbeuse. Fuir casse toujours une chaîne de Poké Radar - il n'y a pas de fuite sûre.\n\nAvec le Verrou d'Espèce activé (onglet Chaîne) : à partir de la chaîne 2, chaque touffe de la zone correspond à ta cible, tu n'as donc qu'à éviter les vides. Voir son propre (i) pour les détails.\n\nRecette du Verrou d'Espèce : active Radar Batterie infinie et Repousse infinie, utilise le Poké Radar, fuis et réutilise le Radar jusqu'à trouver une espèce qui te plaît, puis active le Verrou d'Espèce.\n\nSi aucune touffe ne semble sûre, marche 50 pas hors des herbes pour recharger le Radar sans perdre la chaîne. Un oiseau légendaire apparaissant en pleine chaîne ne la casse PAS - il s'enfuit tout seul.\n\nDépart de Chaîne te permet de choisir où le compte commence. Plus longue Chaîne (onglet Chaîne) suit ton meilleur score de la session.\n\nLes Chances de l'onglet Chasse et le Taux de capture de l'onglet PokeRadar sont deux nombres différents : les Chances sont ta probabilité globale basée sur les rencontres, le Taux de capture se base uniquement sur la longueur de chaîne actuelle et ne compte que pendant un enchaînement actif.
 SHINY_TARGET :: Cible :
 SHINY_ENCOUNTERS :: Rencontres
 SHINY_METHOD :: Méthode :
@@ -1206,24 +1213,43 @@ SHINY_CLOSE :: Fermer
 SHINY_ONLY_NOTE :: Ne compte que si le Pokémon sauvage est ta cible.
 EGG_PEEK_SKIP :: A pour passer
 
-# ==== Radar Chain Assistant (Fase 01) - Tab 2 of Shiny Hunt Companion, X/Y only ====
+# ==== PokeRadar (Tab 2 of Shiny Hunt Companion, X/Y only) ====
 MENU_RADAR_CHAIN :: Assistant Chaîne Radar
-RADAR_CHAIN_LABEL :: Chaîne (estimation)
-RADAR_CHAIN_ESTIMATE_NOTE :: Compte les combats engagés ; pas la vraie valeur de chaîne du jeu.
+RADAR_CHAIN_LABEL :: Chaîne
+RADAR_CHAIN_ODDS_LABEL :: Taux de capture
+RADAR_CHAIN_GUARD_SAVED :: Chaîne Maintenue
+RADAR_CHAIN_BROKEN :: Chaîne Rompue
+RADAR_CHAIN_GUARD_MARK :: *
 RADAR_RECHARGE_LABEL :: Batterie du Radar
 RADAR_CHAIN_TAB_HINT :: A valider   L/R onglet
 RADAR_CHAIN_TAP_HINT :: A basculer   L/R onglet
-RADAR_CHAIN_RESET_DONE :: Nombre de chaîne réinitialisé
 RADAR_CHAIN_RECHARGE_READY :: Radar prêt à être réactivé
+TAB_HUNT :: Chasse
+TAB_POKERADAR :: Radar
+TAB_CHAIN :: Chaîne
+POKERADAR_IN_BAG :: PokéRadar : au sac
+POKERADAR_GET_ITEM :: PokéRadar : obtenir
+POKERADAR_GET_ITEM_CONFIRM :: Le PokéRadar est normalement donné plus tard dans l'histoire.\n\nLe donner à ton sac maintenant à la place ?
 RADAR_CHAIN_ROW_BATTERY :: Radar Batterie infinie
-RADAR_CHAIN_ROW_REPEL :: Repousse Auto-Recharge
-RADAR_CHAIN_ROW_NOWILD :: Aucun Pokémon sauvage
-RADAR_CHAIN_ROW_HUD_CHAIN :: Afficher la chaîne sur le HUD
+RADAR_CHAIN_ROW_REPEL :: Repousse infinie
 RADAR_CHAIN_ROW_HUD_RECHARGE :: Afficher la batterie du Radar sur le HUD
-RADAR_CHAIN_ROW_RESET :: Réinitialiser le nombre de chaîne
-RADAR_CHAIN_SHORT :: Chaîne Radar
-RADAR_BATTERY_LIVE_NOTE :: Valeur en direct - diminue de 5 par utilisation, se recharge en marchant.
-RADAR_BATTERY_INFINITE_NOTE :: La batterie Radar infinie est activée.
+
+# ==== Chain (Tab 3 of Shiny Hunt Companion, X/Y only) ====
+MENU_CHAIN_TOOLS :: Outils de Chaîne
+CHAIN_TOOLS_TOP_UNBREAKABLE :: Chaîne Sécurisée protège le compteur - l'espèce n'est pas garantie.
+CHAIN_TOOLS_TOP_START :: Choisir Valeur Chaîne définit où le compte commence.
+CHAIN_TOOLS_TOP_RESPAWN :: Verrou d'Espèce reproduit ta chaîne à partir de la chaîne 2.
+CHAIN_TOOLS_TOP_BETA :: Bêta : confirmé en RAM, aucun effet RNG confirmé. À tester.
+CHAIN_TOOLS_ROW_START :: Choisir Valeur Chaîne
+CHAIN_TOOLS_SAVES :: Incassées :
+CHAIN_TOOLS_LONGEST :: Plus longue :
+CHAIN_TOOLS_HINT :: < > ajuster   L/R onglet
+RADAR_CHAIN_ROW_UNBREAKABLE :: Chaîne Sécurisée
+RADAR_CHAIN_ROW_HUD_CHAIN :: Afficher la chaîne sur le HUD
+RADAR_CHAIN_ROW_RESPAWN :: Verrou d'Espèce
+FAV_RADAR_CHAIN_ROW_RESPAWN :: Verrou Esp.
+NOTE_RADAR_CHAIN_RESPAWN :: Comment l'utiliser : active Radar Batterie infinie et Repousse infinie, utilise le Poké Radar, fuis et réutilise le Radar jusqu'à trouver une espèce qui te plaît, puis active le Verrou d'Espèce.\n\nConfirmé sur matériel : dès que ta chaîne atteint 2, chaque touffe d'herbe de la zone fait apparaître l'espèce que tu enchaînes - pas seulement celle correspondant au tremblement précédent. Tu dois seulement éviter les touffes vides "aucun Pokémon ici".\n\nSeuls l'espèce/la forme sont forcés. Le niveau, les IV, la nature et le PID restent gérés par le jeu - ce n'est pas un clone complet.\n\nChangement EXPÉRIMENTAL : le niveau était auparavant fixé au niveau où tu as combattu, mais ce n'est plus le cas - nous ne savons pas encore si la RNG de rencontre du jeu choisit d'elle-même un niveau cohérent, ou si quelque chose casse. Merci de rapporter le niveau auquel l'espèce forcée finit.\n\nL'effet reste actif sur CHAQUE touffe de la zone jusqu'à ce que tu sortes et y reviennes - désactiver ce réglage n'annule pas les touffes déjà forcées.\n\nUne touffe réellement vide casse quand même la chaîne, comme un enchaînement Poké Radar normal - cet outil supprime seulement le risque de deviner la mauvaise espèce, pas le risque d'une touffe vide.\n\nNe fait rien tant que ta chaîne n'atteint pas 2 - la toute première capture n'a encore rien à répéter.
+RADAR_CHAIN_RESPAWN_APPLIED :: Verrou d'Espèce appliqué
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: Carte de Dresseur

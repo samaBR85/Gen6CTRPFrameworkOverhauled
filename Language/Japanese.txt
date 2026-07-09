@@ -12,7 +12,8 @@ BATTLE_ACCESS_BAG :: バッグを開く
 BATTLE_ALLOW_MEGAS :: メガシンカ複数可
 BATTLE_ALWAYS_SHINY :: 常に色違い
 BATTLE_RADAR_INFINITE_BATTERY :: ポケレーダー電池無限
-BATTLE_REPEL_AUTO_REFRESH :: 虫よけ自動補充
+BATTLE_RADAR_UNBREAKABLE_CHAIN :: 連鎖切れ防止
+BATTLE_REPEL_AUTO_REFRESH :: 虫よけ無限
 BATTLE_CAPTURE_RATE_100 :: 捕獲率100％
 BATTLE_CAPTURE_TRAINER_POKEMON :: トレーナーのポケモンを捕獲
 BATTLE_CONDITION :: 状態
@@ -471,10 +472,12 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: バトル中にトレーナーのPokémon
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: トレーナー捕獲
 NOTE_BATTLE_ALWAYS_SHINY :: すべての野生・タマゴのPokémonが色違いになります。出現時にきらめくアニメーションが再生されます。
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: オーバーワールドでポケレーダーの電池を満タンに保ち、使用後の約50歩の充電待ちを省略します。\n\nX/Y専用（オメガルビー/アルファサファイアにはレーダー自体が存在しません）。\n\n重要：安全のため、これは再起動をまたいでオンのままにはなりません。常にオフで始まります。\n\nゲームに入ってから、毎回オンにし直してください。\n\n（起動時にゲームがセーブを見つけられなくなる問題を防ぐためです。）
-NOTE_BATTLE_REPEL_AUTO_REFRESH :: 虫よけを永久に切れないよう保ちます。虫よけは先頭のPokémonより弱い野生Pokémonの出現を防ぎますが、すべてのエンカウントを止めるわけではありません。\n\n再起動をまたいでオンのままでも安全です。このアドレスはセーブデータの一部ではありません。
+NOTE_BATTLE_RADAR_UNBREAKABLE_CHAIN :: 実験的機能 - テストにご協力ください。\n\nオンの間、連鎖カウンターが切れそうになった瞬間（にげる、はずれパッチ、端のパッチ）に復元され、見た目上0に落ちません。\n\nこれは種族固定とは別物です。次のPokémonを一致させる強制はせず、出現内容はゲーム自身のパッチRNGが決めます。カウンターを戻しても、ゲーム内部の連鎖状態が本当に無傷のものと一致している保証はありません。\n\n本物の無傷の連鎖のように色違い確率が本当に上がるのか、画面上の数字を偽装しているだけなのかはまだ不明です。結果（到達した連鎖数、種族が一致したか、色違いだったか）を報告してください。\n\nX/Y専用（オメガルビー/アルファサファイアにレーダーは存在しません）。\n\n重要：安全のため、これは再起動をまたいでオンのままにはなりません。常にオフで始まります。\n\nゲームに入ってから、毎回オンにし直してください。
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: 虫よけを永久に切らさず、なくならないようにします。虫よけは先頭のPokémonより弱い野生Pokémonを防ぎますが、すべてのエンカウントを止めるわけではありません。\n\n重要：安全のため、これは再起動をまたいでオンのままにはなりません。常にオフで始まります。\n\nゲームに入ってから、毎回オンにし直してください。\n\n（起動時にゲームがセーブを見つけられなくなる問題を防ぐためです。）
 FAV_BATTLE_ALWAYS_SHINY :: 常に色違い
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: 無限レーダー
-FAV_BATTLE_REPEL_AUTO_REFRESH :: 虫よけ補充
+FAV_BATTLE_RADAR_UNBREAKABLE_CHAIN :: 連鎖切れ防止
+FAV_BATTLE_REPEL_AUTO_REFRESH :: 虫よけ無限
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: 通常は色違いロックされている遭遇でも色違いを許可します。
 FAV_BATTLE_DISABLE_SHINY_LOCK :: 色違いロック解除
 MENU_RENAME_ANY :: どのPokémonも改名
@@ -546,6 +549,9 @@ FAV_PATCH_COLOR_CRASHES :: 色文字修正
 MENU_SHOW_NOTIFICATIONS :: 画面通知を表示
 NOTE_SHOW_NOTIFICATIONS :: チートをオン/オフしたときに上画面へトースト表示します。
 FAV_SHOW_NOTIFICATIONS :: 通知
+MENU_NOTIF_TRANSPARENT :: 通知を透明化
+NOTE_NOTIF_TRANSPARENT :: トースト通知（チートや連鎖イベントなどで表示される小さなポップアップ）は通常、黒い背景で表示されます。\n\nこれをオンにすると、背景の枠を描かず文字だけを表示し、画面の内容に重ねます。
+FAV_NOTIF_TRANSPARENT :: 透明な通知
 MENU_PLUGIN_SETTINGS :: プラグイン設定
 NOTE_PLUGIN_SETTINGS :: このプラグイン自身の設定（例：言語）- ゲームのオプションではありません。
 MENU_VIEW_PARTY_SUMMARY :: 手持ちサマリーを表示
@@ -678,7 +684,7 @@ SPAWN_FILTERS :: フィルター
 SPAWN_IN_INVENTORY :: 所持中
 SPAWN_ON :: ON
 SPAWN_SEARCH_PROMPT :: 名前または全国図鑑番号で検索
-SPAWN_NAME_NUM :: 名前 / #
+SPAWN_NAME_NUM :: 名前 / No.
 SPAWN_GENERATION :: 世代
 SPAWN_TYPE :: タイプ
 SPAWN_TRAITS :: 特徴
@@ -792,7 +798,7 @@ MART_IN_BAG :: バッグ内
 MART_ON :: ON
 MART_ANY :: すべて
 MART_SEARCH_PROMPT :: 名前または道具番号で検索
-MART_NAME_NUM :: 名前 / #
+MART_NAME_NUM :: 名前 / No.
 MART_ALL_FMT :: すべての%s
 MART_POCKET :: ポケット
 MART_EFFECT :: 効果
@@ -887,9 +893,9 @@ HUD_PARTY :: 手持ち: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: 虫よけ: %u
 HUD_RADAR :: レーダー電池: %u
-HUD_RADAR_CHAIN :: 連鎖数: %u
+HUD_RADAR_CHAIN :: 連鎖数: %s
 HUD_RADAR_RECHARGE :: 充電: %u/50
-HUD_MAP_ID :: マップ #%u (0x%X)
+HUD_MAP_ID :: マップNo.%u (0x%X)
 HUD_POS_TOP_LEFT :: 左上
 HUD_POS_TOP_CENTER :: 上中央
 HUD_POS_TOP_RIGHT :: 右上
@@ -916,7 +922,7 @@ NOTE_ENEMY_ENABLE :: バトル中に相手の能力値を見られます。\n\n�
 FAV_ENEMY_ENABLE :: 能力値有効化
 MENU_ENEMY_SLOT :: スロット番号
 NOTE_ENEMY_SLOT :: 手持ちスロット[#N]を表示（その種族をボックスに既に持っていれば緑、いなければ赤）。
-FAV_ENEMY_SLOT :: スロット#
+FAV_ENEMY_SLOT :: スロットNo.
 MENU_ENEMY_SPECIES :: 種族
 NOTE_ENEMY_SPECIES :: 相手の種族名を表示します。
 FAV_ENEMY_SPECIES :: 種族
@@ -1004,7 +1010,7 @@ MENU_HUD_RADAR_CHAIN :: 連鎖数
 MENU_HUD_RADAR_RECHARGE :: レーダー充電
 NOTE_HUD_REPEL :: 虫よけの残り歩数を表示します（0 = 虫よけ無効）。\nゲームに保存されないので、リロード時に0に戻ります。
 NOTE_HUD_RADAR :: ポケレーダーの現在の電池残量を表示します(0-255)。X/Y専用。
-NOTE_HUD_RADAR_CHAIN :: レーダー連鎖アシスタントの連鎖数を表示します（目安で、ゲーム内部の実際の値ではありません）。X/Y専用。
+NOTE_HUD_RADAR_CHAIN :: レーダー連鎖アシスタントの連鎖数を表示します（ゲームから直接読み取った値）。X/Y専用。
 NOTE_HUD_RADAR_RECHARGE :: 安全な充電に必要な50歩への進捗を表示します。X/Y専用。
 FAV_HUD_REPEL :: 虫よけ
 FAV_HUD_RADAR :: レーダー電池
@@ -1085,7 +1091,8 @@ OPC_HINT_KEEP :: 維持: ゲージが満タンのまま、待ち時間なし
 OPC_BTN_KEEPFULL :: 維持
 
 
-REFILL_DONE :: 手持ちを回復しました！
+REFILL_HEALTH_DONE :: HP回復
+REFILL_MANA_DONE :: PP回復
 
 MENU_HEALTH_MANA :: HPとPP
 NOTE_HEALTH_MANA :: 手持ちのHPとPPを回復・固定します。\n\n常に最大（切り替え）: 戦闘中HP/PPを満タンに固定 - ひんしにならず、PP切れもなし。\n即時補充（切り替え）: ひとつONにするとショートカットが有効になり、押すと一度だけ補充します（初期はOFF - 任意設定。OFFでボタンが解放されます）。HP補充はフィールドで動作し、戦闘中はむげんのHPを使ってください。
@@ -1139,22 +1146,22 @@ MENU_HUD_SEED :: Initial seed
 FAV_HUD_SEED :: Initial seed
 MENU_HUD_FRAME :: Current seed
 FAV_HUD_FRAME :: Current seed
-MENU_HUD_ADV :: Frame
-FAV_HUD_ADV :: Frame
-HUD_SEED :: iSeed: %08X
-HUD_FRAME :: cSeed: %08X
-HUD_ADV :: Frame: %lu
+MENU_HUD_ADV :: MT消費数
+FAV_HUD_ADV :: MT消費数
+HUD_SEED :: 初期seed: %08X
+HUD_FRAME :: 現在state: %08X
+HUD_ADV :: MT消費数: %lu
 NOTE_HUD_SEED :: ゲームの「initial seed」- このセッションの全ての乱数結果の元になる数値。ソフトリセット後に取得（それまで----）。PCの3DSRNGToolに入力して色違いを狙えます。
 NOTE_HUD_FRAME :: 今の乱数の値（「current seed」）です。ゲームが進むと変化し、止まっていると固定されます。
 NOTE_HUD_ADV :: 現在のRNG「frame」- initial seedからの絶対的なadvances数。RNG厳選では目標フレームに合わせて操作します。seed取得まで----。
 MENU_HUD_EGG :: Egg seed
 FAV_HUD_EGG :: Egg seed
 HUD_EGG :: Egg: %08X
-HUD_SEED_PENDING :: iSeed: ----
+HUD_SEED_PENDING :: 初期seed: ----
 NOTE_HUD_EGG :: 「egg seed」。セーブ時の乱数スナップショットで、タマゴ／預け屋のRNG（PKSeedなど）に使います。セーブすると更新されます。
 MENU_HUD_TSV :: TSV / TRV
 FAV_HUD_TSV :: TSV / TRV
-HUD_TSV :: TSV:%u TRV:%X
+HUD_TSV :: TSV: %u, TRV: %u
 NOTE_HUD_TSV :: あなたの「TSV」(Trainer Shiny Value)と「TRV」を一行で。タマゴや遭遇は、そのPSVがTSVと一致するとあなたにとって色違いです。RNGにはTSVが必要；TRVはGen8以降のおまけ。
 MENU_HUD_TRV :: TRV
 FAV_HUD_TRV :: TRV
@@ -1167,9 +1174,9 @@ HUD_TINYST2 :: [1]%08X [0]%08X
 NOTE_HUD_TINYST :: ライブのTinyMT状態（4ワード）- 野生の出現・シンクロ・隠れ特性・群れを決める2つ目のRNG。3DSRNGToolに入れて野生RNGに使えます。
 MENU_HUD_TINYADV :: TinyMT adv
 FAV_HUD_TINYADV :: TinyMT adv
-HUD_TINYADV :: tAdv: %lu
+HUD_TINYADV :: 消費数: %lu
 NOTE_HUD_TINYADV :: 野生出現RNG（TinyMT）が見始めてからどれだけ進んだか。野生の目標を合わせるのに使います。
-HUD_ADV_PENDING :: Frame: ----
+HUD_ADV_PENDING :: MT消費数: ----
 MENU_HUD_TARGET :: Target frame
 FAV_HUD_TARGET :: Target frame
 HUD_TARGET :: Tgt:%+ld %s
@@ -1186,7 +1193,7 @@ EGG_PEEK_HINT :: Aで中身を見る
 NOTE_EGG_PEEK_CONFIRM :: このタマゴの中身を見ますか？
 MENU_SHINY_HUNT :: 色違いハント補助
 FAV_SHINY_HUNT :: 色違いハント
-NOTE_SHINY_HUNT :: パネルを開いて狙うポケモンを選ぶと、その種の野生エンカウントを裏で数えます。\n\n本物の色違いが出ると通知して一時停止します。数えるのは野生戦のみ（目安）。カウントは対象ごとに保存されます。\n\nX/Yでは、Rボタンでレーダー連鎖アシスタントのタブを開けます。草むらは4輪目以降で、直前の揺れと同じ場所を選び、草むらの端は避けてください。逃げると必ずポケレーダーの連鎖が途切れます（安全に逃げる方法はありません）。安全そうな草むらがない場合は、草むらの外を50歩歩けば連鎖を失わずにレーダーを充電できます。
+NOTE_SHINY_HUNT :: パネルを開いて狙うPokémonを選ぶと、その種の野生エンカウントを裏で数えます。\n\n本物の色違いが出ると通知して一時停止します。数えるのは野生戦のみ（目安）。カウントは対象ごとに保存されます。\n\nX/Yでは、L/Rで3つのタブ（ハント、レーダー、連鎖）を切り替えます。\n\n種族固定なし：草むらは4輪目以降で、直前の揺れと同じ場所を選び、草地の端のパッチは避けてください。逃げると必ずポケレーダーの連鎖が途切れます（安全に逃げる方法はありません）。\n\n種族固定オン（連鎖タブ）：連鎖2以降はエリア内のすべてのパッチが対象と一致するので、空のパッチだけ避ければ済みます。詳しくは種族固定の(i)を参照。\n\n種族固定の手順：ポケレーダーのバッテリー無限と虫よけ無限をオンにし、ポケレーダーを使い、欲しい種族が出るまで逃げてはレーダーを使い直し、その後で種族固定をオンにします。\n\n安全そうなパッチがない場合は、草むらの外を50歩歩けば連鎖を失わずにレーダーを充電できます。連鎖中に伝説の鳥が現れても連鎖は切れません（勝手に逃げていきます）。\n\n連鎖数を選択で、カウントの始まりを選べます。最長連鎖（連鎖タブ）は今回のセッションの記録を追跡します。\n\nハントタブのOddsとレーダータブの捕獲率は別の数字です。Oddsはエンカウント全体に基づく確率、捕獲率は現在の連鎖数のみに基づき、連鎖中だけ意味を持ちます。
 SHINY_TARGET :: 対象：
 SHINY_ENCOUNTERS :: エンカウント
 SHINY_METHOD :: 方法：
@@ -1208,22 +1215,39 @@ EGG_PEEK_SKIP :: Aでスキップ
 
 # ==== Radar Chain Assistant (Fase 01) - Tab 2 of Shiny Hunt Companion, X/Y only ====
 MENU_RADAR_CHAIN :: レーダー連鎖アシスタント
-RADAR_CHAIN_LABEL :: 連鎖数（目安）
-RADAR_CHAIN_ESTIMATE_NOTE :: 突入したバトル数を数えます。ゲーム内部の実際の連鎖数ではありません。
+RADAR_CHAIN_LABEL :: 連鎖
+RADAR_CHAIN_GUARD_SAVED :: 連鎖維持
+RADAR_CHAIN_BROKEN :: 連鎖切れ
+RADAR_CHAIN_GUARD_MARK :: *
 RADAR_RECHARGE_LABEL :: レーダー電池
 RADAR_CHAIN_TAB_HINT :: A 決定   L/R タブ切替
 RADAR_CHAIN_TAP_HINT :: A 切替   L/R タブ切替
-RADAR_CHAIN_RESET_DONE :: 連鎖数をリセットしました
 RADAR_CHAIN_RECHARGE_READY :: レーダーを再起動できます
+MENU_CHAIN_TOOLS :: 連鎖ツール
+TAB_HUNT :: ハント
+TAB_POKERADAR :: レーダー
+TAB_CHAIN :: 連鎖
+CHAIN_TOOLS_ROW_START :: 連鎖数を選択
+CHAIN_TOOLS_SAVES :: 保護回数:
+CHAIN_TOOLS_LONGEST :: 最長:
+CHAIN_TOOLS_HINT :: < > で調整   L/Rタブ
+RADAR_CHAIN_ODDS_LABEL :: 捕獲率
+POKERADAR_IN_BAG :: ポケレーダー所持
+POKERADAR_GET_ITEM :: ポケレーダー入手
+POKERADAR_GET_ITEM_CONFIRM :: ポケレーダーは通常、物語終盤に入手します。\n\n今すぐバッグに入れますか？
+CHAIN_TOOLS_TOP_UNBREAKABLE :: 連鎖切れ防止はカウンターを守りますが、種族は保証されません。
+CHAIN_TOOLS_TOP_START :: 連鎖数を選択で、カウントの開始地点を決めます。
+CHAIN_TOOLS_TOP_RESPAWN :: 種族固定は連鎖2から連鎖中の種族に合わせます。
+CHAIN_TOOLS_TOP_BETA :: ベータ：RAM上では確認済み、RNGへの効果は未確認。要検証。
 RADAR_CHAIN_ROW_BATTERY :: ポケレーダー電池無限
-RADAR_CHAIN_ROW_REPEL :: 虫よけ自動補充
-RADAR_CHAIN_ROW_NOWILD :: 野生Pokémon出現なし
+RADAR_CHAIN_ROW_REPEL :: 虫よけ無限
+RADAR_CHAIN_ROW_UNBREAKABLE :: 連鎖切れ防止
 RADAR_CHAIN_ROW_HUD_CHAIN :: HUDに連鎖数を表示
+RADAR_CHAIN_ROW_RESPAWN :: 種族固定
+FAV_RADAR_CHAIN_ROW_RESPAWN :: 種族固定
+NOTE_RADAR_CHAIN_RESPAWN :: 使い方：ポケレーダーのバッテリー無限と虫よけ無限をオンにし、ポケレーダーを使い、欲しい種族が出るまで逃げてはレーダーを使い直し、その後で種族固定をオンにします。\n\n実機で確認済み：連鎖が2に達すると、エリア内のすべての草むらのパッチで連鎖中の種族が出現します（直前の揺れと一致するパッチだけではありません）。避ける必要があるのは「ポケモンがいない」空のパッチだけです。\n\n強制されるのは種族/フォルムのみです。レベル、個体値、性格、PIDはゲーム任せで、完全なクローンではありません。\n\n実験的な変更：以前はレベルが戦った時のレベルに固定されていましたが、現在は固定されません。ゲーム自身のエンカウントRNGが自然に妥当なレベルを選ぶのか、何か不具合が起きるのかはまだ不明です。強制された種族がどのレベルになったか報告してください。\n\n効果はエリアを出て入り直すまで、そのエリアのすべてのパッチに残ります。このトグルをオフにしても、すでに強制されたパッチは元に戻りません。\n\n本当に空のパッチは通常のポケレーダー連鎖と同じく連鎖を切ります。このツールは種族を読み違えるリスクを消すだけで、空パッチのリスクは消しません。\n\n連鎖が2に達するまでは何も起きません（最初の1匹目は繰り返す対象がまだないためです）。
+RADAR_CHAIN_RESPAWN_APPLIED :: 種族固定を適用
 RADAR_CHAIN_ROW_HUD_RECHARGE :: HUDにレーダー電池を表示
-RADAR_CHAIN_ROW_RESET :: 連鎖数をリセット
-RADAR_CHAIN_SHORT :: レーダー連鎖
-RADAR_BATTERY_LIVE_NOTE :: 現在値 - 使用ごとに5減少し、歩くと回復します。
-RADAR_BATTERY_INFINITE_NOTE :: レーダー電池無限がオンです。
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: トレーナーカード

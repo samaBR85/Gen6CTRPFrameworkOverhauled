@@ -1595,7 +1595,7 @@ namespace CTRPluginFramework {
 
     unsigned short last = 0xFFFF, poke[721];
 
-    void UpdateWildSpawner(int spawn, int form, int level, bool updateRadar) {
+    void UpdateWildSpawner(int spawn, int form, int level, bool updateRadar, bool lockLevel) {
         static const u32 pointer = AutoGameSet(0x8CEC564, 0x8D06468);
         static const int tableLength = AutoGameSet(0x178, 0xF4);
 
@@ -1632,7 +1632,10 @@ namespace CTRPluginFramework {
                 continue;
 
             // Update encounter details
-            Process::Write8(entryOffset + 2, level);
+            if (lockLevel) Process::Write8(entryOffset + 2, level); // EXPERIMENTAL: Species Lock skips this so
+                                                                     // the game's own encounter RNG can pick a
+                                                                     // level - unverified whether that produces
+                                                                     // a natural level or a broken one.
             Process::Write8(entryOffset + 3, 1); // Mark as valid encounter
 
             // Associate the species with the modified Pokemon
@@ -3461,6 +3464,12 @@ namespace CTRPluginFramework {
         g_entryToggleNotif = entry->IsActivated();
     }
 
+    // Menu checkbox GameFunc: mirror its state into the Library-side toast-draw flag (see OSD.hpp). ON =
+    // toasts draw with no background box.
+    void TransparentNotifications(MenuEntry *entry) {
+        g_notifTransparentBg = entry->IsActivated();
+    }
+
     // Poké Radar "infinite battery": pins the 10-notch charge full every frame while active, so the
     // ~50-step recharge wait is skipped entirely. XY only - the entry is XY-gated at registration
     // (Main.cpp), so this never runs on an OR/AS save. Addr from PokemonCheatPlugin (same game build);
@@ -3502,16 +3511,31 @@ namespace CTRPluginFramework {
             return;
         if (!RadarMenuWasOpened())   // never write before the user has opened the menu (save-select safety)
             return;
-        Process::Write16(0x8C7D23E, 0xFF);
+        Process::Write16(0x8C7D23E, 50); // in-game battery caps at 50 - writing higher (was 0xFF) has no effect
     }
 
     MenuEntry *g_repelCheatEntry = nullptr; // the Encounters&Catching Repel Auto-Refresh entry (set in Main.cpp)
     MenuEntry *g_noWildEntry     = nullptr; // the Encounters&Catching No Wild Pokémon entry (set in Main.cpp)
+    MenuEntry *g_chainGuardEntry = nullptr; // the Encounters&Catching "Unbreakable Chain (Experimental)" entry (set in Main.cpp)
 
-    // Repel Auto-Refresh: keeps the Repel step counter topped up so it never lapses mid-hunt. Unlike the Radar
-    // battery address, this one is a documented VOLATILE overworld counter, not stored in the save (same address
-    // the HUD's "Repel" readout already reads read-only) - so it's safe to auto-enable at boot like any normal
-    // cheat, no RadarMenuWasOpened()-style gate needed.
+    // Placeholder GameFunc: this entry only needs to render/persist as a checkbox. The actual protection runs
+    // in HudCallback every frame (see the block near ShinyHuntDetect) instead of here, because that callback
+    // fires unconditionally and gives clean on/off EDGE detection via entry->IsActivated() - needed so
+    // re-enabling the guard mid-session syncs to the CURRENT chain instead of restoring a stale value left
+    // over from a previous, already-finished hunt.
+    void RadarChainGuardHold(MenuEntry *entry) { (void)entry; }
+
+    MenuEntry *g_respawnLastEntry = nullptr; // the Encounters&Catching "Species Lock" entry (set in Main.cpp)
+
+    // Placeholder GameFunc: this entry only needs to render/persist as a checkbox. The actual protection runs
+    // in HudCallback every frame (see the block near ShinyHuntDetect) instead of here.
+    void RespawnLastHold(MenuEntry *entry) { (void)entry; }
+
+    // Repel Auto-Refresh: keeps the Repel step counter topped up so it never lapses mid-hunt. The counter itself
+    // is a documented VOLATILE overworld address, not stored in the save - but HW-confirmed this session: the
+    // framework's own boot-time auto-restore of a saved ON state fires before the menu is ever opened, while the
+    // game is still on the save-select screen, and bypasses it. So this DOES need the same
+    // RadarMenuWasOpened()-style boot-off gate as the Radar battery (see HudCallback).
     void RepelKeepUp(MenuEntry *entry) {
         if (!entry->IsActivated())
             return;
@@ -5295,12 +5319,66 @@ namespace CTRPluginFramework {
     static int  s_lastTX = 0, s_lastTY = 0;
     static bool s_haveTile = false;
 
-    // ===== Radar Chain Assistant (Fase 01) — session-only counter, reused by the Shiny Hunt Companion's Tab 2 =====
-    // Chain is a deliberate APPROXIMATION, not the game's real internal chain value (no known RAM address for
-    // that exists) - it just counts every battle entered while hunting, regardless of catch/faint/flee outcome.
-    // The Radar's battery/recharge state, by contrast, IS directly readable (0x8C7D23E, same address HUD_RADAR
-    // already uses) - no approximation needed there, so no separate counter for it.
-    static u32  g_chainCount = 0;
+    // ===== Radar Chain Assistant, reused by the Shiny Hunt Companion's Tab 2 =====
+    // Chain is the game's OWN live counter, found via an on-hardware RAM search and confirmed to reset to 0 on
+    // a real chain break (Run): XY only, u16, address 0x8D1B2B8. Read directly wherever the chain is shown -
+    // no local tracking variable needed, unlike the pre-v0.8.0 "count battles entered" approximation.
+    static const u32 kRadarChainAddr = 0x8D1B2B8;
+    // Raw, unclamped read of the game's real chain counter. Used for the on-screen display (uncapped now -
+    // see RadarChainDisplayString) and for the HudCallback rise/break/Species Lock tracking, so both keep
+    // working past 40. Only the odds calc (RadarChainCatchOdds) still clamps, and it does so internally.
+    static u16 RadarChainRaw(void) {
+        u16 chain = 0;
+        if (currGameSeries == GameSeries::XY) Process::Read16(kRadarChainAddr, chain);
+        return chain;
+    }
+    // Clamped at 40: past that point the chain makes no further difference to shiny odds (see
+    // RadarChainCatchOdds below), so nothing internal needs to track or restore higher than 40.
+    static u16 RadarChainCount(void) {
+        u16 chain = RadarChainRaw();
+        if (chain > 40) chain = 40;
+        return chain;
+    }
+    // Real X/Y "sparkling patch" formula (Bulbapedia, Poké Radar): 1/(8100 - chain*200), capped at 1/100
+    // once chain reaches 40. This is the chance any one shake-check turns up the guaranteed-shiny glowing
+    // patch - not a guess, sourced before shipping since a wrong number here would mislead hours of hunting.
+    static float RadarChainCatchOdds(u16 chain) {
+        if (chain > 40) chain = 40;
+        float denom = 8100.0f - (float)chain * 200.0f;
+        if (denom < 100.0f) denom = 100.0f;
+        return 100.0f / denom;
+    }
+    // Show the TRUE chain count, uncapped - the game's counter really does climb past 40 (HW-confirmed), and
+    // the raw number is more useful to the player than a "40+" placeholder. Catch odds cap at 40 on their own
+    // (RadarChainCatchOdds), so the display doesn't need to.
+    static string RadarChainDisplayString(void) {
+        return to_string(RadarChainRaw());
+    }
+    // Formats RadarChainCatchOdds as "N.NN%" without any float-format dependency (this codebase avoids
+    // snprintf-style float formatting elsewhere too - see the Shiny odds chip's manual div/mod pattern).
+    static string RadarChainOddsString(u16 chain) {
+        int hundredths = (int)(RadarChainCatchOdds(chain) * 100.0f + 0.5f);
+        int whole = hundredths / 100, frac = hundredths % 100;
+        string fracStr = to_string(frac);
+        if (fracStr.size() < 2) fracStr = "0" + fracStr;
+        return to_string(whole) + "." + fracStr + "%";
+    }
+    // "Unbreakable Chain (Experimental)" save marker: true once the guard has restored the chain at least once
+    // this hunt - read by the HUD chain line + the PokeRadar tab's Chain card to append a persistent "*" (proof
+    // the system intervened, not just a toast the player might miss mid-battle). Reset to false when the guard
+    // is freshly enabled.
+    static bool g_chainGuardEverSaved = false;
+    static u32 g_chainGuardSaveCount = 0;      // "Unbroken:" - how many times the guard has intervened this hunt
+    // The guard's restore baseline, promoted out of HudCallback so "Chain Start from" can rewrite it too -
+    // otherwise the guard would see the player's own edit as a "drop" and immediately fight it back.
+    static u16 g_chainGuardLastValue = 0;
+    // Chain tab (Tab 3 of the Shiny Hunt Companion):
+    static u16 g_chainLongestSession = 0;      // "Longest Chain" - highest value seen on this boot
+    // Baseline for "Chain Broken"/"Species Lock" rise/break detection, promoted out of HudCallback so "Chain
+    // Start from" can sync it too - otherwise a manual stepper edit reads as a real chain rise/break and
+    // misfires Species Lock with a stale species, or falsely announces a break (HW-confirmed this session -
+    // it does fire in the overworld from just moving the stepper, with no battle involved at all).
+    static u16 g_lastChainSeen = 0;
 
     // ===== Shiny Hunt Companion (Encounters & Catching hub) =====
     // The hub picks a target species; the detector below (in HudCallback) then counts wild encounters of that
@@ -5390,6 +5468,9 @@ namespace CTRPluginFramework {
             for (int i = 0; i < 8; i++)
                 if (RngGroupPtrs[i] != nullptr) RngGroupPtrs[i]->Disable();
             g_hudRngAllOn->Disable(); onNow = false;
+            // Unlike All ON (which must never touch Freeze), All OFF also releases it - a still-frozen HUD
+            // with every field off would just be holding an empty panel in place for no reason.
+            if (g_hudFreeze != nullptr) g_hudFreeze->Disable();
         }
 
         // Auto-off: these are momentary action buttons, they must not stay checked once you're back in the
@@ -5553,6 +5634,34 @@ namespace CTRPluginFramework {
         }
     }
 
+    // "Respawn Last" support (Chain tab, XY only, EXPERIMENTAL): snapshots the just-fought wild Pokémon's
+    // species/form/level - same read pattern as ShinyHuntDetect above, but unconditional on g_shinyTarget
+    // (Respawn Last must work regardless of whether a Hunt target is set). Fed to UpdateWildSpawner on a
+    // chain-rise edge in HudCallback's guard block.
+    static u16  s_respawnSpecies = 0;
+    static u8   s_respawnForm = 0, s_respawnLevel = 0;
+    static bool s_respawnEvalDone = false;
+    static void RespawnLastCapture(bool nowBattle) {
+        if (!nowBattle) { s_respawnEvalDone = false; return; }
+        if (s_respawnEvalDone) return;
+        PK6 epk;
+        if (!IsValid(AutoGameSet((u32)0x81FF744, (u32)0x81FEEC8), &epk)) return;
+        if (epk.species < 1 || epk.species > 721) return;
+        s_respawnEvalDone = true;
+        if (epk.originalTrainerName[0] != 0) return; // wild-only
+        s_respawnSpecies = epk.species;
+        s_respawnForm = epk.fatefulEncounterGenderForm >> 3; // same extraction pattern as PKHeX.cpp:5275
+        s_respawnLevel = GetPokemonLevel(epk.species, epk.exp);
+    }
+
+    // HW-confirmed this session: a 2-second post-battle delay was tried first (theory: the game's own patch
+    // reshake happens in a cascade after battle exit, and would overwrite an early write) - but on hardware,
+    // `IfInBattle()` doesn't flip true until AFTER the chain-rise moment, so the "wait for battle exit" check
+    // was already satisfied immediately and the delay never actually applied. Firing directly on chain-rise
+    // turned out to work reliably anyway (30/30 in testing) - the encounter-table write reaches EVERY patch in
+    // the area, not just the "matching" one, and stays forced until the area is left and re-entered. Simplified
+    // to fire right here, no separate fire-check function needed.
+
     // (1-p)^n via binary exponentiation (no <cmath>): cumulative shiny odds = 1 - (1-p)^n.
     static float PowInt(float base, u32 n) {
         float r = 1.0f;
@@ -5576,11 +5685,17 @@ namespace CTRPluginFramework {
         static const char *MKEY[4] = {"SHINY_METHOD_FULL", "SHINY_METHOD_MASUDA", "SHINY_METHOD_CHARM", "SHINY_METHOD_BOTH"};
 
         Image sprite; int spriteKey = -1;
+        // Poké Radar bag-icon (item 431), a fixed tiny asset - load once ever (static), not per screen-open.
+        static Image g_pokeRadarSprite; static bool s_pokeRadarSpriteLoaded = false;
+        if (!s_pokeRadarSpriteLoaded) { g_pokeRadarSprite.LoadFromFile("Assets/BagSprites/list/431.bmp"); s_pokeRadarSpriteLoaded = true; }
 
         // Centered word-wrap: same fit logic as the app's usual left-aligned drawWrap, but each line is
         // horizontally centered around cx - used inside the Radar Chain cards, which are narrow enough that
         // captions routinely wrap to 2-3 lines.
-        auto drawWrapCenter = [](const Screen &scr, const string &s, int cx, int y, int maxW, int lineH, Color c) {
+        // Returns the y just past the last drawn line (one lineH below it) - lets callers chain several
+        // wrapped paragraphs one after another without knowing in advance how many lines each will take
+        // (translations wrap to different line counts than English).
+        auto drawWrapCenter = [](const Screen &scr, const string &s, int cx, int y, int maxW, int lineH, Color c) -> int {
             size_t i = 0, n = s.size();
             int cy = y;
             while (i < n) {
@@ -5598,6 +5713,7 @@ namespace CTRPluginFramework {
                 i = (brk == lastSpace) ? brk + 1 : brk;
                 cy += lineH;
             }
+            return cy + lineH;
         };
         auto drawCentered = [](const Screen &scr, const string &s, int cx, int y, Color c) {
             scr.DrawSysfont(c << s, cx - (int)OSD::GetTextWidth(true, s) / 2, y, c);
@@ -5613,9 +5729,25 @@ namespace CTRPluginFramework {
             scr.DrawSysfont(txtc << s, cx - (int)OSD::GetTextWidth(true, s) / 2, y + (h - 9) / 2, txtc);
         };
 
-        // Tab 2 ("Radar Chain Assistant") only exists on XY - the Radar itself doesn't exist on OR/AS, so the
-        // tab is simply absent there rather than shown with a "not available" message.
-        const int tabCount = (currGameSeries == GameSeries::XY) ? 2 : 1;
+        // Tab 2 ("Radar Chain Assistant") and Tab 3 ("Chain Tools") only exist on XY - the Radar itself doesn't
+        // exist on OR/AS, so both tabs are simply absent there rather than shown with a "not available" message.
+        const int tabCount = (currGameSeries == GameSeries::XY) ? 3 : 1;
+
+        // Bottom-screen tab pills, shared by all 3 tabs. One-word labels (CHAIN_TAB_*) - a 3-way split of the
+        // 268px pill row only leaves ~88px each, too narrow for full names like "Radar Chain".
+        auto drawTabPills = [&](int activeIdx) {
+            static const char *TABK[3] = { "TAB_HUNT", "TAB_POKERADAR", "TAB_CHAIN" };
+            int n = tabCount, pillW = 268 / n, x = 26;
+            for (int i = 0; i < n; i++) {
+                bool isSel = i == activeIdx;
+                int w = (i == n - 1) ? (294 - x) : (pillW - 2);
+                bot.DrawRect(x, 24, w, 20, isSel ? sel : bg2, true);
+                bot.DrawRect(x, 24, w, 20, isSel ? title : border, false);
+                drawCentered(bot, getLanguage->Get(TABK[i]), x + w / 2, 28, isSel ? bg : txt);
+                x += pillW;
+            }
+            bot.DrawRect(26, 48, 268, 1, border, true);
+        };
         // Remembers the last tab used across repeated opens this session (e.g. a player who's mostly working
         // the Radar Chain tab shouldn't have to L/R back to it every time). Session-only, not saved to disk -
         // resets to Shiny Hunt on the next cold boot, same as this tool's other session state (sprite cache etc).
@@ -5635,17 +5767,32 @@ namespace CTRPluginFramework {
             { "SHINY_RESET",         12, nullptr },
             { "SHINY_CLOSE",         13, nullptr }
         };
-        Row rows2[6] = {
+        // Tab 2 ("PokeRadar", XY only): a live bag-check row for the Poké Radar item itself (kind 30), then
+        // the radar/repel toggles. Show Chain on HUD moved to the Chain tab; No Wild Pokémon was removed from
+        // here - it works against the intended Species Lock workflow (you WANT wild encounters to keep re-
+        // rolling the Radar) - it's still available on its own in Encounters & Catching.
+        Row rows2[4] = {
+            { "POKERADAR_ROW_BAG",       30, nullptr },
             { "RADAR_CHAIN_ROW_BATTERY", 0, g_radarCheatEntry },
             { "RADAR_CHAIN_ROW_REPEL",   0, g_repelCheatEntry },
-            { "RADAR_CHAIN_ROW_NOWILD",  0, g_noWildEntry },
+            { "RADAR_CHAIN_ROW_HUD_RECHARGE", 1, g_hudRadar },
+        };
+        // Tab 3 ("Chain", XY only): Species Lock leads, then Secure Chain, the Choose Chain # stepper, and Show
+        // Chain on HUD - "Unbroken"/"Longest" stats below are read-only, drawn directly (no Row entry -
+        // nothing to fire). Species Lock forces the actual species on every non-empty patch in the area and is
+        // the more reliable tool; Secure Chain only patches the COUNTER (no species guarantee, effectiveness
+        // unconfirmed - flagged Experimental on purpose) - both are offered so the community can compare
+        // results.
+        Row rows3[4] = {
+            { "RADAR_CHAIN_ROW_RESPAWN", 0, g_respawnLastEntry }, // mirrored in Encounters & Catching (favoritable)
+            { "RADAR_CHAIN_ROW_UNBREAKABLE", 0, g_chainGuardEntry },
+            { "CHAIN_TOOLS_ROW_START", 20, nullptr }, // kind 20 = stepper (Left/Right adjust, writes live)
             { "RADAR_CHAIN_ROW_HUD_CHAIN",    1, g_hudChain },
-            { "RADAR_CHAIN_ROW_HUD_RECHARGE", 1, g_hudRadar }, // label now reads "Show Radar Battery on HUD"
-            { "RADAR_CHAIN_ROW_RESET",   2, nullptr }
         };
         const int GROUP1[4] = { 0, 0, 1, 1 };    // Tab 1 groups: target/method, reset/close
-        const int GROUP2[6] = { 0, 0, 0, 1, 1, 2 }; // Tab 2 groups: 3 cheats, 2 HUD toggles, 1 action
-        int cursor1 = 0, cursor2 = 0;
+        const int GROUP2[4] = { 0, 0, 0, 1 }; // Tab 2 groups: bag-check + 2 cheats, 1 HUD toggle
+        const int GROUP3[4] = { 0, 0, 0, 0 };    // Tab 3 groups: one flat group, stats are drawn separately
+        int cursor1 = 0, cursor2 = 0, cursor3 = 0;
         bool wasTouchDown = false;
 
         // Row Y positions, laid out below the tab-pill header (04..24 pill, divider at 28, rows start 34),
@@ -5659,7 +5806,8 @@ namespace CTRPluginFramework {
             }
         };
         int rowY1[4]; layoutRows(4, GROUP1, rowY1);
-        int rowY2[6]; layoutRows(6, GROUP2, rowY2);
+        int rowY2[4]; layoutRows(4, GROUP2, rowY2);
+        int rowY3[4]; layoutRows(4, GROUP3, rowY3);
 
         auto fireRow1 = [&](int i) {
             if (i == 0) {
@@ -5679,12 +5827,29 @@ namespace CTRPluginFramework {
         };
         auto fireRow2 = [&](int i) {
             Row &r = rows2[i];
-            if (r.kind == 2) { g_chainCount = 0; OSD::Notify(getLanguage->Get("RADAR_CHAIN_RESET_DONE")); }
-            else if (r.entry != nullptr) { if (r.entry->IsActivated()) r.entry->Disable(); else r.entry->Enable(); }
+            if (r.kind == 30) { // Poké Radar bag-check row
+                if (BagOwnedCount(431) <= 0) {
+                    // The Poké Radar is normally a late-game story gift on X/Y - warn before handing it over
+                    // early, same confirm-before-shortcut pattern as the shiny-counter reset above.
+                    if (MessageBox(CenterAlign(getLanguage->Get("POKERADAR_GET_ITEM_CONFIRM")), DialogType::DialogYesNo, ClearScreen::Both)())
+                        BagGiveItem(431);
+                }
+                return;
+            }
+            if (r.entry != nullptr) { if (r.entry->IsActivated()) r.entry->Disable(); else r.entry->Enable(); }
+        };
+        // i==2 ("Choose Chain #") is a Left/Right stepper, handled separately below so it can auto-repeat while
+        // held; i==0/1/3 are plain entry toggles (Species Lock and Secure Chain are real MenuEntries, both
+        // mirrored in Encounters & Catching).
+        auto fireRow3 = [&](int i) {
+            Row &r = rows3[i];
+            if (r.entry != nullptr) { if (r.entry->IsActivated()) r.entry->Disable(); else r.entry->Enable(); }
         };
 
         // Swallow the A/B that opened the hub.
         while (Controller::IsKeyDown(Key::A) || Controller::IsKeyDown(Key::B)) { Controller::Update(); OSD::SwapBuffers(); }
+
+        int chainStepHeldDir = 0, chainStepRepeat = 0; // Left/Right auto-repeat state for "Chain Start at"
 
         while (true) {
             Controller::Update();
@@ -5700,28 +5865,48 @@ namespace CTRPluginFramework {
             if (tabCount > 1 && Controller::IsKeyPressed(Key::R)) tab = (tab + 1) % tabCount;
             if (tabCount > 1 && Controller::IsKeyPressed(Key::L)) tab = (tab + tabCount - 1) % tabCount;
 
-            int rowCount = tab == 0 ? 4 : 6;
-            int *cursor = tab == 0 ? &cursor1 : &cursor2;
-            if (Controller::IsKeyPressed(Key::Up))   *cursor = (*cursor - 1 + rowCount) % rowCount;
-            if (Controller::IsKeyPressed(Key::Down)) *cursor = (*cursor + 1) % rowCount;
-            if (Controller::IsKeyPressed(Key::A)) {
-                if (tab == 0) fireRow1(*cursor); else fireRow2(*cursor);
+            int rowCount = tab == 0 ? 4 : (tab == 1 ? 4 : 4);
+            int *cursor = tab == 0 ? &cursor1 : (tab == 1 ? &cursor2 : &cursor3);
+            if (rowCount > 0 && Controller::IsKeyPressed(Key::Up))   *cursor = (*cursor - 1 + rowCount) % rowCount;
+            if (rowCount > 0 && Controller::IsKeyPressed(Key::Down)) *cursor = (*cursor + 1) % rowCount;
+            if (rowCount > 0 && Controller::IsKeyPressed(Key::A)) {
+                if (tab == 0) fireRow1(*cursor); else if (tab == 1) fireRow2(*cursor); else fireRow3(*cursor);
                 while (Controller::IsKeyDown(Key::A)) { Controller::Update(); OSD::SwapBuffers(); }
                 if (tab == 0 && *cursor == 3) break; // "Close" row
+            }
+
+            // "Chain Start from" Left/Right stepper (0-40), same held-direction auto-repeat idiom used by the
+            // Bag list scroller. Writes straight to the real chain address AND keeps the rise/break tracker in
+            // sync - otherwise the next frame would read this manual edit as a real chain rise or break.
+            if (tab == 2 && *cursor == 2) {
+                int dir = Controller::IsKeyDown(Key::Left) ? -1 : (Controller::IsKeyDown(Key::Right) ? 1 : 0);
+                bool fire = false;
+                if (dir != chainStepHeldDir) { chainStepHeldDir = dir; chainStepRepeat = 16; fire = dir != 0; }
+                else if (dir != 0 && --chainStepRepeat <= 0) { chainStepRepeat = 4; fire = true; }
+                if (fire) {
+                    u16 cur = 0; Process::Read16(kRadarChainAddr, cur);
+                    int nv = (int)cur + dir;
+                    if (nv < 0) nv = 40; else if (nv > 40) nv = 0; // wrap around at the ends
+                    Process::Write16(kRadarChainAddr, (u16)nv);
+                    g_chainGuardLastValue = (u16)nv;
+                    g_lastChainSeen = (u16)nv; // keep Species Lock from reading this manual edit as a real chain-rise
+                }
+            } else {
+                chainStepHeldDir = 0;
             }
 
             // Touch fallback: tapping a row selects it AND fires it in one go (same rects the rows are drawn
             // in below - real x range on the bottom screen is 26..294, mirrored here for the hit-test).
             bool touchClosedTab1 = false;
             {
-                const int *rowY = tab == 0 ? rowY1 : rowY2;
+                const int *rowY = tab == 0 ? rowY1 : (tab == 1 ? rowY2 : rowY3);
                 bool down = Touch::IsDown();
                 if (down && !wasTouchDown) {
                     UIntVector tp = Touch::GetPosition();
                     for (int i = 0; i < rowCount; i++) {
                         if ((int)tp.x >= 26 && (int)tp.x < 294 && (int)tp.y >= rowY[i] - 3 && (int)tp.y < rowY[i] + 21) {
                             *cursor = i;
-                            if (tab == 0) fireRow1(i); else fireRow2(i);
+                            if (tab == 0) fireRow1(i); else if (tab == 1) fireRow2(i); else fireRow3(i);
                             if (tab == 0 && i == 3) touchClosedTab1 = true; // "Close" row
                             break;
                         }
@@ -5796,11 +5981,7 @@ namespace CTRPluginFramework {
                 bot.DrawRect(20, 20, 280, 200, bg, true);
                 bot.DrawRect(20, 20, 280, 200, border, false);
                 if (tabCount > 1) {
-                    bot.DrawRect(26, 24, 128, 20, sel, true);  bot.DrawRect(26, 24, 128, 20, title, false);
-                    drawCentered(bot, getLanguage->Get("FAV_SHINY_HUNT"), 90, 28, bg);
-                    bot.DrawRect(160, 24, 134, 20, bg2, true); bot.DrawRect(160, 24, 134, 20, border, false);
-                    drawCentered(bot, getLanguage->Get("RADAR_CHAIN_SHORT"), 227, 28, txt);
-                    bot.DrawRect(26, 48, 268, 1, border, true);
+                    drawTabPills(0);
                 } else {
                     bot.DrawSysfont(title << getLanguage->Get("MENU_SHINY_HUNT"), 26, 28, title);
                     bot.DrawRect(26, 44, 268, 1, title, true);
@@ -5819,62 +6000,121 @@ namespace CTRPluginFramework {
                 }
                 drawWrapCenter(bot, getLanguage->Get("SHINY_ONLY_NOTE"), 160, 160, 250, 12, txt);
                 drawCentered(bot, getLanguage->Get("RADAR_CHAIN_TAB_HINT"), 160, 202, txt);
-            } else {
-                // ---- TOP: Tab 2 (Radar Chain Assistant) — read-only stats, two cards side by side ----
+            } else if (tab == 1) {
+                // ---- TOP: Tab 2 (PokeRadar) — read-only stats, two cards side by side ----
                 top.DrawRect(30, 20, 340, 200, bg, true);
                 top.DrawRect(30, 20, 340, 200, border, false);
                 top.DrawSysfont(title << getLanguage->Get("MENU_RADAR_CHAIN"), 42, 26, title);
                 top.DrawRect(42, 40, 316, 1, title, true);
 
-                const int CY = 44, CH = 150, C1X = 42, C2X = 208, CW = 150;
+                // CY/CH moved down + shrunk from the original (44/150) to center both cards better in the window,
+                // now that the Radar battery card no longer has a bottom note eating its lower half.
+                const int CY = 58, CH = 132, C1X = 42, C2X = 208, CW = 150;
                 top.DrawRect(200, CY, 1, CH, bg2, true);
 
                 top.DrawRect(C1X, CY, CW, CH, bg2, true);
                 top.DrawRect(C1X, CY, CW, CH, border, false);
-                drawCentered(top, getLanguage->Get("RADAR_CHAIN_LABEL"), C1X + CW / 2, CY + 10, sel);
-                drawCentered(top, to_string(g_chainCount), C1X + CW / 2, CY + 30, title);
-                drawWrapCenter(top, getLanguage->Get("RADAR_CHAIN_ESTIMATE_NOTE"), C1X + CW / 2, CY + 58, CW - 16, 11, txt);
+                string chainLabel = getLanguage->Get("RADAR_CHAIN_LABEL");
+                if (g_chainGuardEverSaved)
+                    chainLabel = getLanguage->Get("RADAR_CHAIN_GUARD_MARK") + chainLabel; // guard has restored a drop this hunt
+                drawCentered(top, chainLabel, C1X + CW / 2, CY + 12, sel);
+                u16 curChainForOdds = RadarChainCount();
+                string chainNum = RadarChainDisplayString();
+                drawCentered(top, chainNum, C1X + CW / 2, CY + 34, g_chainGuardEverSaved ? Color::LimeGreen : title);
+                // "Live value..." note REMOVED - replaced with the actual catch odds at the current chain
+                // (RadarChainCatchOdds - the real X/Y sparkling-patch formula, not a guess).
+                drawCentered(top, getLanguage->Get("RADAR_CHAIN_ODDS_LABEL"), C1X + CW / 2, CY + 70, sel);
+                drawCentered(top, RadarChainOddsString(curChainForOdds), C1X + CW / 2, CY + 92, title);
 
                 bool infinite = g_radarCheatEntry != nullptr && g_radarCheatEntry->IsActivated();
                 u16 charge = 0;
                 Process::Read16(0x8C7D23E, charge); // same live address the HUD_RADAR line already reads
                 top.DrawRect(C2X, CY, CW, CH, bg2, true);
                 top.DrawRect(C2X, CY, CW, CH, border, false);
-                drawCentered(top, getLanguage->Get("RADAR_RECHARGE_LABEL"), C2X + CW / 2, CY + 10, sel);
-                drawCentered(top, infinite ? "255" : (to_string(charge) + "/50"), C2X + CW / 2, CY + 30, infinite ? sel : title);
-                const int BX = C2X + 10, BY = CY + 54, BW = CW - 20, BH = 8;
+                drawCentered(top, getLanguage->Get("RADAR_RECHARGE_LABEL"), C2X + CW / 2, CY + 12, sel);
+                drawCentered(top, infinite ? "50/50" : (to_string(charge) + "/50"), C2X + CW / 2, CY + 34, infinite ? sel : title);
+                // Bar re-centered in the card's free space now that the (wrong - it drains the whole 50, not "5
+                // per use") note underneath it is gone.
+                const int BX = C2X + 10, BY = CY + 74, BW = CW - 20, BH = 10;
                 top.DrawRect(BX, BY, BW, BH, border, false);
                 int fillW = infinite ? (BW - 2) : (int)(((float)(charge > 50 ? 50 : charge) / 50.0f) * (BW - 2));
                 if (fillW > 0) top.DrawRect(BX + 1, BY + 1, fillW, BH - 2, infinite ? title : sel, true);
-                drawWrapCenter(top, getLanguage->Get(infinite ? "RADAR_BATTERY_INFINITE_NOTE" : "RADAR_BATTERY_LIVE_NOTE"), C2X + CW / 2, BY + 16, CW - 16, 11, txt);
 
                 // ---- BOTTOM: Tab 2 - tab pills + D-Pad checklist ----
                 bot.DrawRect(20, 20, 280, 200, bg, true);
                 bot.DrawRect(20, 20, 280, 200, border, false);
-                bot.DrawRect(26, 24, 128, 20, bg2, true);  bot.DrawRect(26, 24, 128, 20, border, false);
-                drawCentered(bot, getLanguage->Get("FAV_SHINY_HUNT"), 90, 28, txt);
-                bot.DrawRect(160, 24, 134, 20, sel, true); bot.DrawRect(160, 24, 134, 20, title, false);
-                drawCentered(bot, getLanguage->Get("RADAR_CHAIN_SHORT"), 227, 28, bg);
-                bot.DrawRect(26, 48, 268, 1, border, true);
+                drawTabPills(1);
 
-                for (int i = 0; i < 6; i++) {
+                for (int i = 0; i < 4; i++) {
                     bool isSel = i == cursor2;
                     Row &r = rows2[i];
-                    bool isToggle = r.kind != 2;
-                    bool on = isToggle && r.entry != nullptr && r.entry->IsActivated();
+                    if (r.kind == 30) {
+                        // Poké Radar bag-check row: sprite + live status, no checkbox - "get item" reads
+                        // in title (red) like a normal selected/actionable row; "in bag" just reads in sel.
+                        bool inBag = BagOwnedCount(431) > 0;
+                        Color c = isSel ? title : (inBag ? sel : txt);
+                        if (isSel) bot.DrawSysfont(title << "\xE2\x86\x92", 28, rowY2[i] + 4, title);
+                        if (g_pokeRadarSprite.IsLoaded()) g_pokeRadarSprite.Draw(bot, 44, rowY2[i] + 2);
+                        bot.DrawSysfont(c << getLanguage->Get(inBag ? "POKERADAR_IN_BAG" : "POKERADAR_GET_ITEM"), 44 + 18, rowY2[i] + 4, c);
+                        continue;
+                    }
+                    bool on = r.entry != nullptr && r.entry->IsActivated();
                     // No box: selection = title accent + moving → arrow; an enabled toggle reads in `sel`;
                     // idle rows in `txt`. On/off is shown purely by the check square on the right.
                     Color c = isSel ? title : (on ? sel : txt);
                     if (isSel) bot.DrawSysfont(title << "\xE2\x86\x92", 28, rowY2[i] + 4, title);
                     bot.DrawSysfont(c << getLanguage->Get(r.labelKey), 44, rowY2[i] + 4, c);
-                    if (!isToggle) {
-                        bot.DrawSysfont(sel << ">>", 272, rowY2[i] + 4, sel);
-                    } else {
-                        bot.DrawRect(272, rowY2[i] + 4, 10, 10, on ? sel : border, false);
-                        if (on) bot.DrawRect(274, rowY2[i] + 6, 6, 6, sel, true);
-                    }
+                    bot.DrawRect(272, rowY2[i] + 4, 10, 10, on ? sel : border, false);
+                    if (on) bot.DrawRect(274, rowY2[i] + 6, 6, 6, sel, true);
                 }
                 drawCentered(bot, getLanguage->Get("RADAR_CHAIN_TAP_HINT"), 160, 202, txt);
+            } else {
+                // ---- TOP: Tab 3 (Chain) - explains what each control does, mirrors the (i) note ----
+                top.DrawRect(30, 20, 340, 200, bg, true);
+                top.DrawRect(30, 20, 340, 200, border, false);
+                top.DrawSysfont(title << getLanguage->Get("MENU_CHAIN_TOOLS"), 42, 26, title);
+                top.DrawRect(42, 40, 316, 1, title, true);
+                int ty = 58;
+                ty = drawWrapCenter(top, getLanguage->Get("CHAIN_TOOLS_TOP_RESPAWN"), 200, ty, 280, 14, txt) + 6;
+                ty = drawWrapCenter(top, getLanguage->Get("CHAIN_TOOLS_TOP_UNBREAKABLE"), 200, ty, 280, 14, sel) + 6;
+                ty = drawWrapCenter(top, getLanguage->Get("CHAIN_TOOLS_TOP_START"), 200, ty, 280, 14, txt) + 6;
+                drawWrapCenter(top, getLanguage->Get("CHAIN_TOOLS_TOP_BETA"), 200, ty, 280, 14, sel);
+
+                // ---- BOTTOM: Tab 3 - tab pills + Chain Start from / Show Chain on HUD / Species Lock, then a
+                // divider and the session's longest-chain stat ----
+                bot.DrawRect(20, 20, 280, 200, bg, true);
+                bot.DrawRect(20, 20, 280, 200, border, false);
+                drawTabPills(2);
+
+                for (int i = 0; i < 4; i++) {
+                    bool isSel = i == cursor3;
+                    Row &r = rows3[i];
+                    bool on = r.entry != nullptr && r.entry->IsActivated();
+                    Color c = isSel ? title : (on ? sel : txt);
+                    if (isSel) bot.DrawSysfont(title << "\xE2\x86\x92", 28, rowY3[i] + 4, title);
+                    bot.DrawSysfont(c << getLanguage->Get(r.labelKey), 44, rowY3[i] + 4, c);
+                    if (r.kind == 20) {
+                        u16 curChain = 0; Process::Read16(kRadarChainAddr, curChain);
+                        string val = "< " + to_string(curChain) + " >"; // plain ASCII - ◄ ► glyphs don't exist on this sysfont (HW-confirmed)
+                        int vw = (int)OSD::GetTextWidth(true, val);
+                        bot.DrawSysfont(c << val, 272 - vw, rowY3[i] + 4, c);
+                    } else {
+                        bot.DrawRect(272, rowY3[i] + 4, 10, 10, on ? sel : border, false);
+                        if (on) bot.DrawRect(274, rowY3[i] + 6, 6, 6, sel, true);
+                    }
+                }
+
+                int statY = rowY3[3] + 20 + 8;
+                bot.DrawRect(30, statY, 260, 1, border, true);
+                statY += 10;
+                bot.DrawSysfont(txt << getLanguage->Get("CHAIN_TOOLS_SAVES"), 44, statY + 4, txt);
+                string savesVal = to_string(g_chainGuardSaveCount);
+                bot.DrawSysfont(sel << savesVal, 155 - (int)OSD::GetTextWidth(true, savesVal), statY + 4, sel);
+                bot.DrawSysfont(txt << getLanguage->Get("CHAIN_TOOLS_LONGEST"), 165, statY + 4, txt);
+                string longVal = to_string(g_chainLongestSession);
+                bot.DrawSysfont(sel << longVal, 272 - (int)OSD::GetTextWidth(true, longVal), statY + 4, sel);
+
+                drawCentered(bot, getLanguage->Get("CHAIN_TOOLS_HINT"), 160, 202, txt);
             }
 
             OSD::SwapBuffers();
@@ -5890,6 +6130,7 @@ namespace CTRPluginFramework {
         // Shiny Hunt detector runs once per frame whenever a target is armed — independent of the HUD being shown,
         // so it must sit BEFORE the master-activated guard below. Cheap no-op when disarmed (g_shinyTarget == 0).
         ShinyHuntDetect(IfInBattle());
+        RespawnLastCapture(IfInBattle());
 
         // Same reasoning: Display Enemy Stats toggle persistence must be applied/synced every frame regardless
         // of whether the HUD overlay itself is shown.
@@ -5904,6 +6145,19 @@ namespace CTRPluginFramework {
         if (g_radarCheatEntry != nullptr && !RadarMenuWasOpened())
             g_radarCheatEntry->Disable();
 
+        // "Unbreakable Chain (Experimental)" gets the same deterministic start-OFF treatment as the Radar
+        // battery, for the same reason: this address hasn't been proven save-safe either, so don't let it
+        // write anything before the user has opened the menu this boot.
+        if (g_chainGuardEntry != nullptr && !RadarMenuWasOpened())
+            g_chainGuardEntry->Disable();
+
+        // "Repel Auto-Refresh" (HW-confirmed this session): same boot race as the Radar battery above - the
+        // framework auto-restores its saved ON state ONCE during init, before the menu is ever opened, and that
+        // early write happens while the game is still on the save-select screen and bypasses it. Force OFF every
+        // frame until the user opens the menu this session, same gate as the two entries above.
+        if (g_repelCheatEntry != nullptr && !RadarMenuWasOpened())
+            g_repelCheatEntry->Disable();
+
         // RNG Tracking "All ON"/"All OFF" masters: batch push + mutual exclusion + auto-off, resolved every
         // frame here (menu open or closed) so the child checkboxes flip live in the menu. See RngAllMasterSync.
         {
@@ -5911,16 +6165,68 @@ namespace CTRPluginFramework {
             RngAllMasterSync(pm != nullptr && pm->IsOpen());
         }
 
-        // Radar Chain Assistant chain counter: must run regardless of the "Display HUD" master toggle, since
-        // the Tab 2 tool (and its optional "Show Chain on HUD" row) need a live number even when the overlay
-        // is off. XY only - the whole tab is gated to XY. The Radar's actual battery/recharge state is read
-        // directly from live RAM elsewhere (same address the HUD_RADAR line already reads) - no separate
-        // approximation needed, so there is no step-counter here anymore.
+        // Radar Chain Assistant chain counter used to need a per-frame battle-entered tally here; now it just
+        // reads RadarChainCount() live wherever it's displayed (HUD line + the Chain card), so there is nothing
+        // left to track every frame.
+
+        // Chain rise/break tracking + Unbreakable Chain (Experimental) + Species Lock: runs unconditionally on
+        // XY (menu open or closed) so nothing is ever missed.
         if (currGameSeries == GameSeries::XY) {
-            bool nowBattleForChain = IfInBattle();
-            static bool s_wasInBattleForChain = false;
-            if (nowBattleForChain && !s_wasInBattleForChain) g_chainCount++;
-            s_wasInBattleForChain = nowBattleForChain;
+            static bool s_guardWasOn = false;
+            u16 curChain = RadarChainRaw(); // RAW, uncapped - the game's real chain keeps climbing past 40
+                                            // (HW-confirmed); tracking must follow it so Species Lock/Secure
+                                            // Chain/break detection keep working past 40. Odds still clamp at
+                                            // 40 inside RadarChainCatchOdds itself.
+
+            // Session best - just an FYI stat for Chain Tools.
+            if (curChain > g_chainLongestSession) g_chainLongestSession = curChain;
+
+            // "Unbreakable Chain (Experimental)": while checked, rewrite the real chain counter back to its
+            // last known value the instant it drops. Runs unconditionally (menu open or closed) so on/off is
+            // reliably observable via IsActivated() - re-enabling mid-session syncs to the CURRENT chain
+            // instead of a stale value. Write-gated behind RadarMenuWasOpened(), same caution as the Radar
+            // battery address (this one hasn't been proven save-safe either). EXPERIMENTAL: this only patches
+            // the counter - it does NOT force the next Pokémon's species like Species Lock does, so whether it
+            // actually preserves real shiny odds is unconfirmed; the "*"/Unbroken stats exist so testers can
+            // see when it fired and correlate with their results.
+            bool guardOn = g_chainGuardEntry != nullptr && g_chainGuardEntry->IsActivated();
+            if (guardOn && !s_guardWasOn) {
+                g_chainGuardLastValue = curChain; // just turned on: sync to the current value, don't fight a stale one
+                g_chainGuardEverSaved = false;    // fresh hunt for the marker too - no save has happened yet
+                g_chainGuardSaveCount = 0;
+            } else if (guardOn && curChain < g_chainGuardLastValue && RadarMenuWasOpened()) {
+                Process::Write16(kRadarChainAddr, g_chainGuardLastValue);
+                curChain = g_chainGuardLastValue;
+                // Visible proof the system acted: a short toast right now, plus a persistent "*" marker next
+                // to the chain number from here on (this hunt), since a toast alone can be missed mid-battle.
+                OSD::Notify(getLanguage->Get("RADAR_CHAIN_GUARD_SAVED"), Color::Cyan);
+                g_chainGuardEverSaved = true;
+                g_chainGuardSaveCount++;
+            }
+            if (guardOn) g_chainGuardLastValue = curChain;
+            s_guardWasOn = guardOn;
+
+            // "Chain Broken": an UNPROTECTED break (guard off, or a drop the guard didn't catch this frame).
+            // Checked after the guard logic above so curChain already reflects any same-frame restore - a
+            // protected drop never actually reads 0 here, so this never double-toasts with "Chain Sustained".
+            if (g_lastChainSeen > 0 && curChain == 0) {
+                OSD::Notify(getLanguage->Get("RADAR_CHAIN_BROKEN"), Color::Red);
+                g_chainGuardEverSaved = false;
+                g_chainGuardSaveCount = 0;
+            }
+            // "Species Lock" (HW-confirmed working this session, 30/30 in testing): fires directly on a
+            // chain-RISE - writes reach EVERY patch in the area (not just a "matching" one) and stay forced
+            // until the area is left and re-entered. Only fires from chain 2 onward (g_lastChainSeen > 0 means
+            // a PRIOR chain value exists to compare against - the very first catch that locks the chain at 1
+            // has nothing to echo yet). Species/form come from s_respawn* (RespawnLastCapture, latched
+            // mid-battle) - by the time the chain visibly rises those are already populated. lockLevel=false
+            // (EXPERIMENTAL, unverified this session): only species/form get forced, s_respawnLevel is passed
+            // but ignored - lets the game's own encounter RNG pick the level instead of hardcoding it.
+            if (g_respawnLastEntry != nullptr && g_respawnLastEntry->IsActivated() && g_lastChainSeen > 0 && curChain > g_lastChainSeen) {
+                UpdateWildSpawner(s_respawnSpecies, s_respawnForm, s_respawnLevel, false, false);
+                OSD::Notify(getLanguage->Get("RADAR_CHAIN_RESPAWN_APPLIED"), Color::Cyan);
+            }
+            g_lastChainSeen = curChain;
         }
 
         if (!g_hudMaster->IsActivated())
@@ -6117,8 +6423,12 @@ namespace CTRPluginFramework {
             lines.push_back(Utils::Format(getLanguage->Get("HUD_RADAR").c_str(), (unsigned)charge));
         }
 
-        if (g_hudChain != nullptr && g_hudChain->IsActivated())
-            lines.push_back(Utils::Format(getLanguage->Get("HUD_RADAR_CHAIN").c_str(), (unsigned)g_chainCount));
+        if (g_hudChain != nullptr && g_hudChain->IsActivated()) {
+            string chainLine = Utils::Format(getLanguage->Get("HUD_RADAR_CHAIN").c_str(), RadarChainDisplayString().c_str());
+            if (g_chainGuardEverSaved)
+                chainLine = getLanguage->Get("RADAR_CHAIN_GUARD_MARK") + chainLine; // proof the guard has saved this chain at least once
+            lines.push_back(chainLine);
+        }
 
         if (g_hudMapId != nullptr && g_hudMapId->IsActivated()) {
             u16 mid = 0;

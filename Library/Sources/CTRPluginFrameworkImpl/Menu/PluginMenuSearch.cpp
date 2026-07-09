@@ -204,7 +204,9 @@ namespace CTRPluginFramework {
                 else {
                     _compareType.IsEnabled = true;
 
-                    if (_compareType.SelectedItem <= 5 && _searchType.SelectedItem == 1)
+                    // "Changed" (index 6, see _PopulateSearchType) needs no typed value either, same as the
+                    // plain comparators (indices 0-5).
+                    if (_compareType.SelectedItem <= 6 && _searchType.SelectedItem == 1) // <=5 always-present + 6 = "Changed"
                         _valueTextBox.IsEnabled = false;
 
                     else _valueTextBox.IsEnabled = true;
@@ -214,7 +216,7 @@ namespace CTRPluginFramework {
 
         // Compare type changed
         if (_compareType()) {
-            if (_compareType.SelectedItem <= 5 && _searchType.SelectedItem == 1)
+            if (_compareType.SelectedItem <= 6 && _searchType.SelectedItem == 1) // <=5 always-present + 6 = "Changed"
                 _valueTextBox.IsEnabled = false;
 
             else _valueTextBox.IsEnabled = true;
@@ -432,7 +434,18 @@ namespace CTRPluginFramework {
         parameters.flags |= _searchType.SelectedItem == 0 ? 0 : (u32)SearchFlags::Unknown;
 
         // Set Compare Flags
-        parameters.flags |= (u32)SearchFlags::Equal << _compareType.SelectedItem;
+        // Indices 0-5 (Equal to..Smaller or Equal, always present) still use the raw index shift. Indices 6-9
+        // (Changed/Different by/Less/More, only added on a non-first search - see _PopulateSearchType) are
+        // explicit here instead, since their order no longer matches their SearchFlags bit position 1:1
+        // ("Changed" is an alias inserted before the Different-by group; "Unchanged" was removed as a
+        // duplicate of "Equal to").
+        switch (_compareType.SelectedItem) {
+            case 6: parameters.flags |= (u32)SearchFlags::NotEqual; break;        // "Changed"
+            case 7: parameters.flags |= (u32)SearchFlags::DifferentBy; break;
+            case 8: parameters.flags |= (u32)SearchFlags::DifferentByLess; break;
+            case 9: parameters.flags |= (u32)SearchFlags::DifferentByMore; break;
+            default: parameters.flags |= (u32)SearchFlags::Equal << _compareType.SelectedItem; break;
+        }
 
         // Set CheckValue
         parameters.value32.U32 = _valueTextBox.Bits32;
@@ -738,6 +751,15 @@ namespace CTRPluginFramework {
         if (isFirstSearch)
             return;
 
+        // "Changed" - friendly alias for "Not Equal to" against the previous snapshot (most useful with
+        // Unknown Search: no value to type). Placed right after the 6 always-present entries above (indices
+        // 0-5, untouched) so it's reachable without scrolling past the "Different by..." group. "Unchanged"
+        // (the equivalent alias for "Equal to") was removed - it was a literal duplicate of "Equal to" (same
+        // SearchFlags::Equal), and dropping it brings the list back to 10 items.
+        _compareType.Add("Changed");        // index 6
+
+        // These three still use the raw index-shift (SearchFlags::Equal << SelectedItem) in the flags-
+        // building code, now at indices 7/8/9 instead of 8/9/10 - see the special case there.
         _compareType.Add("Different by");
         _compareType.Add("Different by Less");
         _compareType.Add("Different by More");

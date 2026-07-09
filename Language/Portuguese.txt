@@ -12,7 +12,8 @@ BATTLE_ACCESS_BAG :: Abrir Bag
 BATTLE_ALLOW_MEGAS :: Mais Megas
 BATTLE_ALWAYS_SHINY :: Sempre Shiny
 BATTLE_RADAR_INFINITE_BATTERY :: Radar Poke Bateria infinita
-BATTLE_REPEL_AUTO_REFRESH :: Repelente Auto-Renovacao
+BATTLE_RADAR_UNBREAKABLE_CHAIN :: Chain Inquebravel
+BATTLE_REPEL_AUTO_REFRESH :: Repelente Infinito
 BATTLE_CAPTURE_RATE_100 :: Captura 100%
 BATTLE_CAPTURE_TRAINER_POKEMON :: Capturar Pokémon Alheio
 BATTLE_CONDITION :: Condição
@@ -472,10 +473,12 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Permite que você capture o Pokémon de u
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Pegar Treino
 NOTE_BATTLE_ALWAYS_SHINY :: Todo Pokémon selvagem e nascido de ovo será shiny. A animação de brilho toca quando ele aparece.
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: Mantem a bateria do Radar Poke cheia no overworld, pulando a espera de recarga de uns 50 passos entre usos.\n\nSomente X/Y - o Radar nao existe em Rubi Omega / Safira Alfa.\n\nIMPORTANTE: por seguranca isto NAO fica ligado entre reinicios. Ele sempre comeca desligado.\n\nEntao ligue de novo a cada sessao, quando ja estiver dentro do seu jogo.\n\n(Isso evita um problema na inicializacao em que o jogo poderia nao encontrar o seu save.)
-NOTE_BATTLE_REPEL_AUTO_REFRESH :: Mantem um Repelente sempre ativo, para que ele nunca acabe. O Repelente bloqueia Pokemon selvagens mais fracos que o seu lider - ele nao impede todos os encontros.\n\nSeguro deixar ligado entre reinicios; esse endereco nao faz parte do seu save.
+NOTE_BATTLE_RADAR_UNBREAKABLE_CHAIN :: Enquanto ligado, no momento em que seu Chain do Radar for quebrar (fugir, uma patch ruim...), ele e colocado de volta no que era - lido direto do proprio contador de chain do jogo, entao cobre toda forma de um chain quebrar.\n\nSomente X/Y - o Radar nao existe em Rubi Omega / Safira Alfa.\n\nIMPORTANTE: por seguranca isto NAO fica ligado entre reinicios. Ele sempre comeca desligado.\n\nEntao ligue de novo a cada sessao, quando ja estiver dentro do seu jogo.\n\n(Isso evita um problema na inicializacao em que o jogo poderia nao encontrar o seu save.)
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: Mantém um Repelente sempre ativo, então ele nunca acaba. O Repelente bloqueia Pokémon selvagens mais fracos que o seu líder - ele não impede todos os encontros.\n\nIMPORTANTE: por segurança isto NÃO fica ligado entre reinícios. Ele sempre começa DESLIGADO.\n\nEntão ligue de novo a cada sessão, quando já estiver dentro do seu jogo.\n\n(Isso evita um problema na inicialização em que o jogo poderia não encontrar o seu save.)
 FAV_BATTLE_ALWAYS_SHINY :: Sempre Shiny
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: Radar infinito
-FAV_BATTLE_REPEL_AUTO_REFRESH :: Repelente Renov.
+FAV_BATTLE_RADAR_UNBREAKABLE_CHAIN :: Chain Inquebravel
+FAV_BATTLE_REPEL_AUTO_REFRESH :: Repelente Inf.
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: Permite shininess em encontros normalmente travados contra shiny.
 FAV_BATTLE_DISABLE_SHINY_LOCK :: Sem Trava Sh.
 MENU_RENAME_ANY :: Renomear Qualquer
@@ -547,6 +550,9 @@ FAV_PATCH_COLOR_CRASHES :: Cor. Texto Cor
 MENU_SHOW_NOTIFICATIONS :: Mostrar Notificações na Tela
 NOTE_SHOW_NOTIFICATIONS :: Aviso na tela superior quando você liga/desliga uma trapaça.
 FAV_SHOW_NOTIFICATIONS :: Notificações
+MENU_NOTIF_TRANSPARENT :: Notificações Transparentes
+NOTE_NOTIF_TRANSPARENT :: Os avisos (os pequenos popups mostrados para trapaças, eventos de chain, etc.) normalmente têm um fundo preto sólido.\n\nLigue isto para desenhar só o texto, sem a caixa de fundo, mesclando sobre o que estiver na tela.
+FAV_NOTIF_TRANSPARENT :: Notif. Transp.
 MENU_PLUGIN_SETTINGS :: Config. Plugin
 NOTE_PLUGIN_SETTINGS :: As configurações do próprio plugin (ex.: idioma) - não as opções do seu jogo.
 MENU_VIEW_PARTY_SUMMARY :: Ver Resumo do Time
@@ -679,7 +685,7 @@ SPAWN_FILTERS :: Filtros
 SPAWN_IN_INVENTORY :: No Inventár.
 SPAWN_ON :: ON
 SPAWN_SEARCH_PROMPT :: Busque por nome ou nº da National Dex
-SPAWN_NAME_NUM :: Nome / #
+SPAWN_NAME_NUM :: Nome / Nº
 SPAWN_GENERATION :: Geração
 SPAWN_TYPE :: Tipo
 SPAWN_TRAITS :: Traços
@@ -792,8 +798,8 @@ MART_FILTERS :: Filtros
 MART_IN_BAG :: Tenho
 MART_ON :: ON
 MART_ANY :: qqr
-MART_SEARCH_PROMPT :: Buscar por nome ou nº
-MART_NAME_NUM :: Nome/#
+MART_SEARCH_PROMPT :: Buscar por nome ou nº do item
+MART_NAME_NUM :: Nome / Nº
 MART_ALL_FMT :: %s
 MART_POCKET :: Bolso
 MART_EFFECT :: Efeito
@@ -888,9 +894,9 @@ HUD_PARTY :: Time: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: Repel: %u
 HUD_RADAR :: Radar bat: %u
-HUD_RADAR_CHAIN :: Chain: %u
+HUD_RADAR_CHAIN :: Chain: %s
 HUD_RADAR_RECHARGE :: Recarga: %u/50
-HUD_MAP_ID :: Mapa #%u(0x%X)
+HUD_MAP_ID :: Mapa nº%u (0x%X)
 HUD_POS_TOP_LEFT :: Sup-Esq
 HUD_POS_TOP_CENTER :: Sup-Centro
 HUD_POS_TOP_RIGHT :: Sup-Dir
@@ -916,8 +922,8 @@ MENU_ENEMY_ENABLE :: Ativar Atr.
 NOTE_ENEMY_ENABLE :: Veja os atributos do oponente em batalha.\n\nNo começo este botão está TRAVADO (mostrado com um ícone de engrenagem) porque só pode ser armado durante uma batalha.\n\nPara desbloqueá-lo: entre em qualquer batalha, selecione este item, depois toque em ATIVAR na tela de toque inferior - você só precisa fazer isso uma vez.\n\nDepois disso o botão fica desbloqueado; marque-o para ligar o recurso.\n\nEm batalha: ZR alterna entre as duas páginas (Básico/Golpes e IV/EV), e L/R trocam entre os Pokémon do inimigo.\n\nPara esconder a sobreposição totalmente, basta desligar este botão Ativar Atributos.
 FAV_ENEMY_ENABLE :: Ativar Atr.
 MENU_ENEMY_SLOT :: Nº do slot
-NOTE_ENEMY_SLOT :: Mostra o slot do time [#N] (verde quando você já tem a espécie numa box, vermelho quando não).
-FAV_ENEMY_SLOT :: Slot
+NOTE_ENEMY_SLOT :: Mostra o slot do time [N] (verde quando você já tem a espécie numa box, vermelho quando não).
+FAV_ENEMY_SLOT :: Slot nº
 MENU_ENEMY_SPECIES :: Espécie
 NOTE_ENEMY_SPECIES :: Mostra o nome da espécie do oponente.
 FAV_ENEMY_SPECIES :: Espécie
@@ -1005,7 +1011,7 @@ MENU_HUD_RADAR_CHAIN :: Contagem de Chain
 MENU_HUD_RADAR_RECHARGE :: Recarga do Radar
 NOTE_HUD_REPEL :: Mostra quantos passos de Repel restam (0 = nenhum Repel ativo).\nNão é salvo pelo jogo, então volta a 0 ao recarregar.
 NOTE_HUD_RADAR :: Mostra a carga atual da bateria do Radar Poke (0-255). Somente X/Y.
-NOTE_HUD_RADAR_CHAIN :: Mostra a contagem de chain do Radar Chain Assistant (uma estimativa, não o valor real do jogo). Somente X/Y.
+NOTE_HUD_RADAR_CHAIN :: Mostra a contagem de chain do Radar Chain Assistant, lida diretamente do jogo. Somente X/Y.
 NOTE_HUD_RADAR_RECHARGE :: Mostra o progresso até os 50 passos seguros de recarga. Somente X/Y.
 FAV_HUD_REPEL :: Repel
 FAV_HUD_RADAR :: Bateria Radar
@@ -1087,7 +1093,8 @@ OPC_HINT_KEEP :: Manter: medidor sempre cheio, sem espera
 OPC_BTN_KEEPFULL :: Manter
 
 
-REFILL_DONE :: Equipe reabastecida!
+REFILL_HEALTH_DONE :: HP restaurado
+REFILL_MANA_DONE :: PP restaurado
 
 MENU_HEALTH_MANA :: Vida e Mana
 NOTE_HEALTH_MANA :: Encha ou trave o HP e o PP da sua equipe.\n\nSempre no MAX (alterna): mantenha HP/PP fixos no máximo durante a batalha - sem desmaiar, sem ficar sem PP.\nReabastecimento Instantâneo (alterna): ligue um para armar seu atalho e pressione-o para reabastecer uma vez (padrão DESLIGADO - opcional; DESLIGADO libera o botão). O reabastecimento de HP funciona no mapa; em batalha use Vida Infinita.
@@ -1141,22 +1148,22 @@ MENU_HUD_SEED :: Initial seed
 FAV_HUD_SEED :: Initial seed
 MENU_HUD_FRAME :: Current seed
 FAV_HUD_FRAME :: Current seed
-MENU_HUD_ADV :: Frame
-FAV_HUD_ADV :: Frame
-HUD_SEED :: iSeed: %08X
-HUD_FRAME :: cSeed: %08X
-HUD_ADV :: Frame: %lu
+MENU_HUD_ADV :: Avanços MT
+FAV_HUD_ADV :: Avanços MT
+HUD_SEED :: Seed inic.: %08X
+HUD_FRAME :: Estado atual: %08X
+HUD_ADV :: Avanços MT: %lu
 NOTE_HUD_SEED :: A "initial seed" do seu jogo - o número por trás de todo resultado aleatório desta sessão. Capturada após um soft-reset (mostra ---- até lá). Digite no 3DSRNGTool no PC pra planejar um shiny.
 NOTE_HUD_FRAME :: O valor do RNG agora (a "current seed"). Muda conforme o jogo avança e fica parado quando você fica parado.
 NOTE_HUD_ADV :: A "frame" RNG - o número absoluto de advances desde a initial seed. No RNG você cronometra a ação numa frame-alvo. Mostra ---- até a seed ser capturada.
 MENU_HUD_EGG :: Egg seed
 FAV_HUD_EGG :: Egg seed
 HUD_EGG :: Egg: %08X
-HUD_SEED_PENDING :: iSeed: ----
+HUD_SEED_PENDING :: Seed inic.: ----
 NOTE_HUD_EGG :: A "egg seed" - o snapshot de RNG do save, pra RNG de ovo / Daycare (ex. PKSeed). Atualiza quando você salva.
 MENU_HUD_TSV :: TSV / TRV
 FAV_HUD_TSV :: TSV / TRV
-HUD_TSV :: TSV:%u TRV:%X
+HUD_TSV :: TSV: %u, TRV: %u
 NOTE_HUD_TSV :: Seu "TSV" (Trainer Shiny Value) e o "TRV" na mesma linha. Um ovo ou encontro é shiny pra você quando o PSV bate com o TSV. No RNG você precisa do TSV; o TRV é um extra de Gen 8+.
 MENU_HUD_TRV :: TRV
 FAV_HUD_TRV :: TRV
@@ -1169,9 +1176,9 @@ HUD_TINYST2 :: [1]%08X [0]%08X
 NOTE_HUD_TINYST :: O estado vivo do TinyMT (4 words) - o segundo RNG, que decide encontros selvagens, Sincronia, Habilidade Oculta e hordes. Alimente no 3DSRNGTool pro RNG de selvagem.
 MENU_HUD_TINYADV :: TinyMT adv
 FAV_HUD_TINYADV :: TinyMT adv
-HUD_TINYADV :: tAdv: %lu
+HUD_TINYADV :: Avanços: %lu
 NOTE_HUD_TINYADV :: Quanto o RNG de encontro selvagem (TinyMT) avançou desde que você começou a olhar. Use pra cronometrar um alvo selvagem.
-HUD_ADV_PENDING :: Frame: ----
+HUD_ADV_PENDING :: Avanços MT: ----
 MENU_HUD_TARGET :: Target frame
 FAV_HUD_TARGET :: Target frame
 HUD_TARGET :: Tgt:%+ld %s
@@ -1188,7 +1195,7 @@ EGG_PEEK_HINT :: Aperte A para espiar
 NOTE_EGG_PEEK_CONFIRM :: Revelar o conteúdo deste ovo?
 MENU_SHINY_HUNT :: Assistente de Caça Shiny
 FAV_SHINY_HUNT :: Caça Shiny
-NOTE_SHINY_HUNT :: Abra o hub, escolha o Pokémon que você está caçando, e ele conta seus encontros selvagens dessa espécie em segundo plano.\n\nQuando um shiny de verdade aparece, ele avisa e pausa. Conta só batalhas selvagens (aproximado). Sua contagem é salva por alvo.\n\nEm X/Y, aperte R para a aba do Radar Chain Assistant: escolha manchas de grama no 4º anel ou além, combinando com o tremor anterior, e evite manchas na borda da área de grama. Fugir sempre quebra uma chain do Poké Radar - não existe fuga segura. Se nenhuma mancha parecer segura, ande 50 passos fora da grama para recarregar o Radar sem perder a chain.
+NOTE_SHINY_HUNT :: Abra o hub, escolha o Pokémon que você está caçando, e ele conta seus encontros selvagens dessa espécie em segundo plano.\n\nQuando um shiny de verdade aparece, ele avisa e pausa. Conta só batalhas selvagens (aproximado). Sua contagem é salva por alvo.\n\nEm X/Y, L/R alternam entre 3 abas: Caça, PokeRadar e Chain.\n\nSem a Trava de Espécie: escolha manchas de grama no 4º anel ou além, combinando com o tremor anterior, e evite manchas na borda da área de grama. Fugir sempre quebra uma chain do Poké Radar - não existe fuga segura.\n\nCom a Trava de Espécie ligada (aba Chain): do chain 2 em diante toda mancha da área combina com seu alvo, então você só precisa evitar as vazias. Veja o (i) dela para detalhes.\n\nReceita da Trava de Espécie: ligue a Bateria Infinita do Radar e o Repelente Infinito, use o Poké Radar, fuja e reutilize o Radar até achar uma espécie que você quer, depois ligue a Trava de Espécie.\n\nSe nenhuma mancha parecer segura, ande 50 passos fora da grama para recarregar o Radar sem perder a chain. Um pássaro lendário aparecendo no meio da chain NÃO a quebra - ele só foge sozinho.\n\n'Chain a partir de' deixa você escolher onde a contagem começa. 'Chain Mais Longa' (aba Chain) acompanha seu recorde nesta sessão.\n\nA Chance da aba Caça e a Chance de captura da aba PokeRadar são números diferentes: Chance é sua probabilidade geral baseada em encontros, Chance de captura é baseada só no comprimento atual da chain e só importa enquanto você está encadeando ativamente.
 SHINY_TARGET :: Alvo:
 SHINY_ENCOUNTERS :: Encontros
 SHINY_METHOD :: Método:
@@ -1210,22 +1217,39 @@ EGG_PEEK_SKIP :: A para pular
 
 # ==== Radar Chain Assistant (Fase 01) - Aba 2 do Shiny Hunt Companion, somente X/Y ====
 MENU_RADAR_CHAIN :: Radar Chain Assistant
-RADAR_CHAIN_LABEL :: Chain (estimativa)
-RADAR_CHAIN_ESTIMATE_NOTE :: Conta batalhas iniciadas; não é o valor real de chain do jogo.
+RADAR_CHAIN_LABEL :: Chain
+RADAR_CHAIN_GUARD_SAVED :: Chain Mantida
+RADAR_CHAIN_BROKEN :: Chain Quebrada
+RADAR_CHAIN_GUARD_MARK :: *
 RADAR_RECHARGE_LABEL :: Bateria do Radar
 RADAR_CHAIN_TAB_HINT :: A confirmar   L/R aba
 RADAR_CHAIN_TAP_HINT :: A alternar   L/R aba
-RADAR_CHAIN_RESET_DONE :: Contagem de chain reiniciada
 RADAR_CHAIN_RECHARGE_READY :: Radar pronto para reativar
+MENU_CHAIN_TOOLS :: Ferramentas de Chain
+TAB_HUNT :: Caça
+TAB_POKERADAR :: PokeRad
+TAB_CHAIN :: Chain
+CHAIN_TOOLS_ROW_START :: Chain a partir de
+CHAIN_TOOLS_SAVES :: Salvos nesta caça
+CHAIN_TOOLS_LONGEST :: Chain Mais Longa
+CHAIN_TOOLS_HINT :: < > ajustar   L/R aba
+RADAR_CHAIN_ODDS_LABEL :: Chance de captura
+POKERADAR_IN_BAG :: Poke Radar: na bolsa
+POKERADAR_GET_ITEM :: Poke Radar: obter item
+POKERADAR_GET_ITEM_CONFIRM :: O Poké Radar normalmente é dado mais tarde pela história.\n\nDar para a bolsa agora mesmo assim?
+CHAIN_TOOLS_TOP_UNBREAKABLE :: Chain Inquebrável desfaz uma quebra (Fugir, erro) na hora - a chain nunca volta a 0.
+CHAIN_TOOLS_TOP_START :: Chain a partir de permite escolher onde a contagem começa.
+CHAIN_TOOLS_TOP_RESPAWN :: Trava de Espécie repete sua chain a partir do chain 2.
+CHAIN_TOOLS_TOP_BETA :: Beta: confirmado na RAM, sem efeito no RNG comprovado. Precisa de testes.
 RADAR_CHAIN_ROW_BATTERY :: Bateria infinita do Radar
-RADAR_CHAIN_ROW_REPEL :: Repelente Auto-Renovação
-RADAR_CHAIN_ROW_NOWILD :: Sem Pokémon Selvagens
+RADAR_CHAIN_ROW_REPEL :: Repelente Infinito
+RADAR_CHAIN_ROW_UNBREAKABLE :: Chain Inquebravel
 RADAR_CHAIN_ROW_HUD_CHAIN :: Mostrar Chain no HUD
+RADAR_CHAIN_ROW_RESPAWN :: Trava de Espécie
+FAV_RADAR_CHAIN_ROW_RESPAWN :: Trava Esp.
+NOTE_RADAR_CHAIN_RESPAWN :: Como usar: ligue a Bateria Infinita do Radar e o Repelente Infinito, use o Poké Radar, fuja e reutilize o Radar até achar uma espécie que você quer, depois ligue a Trava de Espécie.\n\nConfirmado no hardware: assim que sua chain chega a 2, toda mancha de grama na área gera a espécie que você está encadeando - não só a que combina com o tremor anterior. Você só precisa evitar as manchas vazias de "nenhum Pokémon aqui".\n\nSó a espécie/forma são forçadas. Nível, IVs, natureza e PID continuam por conta do jogo - isto não é um clone completo.\n\nMudança EXPERIMENTAL: o nível costumava ser fixado no nível em que você lutou, mas não é mais - ainda não sabemos se o próprio RNG de encontro do jogo escolhe um nível sensato sozinho, ou se algo quebra. Por favor relate em que nível a espécie forçada acaba ficando.\n\nO efeito fica em TODA mancha da área até você sair e re-entrar - desligar este botão não desfaz as manchas já forçadas.\n\nUma mancha genuinamente vazia ainda quebra a chain, igual ao encadeamento normal do Poké Radar - esta ferramenta só remove o risco de errar a espécie, não o risco de uma mancha vazia.\n\nNão faz nada até sua chain chegar a 2 - a primeira captura ainda não tem o que repetir.
+RADAR_CHAIN_RESPAWN_APPLIED :: Trava de Espécie aplicada
 RADAR_CHAIN_ROW_HUD_RECHARGE :: Mostrar Bateria do Radar no HUD
-RADAR_CHAIN_ROW_RESET :: Reiniciar contagem de chain
-RADAR_CHAIN_SHORT :: Radar Chain
-RADAR_BATTERY_LIVE_NOTE :: Valor em tempo real - cai 5 por uso, recarrega andando.
-RADAR_BATTERY_INFINITE_NOTE :: Bateria Infinita do Radar está ATIVADA.
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: Cartão de Treinador

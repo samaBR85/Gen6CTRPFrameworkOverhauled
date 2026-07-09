@@ -12,6 +12,11 @@ namespace CTRPluginFramework {
     // toast appear as soon as the menu closes instead of seconds later.
     extern bool g_entryToggleNotif;
 
+    // Set by the plugin's "Transparent Notifications" checkbox (Screen Overlays); read by OSDImpl's toast
+    // draw loop to pick the no-background DrawString overload (glyph pixels only) instead of the solid-box
+    // one. Default false = the classic black-background toast.
+    extern bool g_notifTransparentBg;
+
     // The user's configured "Card stat HIGHER/LOWER" key (Tools > Hotkeys). Mirrors
     // Preferences::CardStatHotkeys (which persists it in Data.bin) so PLUGIN code — which cannot
     // include the impl-only Preferences.hpp — can read it. Used ONLY by the Party Summary card

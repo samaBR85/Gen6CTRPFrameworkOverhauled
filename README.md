@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.7.9
+# Gen6CTRPluginFrameworkOverhauled — v0.8.0
 
 **English** · [Português](README.pt-BR.md)
 
@@ -70,6 +70,31 @@ moves it knows at your level — then set form, level and Normal/Shiny and spawn
 
 Knocked out a legendary, or watched one flee? **Respawn Legendary** lists them all with their real locations and
 sends the one you pick back where you found it.
+
+### Hunt shinies with the Radar
+
+**X/Y only.** The **Shiny Hunt Companion** counts your wild encounters of a target species, alerts and pauses on
+a real shiny, and — reorganised in v0.8.0 — splits into three tabs you flip with **L/R**: **Hunt**, **PokeRadar**
+and **Chain**.
+
+<p align="center">
+  <img src="Screenshots/v0.8.0/shc_hunt.png" width="250" alt="Shiny Hunt Companion — Hunt tab, target species and live shiny odds" />
+  <img src="Screenshots/v0.8.0/shc_pokeradar.png" width="250" alt="Shiny Hunt Companion — PokeRadar tab, Radar battery and item helpers" />
+  <img src="Screenshots/v0.8.0/shc_chain.png" width="250" alt="Shiny Hunt Companion — Chain tab, Species Lock, Secure Chain and the chain count" />
+</p>
+
+The **Chain** tab is the new heart of it. **Species Lock (beta)** forces the species you're chaining onto every
+grass patch in the area from chain 2 on, so you only have to avoid the empty ones — species and form are set,
+while level, IVs and nature stay natural. **Secure Chain (beta)** keeps the Poké Radar chain counter from
+resetting, and **Choose Chain Value** lets you set the starting count. Pair them with **Infinite Repel** and
+**Infinite Radar Battery** for uninterrupted chaining, and read the live chain and shiny odds right on the HUD.
+
+<p align="center">
+  <img src="Screenshots/v0.8.0/shc_hud.png" width="330" alt="The overworld HUD showing the live Radar chain count and shiny odds" />
+</p>
+
+> 🧪 Species Lock and Secure Chain are **beta** — confirmed to act on the game's RAM, but their effect on the
+> game's own shiny RNG is still being tested. Give them a try and report what you see.
 
 ### Carry a Poké Mart in your bag
 
@@ -268,7 +293,7 @@ preview swatch beside each name and your choice remembered between sessions. Pin
 
 <p align="center">
   <img src="Screenshots/v0.3.3/export/26_themes.png" width="330" alt="The theme picker with color swatches" />
-  <img src="Screenshots/v0.3.3/export/27_appguide.png" width="330" alt="The built-in App Guide reader" />
+  <img src="Screenshots/v0.8.0/favorites.png" width="330" alt="The Favorites list — your most-used features pinned in two columns" />
 </p>
 
 And if you ever feel lost, the **App Guide** (23 pages, written like a guided adventure rather than a manual) and an
@@ -304,6 +329,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.7.7** — **Level Cap**, a new Trainer Info screen for nuzlocke/hardcore runs: an auto level cap tied to the next Gym Leader's ace (+ your own offset), Warn or Enforce modes, a D-Pad browser to preview upcoming gyms, and a live HUD field for the over-cap count.
 - **v0.7.8** — **Poké Radar: Infinite Battery** (X/Y) — keep the Radar's battery full in the overworld so there's no ~50-step recharge wait between chains, plus a live HUD battery readout. The **Poké Radar** also returns to the PokéMart Anywhere list on X/Y. Polish: Display Enemy Stats now remembers which fields you turned on, Encounters & Catching leads with Shiny Hunt Companion, and Favorites labels are cleaner. Suggested by u/Victhordiz.
 - **v0.7.9** — a polish pass. **Shiny Hunt Companion & Radar Chain** got a cleaner look (theme-matched colors, no boxes around rows, a moving arrow for the cursor, and fixed-width odds chips). **Party Stats Summary** now shows each move's description — press **Y** to cycle through the four. **Config HUD** gained **All ON / All OFF** buttons for the RNG Tracking fields and an **L/R** shortcut to jump between Money, All ON and the Panel toggle, and the **Favorites** list keeps its two-column layout throughout.
+- **v0.8.0** — **Radar Chain Update** (X/Y). The **Shiny Hunt Companion** splits into **Hunt / PokeRadar / Chain** tabs (L/R to switch), and the Chain tab adds two experimental helpers: **Species Lock**, which forces the species you're chaining onto every grass patch in the area from chain 2 on (species + form only — level, IVs and nature stay natural), and **Secure Chain**, which keeps the chain counter from resetting. Plus **Choose Chain Value** to set the starting count, an **uncapped chain readout** (the real number past 40, not "40+"), **Infinite Repel** (renamed from Repel Auto-Refresh), a **Transparent Notifications** toggle for box-free toasts, a **"Changed" scan type** in Search, and a batch of text fixes. Species Lock & Secure Chain are beta — report your results.
 
 ## 📥 Installing
 
@@ -417,7 +443,7 @@ This project stands on a long line of volunteer work — from the very first anc
   cap idea that became **Level Cap** (v0.7.7).
 
 **This fork**
-- Fork, overhaul and v0.3.0 → v0.7.9 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
+- Fork, overhaul and v0.3.0 → v0.8.0 additions by [samaBR85](https://github.com/samaBR85), built in collaboration
   with **Claude** (Anthropic).
 
 ## License

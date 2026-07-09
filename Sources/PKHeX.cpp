@@ -1637,7 +1637,7 @@ namespace CTRPluginFramework {
             if (!e->IsActivated()) return;
             static int frames = 0;
             if (e->Hotkeys.Count() && e->Hotkeys[0].IsPressed()) {
-                OSD::Notify(getLanguage->Get("REFILL_DONE"));
+                OSD::Notify(getLanguage->Get("REFILL_HEALTH_DONE"));
                 if (IfInBattle()) frames = 60;
                 else RefillPartyOverworld(true, false);
             }
@@ -1647,7 +1647,7 @@ namespace CTRPluginFramework {
             if (!e->IsActivated()) return;
             static int frames = 0;
             if (e->Hotkeys.Count() && e->Hotkeys[0].IsPressed()) {
-                OSD::Notify(getLanguage->Get("REFILL_DONE"));
+                OSD::Notify(getLanguage->Get("REFILL_MANA_DONE"));
                 if (IfInBattle()) frames = 60;
                 else RefillPartyOverworld(false, true);
             }

@@ -12,7 +12,8 @@ BATTLE_ACCESS_BAG :: Access Bag
 BATTLE_ALLOW_MEGAS :: Allow 1+ Megas
 BATTLE_ALWAYS_SHINY :: Always Shiny
 BATTLE_RADAR_INFINITE_BATTERY :: Poke Radar Infinite Battery
-BATTLE_REPEL_AUTO_REFRESH :: Repel Auto-Refresh
+BATTLE_RADAR_UNBREAKABLE_CHAIN :: Secure Chain
+BATTLE_REPEL_AUTO_REFRESH :: Infinite Repel
 BATTLE_CAPTURE_RATE_100 :: Capture Rate 100%
 BATTLE_CAPTURE_TRAINER_POKEMON :: Capture Trainer Pokémon
 BATTLE_CONDITION :: Condition
@@ -472,10 +473,12 @@ NOTE_BATTLE_CAPTURE_TRAINER_POKEMON :: Let you catch a trainer's Pokémon in bat
 FAV_BATTLE_CAPTURE_TRAINER_POKEMON :: Catch Trainer
 NOTE_BATTLE_ALWAYS_SHINY :: Every wild and bred Pokémon will be shiny. The sparkle animation plays when it appears.
 NOTE_BATTLE_RADAR_INFINITE_BATTERY :: Keeps the Poke Radar's battery full in the overworld, skipping the ~50-step recharge wait between uses.\n\nX/Y only - the Radar doesn't exist in Omega Ruby / Alpha Sapphire.\n\nIMPORTANT: for safety this does NOT stay on across reboots. It always starts OFF.\n\nSo turn it back on each session, once you are already in your game.\n\n(This prevents a startup issue where the game could fail to find your save.)
-NOTE_BATTLE_REPEL_AUTO_REFRESH :: Keeps a Repel active forever, so it never runs out. Repel blocks wild Pokémon weaker than your lead - it does not stop every encounter.\n\nSafe to leave on across reboots; this address is not part of your save data.
+NOTE_BATTLE_REPEL_AUTO_REFRESH :: Keeps a Repel active forever, so it never runs out. Repel blocks wild Pokémon weaker than your lead - it does not stop every encounter.\n\nIMPORTANT: for safety this does NOT stay on across reboots. It always starts OFF.\n\nSo turn it back on each session, once you are already in your game.\n\n(This prevents a startup issue where the game could fail to find your save.)
+NOTE_BATTLE_RADAR_UNBREAKABLE_CHAIN :: EXPERIMENTAL - we need your help testing this one.\n\nWhile ON, the chain COUNTER is restored the instant it would break (Run, a bad patch, an edge patch) - it never visibly drops to 0.\n\nThis is NOT the same as Species Lock. It does not force the next Pokémon to match - the game's own patch RNG still decides what appears. Restoring the counter does not prove the game's real chain state matches an unbroken one.\n\nWe don't yet know if this actually raises your shiny odds the way a real unbroken chain would, or if it just fakes the number on screen. Please report your results (chain length reached, whether the species matched, shiny or not).\n\nX/Y only - the Radar doesn't exist in Omega Ruby / Alpha Sapphire.\n\nIMPORTANT: for safety this does NOT stay on across reboots. It always starts OFF.\n\nSo turn it back on each session, once you are already in your game.
 FAV_BATTLE_ALWAYS_SHINY :: Always Shiny
 FAV_BATTLE_RADAR_INFINITE_BATTERY :: Infinite Radar
-FAV_BATTLE_REPEL_AUTO_REFRESH :: Repel Refresh
+FAV_BATTLE_RADAR_UNBREAKABLE_CHAIN :: Secure Chain
+FAV_BATTLE_REPEL_AUTO_REFRESH :: Infinite Repel
 NOTE_BATTLE_DISABLE_SHINY_LOCK :: Allow shininess on normally shiny-locked encounters.
 FAV_BATTLE_DISABLE_SHINY_LOCK :: No Shiny Lock
 MENU_RENAME_ANY :: Rename Any Pokémon
@@ -547,6 +550,9 @@ FAV_PATCH_COLOR_CRASHES :: Color Text Fix
 MENU_SHOW_NOTIFICATIONS :: Display On-Screen Notifications
 NOTE_SHOW_NOTIFICATIONS :: Toast on the top screen when you toggle a cheat on/off.
 FAV_SHOW_NOTIFICATIONS :: Notifications
+MENU_NOTIF_TRANSPARENT :: Transparent Notifications
+NOTE_NOTIF_TRANSPARENT :: Toasts (the small popups shown for cheats, chain events, etc.) normally have a solid black background.\n\nTurn this ON to draw just the text, with no background box, blending over whatever is on screen.
+FAV_NOTIF_TRANSPARENT :: Transparent Notif.
 MENU_PLUGIN_SETTINGS :: Plugin Settings
 NOTE_PLUGIN_SETTINGS :: This plugin's own settings (e.g. language) - not your game options.
 MENU_VIEW_PARTY_SUMMARY :: View Party Summary
@@ -678,8 +684,8 @@ SPAWN_WIDEN :: Tap a filter below to widen the search.
 SPAWN_FILTERS :: Filters
 SPAWN_IN_INVENTORY :: In-Inventory
 SPAWN_ON :: ON
-SPAWN_SEARCH_PROMPT :: Search by name or National Dex #
-SPAWN_NAME_NUM :: Name / #
+SPAWN_SEARCH_PROMPT :: Search by name or National Dex No.
+SPAWN_NAME_NUM :: Name / No.
 SPAWN_GENERATION :: Generation
 SPAWN_TYPE :: Type
 SPAWN_TRAITS :: Traits
@@ -792,8 +798,8 @@ MART_FILTERS :: Filters
 MART_IN_BAG :: In bag
 MART_ON :: ON
 MART_ANY :: any
-MART_SEARCH_PROMPT :: Search by name or item #
-MART_NAME_NUM :: Name / #
+MART_SEARCH_PROMPT :: Search by name or item No.
+MART_NAME_NUM :: Name / No.
 MART_ALL_FMT :: All %s
 MART_POCKET :: Pocket
 MART_EFFECT :: Effect
@@ -888,9 +894,9 @@ HUD_PARTY :: Party: %d/6
 HUD_XY :: X:%.0f Y:%.0f
 HUD_REPEL :: Repel: %u
 HUD_RADAR :: Radar batt: %u
-HUD_RADAR_CHAIN :: Chain: %u
+HUD_RADAR_CHAIN :: Chain: %s
 HUD_RADAR_RECHARGE :: Recharge: %u/50
-HUD_MAP_ID :: Map #%u (0x%X)
+HUD_MAP_ID :: Map No.%u (0x%X)
 HUD_POS_TOP_LEFT :: Top-Left
 HUD_POS_TOP_CENTER :: Top-Center
 HUD_POS_TOP_RIGHT :: Top-Right
@@ -916,8 +922,8 @@ MENU_ENEMY_ENABLE :: Enable Stats
 NOTE_ENEMY_ENABLE :: See the foe's stats in battle.\n\nAt first this toggle is LOCKED (shown with a gear icon) because it can only be armed during a battle.\n\nTo unlock it: enter any battle, select this item, then tap ENABLE on the bottom touch screen - you only need to do this once.\n\nAfter that the toggle is unlocked; tick it to turn the feature on.\n\nIn battle: ZR flips between the two pages (Basic/Moves and IV/EV), and L/R switch between the enemy's Pokémon.\n\nTo hide the overlay entirely, just turn this Enable Stats toggle back OFF.
 FAV_ENEMY_ENABLE :: Enable Stats
 MENU_ENEMY_SLOT :: Slot number
-NOTE_ENEMY_SLOT :: Show the party slot [#N] (green when you already own the species in a box, red when you don't).
-FAV_ENEMY_SLOT :: Slot #
+NOTE_ENEMY_SLOT :: Show the party slot [N] (green when you already own the species in a box, red when you don't).
+FAV_ENEMY_SLOT :: Slot No.
 MENU_ENEMY_SPECIES :: Species
 NOTE_ENEMY_SPECIES :: Show the opponent's species name.
 FAV_ENEMY_SPECIES :: Species
@@ -1005,7 +1011,7 @@ MENU_HUD_RADAR_CHAIN :: Chain count
 MENU_HUD_RADAR_RECHARGE :: Radar recharge
 NOTE_HUD_REPEL :: Show how many steps of Repel are left (0 = no Repel active).\nNot saved by the game, so it resets to 0 on reload.
 NOTE_HUD_RADAR :: Show the Poke Radar's current battery charge (0-255). X/Y only.
-NOTE_HUD_RADAR_CHAIN :: Show the Radar Chain Assistant's chain count (an estimate, not the game's real value). X/Y only.
+NOTE_HUD_RADAR_CHAIN :: Show the Radar Chain Assistant's chain count, read directly from the game. X/Y only.
 NOTE_HUD_RADAR_RECHARGE :: Show progress toward the 50 safe recharge steps. X/Y only.
 FAV_HUD_REPEL :: Repel
 FAV_HUD_RADAR :: Radar battery
@@ -1086,7 +1092,8 @@ OPC_HINT_KEEP :: Keep: gauge stays full, no waiting
 OPC_BTN_KEEPFULL :: Keep
 
 
-REFILL_DONE :: Party refilled!
+REFILL_HEALTH_DONE :: HP refilled
+REFILL_MANA_DONE :: PP refilled
 
 MENU_HEALTH_MANA :: Health & Mana
 NOTE_HEALTH_MANA :: Top up or lock your party's HP and PP.\n\nAlways MAX (toggles): keep HP/PP pinned at full during battle - no faint, no PP-out.\nInstant Refill (toggles): turn one ON to arm its hotkey, then press it to refill once (default OFF - opt-in; OFF frees the button). HP refill works in the overworld; in battle use Infinite Health.
@@ -1140,22 +1147,22 @@ MENU_HUD_SEED :: Initial seed
 FAV_HUD_SEED :: Initial seed
 MENU_HUD_FRAME :: Current seed
 FAV_HUD_FRAME :: Current seed
-MENU_HUD_ADV :: Frame
-FAV_HUD_ADV :: Frame
-HUD_SEED :: iSeed: %08X
-HUD_FRAME :: cSeed: %08X
-HUD_ADV :: Frame: %lu
+MENU_HUD_ADV :: MT Advances
+FAV_HUD_ADV :: MT Advances
+HUD_SEED :: Init seed: %08X
+HUD_FRAME :: Curr state: %08X
+HUD_ADV :: MT Advances: %lu
 NOTE_HUD_SEED :: Your game's "initial seed" - the number behind every random result this session. Grabbed after a soft-reset (shows ---- until then). Type it into 3DSRNGTool on PC to plan a shiny.
 NOTE_HUD_FRAME :: The RNG value right now (the "current seed"). It changes as the game advances, and holds still when you stand still.
 NOTE_HUD_ADV :: The RNG "frame" - the absolute number of advances since the initial seed. RNG hunters time their action to a target frame. Shows ---- until the seed is captured.
 MENU_HUD_EGG :: Egg seed
 FAV_HUD_EGG :: Egg seed
 HUD_EGG :: Egg: %08X
-HUD_SEED_PENDING :: iSeed: ----
+HUD_SEED_PENDING :: Init seed: ----
 NOTE_HUD_EGG :: The "egg seed" - the save's RNG snapshot, used for breeding / Daycare RNG (e.g. PKSeed). Updates when you save.
 MENU_HUD_TSV :: TSV / TRV
 FAV_HUD_TSV :: TSV / TRV
-HUD_TSV :: TSV:%u TRV:%X
+HUD_TSV :: TSV: %u, TRV: %u
 NOTE_HUD_TSV :: Your "TSV" (Trainer Shiny Value) and "TRV" on one line. An egg or encounter is shiny for you when its PSV matches the TSV. RNG hunters need the TSV; TRV is a Gen 8+ extra.
 MENU_HUD_TRV :: TRV
 FAV_HUD_TRV :: TRV
@@ -1168,9 +1175,9 @@ HUD_TINYST2 :: [1]%08X [0]%08X
 NOTE_HUD_TINYST :: The live TinyMT state (4 words) - the second RNG, which picks wild encounters, Synchronize, Hidden Ability and hordes. Feed it to 3DSRNGTool for wild RNG.
 MENU_HUD_TINYADV :: TinyMT adv
 FAV_HUD_TINYADV :: TinyMT adv
-HUD_TINYADV :: tAdv: %lu
+HUD_TINYADV :: Advances: %lu
 NOTE_HUD_TINYADV :: How far the wild-encounter RNG (TinyMT) has advanced since you started watching. Use it to time a wild target.
-HUD_ADV_PENDING :: Frame: ----
+HUD_ADV_PENDING :: MT Advances: ----
 MENU_HUD_TARGET :: Target frame
 FAV_HUD_TARGET :: Target frame
 HUD_TARGET :: Tgt:%+ld %s
@@ -1187,7 +1194,7 @@ EGG_PEEK_HINT :: Press A to peek
 NOTE_EGG_PEEK_CONFIRM :: Reveal this egg's contents?
 MENU_SHINY_HUNT :: Shiny Hunt Companion
 FAV_SHINY_HUNT :: Shiny Hunt
-NOTE_SHINY_HUNT :: Open the hub, pick the Pokémon you are hunting, and it counts your wild encounters of that species in the background.\n\nWhen a real shiny appears it alerts you and pauses. Counts wild battles only (best-effort). Your count is saved per target.\n\nOn X/Y, press R for the Radar Chain Assistant tab: pick grass patches in the 4th ring or further, matching the previous shake, and avoid patches on the edge of the grassy area. Running away always breaks a Poké Radar chain - there is no safe flee. If no patch looks safe, walk 50 steps outside the grass to recharge the Radar without losing the chain.
+NOTE_SHINY_HUNT :: Open the hub, pick the Pokémon you are hunting, and it counts your wild encounters of that species in the background.\n\nWhen a real shiny appears it alerts you and pauses. Counts wild battles only (best-effort). Your count is saved per target.\n\nOn X/Y, L/R switches between 3 tabs: Hunt, PokeRadar, and Chain.\n\nWithout Species Lock: pick grass patches in the 4th ring or further, matching the previous shake, and avoid patches on the edge of the grassy area. Running away always breaks a Poké Radar chain - there is no safe flee.\n\nWith Species Lock on (Chain tab): from chain 2 onward every patch in the area matches your target, so you only need to avoid the empty ones. See its own (i) for details.\n\nSpecies Lock recipe: turn on Infinite Radar Battery and Infinite Repel, use the Poké Radar, flee and reuse the Radar until you find a species you want, then turn Species Lock on.\n\nIf no patch looks safe, walk 50 steps outside the grass to recharge the Radar without losing the chain. A legendary bird showing up mid-chain does NOT break it - it just runs away on its own.\n\nChain Start from lets you pick where the count begins. Longest Chain (Chain tab) tracks your best this session.\n\nThe Hunt tab's Odds and the PokeRadar tab's Catch odds are different numbers: Odds is your overall encounter-based chance, Catch odds is based only on the current chain length and only matters while actively chaining.
 SHINY_TARGET :: Target:
 SHINY_ENCOUNTERS :: Encounters
 SHINY_METHOD :: Method:
@@ -1207,24 +1214,43 @@ SHINY_CLOSE :: Close
 SHINY_ONLY_NOTE :: Counts only when the wild lead matches your target.
 EGG_PEEK_SKIP :: Press A to skip
 
-# ==== Radar Chain Assistant (Fase 01) - Tab 2 of Shiny Hunt Companion, X/Y only ====
+# ==== PokeRadar (Tab 2 of Shiny Hunt Companion, X/Y only) ====
 MENU_RADAR_CHAIN :: Radar Chain Assistant
-RADAR_CHAIN_LABEL :: Chain (estimate)
-RADAR_CHAIN_ESTIMATE_NOTE :: Counts battles entered; not the game's real chain value.
+RADAR_CHAIN_LABEL :: Chain
+RADAR_CHAIN_ODDS_LABEL :: Catch odds
+RADAR_CHAIN_GUARD_SAVED :: Chain Sustained
+RADAR_CHAIN_BROKEN :: Chain Broken
+RADAR_CHAIN_GUARD_MARK :: *
 RADAR_RECHARGE_LABEL :: Radar battery
 RADAR_CHAIN_TAB_HINT :: A confirm   L/R tab
 RADAR_CHAIN_TAP_HINT :: A toggle   L/R tab
-RADAR_CHAIN_SHORT :: Radar Chain
-RADAR_BATTERY_LIVE_NOTE :: Live value - drops 5 per use, recharges by walking.
-RADAR_BATTERY_INFINITE_NOTE :: Infinite Radar Battery is ON.
-RADAR_CHAIN_RESET_DONE :: Chain count reset
 RADAR_CHAIN_RECHARGE_READY :: Radar ready to reactivate
+TAB_HUNT :: Hunt
+TAB_POKERADAR :: PokeRadar
+TAB_CHAIN :: Chain
+POKERADAR_IN_BAG :: Poke Radar: in bag
+POKERADAR_GET_ITEM :: Poke Radar: get item
+POKERADAR_GET_ITEM_CONFIRM :: The Poké Radar is normally given late-game by the story.\n\nGive it to your bag now instead?
 RADAR_CHAIN_ROW_BATTERY :: Infinite Radar Battery
-RADAR_CHAIN_ROW_REPEL :: Repel Auto-Refresh
-RADAR_CHAIN_ROW_NOWILD :: No Wild Pokémon
-RADAR_CHAIN_ROW_HUD_CHAIN :: Show Chain on HUD
+RADAR_CHAIN_ROW_REPEL :: Infinite Repel
 RADAR_CHAIN_ROW_HUD_RECHARGE :: Show Radar Battery on HUD
-RADAR_CHAIN_ROW_RESET :: Reset chain count
+
+# ==== Chain (Tab 3 of Shiny Hunt Companion, X/Y only) ====
+MENU_CHAIN_TOOLS :: Chain Tools
+CHAIN_TOOLS_TOP_UNBREAKABLE :: Secure Chain protects the counter - species isn't guaranteed.
+CHAIN_TOOLS_TOP_START :: Choose Chain Value picks where the count begins.
+CHAIN_TOOLS_TOP_RESPAWN :: Species Lock matches your chain from chain 2 on.
+CHAIN_TOOLS_TOP_BETA :: Beta: confirmed on RAM, no RNG effect confirmed. Needs testing.
+CHAIN_TOOLS_ROW_START :: Choose Chain Value
+CHAIN_TOOLS_SAVES :: Unbroken:
+CHAIN_TOOLS_LONGEST :: Longest:
+CHAIN_TOOLS_HINT :: < > adjust   L/R tab
+RADAR_CHAIN_ROW_UNBREAKABLE :: Secure Chain
+RADAR_CHAIN_ROW_HUD_CHAIN :: Show Chain on HUD
+RADAR_CHAIN_ROW_RESPAWN :: Species Lock
+FAV_RADAR_CHAIN_ROW_RESPAWN :: Species Lock
+NOTE_RADAR_CHAIN_RESPAWN :: How to use it: turn on Infinite Radar Battery and Infinite Repel, use the Poké Radar, flee and reuse the Radar until you find a species you want, then turn Species Lock on.\n\nConfirmed on hardware: once your chain reaches 2, every grass patch in the area spawns the species you're chaining - not just the one matching the previous shake. You only need to avoid the empty "no Pokémon here" patches.\n\nOnly species/form are forced. Level, IVs, nature and PID stay up to the game - this is not a full clone.\n\nEXPERIMENTAL change: the level used to be hardcoded to the level you fought at, but no longer is - we don't yet know if the game's own encounter RNG naturally picks a sensible level on its own, or if something breaks. Please report what level the forced species ends up at.\n\nThe effect stays on EVERY patch in the area until you leave and re-enter it - turning this toggle off does not undo already-forced patches.\n\nA genuinely empty patch still breaks the chain, same as normal Poké Radar chaining - this tool only removes the risk of guessing the wrong species, not the risk of an empty patch.\n\nDoesn't do anything until your chain reaches 2 - the very first catch has nothing to repeat yet.
+RADAR_CHAIN_RESPAWN_APPLIED :: Species Lock applied
 
 # ==== Trainer Card ====
 MENU_TRAINER_CARD :: Trainer Card

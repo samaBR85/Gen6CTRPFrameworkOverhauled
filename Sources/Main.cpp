@@ -375,7 +375,11 @@ namespace CTRPluginFramework {
         if (File::Exists(PATH_THEME_SETTINGS) == 0)
             File::Create(PATH_THEME_SETTINGS);
 
-        File file(PATH_THEME_SETTINGS);
+        // MUST include TRUNCATE - the default File(path) mode is READ|WRITE|SYNC with no truncate, so writing
+        // a SHORTER id (e.g. "0") over a longer stale one (e.g. "16") only overwrites the first byte and
+        // leaves the old trailing digit(s) in the file, corrupting the id read back on the next boot (this is
+        // the real cause of the theme silently changing to a totally different one after a reboot).
+        File file(PATH_THEME_SETTINGS, File::READ | File::WRITE | File::CREATE | File::TRUNCATE | File::SYNC);
         LineWriter writer(file);
         writer << Utils::Format("%d", id);
         writer.Flush();
@@ -692,8 +696,8 @@ namespace CTRPluginFramework {
         vector<MenuEntry*> ccItems = {
             Fav(new MenuEntry(getLanguage->Get("MENU_SHINY_HUNT"), nullptr, ShinyHuntCompanion, getLanguage->Get("NOTE_SHINY_HUNT")), "FAV_SHINY_HUNT")
         };
-        // No Wild Pokémon: captured into g_noWildEntry so the Radar Chain Assistant tab (inside Shiny Hunt
-        // Companion) can mirror it as a tap-to-toggle row — same entry, same state, either place.
+        // No Wild Pokémon: standalone toggle, not mirrored in the Radar Chain Assistant tab - it works
+        // against the Species Lock workflow (you WANT wild encounters there to keep re-rolling the Radar).
         {
             MenuEntry *noWildEntry = new MenuEntry(getLanguage->Get("BATTLE_NO_WILD_POKEMON"), NoWildPokemon, getLanguage->Get("NOTE_BATTLE_NO_WILD_POKEMON"));
             g_noWildEntry = noWildEntry;
@@ -728,6 +732,24 @@ namespace CTRPluginFramework {
         }
         ccItems.push_back(Fav(new MenuEntry(getLanguage->Get("BATTLE_ALWAYS_SHINY"), AlwaysShiny, getLanguage->Get("NOTE_BATTLE_ALWAYS_SHINY")), "FAV_BATTLE_ALWAYS_SHINY")); // <W, tested: O3DS/O2DS - Y/OR
         ccItems.push_back(Fav(new MenuEntry(getLanguage->Get("BATTLE_DISABLE_SHINY_LOCK"), DisableShinyLock, getLanguage->Get("NOTE_BATTLE_DISABLE_SHINY_LOCK")), "FAV_BATTLE_DISABLE_SHINY_LOCK")); // <W, tested: O3DS/O2DS - Y/OR
+        // "Species Lock" (XY only, EXPERIMENTAL): mirrored in the Chain tab. Captured into g_respawnLastEntry
+        // so the Chain tab row and this Encounters & Catching entry are the SAME MenuEntry (one favoritable
+        // toggle, not two independent states to keep in sync).
+        if (currGameSeries == GameSeries::XY) {
+            MenuEntry *respawnLastEntry = new MenuEntry(getLanguage->Get("RADAR_CHAIN_ROW_RESPAWN"), RespawnLastHold, getLanguage->Get("NOTE_RADAR_CHAIN_RESPAWN"));
+            g_respawnLastEntry = respawnLastEntry;
+            ccItems.push_back(Fav(respawnLastEntry, "FAV_RADAR_CHAIN_ROW_RESPAWN"));
+        }
+        // "Secure Chain" (XY only, EXPERIMENTAL - needs community testing): while ON, HudCallback rewrites the
+        // real Radar Chain counter (0x8D1B2B8) back to its last value the instant it drops. The COUNTER never resets -
+        // but unlike Species Lock, this does NOT force the next Pokémon's species; the game's own patch RNG still
+        // decides what appears, so whether this actually preserves real shiny odds is unconfirmed. Captured into
+        // g_chainGuardEntry so the Chain tab can mirror it.
+        if (currGameSeries == GameSeries::XY) {
+            MenuEntry *chainGuardEntry = new MenuEntry(getLanguage->Get("BATTLE_RADAR_UNBREAKABLE_CHAIN"), RadarChainGuardHold, getLanguage->Get("NOTE_BATTLE_RADAR_UNBREAKABLE_CHAIN"));
+            g_chainGuardEntry = chainGuardEntry;
+            ccItems.push_back(Fav(chainGuardEntry, "FAV_BATTLE_RADAR_UNBREAKABLE_CHAIN"));
+        }
         // ---- merged from the old "Quick Edits" folder ----
         ccItems.push_back(Fav(new MenuEntry(getLanguage->Get("MENU_RENAME_ANY"), RenameAnyPokemon, getLanguage->Get("NOTE_RENAME_ANY")), "FAV_RENAME_ANY")); // <W, tested: O3DS/O2DS - Y/OR
         ccItems.push_back(Fav(new MenuEntry(getLanguage->Get("MISC_LEARN_ANY"), LearnAnyTeachable, getLanguage->Get("NOTE_MISC_LEARN_ANY")), "FAV_MISC_LEARN_ANY")); // <W, tested: O3DS/O2DS - Y/OR
@@ -823,9 +845,14 @@ namespace CTRPluginFramework {
         Fav(notifEntry, "FAV_SHOW_NOTIFICATIONS");
         g_entryToggleNotifSrc = (void *)notifEntry; // let the menu give this checkbox a single instant toast (no double)
 
-        // Screen Overlays order: notifications, then HUD. (Themes + Language moved to the framework "Tools"
-        // screen — Language is registered via FwkSettings::OnLanguage below.)
+        // "Transparent Notifications": draws toasts with no background box (Library g_notifTransparentBg bridge).
+        MenuEntry *notifTransparentEntry = new MenuEntry(getLanguage->Get("MENU_NOTIF_TRANSPARENT"), TransparentNotifications, getLanguage->Get("NOTE_NOTIF_TRANSPARENT"));
+        Fav(notifTransparentEntry, "FAV_NOTIF_TRANSPARENT");
+
+        // Screen Overlays order: notifications, transparent-notifications, then HUD. (Themes + Language moved to
+        // the framework "Tools" screen — Language is registered via FwkSettings::OnLanguage below.)
         *misc += notifEntry;
+        *misc += notifTransparentEntry;
         *misc += HudMasterEntry(); // "Display HUD" master — lifted out of Config HUD, sits right below Notifications
         *misc += hud;
 
@@ -862,7 +889,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 7, 9, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 8, 0, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized

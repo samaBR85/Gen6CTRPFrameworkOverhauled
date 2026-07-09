@@ -108,7 +108,10 @@ namespace CTRPluginFramework {
 
         for (OSDMessage *message : Notifications) {
             posX = XEND - message->width;
-            Renderer::DrawString(message->text.c_str(), posX, posY, message->foreground, message->background);
+            if (g_notifTransparentBg)
+                Renderer::DrawString(message->text.c_str(), posX, posY, message->foreground);
+            else
+                Renderer::DrawString(message->text.c_str(), posX, posY, message->foreground, message->background);
             posY += 5;
 
             if (!message->drawn)
@@ -135,7 +138,10 @@ namespace CTRPluginFramework {
         for (; messIter != endIter; ++messIter) {
             OSDMessage *message = *messIter;
             int posX = XEND - message->width;
-            Renderer::DrawString(message->text.c_str(), posX, posY, message->foreground, message->background);
+            if (g_notifTransparentBg)
+                Renderer::DrawString(message->text.c_str(), posX, posY, message->foreground);
+            else
+                Renderer::DrawString(message->text.c_str(), posX, posY, message->foreground, message->background);
             posY += 5;
 
             if (!message->drawn)
