@@ -648,12 +648,36 @@
     }
     .citra-note strong { color: var(--text); }
 
+    /* ── "Show all" collapse button (mobile-only long lists) ── */
+    .show-all {
+      display: none; width: fit-content; margin: 1.25rem auto 0; padding: .6rem 1.4rem;
+      background: var(--surface); color: var(--accent); border: 1px solid var(--border);
+      border-radius: var(--radius); font-family: inherit; font-weight: 700; font-size: .9rem;
+      cursor: pointer; transition: background .15s, border-color .15s;
+    }
+    .show-all:hover { background: var(--bg3); border-color: var(--accent); }
+
     /* ── RESPONSIVE ───────────────────────────────────── */
     @media (max-width: 768px) {
       nav { padding: 0 1rem; }
       .nav-links { display: none; }
       .hero-stats { gap: 1.5rem; }
-      section { padding: 3.5rem 1.25rem; }
+      section { padding: 2.6rem 1.25rem; }
+      .hero { min-height: auto; padding: 82px 1.25rem 3rem; }
+      /* 2-up image grids so 3DS shots don't stack one-per-screen */
+      .screenshots-grid { grid-template-columns: repeat(2, 1fr); gap: .55rem; }
+      .wn-shots { grid-template-columns: repeat(2, 1fr); gap: .55rem; }
+      .themes-grid { grid-template-columns: repeat(2, 1fr); gap: .55rem; }
+      .wn-feature { margin-bottom: 2rem; }
+      .release-row { padding: .55rem .9rem; font-size: .9rem; }
+      #changelog li { padding: .45rem 0 !important; font-size: .9rem; }
+      /* collapse the two long lists to the 5 newest; "Show all" reveals the rest */
+      #changelog.collapsed > li:nth-child(n+6) { display: none; }
+      .releases-list.collapsed > .release-row:nth-child(n+6) { display: none; }
+      .show-all { display: block; }
+    }
+    @media (max-width: 460px) {
+      .screenshots-grid, .wn-shots, .themes-grid { gap: .4rem; }
     }
 
     /* ── ANIMATIONS ───────────────────────────────────── */
@@ -1207,7 +1231,7 @@
       <div class="section-tag" data-i18n="sec_history_tag">A short history</div>
       <h2 class="section-title" data-i18n="sec_history_title">How it grew</h2>
     </div>
-    <ul class="history-list fade-in" style="max-width:680px;margin:0 auto;list-style:none;padding:0;">
+    <ul id="changelog" class="history-list fade-in" style="max-width:680px;margin:0 auto;list-style:none;padding:0;">
       <li style="display:flex;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border);">
         <span style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;flex:0 0 56px;">v0.8.0</span>
         <span style="color:var(--text);">The Shiny Hunt Companion grew into a three-tab hunting coach — Hunt (encounter count, phase and live odds), PokeRadar (chain build-up and reading), and Chain, which adds two beta helpers: Species Lock keeps you on the Pokemon you actually want, and Secure Chain guards your streak from a careless break. Your count also rides along on the HUD.</span>
@@ -1293,6 +1317,7 @@
         <span style="color:var(--muted);" data-i18n="hist_02">The big UX overhaul — re-organised menus, Favorites, toasts, the HUD, and the first themes.</span>
       </li>
     </ul>
+      <button class="show-all" data-i18n="show_all" data-target="changelog">Show all</button>
   </div>
 </section>
 
@@ -1374,7 +1399,7 @@
       </div>
     </div>
 
-    <div class="releases-list fade-in">
+    <div id="releases" class="releases-list fade-in">
       <div class="release-row">
         <span class="release-tag">v0.8.0</span>
         <span class="release-date">Jul 9, 2026</span>
@@ -1520,6 +1545,7 @@
         <a class="release-link" href="https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/download/v0.2.0/Gen6CTRPluginFramework-v0.2.0.zip" target="_blank" rel="noopener">Download</a>
       </div>
     </div>
+    <button class="show-all" data-i18n="show_all" data-target="releases">Show all</button>
   </div>
 </section>
 
@@ -1840,6 +1866,7 @@
 
   /* ── i18n (EN default in the markup, PT overrides below) ───────────── */
   const I18N_PT = {
+    show_all: "Ver tudo",
     // nav
     nav_new: "Novidades", nav_features: "Recursos", nav_shots: "Capturas", nav_themes: "Temas", nav_download: "Download", nav_install: "Instalar",
     // hero
@@ -1965,6 +1992,28 @@
     const lang = saved || ((navigator.language || 'en').toLowerCase().startsWith('pt') ? 'pt' : 'en');
     setLang(lang);
   })();
+
+  /* Mobile: collapse the changelog + releases list to their 5 newest; "Show all" reveals the rest. */
+  (function collapseLists() {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const lists = ['changelog', 'releases'].map(id => document.getElementById(id)).filter(Boolean);
+    const btns = Array.from(document.querySelectorAll('.show-all'));
+    function apply() {
+      lists.forEach(el => el.classList.toggle('collapsed', mq.matches && el.dataset.expanded !== '1'));
+      btns.forEach(btn => {
+        const t = document.getElementById(btn.dataset.target);
+        btn.style.display = (t && t.classList.contains('collapsed')) ? 'block' : 'none';
+      });
+    }
+    btns.forEach(btn => btn.addEventListener('click', () => {
+      const t = document.getElementById(btn.dataset.target);
+      if (t) { t.dataset.expanded = '1'; t.classList.remove('collapsed'); }
+      btn.style.display = 'none';
+    }));
+    apply();
+    if (mq.addEventListener) mq.addEventListener('change', apply); else mq.addListener(apply);
+  })();
+
 </script>
 </body>
 </html>
