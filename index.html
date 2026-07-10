@@ -477,6 +477,7 @@
 
     /* ── DOWNLOAD ─────────────────────────────────────── */
     #download { background: var(--bg3); }
+    .download-card > * { min-width: 0; }
     .download-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -503,7 +504,7 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
-    .dl-title { font-size: 1.5rem; font-weight: 800; margin-bottom: .5rem; }
+    .dl-title { font-size: 1.5rem; font-weight: 800; margin-bottom: .5rem; overflow-wrap: anywhere; word-break: break-word; }
     .dl-meta { font-size: .875rem; color: var(--muted); }
     .dl-meta span { color: var(--text); font-weight: 500; }
     .dl-counter {
@@ -674,6 +675,9 @@
       /* collapse the two long lists to the 5 newest; "Show all" reveals the rest */
       #changelog.collapsed > li:nth-child(n+6) { display: none; }
       .releases-list.collapsed > .release-row:nth-child(n+6) { display: none; }
+      .download-card { padding: 1.5rem 1.25rem; }
+      .dl-counter { min-width: 0; padding: 1.2rem; }
+      #shots.collapsed > .screenshot-item:nth-child(n+7) { display: none; }
       .show-all { display: block; }
     }
     @media (max-width: 460px) {
@@ -1033,7 +1037,7 @@
       <h2 class="section-title" data-i18n="sec_shots_title">Screenshots</h2>
       <p class="section-sub" data-i18n="sec_shots_sub">Click any image to view full size.</p>
     </div>
-    <div class="screenshots-grid">
+    <div id="shots" class="screenshots-grid">
       <div class="screenshot-item fade-in" onclick="openLightbox(this)">
         <img src="https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/Screenshots/v0.7.7/level_cap.png"
              alt="Level Cap — party vs. the next gym's ace level, and the Warn/Enforce manager" loading="lazy" />
@@ -1165,6 +1169,7 @@
         <div class="screenshot-caption">Teleportation — Overview</div>
       </div>
     </div>
+    <button class="show-all" data-i18n="show_all" data-target="shots">Show all</button>
   </div>
 </section>
 
@@ -1996,7 +2001,7 @@
   /* Mobile: collapse the changelog + releases list to their 5 newest; "Show all" reveals the rest. */
   (function collapseLists() {
     const mq = window.matchMedia('(max-width: 768px)');
-    const lists = ['changelog', 'releases'].map(id => document.getElementById(id)).filter(Boolean);
+    const lists = ['changelog', 'releases', 'shots'].map(id => document.getElementById(id)).filter(Boolean);
     const btns = Array.from(document.querySelectorAll('.show-all'));
     function apply() {
       lists.forEach(el => el.classList.toggle('collapsed', mq.matches && el.dataset.expanded !== '1'));
