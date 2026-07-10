@@ -665,23 +665,46 @@
       .hero-stats { gap: 1.5rem; }
       section { padding: 2.6rem 1.25rem; }
       .hero { min-height: auto; padding: 82px 1.25rem 3rem; }
-      /* 2-up image grids so 3DS shots don't stack one-per-screen */
-      .screenshots-grid { grid-template-columns: repeat(2, 1fr); gap: .55rem; }
-      .wn-shots { grid-template-columns: repeat(2, 1fr); gap: .55rem; }
-      .themes-grid { grid-template-columns: repeat(2, 1fr); gap: .55rem; }
+      /* image galleries become a one-at-a-time horizontal swipe carousel */
+      .screenshots-grid, .wn-shots, .themes-grid {
+        display: flex;
+        grid-template-columns: none;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: .6rem;
+        padding-bottom: .4rem;
+        scroll-padding-left: 8%;
+      }
+      .screenshots-grid > *, .wn-shots > img, .themes-grid > * {
+        flex: 0 0 84%;
+        scroll-snap-align: center;
+      }
       .wn-feature { margin-bottom: 2rem; }
       .release-row { padding: .55rem .9rem; font-size: .9rem; }
       #changelog li { padding: .45rem 0 !important; font-size: .9rem; }
-      /* collapse the two long lists to the 5 newest; "Show all" reveals the rest */
+      /* collapse the two long text lists to the 5 newest; "Show all" reveals the rest */
       #changelog.collapsed > li:nth-child(n+6) { display: none; }
       .releases-list.collapsed > .release-row:nth-child(n+6) { display: none; }
       .download-card { padding: 1.5rem 1.25rem; }
       .dl-counter { min-width: 0; padding: 1.2rem; }
-      #shots.collapsed > .screenshot-item:nth-child(n+7) { display: none; }
       .show-all { display: block; }
+      /* smaller, denser cards */
+      .features-grid { grid-template-columns: repeat(2, 1fr); gap: .6rem; }
+      .feature-card { padding: .85rem; }
+      .feature-icon { font-size: 1.3rem; margin-bottom: .4rem; }
+      .feature-card h3 { font-size: .82rem; margin-bottom: .2rem; }
+      .feature-card p { font-size: .72rem; line-height: 1.35; }
+      .compat-grid { grid-template-columns: repeat(2, 1fr); gap: .6rem; }
+      .compat-card { padding: .85rem; }
+      .compat-icon { font-size: 1.6rem; margin-bottom: .3rem; }
+      .compat-card h3 { font-size: .82rem; }
+      .compat-card p { font-size: .68rem; }
+      .compat-badge { font-size: .62rem; padding: .12rem .4rem; margin-top: .35rem; }
     }
     @media (max-width: 460px) {
       .screenshots-grid, .wn-shots, .themes-grid { gap: .4rem; }
+      .screenshots-grid > *, .wn-shots > img, .themes-grid > * { flex-basis: 88%; }
     }
 
     /* ── ANIMATIONS ───────────────────────────────────── */
@@ -1169,7 +1192,6 @@
         <div class="screenshot-caption">Teleportation — Overview</div>
       </div>
     </div>
-    <button class="show-all" data-i18n="show_all" data-target="shots">Show all</button>
   </div>
 </section>
 
@@ -2001,7 +2023,7 @@
   /* Mobile: collapse the changelog + releases list to their 5 newest; "Show all" reveals the rest. */
   (function collapseLists() {
     const mq = window.matchMedia('(max-width: 768px)');
-    const lists = ['changelog', 'releases', 'shots'].map(id => document.getElementById(id)).filter(Boolean);
+    const lists = ['changelog', 'releases'].map(id => document.getElementById(id)).filter(Boolean);
     const btns = Array.from(document.querySelectorAll('.show-all'));
     function apply() {
       lists.forEach(el => el.classList.toggle('collapsed', mq.matches && el.dataset.expanded !== '1'));
