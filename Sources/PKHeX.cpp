@@ -7787,7 +7787,8 @@ namespace CTRPluginFramework {
             const Color enemyColor(0xB5, 0x65, 0x1D); const Color myColor(0x2E, 0x6D, 0xA4);
 
             int slot = 0;      // 0..5 enemy slot
-            int view = 0;      // 0 = details list, 1 = compare (enemy vs my active), 2 = suggested items
+            static int view = 0; // 0 = details list, 1 = compare (enemy vs my active), 2 = suggested items.
+                                 // static so the LAST tab you used reopens on it (persists for the session).
             int dmgView = 1;   // inside view==1: 0 = stats compare, 1 = damage estimate (default; Y toggles to stats)
             int scroll = 0;    // detail-list scroll (rows)
             int focus = 0;     // item row focus

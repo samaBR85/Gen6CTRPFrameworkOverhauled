@@ -11,6 +11,7 @@ namespace CTRPluginFramework {
     u32 Preferences::InfoHotkeys = static_cast<u32>(Key::X);
     u32 Preferences::KeyboardHotkeys = static_cast<u32>(Key::Start);
     u32 Preferences::CardStatHotkeys = static_cast<u32>(Key::L);
+    u32 Preferences::QuickMenuHotkeys = static_cast<u32>(Key::ZL);
     u64 Preferences::Flags = 0;
     bool Preferences::Dirty = false;
     LCDBacklight Preferences::Backlights[2];
@@ -113,6 +114,7 @@ namespace CTRPluginFramework {
             InfoHotkeys     = header.reserved[1];
             KeyboardHotkeys = header.reserved[2];
             CardStatHotkeys = header.reserved[3];
+            QuickMenuHotkeys = header.reserved[13]; // Quick Menu open key (0 = unset -> default ZL below)
             g_bagPayMode    = header.reserved[4]; // PokeMart PAY/FREE choice (0 default = FREE on a fresh file)
             g_funPayMode    = header.reserved[5]; // Fun Stuff mini-games FREE/PAID choice (0 default = FREE)
             g_hiLoBest      = header.reserved[6]; // Fun Stuff "Higher or Lower" best streak
@@ -121,6 +123,7 @@ namespace CTRPluginFramework {
             g_levelCapOffset = header.reserved[9];  // Level Cap offset, biased +8 (0 = unset -> default below)
             g_levelCapMode   = header.reserved[10]; // Level Cap mode (0 = Warn default on a fresh file)
             g_enemyStatsMask = header.reserved[11]; // Display Enemy Stats field toggles (0 = unset -> all ON default)
+            g_quickMenuStyle = header.reserved[12]; // Quick Menu layout (0 = Left strip default on a fresh file)
             Flags = header.flags;
             memcpy(reinterpret_cast<void*>(Backlights), &header.lcdbacklights, sizeof(Backlights));
         }
@@ -148,8 +151,12 @@ namespace CTRPluginFramework {
         if (CardStatHotkeys == 0)
             CardStatHotkeys = Key::L;
 
-        // Mirror to the public global so plugin code (PKHeX.cpp card view) can read it.
+        if (QuickMenuHotkeys == 0)
+            QuickMenuHotkeys = Key::ZL;
+
+        // Mirror to the public global so plugin code (PKHeX.cpp card view / Codes.cpp Quick Menu) can read it.
         g_cardStatHotkey = CardStatHotkeys;
+        g_quickMenuHotkey = QuickMenuHotkeys;
 
         // Level Cap offset is stored biased by +8 (8 == offset 0). A fresh/reset Data.bin has 0 here, which we
         // treat as "unset" -> default 8. Clamp to the valid biased range [1..16] (offset -7..+8).
@@ -159,6 +166,8 @@ namespace CTRPluginFramework {
             g_levelCapOffset = 16;
         if (g_levelCapMode > 2)
             g_levelCapMode = 0;
+        if (g_quickMenuStyle > 1)
+            g_quickMenuStyle = 0;
     }
 
     void Preferences::LoadSavedEnabledCheats(void) {
@@ -306,6 +315,8 @@ namespace CTRPluginFramework {
             header.reserved[9] = g_levelCapOffset;      // Level Cap offset, biased +8 (see SetLevelCapOffset)
             header.reserved[10] = g_levelCapMode;       // Level Cap mode Warn/Enforce/Off (see SetLevelCapMode)
             header.reserved[11] = g_enemyStatsMask;     // Display Enemy Stats field toggles (see SetEnemyStatsMask)
+            header.reserved[12] = g_quickMenuStyle;     // Quick Menu layout Left/Bottom (see SetQuickMenuStyle)
+            header.reserved[13] = QuickMenuHotkeys;      // Quick Menu open key (rebindable, Tools>Hotkeys)
             header.flags = Flags;
             memcpy(&header.lcdbacklights, Backlights, sizeof(header.lcdbacklights));
 

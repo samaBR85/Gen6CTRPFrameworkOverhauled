@@ -84,8 +84,18 @@ namespace CTRPluginFramework {
         }
     }
 
+    static void QuickMenuHotkeyModifier(void) {
+        u32 keys = Preferences::QuickMenuHotkeys;
+        (HotkeysModifier(keys, "Pick the button(s) to open the Quick Menu\noverlay over the running game.\n\nThe game keeps running - pick a button it\nignores (e.g. ZL/ZR) so nothing leaks into\ngameplay.\n\nDefault: ZL."))();
+
+        if (keys != 0) {
+            Preferences::QuickMenuHotkeys = keys;
+            g_quickMenuHotkey = keys; // keep the plugin-visible mirror in sync
+        }
+    }
+
     void PluginMenuTools::UpdateSettings(void) {
-        // The 5 checkbox entries are indices 0..4; "Set Backlight" (index 5) is a non-checkbox action, skipped.
+        // The 6 checkbox entries are indices 0..5; "Set Backlight" (index 6) is a non-checkbox action, skipped.
         auto item = _settingsMenu.begin();
 
         if (Preferences::IsEnabled(Preferences::AutoSaveFavorites))
@@ -109,6 +119,13 @@ namespace CTRPluginFramework {
         else (*item++)->AsMenuEntryImpl().Disable();
 
         if (Preferences::IsEnabled(Preferences::UseFloatingBtn))
+            (*item++)->AsMenuEntryTools().Enable();
+
+        else (*item++)->AsMenuEntryTools().Disable();
+
+        // 6th checkbox: "Show menu timing" (index 5, appended after the originals). "Set Backlight" (index 6)
+        // is still skipped (a non-checkbox action).
+        if (Preferences::IsEnabled(Preferences::ShowMenuTiming))
             (*item)->AsMenuEntryTools().Enable();
 
         else (*item)->AsMenuEntryTools().Disable();
@@ -550,14 +567,18 @@ namespace CTRPluginFramework {
         _hotkeysMenu.Append(new MenuEntryTools(FwText("FW_HK_INFO", "Show item Info (default X)"), InfoHotkeyModifier, Icon::DrawGameController));
         _hotkeysMenu.Append(new MenuEntryTools(FwText("FW_HK_EDIT", "Open item Editor (default START)"), KeyboardHotkeyModifier, Icon::DrawGameController));
         _hotkeysMenu.Append(new MenuEntryTools(FwText("FW_HK_CARD", "Card stat HIGHER/LOWER (default L)"), CardStatHotkeyModifier, Icon::DrawGameController));
+        _hotkeysMenu.Append(new MenuEntryTools(FwText("FW_HK_QUICKMENU", "Open Quick Menu (default ZL)"), QuickMenuHotkeyModifier, Icon::DrawGameController));
 
-        // Settings menu — UpdateSettings() indexes the 5 checkbox entries by position (begin()+0 .. +4).
+        // Settings menu — UpdateSettings() indexes the 6 checkbox entries by position (begin()+0 .. +5).
         // "Set Backlight" is a non-checkbox action entry and MUST stay last (UpdateSettings skips it).
         _settingsMenu.Append(new MenuEntryTools(FwText("FW_SET_SAVEFAV", "Save Favorites"), [] {Preferences::Toggle(Preferences::AutoSaveFavorites);}, true, Preferences::IsEnabled(Preferences::AutoSaveFavorites)));
         _settingsMenu.Append(new MenuEntryTools(FwText("FW_SET_LOADFAV", "Load Favorites at Start"), [] {Preferences::Toggle(Preferences::AutoLoadFavorites);}, true, Preferences::IsEnabled(Preferences::AutoLoadFavorites)));
         _settingsMenu.Append(new MenuEntryTools(FwText("FW_SET_SAVECHEATS", "Save Enabled Cheats"), [] {Preferences::Toggle(Preferences::AutoSaveCheats);}, true, Preferences::IsEnabled(Preferences::AutoSaveCheats)));
         _settingsMenu.Append(new MenuEntryTools(FwText("FW_SET_LOADCHEATS", "Load Enabled Cheats at Start"), [] {Preferences::Toggle(Preferences::AutoLoadCheats);}, true, Preferences::IsEnabled(Preferences::AutoLoadCheats)));
         _settingsMenu.Append(new MenuEntryTools(FwText("FW_SET_FLOATBTN", "Show Floating Menu Button"), [] {Preferences::Toggle(Preferences::UseFloatingBtn);}, true, Preferences::IsEnabled(Preferences::UseFloatingBtn)));
+        // 6th checkbox (index 5) — opt-in menu open/close timing toast. Appended AFTER the 5 originals so their
+        // indices 0..4 (which UpdateSettings syncs sequentially) are unchanged; "Set Backlight" shifts to 6.
+        _settingsMenu.Append(new MenuEntryTools(FwText("FW_SET_MENUTIMING", "Show menu timing"), [] {Preferences::Toggle(Preferences::ShowMenuTiming);}, true, Preferences::IsEnabled(Preferences::ShowMenuTiming)));
         _settingsMenu.Append(new MenuEntryTools(FwText("FW_SET_BACKLIGHT", "Set Backlight (Experimental)"), EditBacklight, false, false));
     }
 

@@ -52,6 +52,7 @@ namespace CTRPluginFramework {
             void ShowWelcomeMessage(bool showMsg);
 
             MenuFolderImpl *GetRoot(void) const;
+            vector<MenuEntry*> GetFavorites(void) const; // the user's currently-starred entries, favorites order
             bool IsOpen(void) const;
             bool WasOpened(void) const;
             void AddPluginVersion(u32 version) const;

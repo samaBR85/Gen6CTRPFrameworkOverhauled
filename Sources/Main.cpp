@@ -840,6 +840,7 @@ namespace CTRPluginFramework {
         LoadHudConfig();
         LoadMyTeleport();   // HERE binds + custom teleport SPOTs (Teleport X / routes)
         OSD::Run(HudCallback);
+        OSD::Run(QuickOverlayCallback); // Quick Menu: live favorites overlay (ZL to open over the running game)
 
         MenuEntry *notifEntry = new MenuEntry(getLanguage->Get("MENU_SHOW_NOTIFICATIONS"), ShowNotifications, getLanguage->Get("NOTE_SHOW_NOTIFICATIONS"));
         Fav(notifEntry, "FAV_SHOW_NOTIFICATIONS");
@@ -855,6 +856,7 @@ namespace CTRPluginFramework {
         *misc += notifTransparentEntry;
         *misc += HudMasterEntry(); // "Display HUD" master — lifted out of Config HUD, sits right below Notifications
         *misc += hud;
+        *misc += QuickMenuEnableEntry(); // "Quick Menu" — the live favorites overlay (A = on/off, START = layout)
 
         // "Trainer Info": a real root folder (not folder-as-button, to keep the root at 7 items/no scroll)
         // holding the two read-only, no-side-effects snapshots: View Party Summary and Trainer Card.
@@ -889,7 +891,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 8, 0, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 8, 1, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized

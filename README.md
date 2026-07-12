@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.8.0
+# Gen6CTRPluginFrameworkOverhauled — v0.8.1
 
 **English** · [Português](README.pt-BR.md)
 
@@ -330,6 +330,7 @@ A short history, newest last — no detail, just the shape of it:
 - **v0.7.8** — **Poké Radar: Infinite Battery** (X/Y) — keep the Radar's battery full in the overworld so there's no ~50-step recharge wait between chains, plus a live HUD battery readout. The **Poké Radar** also returns to the PokéMart Anywhere list on X/Y. Polish: Display Enemy Stats now remembers which fields you turned on, Encounters & Catching leads with Shiny Hunt Companion, and Favorites labels are cleaner. Suggested by u/Victhordiz.
 - **v0.7.9** — a polish pass. **Shiny Hunt Companion & Radar Chain** got a cleaner look (theme-matched colors, no boxes around rows, a moving arrow for the cursor, and fixed-width odds chips). **Party Stats Summary** now shows each move's description — press **Y** to cycle through the four. **Config HUD** gained **All ON / All OFF** buttons for the RNG Tracking fields and an **L/R** shortcut to jump between Money, All ON and the Panel toggle, and the **Favorites** list keeps its two-column layout throughout.
 - **v0.8.0** — **Radar Chain Update** (X/Y). The **Shiny Hunt Companion** splits into **Hunt / PokeRadar / Chain** tabs (L/R to switch), and the Chain tab adds two experimental helpers: **Species Lock**, which forces the species you're chaining onto every grass patch in the area from chain 2 on (species + form only — level, IVs and nature stay natural), and **Secure Chain**, which keeps the chain counter from resetting. Plus **Choose Chain Value** to set the starting count, an **uncapped chain readout** (the real number past 40, not "40+"), **Infinite Repel** (renamed from Repel Auto-Refresh), a **Transparent Notifications** toggle for box-free toasts, a **"Changed" scan type** in Search, and a batch of text fixes. Species Lock & Secure Chain are beta — report your results.
+- **v0.8.1** — **Quick Menu**: a live favorites overlay you pop open **over the running game** — it doesn't freeze the game like the full menu does — to flip your favorite cheats and HUD switches on the fly (inspired by feedback from the framework's original author). Open it with a rebindable key (default **ZL**, in Tools > Hotkeys), move with **L/R**, toggle the highlighted favorite with **ZR**, and press **START** to switch its layout live between a **Left strip** list and a compact **Bottom bar**. It remembers your last position, and the in-battle Enemy Stats overlay steps aside so the two never clash. Also: the **Enemy Helper** now reopens on the tab you last used, and **Tools > Settings** gains an opt-in **Show menu timing** readout.
 
 ## 📥 Installing
 

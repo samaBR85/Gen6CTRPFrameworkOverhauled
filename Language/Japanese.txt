@@ -552,6 +552,15 @@ FAV_SHOW_NOTIFICATIONS :: 通知
 MENU_NOTIF_TRANSPARENT :: 通知を透明化
 NOTE_NOTIF_TRANSPARENT :: トースト通知（チートや連鎖イベントなどで表示される小さなポップアップ）は通常、黒い背景で表示されます。\n\nこれをオンにすると、背景の枠を描かず文字だけを表示し、画面の内容に重ねます。
 FAV_NOTIF_TRANSPARENT :: 透明な通知
+MENU_QUICK_MENU :: クイックメニュー
+NOTE_QUICK_MENU :: フルメニューを開かずにお気に入りのオン/オフを切り替えられる小さなオーバーレイです。裏ではゲームが止まらずに動き続けます。\n\nAでこの機能をONまたはOFFにします。\n\nゲーム中にクイックメニューキー（初期設定はZL、Tools > Hotkeysで変更可能）を押すと、動作中のゲームの上に表示されます。LとRで選択を移動、ZRでハイライト中のお気に入りをON/OFF、もう一度同じキーで閉じます。\n\nSTARTでレイアウト（左サイド帯または下バー）を切り替えます。開いている間でも、この項目上でも変更できます。\n\nここに表示されるのはオン/オフのお気に入りだけです（チートやHUDのスイッチ）。画面を開くツールは引き続きフルメニューを使います。
+FAV_QUICK_MENU :: クイックメニュー
+QUICK_MENU_TITLE :: クイックメニュー
+QUICK_MENU_EMPTY :: お気に入りのトグルがありません
+QUICK_MENU_ON :: ON
+QUICK_MENU_OFF :: OFF
+QUICK_MENU_STYLE_LEFT :: クイックメニュー：左サイド帯
+QUICK_MENU_STYLE_BOTTOM :: クイックメニュー：下バー
 MENU_PLUGIN_SETTINGS :: プラグイン設定
 NOTE_PLUGIN_SETTINGS :: このプラグイン自身の設定（例：言語）- ゲームのオプションではありません。
 MENU_VIEW_PARTY_SUMMARY :: 手持ちサマリーを表示

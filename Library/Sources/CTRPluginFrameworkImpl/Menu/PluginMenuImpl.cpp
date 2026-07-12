@@ -589,6 +589,24 @@ namespace CTRPluginFramework {
         return (_home->_root);
     }
 
+    // The user's currently-starred entries (favorites), in favorites order. Mirrors WriteFavoritesToFile's
+    // source (_home->_starred). Used by the plugin's live "Quick Menu" overlay so it shows the SAME favorites
+    // as the normal menu. Safe to call while the menu is CLOSED (the only time the overlay reads it) - the
+    // starred set is only mutated while the menu is open, which is when the OSD overlay is not drawing.
+    vector<MenuEntry*> PluginMenuImpl::GetFavorites(void) const {
+        vector<MenuEntry*> favorites;
+
+        if (_home == nullptr || _home->_starred == nullptr)
+            return (favorites);
+
+        for (MenuItem *item : _home->_starred->_items) {
+            if (item != nullptr && item->IsEntry())
+                favorites.push_back(item->AsMenuEntryImpl().AsMenuEntry());
+        }
+
+        return (favorites);
+    }
+
     bool PluginMenuImpl::IsOpen(void) const {
         return (_isOpen);
     }

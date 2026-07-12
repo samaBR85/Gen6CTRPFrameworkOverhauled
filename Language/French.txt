@@ -552,6 +552,15 @@ FAV_SHOW_NOTIFICATIONS :: Notifications
 MENU_NOTIF_TRANSPARENT :: Notifications transparentes
 NOTE_NOTIF_TRANSPARENT :: Les notifications (les petites bulles affichées pour les codes, les événements de chaîne, etc.) ont normalement un fond noir opaque.\n\nActive ceci pour n'afficher que le texte, sans cadre de fond, superposé à ce qui est à l'écran.
 FAV_NOTIF_TRANSPARENT :: Notif. transp.
+MENU_QUICK_MENU :: Menu Rapide
+NOTE_QUICK_MENU :: Une petite fenêtre superposée qui te laisse basculer tes favoris SANS ouvrir le menu complet - le jeu continue de tourner derrière au lieu de se figer.\n\nA active ou désactive cette fonction.\n\nEn jeu, appuie sur la touche Menu Rapide (ZL par défaut, réassignable dans Tools > Hotkeys) pour l'ouvrir par-dessus le jeu en cours. L et R déplacent la sélection, ZR bascule le favori sélectionné ON/OFF, la même touche le referme.\n\nSTART change la disposition (Bande gauche ou Barre du bas) - en direct pendant qu'il est ouvert, ou ici sur cette entrée.\n\nSeuls tes favoris on/off apparaissent ici (cheats et interrupteurs HUD) ; les outils qui ouvrent un écran passent toujours par le menu complet.
+FAV_QUICK_MENU :: Menu Rapide
+QUICK_MENU_TITLE :: Menu Rapide
+QUICK_MENU_EMPTY :: Aucun favori on/off
+QUICK_MENU_ON :: ON
+QUICK_MENU_OFF :: OFF
+QUICK_MENU_STYLE_LEFT :: Menu Rapide : Bande gauche
+QUICK_MENU_STYLE_BOTTOM :: Menu Rapide : Barre du bas
 MENU_PLUGIN_SETTINGS :: Réglages plugin
 NOTE_PLUGIN_SETTINGS :: Les réglages propres à ce plugin (ex. langue) - pas vos options de jeu.
 MENU_VIEW_PARTY_SUMMARY :: Voir résumé équipe

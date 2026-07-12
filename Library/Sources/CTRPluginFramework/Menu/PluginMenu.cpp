@@ -88,6 +88,10 @@ namespace CTRPluginFramework {
         return (_menu->GetRoot()->GetFolderList());
     }
 
+    vector<MenuEntry*> PluginMenu::GetFavorites() const {
+        return (_menu->GetFavorites());
+    }
+
     void PluginMenu::SetHexEditorState(bool isEnabled) const {
         _menu->SetHexEditorState(isEnabled);
     }

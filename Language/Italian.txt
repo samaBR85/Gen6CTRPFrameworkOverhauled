@@ -552,6 +552,15 @@ FAV_SHOW_NOTIFICATIONS :: Notifiche
 MENU_NOTIF_TRANSPARENT :: Notifiche trasparenti
 NOTE_NOTIF_TRANSPARENT :: Le notifiche (i piccoli avvisi mostrati per i cheat, gli eventi catena, ecc.) normalmente hanno uno sfondo nero pieno.\n\nAttiva questa opzione per disegnare solo il testo, senza riquadro di sfondo, sovrapposto a ciò che è a schermo.
 FAV_NOTIF_TRANSPARENT :: Notif. traspar.
+MENU_QUICK_MENU :: Menu Rapido
+NOTE_QUICK_MENU :: Un piccolo overlay che ti permette di attivare o disattivare i tuoi interruttori preferiti SENZA aprire il menu completo, così il gioco continua a girare dietro invece di bloccarsi.\n\nA attiva o disattiva questa funzione.\n\nNel gioco, premi il tasto Menu Rapido (predefinito ZL, riassegnabile in Tools > Hotkeys) per aprirlo sopra il gioco in corso. L e R spostano la selezione, ZR attiva/disattiva il preferito evidenziato ON/OFF, lo stesso tasto lo richiude.\n\nSTART cambia il layout (striscia a Sinistra o barra in Basso), in tempo reale mentre è aperto oppure qui su questa voce.\n\nQui appaiono solo i tuoi preferiti on/off (cheat e interruttori HUD); gli strumenti che aprono una schermata usano ancora il menu completo.
+FAV_QUICK_MENU :: Menu Rapido
+QUICK_MENU_TITLE :: Menu Rapido
+QUICK_MENU_EMPTY :: Nessun preferito on/off
+QUICK_MENU_ON :: ON
+QUICK_MENU_OFF :: OFF
+QUICK_MENU_STYLE_LEFT :: Menu Rapido: striscia sx
+QUICK_MENU_STYLE_BOTTOM :: Menu Rapido: barra giù
 MENU_PLUGIN_SETTINGS :: Impost. Plugin
 NOTE_PLUGIN_SETTINGS :: Le impostazioni di questo plugin (es. lingua) - non le opzioni del gioco.
 MENU_VIEW_PARTY_SUMMARY :: Riepilogo Squadra

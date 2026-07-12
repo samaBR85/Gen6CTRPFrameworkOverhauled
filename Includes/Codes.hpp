@@ -104,6 +104,8 @@ namespace CTRPluginFramework {
     MenuFolder *CreateHudMenu(void);
     MenuEntry *HudMasterEntry(void); // "Display HUD" master toggle (lives in Screen Overlays, not Config HUD)
     bool HudCallback(const Screen &screen);
+    MenuEntry *QuickMenuEnableEntry(void); // "Quick Menu" checkbox (Screen Overlays) - the live favorites overlay
+    bool QuickOverlayCallback(const Screen &screen); // draws the Quick Menu over the running game (OSD::Run)
     void HudMenuFrame(Time); // PluginMenu::OnNewFrame handler - runs while the menu is open (instant All ON/OFF feedback)
     void LoadHudConfig(void);
 }

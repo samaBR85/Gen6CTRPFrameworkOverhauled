@@ -1,4 +1,5 @@
 #include <Headers.hpp>
+#include "CTRPluginFrameworkImpl/Preferences.hpp" // for the opt-in "Show menu timing" toast gate
 
 extern Handle gspThreadEventHandle;
 
@@ -116,10 +117,12 @@ namespace CTRPluginFramework {
         if (Process::OnPauseResume)
             Process::OnPauseResume(true);
 
+        Clock diagClock; // TEMP DIAGNOSTIC - see g_lastMenuOpenMs (OSD.hpp)
         OSDImpl::WaitFramePaused();
         ScreenImpl::AcquireFromGsp();
         OSDImpl::UpdateScreens();
         UpdateMemRegions();
+        g_lastMenuOpenMs = (u32)diagClock.GetElapsedTime().AsMilliseconds();
     }
 
     void ProcessImpl::Play(bool forced) {
@@ -141,9 +144,15 @@ namespace CTRPluginFramework {
             if (Process::OnPauseResume)
                 Process::OnPauseResume(false);
 
+            Clock diagClock; // TEMP DIAGNOSTIC - see g_lastMenuCloseMs (OSD.hpp)
             ScreenImpl::Top->Release();
             ScreenImpl::Bottom->Release();
             OSDImpl::ResumeFrame();
+            g_lastMenuCloseMs = (u32)diagClock.GetElapsedTime().AsMilliseconds();
+            // Opt-in diagnostic (Tools>Settings "Show menu timing", default OFF): toast the open/close cost the
+            // instant Play() finishes, so both numbers are fresh and it can't be missed by a frame race.
+            if (Preferences::IsEnabled(Preferences::ShowMenuTiming))
+                OSD::Notify(Utils::Format("[diag] menu open %ums / close %ums", g_lastMenuOpenMs, g_lastMenuCloseMs));
         }
     }
 

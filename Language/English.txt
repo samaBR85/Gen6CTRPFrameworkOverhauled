@@ -247,7 +247,6 @@ KB_PSS_PROFILE_ICONS :: Icons
 KB_PSS_PROFILE_LINKS :: Links
 KB_PSS_PROFILE_MESSAGE :: Message:
 KB_PSS_PROFILE_MESSAGE_2 :: Message
-KB_PSS_PROFILE_MESSAGE_2:: Message
 KB_PSS_PROFILE_MINI_SURVEY :: Mini Survey
 KB_PSS_PROFILE_NICES :: Nices
 KB_PSS_PROFILE_WISHES :: Wishes
@@ -553,6 +552,15 @@ FAV_SHOW_NOTIFICATIONS :: Notifications
 MENU_NOTIF_TRANSPARENT :: Transparent Notifications
 NOTE_NOTIF_TRANSPARENT :: Toasts (the small popups shown for cheats, chain events, etc.) normally have a solid black background.\n\nTurn this ON to draw just the text, with no background box, blending over whatever is on screen.
 FAV_NOTIF_TRANSPARENT :: Transparent Notif.
+MENU_QUICK_MENU :: Quick Menu
+NOTE_QUICK_MENU :: A small overlay that lets you flip your favorite toggles WITHOUT opening the full menu - so the game keeps running behind it instead of freezing.\n\nA turns this feature ON or OFF.\n\nIn game, tap the Quick Menu key (default ZL, rebindable in Tools > Hotkeys) to open it over the running game. L and R move the selection, ZR flips the highlighted favorite ON/OFF, the same key again closes it.\n\nSTART switches the layout (Left strip or Bottom bar) - live while it is open, or here on this entry.\n\nOnly your on/off favorites show here (cheats and HUD switches); tools that open a screen still use the full menu.
+FAV_QUICK_MENU :: Quick Menu
+QUICK_MENU_TITLE :: Quick Menu
+QUICK_MENU_EMPTY :: No toggle favorites yet
+QUICK_MENU_ON :: ON
+QUICK_MENU_OFF :: OFF
+QUICK_MENU_STYLE_LEFT :: Quick Menu: Left strip
+QUICK_MENU_STYLE_BOTTOM :: Quick Menu: Bottom bar
 MENU_PLUGIN_SETTINGS :: Plugin Settings
 NOTE_PLUGIN_SETTINGS :: This plugin's own settings (e.g. language) - not your game options.
 MENU_VIEW_PARTY_SUMMARY :: View Party Summary

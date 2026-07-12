@@ -1228,6 +1228,12 @@ namespace CTRPluginFramework {
     // Forward decl: translucent panel painter (defined with the HUD code further below).
     static void HudPanel(const Screen &screen, int x, int y, int w, int h, int opacity);
 
+    // Quick Menu (live favorites overlay) shared state — see QuickOverlayCallback further below.
+    // g_quickMenuOpen is true while the overlay is showing (ZL toggles it); TogglePokemonInfo reads it so the
+    // in-battle Enemy Stats overlay stops eating ZR while the Quick Menu is using ZR to toggle a favorite.
+    static bool g_quickMenuOpen = false;
+    static MenuEntry *g_quickMenuEnable = nullptr; // the "Quick Menu" checkbox (Screen Overlays); nullptr = feature off
+
     // Callback function to display Pokemon information
     bool ViewInfoCallback(const Screen &screen) {
         // Static data for Pokemon and UI settings
@@ -1247,6 +1253,13 @@ namespace CTRPluginFramework {
         if (!screen.IsTop)
             return false;
 
+        // While the Quick Menu LEFT-STRIP card is open, hide this panel so the card shows clean on top (OSD
+        // callbacks draw in registration order and this one registers dynamically after the Quick Menu, so it
+        // would otherwise draw over the card). The Bottom-bar layout sits along the bottom and doesn't overlap
+        // this top panel, so leave Enemy Stats visible for that one. Reappears when the card closes.
+        if (g_quickMenuOpen && g_quickMenuStyle == 0)
+            return false;
+
         // Only proceed if in battle and info view is active
         if (!IfInBattle() || !isInfoViewOn)
             return false;
@@ -1255,12 +1268,12 @@ namespace CTRPluginFramework {
         const u32 stepSize = 0x1E4; // Step size for navigating through Pokemon data
         const u32 maxOffset = address + (stepSize * 0x5); // Maximum offset in Pokemon data
 
-        // Move to the next screen if the R key is pressed and within bounds
-        if (Controller::IsKeyPressed(Key::R) && (currentOffset + stepSize) <= maxOffset)
+        // Move to the next/previous slot with R/L - but NOT while the Quick Menu is open: that overlay uses L/R
+        // to move its own selection, so let it own those buttons (same coordination as the ZR guard).
+        if (!g_quickMenuOpen && Controller::IsKeyPressed(Key::R) && (currentOffset + stepSize) <= maxOffset)
             currentOffset += stepSize;
 
-        // Move to the previous screen if the L key is pressed and within bounds
-        if (Controller::IsKeyPressed(Key::L) && (currentOffset - stepSize) >= address)
+        if (!g_quickMenuOpen && Controller::IsKeyPressed(Key::L) && (currentOffset - stepSize) >= address)
             currentOffset -= stepSize;
 
         // Party slot index (0..5) for this position
@@ -1457,7 +1470,9 @@ namespace CTRPluginFramework {
         if (IfInBattle() && entry->IsActivated()) {
             // ZR (hardcoded) cycles between the 2 info pages: [Basic|Moves] and [IVs|EVs].
             // ZL is intentionally left unused so the user is free to bind it to any other function.
-            if (Controller::IsKeyPressed(Key::ZR))
+            // Skip while the Quick Menu overlay is open — it uses ZR to toggle the selected favorite, so we
+            // don't want the same press to also flip the Enemy Stats page underneath it.
+            if (!g_quickMenuOpen && Controller::IsKeyPressed(Key::ZR))
                 screenDisplay = (screenDisplay + 1) % 2;
 
             // Run the callback function to display Pokemon info
@@ -7054,5 +7069,162 @@ namespace CTRPluginFramework {
     // in the Screen Overlays folder, below Notifications. CreateHudMenu must run first.
     MenuEntry *HudMasterEntry(void) {
         return g_hudMaster;
+    }
+
+    // ============================ Quick Menu (live favorites overlay) ============================
+    // A small panel drawn OVER the running game (via OSD::Run, exactly like HudCallback / ViewInfoCallback)
+    // so you can flip your favorited toggles WITHOUT opening the full menu (which freezes the game). Input uses
+    // only buttons the Gen 6 games ignore, so nothing leaks to gameplay: ZL opens/closes, L/R move the
+    // selection, ZR toggles the highlighted favorite ON/OFF. Two layouts (g_quickMenuStyle, persisted):
+    // 0 = Left strip (full list down the left edge), 1 = Bottom bar (one favorite at a time). Gated by the
+    // "Quick Menu" checkbox in Screen Overlays (g_quickMenuEnable).
+    static vector<MenuEntry*> g_qmFavs; // toggle favorites snapshot, taken when the overlay OPENS (not per-frame)
+    static int g_qmSel = 0;
+
+    // START (editor key) on the "Quick Menu" entry switches the layout Left <-> Bottom (+ a confirming toast).
+    void QuickMenuStyleCycle(MenuEntry *entry) {
+        SetQuickMenuStyle(g_quickMenuStyle ? 0 : 1);
+        OSD::Notify(getLanguage->Get(g_quickMenuStyle ? "QUICK_MENU_STYLE_BOTTOM" : "QUICK_MENU_STYLE_LEFT"));
+    }
+
+    bool QuickOverlayCallback(const Screen &screen) {
+        if (!screen.IsTop)
+            return false;
+
+        // Feature disabled -> make sure the overlay is closed and draw nothing.
+        if (g_quickMenuEnable == nullptr || !g_quickMenuEnable->IsActivated()) {
+            g_quickMenuOpen = false;
+            return false;
+        }
+
+        // The rebindable Quick Menu key (default ZL, Tools>Hotkeys) toggles the overlay. On open, snapshot the
+        // current favorites (the menu is closed while the overlay is usable, so the starred set can't be mutated
+        // concurrently). Keep only entries that are real on/off toggles (non-null gameFunc) - a gameFunc is by
+        // contract safe to run every frame, so Enable/Disable on it is safe; menu-func-only favorites (tools that
+        // open a screen) are skipped, they need the full menu.
+        if (Controller::IsKeysPressed(g_quickMenuHotkey)) {
+            g_quickMenuOpen = !g_quickMenuOpen;
+            if (g_quickMenuOpen) {
+                g_qmFavs.clear();
+                PluginMenu *pm = PluginMenu::GetRunningInstance();
+                if (pm != nullptr) {
+                    for (MenuEntry *e : pm->GetFavorites())
+                        if (e != nullptr && e->GetGameFunc() != nullptr)
+                            g_qmFavs.push_back(e);
+                }
+                // Keep the LAST selected position (g_qmSel is static), just clamp it to the current list in
+                // case favorites changed since the overlay was last open.
+                if (g_qmSel >= (int)g_qmFavs.size()) g_qmSel = (int)g_qmFavs.size() - 1;
+                if (g_qmSel < 0) g_qmSel = 0;
+            }
+        }
+
+        if (!g_quickMenuOpen)
+            return false;
+
+        // START switches the layout live (Left strip <-> Bottom bar) while the overlay is open - START has no
+        // use in the Gen 6 overworld, so it's free here. Persists via SetQuickMenuStyle (same as the in-menu
+        // START-on-entry shortcut). Not gated on favorite count so you can flip layouts even with none.
+        if (Controller::IsKeyPressed(Key::Start))
+            SetQuickMenuStyle(g_quickMenuStyle ? 0 : 1);
+
+        const int n = (int)g_qmFavs.size();
+
+        // Navigation + toggle (only when there are toggle favorites).
+        if (n > 0) {
+            if (g_qmSel >= n) g_qmSel = n - 1;
+            if (Controller::IsKeyPressed(Key::L)) g_qmSel = (g_qmSel - 1 + n) % n;
+            if (Controller::IsKeyPressed(Key::R)) g_qmSel = (g_qmSel + 1) % n;
+            if (Controller::IsKeyPressed(Key::ZR)) {
+                MenuEntry *e = g_qmFavs[g_qmSel];
+                if (e != nullptr) {
+                    if (e->IsActivated()) e->Disable();
+                    else                  e->Enable();
+                }
+            }
+        }
+
+        // Theme palette (rule 3). SOLID fill (not the per-pixel HudPanel dither) - a dither over a big panel
+        // is ~40k DrawPixel calls/frame and tanked the framerate to ~2fps; one DrawRect fill is far cheaper AND
+        // gives an opaque background so the text is readable over gameplay.
+        const FwkSettings &st = FwkSettings::Get();
+        Color bg = st.BackgroundMainColor, txt = st.MainTextColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+
+        const string onStr = getLanguage->Get("QUICK_MENU_ON");
+        const string offStr = getLanguage->Get("QUICK_MENU_OFF");
+        int stateW = (int)OSD::GetTextWidth(true, offStr);
+        { int w2 = (int)OSD::GetTextWidth(true, onStr); if (w2 > stateW) stateW = w2; }
+
+        if (g_quickMenuStyle == 1) {
+            // ---- Bottom bar: one favorite at a time ----
+            const int x = 16, y = 208, w = 368, h = 24;
+            screen.DrawRect((u32)x, (u32)y, (u32)w, (u32)h, bg, true);
+            screen.DrawRect((u32)x, (u32)y, (u32)w, (u32)h, border, false);
+            const int ty = y + 5;
+            screen.DrawSysfont(getLanguage->Get("QUICK_MENU_TITLE"), (u32)(x + 6), (u32)ty, title);
+            if (n == 0) {
+                screen.DrawSysfont(getLanguage->Get("QUICK_MENU_EMPTY"), (u32)(x + 110), (u32)ty, txt);
+            } else {
+                MenuEntry *e = g_qmFavs[g_qmSel];
+                bool on = e->IsActivated();
+                screen.DrawSysfont(string("< ") + e->Name(), (u32)(x + 110), (u32)ty, txt);
+                const string &state = on ? onStr : offStr;
+                screen.DrawSysfont(state, (u32)(x + w - 8 - stateW), (u32)ty, on ? Color::LimeGreen : txt);
+            }
+            return true;
+        }
+
+        // ---- Left strip: full list (panel sized to the number of rows, not the whole screen) ----
+        const int rowH = 18, maxRows = 10;
+        int first = 0;
+        if (n > maxRows) {
+            first = g_qmSel - maxRows / 2;
+            if (first < 0) first = 0;
+            if (first > n - maxRows) first = n - maxRows;
+        }
+        int rows = (n < maxRows) ? n : maxRows;
+        int bodyRows = (rows > 0) ? rows : 1;
+
+        // Width = fit the longest visible name (+ cursor slot) and the ON/OFF column.
+        const int cursorW = 14;
+        int nameMax = (int)OSD::GetTextWidth(true, getLanguage->Get("QUICK_MENU_TITLE"));
+        if (n == 0) { int em = (int)OSD::GetTextWidth(true, getLanguage->Get("QUICK_MENU_EMPTY")); if (em > nameMax) nameMax = em; }
+        for (int i = 0; i < rows; i++) { int wv = (int)OSD::GetTextWidth(true, g_qmFavs[first + i]->Name()); if (wv > nameMax) nameMax = wv; }
+        int w = 8 + cursorW + nameMax + 12 + stateW + 8;
+        if (w < 128) w = 128;
+        if (w > 250) w = 250;
+
+        const int x = 6, y = 6, h = 4 + 16 + 4 + bodyRows * rowH + 4;
+        screen.DrawRect((u32)x, (u32)y, (u32)w, (u32)h, bg, true);
+        screen.DrawRect((u32)x, (u32)y, (u32)w, (u32)h, border, false);
+        screen.DrawSysfont(getLanguage->Get("QUICK_MENU_TITLE"), (u32)(x + 8), (u32)(y + 4), title);
+
+        if (n == 0) {
+            screen.DrawSysfont(getLanguage->Get("QUICK_MENU_EMPTY"), (u32)(x + 8), (u32)(y + 24), txt);
+            return true;
+        }
+
+        const int rowY0 = y + 24, valX = x + w - 8;
+        for (int i = 0; i < rows; i++) {
+            int idx = first + i, ry = rowY0 + i * rowH;
+            MenuEntry *e = g_qmFavs[idx];
+            bool sel = (idx == g_qmSel), on = e->IsActivated();
+            screen.DrawSysfont((sel ? "\xE2\x86\x92 " : "  ") + e->Name(), (u32)(x + 8), (u32)ry, sel ? title : txt);
+            const string &state = on ? onStr : offStr;
+            screen.DrawSysfont(state, (u32)(valX - stateW), (u32)ry, on ? Color::LimeGreen : txt);
+        }
+        return true;
+    }
+
+    // Screen Overlays "Quick Menu" checkbox: A = enable/disable the feature; START (editor key) = switch layout.
+    // Kept as g_quickMenuEnable so QuickOverlayCallback can gate on IsActivated(). HudNoop = inert per-frame func
+    // (state is what matters), same as every other overlay toggle.
+    MenuEntry *QuickMenuEnableEntry(void) {
+        if (g_quickMenuEnable == nullptr) {
+            g_quickMenuEnable = new MenuEntry(getLanguage->Get("MENU_QUICK_MENU"), HudNoop, QuickMenuStyleCycle, getLanguage->Get("NOTE_QUICK_MENU"));
+            g_quickMenuEnable->SetFavoriteKey("FAV_QUICK_MENU");
+            g_quickMenuEnable->SetFavoriteAlias(getLanguage->Get("FAV_QUICK_MENU"));
+        }
+        return g_quickMenuEnable;
     }
 }

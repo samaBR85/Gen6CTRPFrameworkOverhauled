@@ -6,6 +6,8 @@ namespace CTRPluginFramework {
     bool g_entryToggleNotif = false;     // see OSD.hpp
     bool g_notifTransparentBg = false;   // see OSD.hpp - default OFF keeps the classic black-background toast
     void *g_entryToggleNotifSrc = nullptr; // see OSD.hpp
+    u32 g_lastMenuOpenMs = 0;   // see OSD.hpp - TEMP diagnostic
+    u32 g_lastMenuCloseMs = 0;  // see OSD.hpp - TEMP diagnostic
     u32 g_cardStatHotkey = static_cast<u32>(Key::L); // see OSD.hpp (synced from Preferences::CardStatHotkeys)
     u32 g_bagPayMode = 0;                            // see OSD.hpp (synced from Data.bin reserved[4]); 0 = FREE
 
@@ -78,6 +80,17 @@ namespace CTRPluginFramework {
         g_enemyStatsMask = value;
         Preferences::MarkDirty(); // so WriteSettings persists reserved[11] when the menu closes
     }
+
+    u32 g_quickMenuStyle = 0;                        // see OSD.hpp (synced from Data.bin reserved[12]); 0 = Left strip
+
+    void SetQuickMenuStyle(u32 value) {
+        if (g_quickMenuStyle == value)
+            return;
+        g_quickMenuStyle = value;
+        Preferences::MarkDirty(); // so WriteSettings persists reserved[12] when the menu closes
+    }
+
+    u32 g_quickMenuHotkey = static_cast<u32>(Key::ZL); // see OSD.hpp (synced from Preferences::QuickMenuHotkeys)
 
     u8 *Screen::GetFramebuffer(u32 posX, u32 posY, bool useRightFb) const {
         if (useRightFb && (!IsTop || !Is3DEnabled))

@@ -27,7 +27,8 @@ namespace CTRPluginFramework {
                 DisplayLoadedFiles = 1 << 16,
                 WriteLoadedFiles = 1 << 17,
                 DrawTouchCursor = 1 << 18,
-                DrawTouchPosition = 1 << 19
+                DrawTouchPosition = 1 << 19,
+                ShowMenuTiming = 1 << 20 // opt-in diagnostic: toast the menu open/close ms on close (Tools>Settings)
             };
 
             struct HeaderV11 {
@@ -102,6 +103,7 @@ namespace CTRPluginFramework {
             static u32 InfoHotkeys;     // menu bind: show selected item's INFO note (default Y)
             static u32 KeyboardHotkeys; // menu bind: open selected item's editor (default START)
             static u32 CardStatHotkeys; // card bind: flip Party-Summary stat jump HIGHER/LOWER (default L); mirrored to OSD::g_cardStatHotkey for the plugin
+            static u32 QuickMenuHotkeys; // in-game bind: open the Quick Menu overlay (default ZL); mirrored to OSD::g_quickMenuHotkey for the plugin
             static u64 Flags;
             static bool Dirty; // unsaved-changes flag; gates WriteSettings (see MarkDirty)
             static LCDBacklight Backlights[2];

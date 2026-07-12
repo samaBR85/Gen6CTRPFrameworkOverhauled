@@ -553,6 +553,15 @@ FAV_SHOW_NOTIFICATIONS :: Notificações
 MENU_NOTIF_TRANSPARENT :: Notificações Transparentes
 NOTE_NOTIF_TRANSPARENT :: Os avisos (os pequenos popups mostrados para trapaças, eventos de chain, etc.) normalmente têm um fundo preto sólido.\n\nLigue isto para desenhar só o texto, sem a caixa de fundo, mesclando sobre o que estiver na tela.
 FAV_NOTIF_TRANSPARENT :: Notif. Transp.
+MENU_QUICK_MENU :: Menu Rápido
+NOTE_QUICK_MENU :: Uma sobreposição pequena que deixa você alternar seus atalhos favoritos SEM abrir o menu completo - assim o jogo continua rodando por trás dela em vez de congelar.\n\nA liga ou desliga este recurso.\n\nNo jogo, aperte a tecla do Menu Rápido (padrão ZL, remapeável em Tools > Hotkeys) para abri-lo sobre o jogo em andamento. L e R movem a seleção, ZR alterna o favorito destacado entre ON/OFF, a mesma tecla de novo o fecha.\n\nSTART troca o layout (Faixa à esquerda ou Barra embaixo) - ao vivo enquanto está aberto, ou aqui nesta entrada.\n\nSó seus favoritos de liga/desliga aparecem aqui (cheats e chaves do HUD); ferramentas que abrem uma tela ainda usam o menu completo.
+FAV_QUICK_MENU :: Menu Rápido
+QUICK_MENU_TITLE :: Menu Rápido
+QUICK_MENU_EMPTY :: Sem favoritos de atalho
+QUICK_MENU_ON :: ON
+QUICK_MENU_OFF :: OFF
+QUICK_MENU_STYLE_LEFT :: Menu Rápido: Faixa à esq.
+QUICK_MENU_STYLE_BOTTOM :: Menu Rápido: Barra embaixo
 MENU_PLUGIN_SETTINGS :: Config. Plugin
 NOTE_PLUGIN_SETTINGS :: As configurações do próprio plugin (ex.: idioma) - não as opções do seu jogo.
 MENU_VIEW_PARTY_SUMMARY :: Ver Resumo do Time

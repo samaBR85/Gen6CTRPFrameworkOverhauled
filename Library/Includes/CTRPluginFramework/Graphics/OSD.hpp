@@ -82,11 +82,30 @@ namespace CTRPluginFramework {
     extern u32 g_enemyStatsMask;
     void SetEnemyStatsMask(u32 value);
 
+    // Quick Menu (live favorites overlay) layout style: 0 = Left strip (full list down the left edge),
+    // 1 = Bottom bar (one favorite at a time along the bottom). Persisted in Data.bin (header.reserved[12])
+    // and mirrored here like g_levelCapMode so PLUGIN code (Codes.cpp QuickOverlayCallback + the style cycler)
+    // can read it every frame and flip it through SetQuickMenuStyle() (which marks Preferences dirty). Default 0.
+    extern u32 g_quickMenuStyle;
+    void SetQuickMenuStyle(u32 value);
+
+    // The user's configured Quick Menu open key (Tools > Hotkeys). Mirrors Preferences::QuickMenuHotkeys
+    // (persisted in Data.bin reserved[13]) so PLUGIN code — which can't include the impl-only Preferences.hpp —
+    // can read it. Read by Codes.cpp QuickOverlayCallback to open/close the overlay. Default ZL.
+    extern u32 g_quickMenuHotkey;
+
     // The MenuEntry* of that very "Show ON/OFF notifications" checkbox (stored as void* to avoid a
     // Menu header dependency). _TriggerEntry uses it to (a) update g_entryToggleNotif the instant
     // the checkbox is toggled and (b) give the checkbox a single "Notifications: ON/OFF" toast
     // instead of the generic "<name>: ON/OFF" — avoiding a double toast.
     extern void *g_entryToggleNotifSrc;
+
+    // TEMP DIAGNOSTIC — not a shipped feature, remove once the menu-open/close latency investigation is done.
+    // Last-measured wall-clock cost of ProcessImpl::Pause()/Play(), i.e. how long the overlay actually takes to
+    // open/close on real hardware. Set + toasted directly in ProcessImpl.cpp around the
+    // WaitFramePaused()/ResumeFrame() calls.
+    extern u32 g_lastMenuOpenMs;
+    extern u32 g_lastMenuCloseMs;
 
     class Screen {
         public:

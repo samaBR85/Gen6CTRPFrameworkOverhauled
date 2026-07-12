@@ -552,6 +552,15 @@ FAV_SHOW_NOTIFICATIONS :: Hinweise
 MENU_NOTIF_TRANSPARENT :: Transparente Meldungen
 NOTE_NOTIF_TRANSPARENT :: Meldungen (die kleinen Popups für Cheats, Ketten-Ereignisse usw.) haben normalerweise einen deckend schwarzen Hintergrund.\n\nSchalte dies AN, um nur den Text zu zeichnen, ohne Hintergrundbox, sodass er sich über das legt, was gerade auf dem Bildschirm ist.
 FAV_NOTIF_TRANSPARENT :: Transp. Meld.
+MENU_QUICK_MENU :: Schnellmenü
+NOTE_QUICK_MENU :: Eine kleine Überlagerung, mit der du deine liebsten Schalter umlegen kannst, OHNE das ganze Menü zu öffnen - so läuft das Spiel dahinter weiter, statt einzufrieren.\n\nA schaltet diese Funktion ON oder OFF.\n\nDrücke im Spiel die Schnellmenü-Taste (Standard ZL, änderbar unter Tools > Hotkeys), um es über dem laufenden Spiel zu öffnen. L und R bewegen die Auswahl, ZR schaltet den markierten Favoriten ON/OFF, dieselbe Taste erneut schließt es.\n\nSTART wechselt das Layout (Linke Leiste oder Untere Leiste) - live während es offen ist, oder hier auf diesem Eintrag.\n\nHier erscheinen nur deine An/Aus-Favoriten (Cheats und HUD-Schalter); Werkzeuge, die einen Bildschirm öffnen, nutzen weiter das ganze Menü.
+FAV_QUICK_MENU :: Schnellmenü
+QUICK_MENU_TITLE :: Schnellmenü
+QUICK_MENU_EMPTY :: Noch keine Schalter-Favoriten
+QUICK_MENU_ON :: ON
+QUICK_MENU_OFF :: OFF
+QUICK_MENU_STYLE_LEFT :: Schnellmenü: Linke Leiste
+QUICK_MENU_STYLE_BOTTOM :: Schnellmenü: Untere Leiste
 MENU_PLUGIN_SETTINGS :: Plugin-Einstell.
 NOTE_PLUGIN_SETTINGS :: Die eigenen Einstellungen dieses Plugins (z.B. Sprache) - nicht deine Spieloptionen.
 MENU_VIEW_PARTY_SUMMARY :: Team-Übersicht

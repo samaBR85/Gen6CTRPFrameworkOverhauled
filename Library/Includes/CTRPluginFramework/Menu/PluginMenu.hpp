@@ -56,6 +56,12 @@ namespace CTRPluginFramework {
             vector<MenuFolder*> GetFolderList(void) const;
 
             /**
+             * \brief Get the entries the user has currently favorited (starred), in favorites order.
+             * \return A vector with pointers to the favorited MenuEntry objects (empty if none / menu not ready)
+             */
+            vector<MenuEntry*> GetFavorites(void) const;
+
+            /**
             * \brief Enable or disable the Hex Editor in Tools
             * \param isEnabled If HexEditor must be enabled or not
             */
