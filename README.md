@@ -353,8 +353,8 @@ Re-run **Download (latest)** anytime to grab the newest version. *(3DS hardware 
 
 ### Manual install
 
-1. Update to the latest [Luma3DS](https://github.com/LumaTeam/Luma3DS/releases/latest).
-2. Download the latest [release](https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/latest).
+1. Update to the latest [Luma3DS](https://github.com/LumaTeam/Luma3DS/releases).
+2. Download the latest [release](https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases).
 3. Extract the `.zip` to the **root of your SD card**, keeping its folder layout. It adds two folders:
    - `luma/` — the plugin, with one folder per game: `luma/plugins/0004000000055D00/` (X), `0004000000055E00/` (Y), `000400000011C400/` (Omega Ruby), `000400000011C500/` (Alpha Sapphire). The same `Gen6CTRPluginFramework.3gx` (plus the built-in App Guide & Game Guide) sits in each; it auto-detects your game.
    - `Gen6CTRPluginFramework/` — the plugin's data, including the **language files** (English, French, German, Italian, Japanese, Portuguese (Brazil), Spanish — 7 languages). **This folder goes at the SD root, next to `luma/` — *not* inside it.** The plugin loads its language from here, so don't skip it. (Your `Theme.txt` and `HUD.txt` settings are created in this folder automatically on first run.)
@@ -405,7 +405,7 @@ This project stands on a long line of volunteer work — from the very first anc
 **The plugin lineage**
 - **Based on** [Gen 6 CTRPluginFramework](https://github.com/biometrix76/Gen6CTRPluginFramework) by
   [biometrix76](https://github.com/biometrix76) — built on
-  [Alolan CTRPluginFramework](https://github.com/biometrix76/alolanctrpluginframework/releases/latest)
+  [Alolan CTRPluginFramework](https://github.com/biometrix76/alolanctrpluginframework/releases)
   and a continuation of the abandoned
   [Multi-Pokémon Framework](https://github.com/semaj14/Multi-PokemonFramework) and
   [its contributors](https://github.com/semaj14/Multi-PokemonFramework/blob/main/Credits.md).

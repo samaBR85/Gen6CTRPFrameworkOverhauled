@@ -358,8 +358,8 @@ Rode **Download (latest)** quando quiser pra pegar a versão mais nova. *(Só ha
 
 ### Instalação manual
 
-1. Atualize para o [Luma3DS](https://github.com/LumaTeam/Luma3DS/releases/latest) mais recente.
-2. Baixe a [versão](https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases/latest) mais recente.
+1. Atualize para o [Luma3DS](https://github.com/LumaTeam/Luma3DS/releases) mais recente.
+2. Baixe a [versão](https://github.com/samaBR85/Gen6CTRPFrameworkOverhauled/releases) mais recente.
 3. Extraia o `.zip` na **raiz do seu cartão SD**, mantendo a estrutura de pastas. Ele adiciona duas pastas:
    - `luma/` — o plugin, com uma pasta por jogo: `luma/plugins/0004000000055D00/` (X), `0004000000055E00/` (Y), `000400000011C400/` (Omega Ruby), `000400000011C500/` (Alpha Sapphire). O mesmo `Gen6CTRPluginFramework.3gx` (junto do App Guide e Game Guide embutidos) fica em cada uma; ele detecta seu jogo automaticamente.
    - `Gen6CTRPluginFramework/` — os dados do plugin, incluindo os **arquivos de idioma** (Inglês, Francês, Alemão, Italiano, Japonês, Português (Brasil), Espanhol — 7 idiomas). **Essa pasta fica na raiz do SD, ao lado de `luma/` — *não* dentro dela.** O plugin carrega o idioma daqui, então não pule essa pasta. (Seus `Theme.txt` e `HUD.txt` são criados nessa pasta automaticamente no primeiro uso.)
@@ -410,7 +410,7 @@ Este projeto se apoia numa longa linha de trabalho voluntário — do primeirís
 **A linhagem do plugin**
 - **Baseado em** [Gen 6 CTRPluginFramework](https://github.com/biometrix76/Gen6CTRPluginFramework) por
   [biometrix76](https://github.com/biometrix76) — construído sobre o
-  [Alolan CTRPluginFramework](https://github.com/biometrix76/alolanctrpluginframework/releases/latest)
+  [Alolan CTRPluginFramework](https://github.com/biometrix76/alolanctrpluginframework/releases)
   e uma continuação do abandonado
   [Multi-Pokémon Framework](https://github.com/semaj14/Multi-PokemonFramework) e
   [seus contribuidores](https://github.com/semaj14/Multi-PokemonFramework/blob/main/Credits.md).
