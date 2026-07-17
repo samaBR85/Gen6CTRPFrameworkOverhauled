@@ -368,7 +368,7 @@ Re-run **Download (latest)** anytime to grab the newest version. *(3DS hardware 
 
 ### On Azahar (emulators)
 
-[Azahar](https://azahar-emu.org/) is the actively-maintained successor to Citra (which was discontinued in 2024), available on Windows, macOS, Linux **and Android**. It inherits Citra's 3GX plugin support, so the same plugin runs on it using the same folder structure as Luma3DS. Steps 1–2 are identical (download & extract). Then:
+[Azahar](https://github.com/azahar-emu/azahar) is the actively-maintained successor to Citra (which was discontinued in 2024), available on Windows, macOS, Linux **and Android**. It inherits Citra's 3GX plugin support, so the same plugin runs on it using the same folder structure as Luma3DS. Steps 1–2 are identical (download & extract). Then:
 
 **Desktop (Windows / macOS / Linux):**
 
@@ -442,6 +442,8 @@ This project stands on a long line of volunteer work — from the very first anc
 **Community suggestions**
 - **[u/Cold_Birthday_2807](https://www.reddit.com/user/Cold_Birthday_2807)** — suggested the per-gym level
   cap idea that became **Level Cap** (v0.7.7).
+- **VM21** (GBAtemp) — suggested the in-plugin completionist checklist with save auto-fill that became the
+  **Post-game Checklist** (v0.8.2).
 
 **This fork**
 - Fork, overhaul and v0.3.0 → v0.8.0 additions by [samaBR85](https://github.com/samaBR85), built in collaboration

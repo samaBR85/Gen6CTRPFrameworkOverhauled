@@ -373,7 +373,7 @@ Rode **Download (latest)** quando quiser pra pegar a versão mais nova. *(Só ha
 
 ### No Azahar (emuladores)
 
-O [Azahar](https://azahar-emu.org/) é o sucessor ativo do Citra (descontinuado em 2024), disponível em Windows, macOS, Linux **e Android**. Ele herda o suporte a plugins 3GX do Citra, então o mesmo plugin roda nele usando a mesma estrutura de pastas do Luma3DS. Os passos 1–2 são idênticos (baixar e extrair). Depois:
+O [Azahar](https://github.com/azahar-emu/azahar) é o sucessor ativo do Citra (descontinuado em 2024), disponível em Windows, macOS, Linux **e Android**. Ele herda o suporte a plugins 3GX do Citra, então o mesmo plugin roda nele usando a mesma estrutura de pastas do Luma3DS. Os passos 1–2 são idênticos (baixar e extrair). Depois:
 
 **Desktop (Windows / macOS / Linux):**
 
