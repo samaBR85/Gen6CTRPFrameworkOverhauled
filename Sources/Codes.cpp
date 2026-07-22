@@ -14,6 +14,18 @@
 #include "Rng.hpp"           // Mt19937 (Gen6, untempered) + TinyMt - live RNG Tracking HUD fields
 
 namespace CTRPluginFramework {
+    // Player-owned data files live under PlayerData/ inside the plugin folder. Relative paths resolve
+    // against the CWD pluginInit already points at /luma/plugins/<TID>/, and creating a plugin-relative
+    // subfolder is well-trodden here (see the Keyboard/ dir below and PKHeX's Bin/ backup dir).
+    string PlayerFile(const char *name) {
+        static bool init = false;
+        if (!init) {
+            init = true;
+            if (!Directory::IsExists("PlayerData")) Directory::Create("PlayerData");
+        }
+        return string("PlayerData/") + name;
+    }
+
     static int selectedIcon = 0;
 
     void UpdateIcon(MenuEntry *entry) {
@@ -1494,6 +1506,12 @@ namespace CTRPluginFramework {
                 isInfoViewOn = (infoViewState == 0);
                 MessageBox(CenterAlign(getLanguage->Get("PK_VIEW_INFO") + " " + string(options[infoViewState])), DialogType::DialogOk, ClearScreen::Both)();
                 entry->SetGameFunc(TogglePokemonInfo);
+                // Two gates guard the overlay: isInfoViewOn (above) lets ViewInfoCallback draw, but
+                // TogglePokemonInfo only runs at all while the entry is ACTIVATED - and SetGameFunc doesn't
+                // activate anything. So picking ENABLE used to leave the freshly-unlocked toggle sitting OFF,
+                // and the player had to tick it by hand to get what they just said yes to. Say ENABLE, get it on.
+                if (isInfoViewOn) entry->Enable();
+                else              entry->Disable();
             }
         }
     }
@@ -3974,6 +3992,8 @@ namespace CTRPluginFramework {
     //      ROUTE_BASE+R = Hoenn route R; SEC_BASE+s = an "Other" section folder (UI only, never persisted) ----
     static const int ROUTE_BASE = 2000, SEC_BASE = 3000;
 
+    MenuEntry *g_teleportEntry = nullptr; // the Movement > Teleportation entry (set in Main.cpp)
+
     // Routes are series-aware: Kalos (XY) has Routes 1-22, Hoenn (ORAS) has Routes 101-134.
     static inline int CurRouteCount()             { return currGameSeries == GameSeries::XY ? kRouteCountXY : kRouteCount; }
     static inline const char *CurRouteName(int R) { return currGameSeries == GameSeries::XY ? kRoutesXY[R] : kRoutes[R]; }
@@ -4007,8 +4027,9 @@ namespace CTRPluginFramework {
     }
 
     static void SaveMyTeleport(void) {
-        if (File::Exists(PATH_MY_TELEPORT) == 0) File::Create(PATH_MY_TELEPORT);
-        File file(PATH_MY_TELEPORT);
+        const string path = PlayerFile(PATH_MY_TELEPORT);
+        if (File::Exists(path) == 0) File::Create(path);
+        File file(path);
         LineWriter writer(file);
         writer << "# Gen6 Teleport - your binds & spots. In the plugin folder; survives updates. Edit freely." << LineWriter::endl();
         writer << "# HERE <mapId> <place>   |   SPOT <place> <value> <dir> <x> <y>" << LineWriter::endl();
@@ -4023,8 +4044,9 @@ namespace CTRPluginFramework {
 
     void LoadMyTeleport(void) {
         gHere.clear(); gSpots.clear();
-        if (File::Exists(PATH_MY_TELEPORT) != 1) return;
-        File file(PATH_MY_TELEPORT);
+        const string path = PlayerFile(PATH_MY_TELEPORT);
+        if (File::Exists(path) != 1) return;
+        File file(path);
         LineReader reader(file);
         string line;
         auto nextTok = [](const string &s, size_t &i, string &out) -> bool {
@@ -4082,8 +4104,27 @@ namespace CTRPluginFramework {
         return false;
     }
 
+    // ===== sTele block + layout-guard canaries (DO NOT REMOVE - see v082-progress memory) =====
+    // v0.8.2 had an intermittent black-top-screen after a warp. A full binary bisection (builds A-E,
+    // HW-tested) proved: the warp DATA is never corrupted (these canaries stayed intact and the written
+    // values always matched what was armed), yet the bug appears ONLY when the Post-game Checklist blob
+    // is LINKED and there is no extra padding. Conclusion: a PRE-EXISTING, latent out-of-bounds write
+    // (present since v0.8.1, harmless there) lands on warp-critical memory only under that exact layout.
+    // These two zero-init canaries bracket the sTele block; their 8 bytes of .bss shift the layout back to
+    // the harmless case (HW-confirmed 11/11 warps clean). They are a BAND-AID, not a root-cause fix: any
+    // future code change reshuffles .bss and could re-expose the stray write elsewhere - so re-test warps
+    // on hardware after touching this file, and if it returns, hunt the real OOB (see the memory note).
+    // The check in ApplyLocation reads them (keeps them from being stripped, and trips if sTele itself is
+    // ever the victim - which the bisection showed it is NOT, so it's belt-and-suspenders).
+    static u32 sTeleCanA = 0;
     // resolved spot for the active teleport (written each frame by ApplyLocation while L is held at a door)
     static int sTeleVal = 0, sTeleDir = 0, sTeleX = 0, sTeleY = 0;
+    // WHICH target the above resolves to (-1 = nothing armed yet). Both arming paths - the Teleport UI
+    // itself and ChecklistArmTeleport - write it, so a screen showing "armed" can't go stale after the
+    // player picks a different destination somewhere else.
+    static int sTeleArmed = -1;
+    static u32 sTeleCanB = 0;
+    static const u32 kTeleCanary = 0xC0DEC0DE;
 
     struct TeleportAddress {
         u32 value16; // Where to write location ID (warp request buffer)
@@ -4125,18 +4166,29 @@ namespace CTRPluginFramework {
         const TeleportAddress A = GetTeleportAddress(currGameSeries);
 
         u16 check = 0;
+        static u16 sPrevCheck = 0; // only trip the canary check once per door transition, not every frame
 
         if (entry->Hotkeys[0].IsDown()) {
             if (Process::Read16(A.check16, check) && check == 0x5544) {
-                // sTele* = the resolved drop point (custom SPOT if set, else the dev default), set at commit time.
-                if (Process::Write16(A.value16, static_cast<u16>(sTeleVal))) {
-                    if (Process::Write8(A.dir8, static_cast<u8>(sTeleDir))) {
-                        Process::WriteFloat(A.posX, static_cast<float>(sTeleX));
-                        Process::WriteFloat(A.posY, static_cast<float>(sTeleY));
+                // Layout-guard tripwire (see the sTele canary note above). If the block bracketing sTele
+                // is intact (always, in normal play - the bisection proved sTele is not the victim), push
+                // the drop point. If it's ever been stomped, DON'T write corrupt coords into the game -
+                // skip the warp and say so once. The read also keeps the canaries from being gc-stripped.
+                bool canOk = (sTeleCanA == kTeleCanary && sTeleCanB == kTeleCanary);
+                if (canOk) {
+                    // sTele* = the resolved drop point (custom SPOT if set, else the dev default), set at commit time.
+                    if (Process::Write16(A.value16, static_cast<u16>(sTeleVal))) {
+                        if (Process::Write8(A.dir8, static_cast<u8>(sTeleDir))) {
+                            Process::WriteFloat(A.posX, static_cast<float>(sTeleX));
+                            Process::WriteFloat(A.posY, static_cast<float>(sTeleY));
+                        }
                     }
+                } else if (sPrevCheck != 0x5544) {
+                    OSD::Notify("Teleport state corrupted - warp skipped", Color::Red);
                 }
             }
         }
+        sPrevCheck = check;
     }
 
     // ── TEMP DEBUG: Zone Finder — memory-diff scanner to PIN the live "current map id" address.
@@ -4242,6 +4294,54 @@ namespace CTRPluginFramework {
 
             OSD::SwapBuffers();
         }
+    }
+
+    // ---- Teleport bridge for other screens (Post-game Checklist's "Where" block) ----
+    // ResolveSpot/sTele*/gSpots are static to this file, so callers outside it go through these two, the
+    // same way the PokeMart cart is reached via BagCartAdd/BagCartClear. locIdx is a kParsedLocations index
+    // (or ROUTE_BASE + N for a route), exactly what the Teleport UI itself passes to ResolveSpot.
+    bool ChecklistTeleportAvailable(int locIdx) {
+        if (locIdx < 0) return false;
+        int v, d, x, y;
+        return ResolveSpot(locIdx, v, d, x, y);
+    }
+
+    // Arms the destination on the REAL Teleport entry: the warp only fires from ApplyLocation, gated by that
+    // entry's own hotkey, when the player walks through a door. Nothing teleports at the moment this returns.
+    bool ChecklistArmTeleport(int locIdx) {
+        if (!g_teleportEntry || locIdx < 0) return false;
+        int v, d, x, y;
+        if (!ResolveSpot(locIdx, v, d, x, y)) return false;
+        sTeleVal = v; sTeleDir = d; sTeleX = x; sTeleY = y;
+        sTeleArmed = locIdx;
+        sTeleCanA = sTeleCanB = kTeleCanary; // (re)arm the layout-guard canaries around the sTele block
+        g_teleportEntry->SetGameFunc(ApplyLocation);
+        // Same as the Teleportation UI's own commit: install the func, but leave arming to the player.
+        // Auto-Enable() here black-screened the warp on hardware (v0.8.2) - see the note there.
+        return true;
+    }
+
+    int ChecklistArmedTarget(void) { return sTeleArmed; }
+
+    // The key the player must hold at a door, so the toast can name the real (possibly rebound) hotkey
+    // instead of hardcoding "L".
+    string ChecklistTeleportKeyName(void) {
+        // NOT Hotkey::ToString() - that returns the framework's FONT_* glyph escapes (FONT_ZL etc),
+        // which only its own menu renderer understands; OSD::Notify printed the raw bytes as garbage.
+        // Plain names, in the bit order the framework's own g_keyName[16] table uses.
+        static const char *kKeyName[16] = { "A", "B", "Select", "Start", "D-Right", "D-Left", "D-Up",
+                                            "D-Down", "R", "L", "X", "Y", "", "", "ZL", "ZR" };
+        // (u32)0, not 0: HotkeyManager overloads operator[] on u32 AND string, and a bare 0 is ambiguous
+        // between them (it's also a null pointer constant).
+        if (!g_teleportEntry || g_teleportEntry->Hotkeys.Count() == 0) return "L";
+        u32 keys = g_teleportEntry->Hotkeys[(u32)0].GetKeys();
+        string out;
+        for (int i = 0; i < 16; ++i) {
+            if (!(keys & (1u << i)) || !kKeyName[i][0]) continue;
+            if (!out.empty()) out += " + ";
+            out += kKeyName[i];
+        }
+        return out.empty() ? string("L") : out;
     }
 
     void Teleportation(MenuEntry* entry) {
@@ -4861,10 +4961,15 @@ namespace CTRPluginFramework {
             int v = 0, d = 0, x = 0, y = 0;
             if (ResolveSpot(commitAbs, v, d, x, y)) {           // custom SPOT if set, else the dev default (routes need a SPOT)
                 sTeleVal = v; sTeleDir = d; sTeleX = x; sTeleY = y;
+                sTeleArmed = commitAbs;
+                sTeleCanA = sTeleCanB = kTeleCanary; // (re)arm the layout-guard canaries around the sTele block
                 if (commitAbs < ROUTE_BASE) sPlaceIndex = commitAbs - (int)base;   // remember the location cursor
                 while (Controller::IsKeyDown(Key::A)) { Controller::Update(); OSD::SwapBuffers(); } // drain A before the dialog
                 MessageBox(CenterAlign(getLanguage->Get("NOTE_TELEPORT_KEY")), DialogType::DialogOk, ClearScreen::Both)();
                 entry->SetGameFunc(ApplyLocation);
+                // NOTE: deliberately does NOT Enable() here. Auto-arming was tried (v0.8.2) and broke the
+                // warp on hardware - it landed with a black top screen - so the player still ticks the
+                // toggle by hand after picking. Don't "fix" this without testing on a real console first.
             }
         }
     }
@@ -5571,8 +5676,9 @@ namespace CTRPluginFramework {
     }
 
     static void SaveShinyHunts(void) {
-        if (File::Exists(PATH_SHINY_HUNTS) == 0) File::Create(PATH_SHINY_HUNTS);
-        File file(PATH_SHINY_HUNTS);
+        const string path = PlayerFile(PATH_SHINY_HUNTS);
+        if (File::Exists(path) == 0) File::Create(path);
+        File file(path);
         LineWriter writer(file);
         writer << "# Gen6 Shiny Hunt Companion - per-target encounter counts. In the plugin folder; survives updates." << LineWriter::endl();
         writer << Utils::Format("TARGET %d", (int)g_shinyTarget) << LineWriter::endl();
@@ -5585,8 +5691,9 @@ namespace CTRPluginFramework {
     static void LoadShinyHunts(void) {
         s_shinyLoaded = true;
         s_huntN = 0; g_shinyTarget = 0; g_shinyMethod = 0; g_shinyCount = 0;
-        if (File::Exists(PATH_SHINY_HUNTS) != 1) return;
-        File file(PATH_SHINY_HUNTS);
+        const string path = PlayerFile(PATH_SHINY_HUNTS);
+        if (File::Exists(path) != 1) return;
+        File file(path);
         LineReader reader(file);
         string line;
         auto tok = [](const string &s, size_t &i, string &out) -> bool {

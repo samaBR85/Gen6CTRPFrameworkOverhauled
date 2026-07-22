@@ -20,6 +20,7 @@
 #include "HeldItemTags.hpp" // gHeldItemTags[]/gHeldItemTagName[] - effect tags for the held-item filter panel
 #include "EggGroups.hpp"    // gEggGroups[]/g_eggGroupNames[] - Breeding Compatibility Checker
 #include "EggMoves.hpp"     // gEggMoves[] - Breeding Compatibility Checker
+#include "ChecklistData.hpp" // clKey/clTask/clKind/clArg/CL().cat[] - Post-game Checklist (auto-generated)
 #include <functional>
 #include <array>
 #include <cstdint>
@@ -2579,6 +2580,698 @@ namespace CTRPluginFramework {
             }
         }
 
+        // ===== Post-game Checklist: scan + auto-fill (Fase 2) =====
+        // Shared box/party iterator, added for the checklist scan. The 4 pre-existing open-coded
+        // box-scan sites (LivingDex below, Breeding Compatibility, etc.) are deliberately NOT
+        // refactored onto this in this pass - they work; touching 4 working scanners alongside a
+        // new feature couples two failure modes for zero user-visible gain. Fold them in later.
+        static void ForEachStoredPokemon(const std::function<void(const PK6 &)> &fn) {
+            u32 boxBase = AutoGameSet((u32)0x8C861C8, (u32)0x8C9E134);
+            for (int b = 0; b < 31; ++b) {
+                for (int s = 0; s < 30; ++s) {
+                    PK6 pk; u32 addr = boxBase + b * 6960 + s * 0xE8;
+                    if (GetPokemon(addr, &pk) && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) fn(pk);
+                }
+            }
+            u32 pbase = FindPartyBase();
+            for (int i = 0; i < 6 && pbase; ++i) {
+                PK6 pk;
+                bool ok = gPartyEncrypted ? GetPokemon(pbase + i * gPartyStride, &pk) : GetPokemonRaw(pbase + i * gPartyStride, &pk);
+                if (ok && pk.species >= 1 && pk.species <= 721 && !IsEggBit(pk)) fn(pk);
+            }
+        }
+
+        static u8 ChecklistBadgeByte(void) {
+            u8 b = 0; Process::Read8(AutoGameSet((u32)0x8C6A6B0, (u32)0x8C71DC4), b); return b;
+        }
+
+        // ORAS-only. RAM address CONFIRMED 2026-07-16 via a hardware RAM dump + brute-force
+        // validation against all 555 PKHeX-named ORAS event flags (matched the tester's actual
+        // play history bit-for-bit - see memory oras-eventflag-block.md). NOT valid on XY (same
+        // block structure exists there per PKHeX, but at a different, not-yet-hunted address).
+        static bool ReadEventFlag(int n) {
+            if (currGameSeries != GameSeries::ORAS || n <= 0) return false;
+            const u32 base = 0x8C81DCC;
+            u8 byte = 0; Process::Read8(base + (u32)(n >> 3), byte);
+            return ((byte >> (n & 7)) & 1) != 0;
+        }
+
+        struct ClScan {
+            bool bagHas[801];
+            u16  speciesOwned[722];
+        };
+
+        static void ChecklistScan(ClScan &s) {
+            for (int i = 0; i < 801; ++i) s.bagHas[i] = false;
+            for (int i = 0; i < 722; ++i) s.speciesOwned[i] = 0;
+            ForEachStoredPokemon([&](const PK6 &pk) {
+                ++s.speciesOwned[pk.species];
+                if (pk.heldItem && pk.heldItem < 801) s.bagHas[pk.heldItem] = true; // fixes the
+                // Mega Stone false-negative: a stone equipped on a team member never shows up in
+                // BagOwnedCount() (it left the bag pocket the moment it was held).
+            });
+        }
+
+        static bool ChecklistItemHas(const ClScan &s, int id) {
+            if (id <= 0 || id >= 801) return false;
+            return s.bagHas[id] || BagOwnedCount(id) > 0;
+        }
+
+        // The active checklist table for the running game. ORAS (422 items, 10 categories) and X/Y
+        // (295 items, 9 categories) live side by side in ChecklistData.hpp; everything below reads the
+        // tables through CL() so one code path serves both. Cheap (a branch + reference); currGameSeries
+        // never changes mid-function. The screen entry is only reachable on ORAS or XY (Main.cpp gates
+        // it), so the fallthrough to CL_XY on None never actually runs.
+        static const ChecklistGame &CL() {
+            return currGameSeries == GameSeries::ORAS ? CL_ORAS : CL_XY;
+        }
+
+        // Monotonic: only ever ADDS a mark (state 0 -> 1), never clears one. A consumed berry or
+        // a legendary traded away after being seen would otherwise silently un-tick real progress
+        // on the next Auto-fill; the user's own manual "un-check" (state 2 -> 3) is the only way
+        // an item goes back to unchecked, and Auto-fill never touches state 1/2/3. Returns the
+        // count of items newly marked this call.
+        static int ChecklistAutoFill(u8 *state) {
+            ClScan s; ChecklistScan(s);
+            int n = 0;
+            for (int i = 0; i < CL().total; ++i) {
+                if (state[i] != 0) continue;
+                bool got = false;
+                switch (CL().kind[i]) {
+                    case 1: // bag item (arg2 != 0 -> both must be owned)
+                        got = ChecklistItemHas(s, CL().arg[i]) && (CL().arg2[i] == 0 || ChecklistItemHas(s, CL().arg2[i]));
+                        break;
+                    case 2: // species currently held (proxy - "owned now", not "ever caught")
+                        got = CL().arg[i] >= 1 && CL().arg[i] <= 721 && s.speciesOwned[CL().arg[i]] > 0;
+                        break;
+                    case 3: { // event flag; arg2 != 0 means version-split (arg=OR flag, arg2=AS flag)
+                        int flagN = CL().arg2[i] != 0 ? (int)AutoGame(CL().arg[i], CL().arg2[i]) : (int)CL().arg[i];
+                        got = ReadEventFlag(flagN);
+                        break;
+                    }
+                    case 4: // gym badge bit
+                        got = CL().arg[i] < 8 && ((ChecklistBadgeByte() >> CL().arg[i]) & 1) != 0;
+                        break;
+                    default: break; // kind 0 = manual, never auto-fillable
+                }
+                if (got) { state[i] = 1; ++n; }
+            }
+            return n;
+        }
+
+        // ===== Post-game Checklist: persistence (Fase 3, Checklist.txt) =====
+        // Plugin-folder text file (relative path -> `/luma/plugins/<TID>/`, survives updates), NOT
+        // Preferences::reserved[]. This data is upstream-controlled (PhilMurwin/PokemonChecklists) --
+        // if the source list gets reordered, positional bits in reserved[] would corrupt silently;
+        // the text key (`CL().key[i]`, e.g. "task1sub4") does not. Mirrors ShinyHunts.txt's shape
+        // (Codes.cpp) exactly: static array + tok() lambda parser + a lazy-load latch + eager save.
+        //
+        // 4 states, only 2 look different on screen: 0 untouched, 1 auto-detected, 2 you-checked,
+        // 3 you-cleared-an-auto-mark (reads as unchecked; Auto-fill will never re-mark it - see
+        // ChecklistAutoFill above, which only ever touches state==0).
+        static const char *PATH_CHECKLIST = "Checklist.txt";
+        static const char *PATH_LIVINGDEX = "LivingDex.txt";   // Living Dex export target (X / the Export button)
+        static u8   s_clState[CL_TOTAL_MAX];   // sized for the biggest game; only [0..CL().total) is used
+        static bool s_clLoaded = false;
+
+        static int ChecklistIndexForKey(const string &key) {
+            for (int i = 0; i < CL().total; ++i) if (key == CL().key[i]) return i;
+            return -1;
+        }
+
+        static void SaveChecklist(void) {
+            const string path = PlayerFile(PATH_CHECKLIST);
+            if (File::Exists(path) == 0) File::Create(path);
+            File file(path);
+            LineWriter writer(file);
+            writer << Utils::Format("# Gen6 Post-game Checklist (%s). Plugin folder; survives updates.",
+                                    currGameSeries == GameSeries::ORAS ? "ORAS" : "XY") << LineWriter::endl();
+            writer << "VER 1" << LineWriter::endl();
+            for (int i = 0; i < CL().total; ++i) {
+                if (s_clState[i] == 0) continue;
+                const char *tag = (s_clState[i] == 1) ? "A" : (s_clState[i] == 2) ? "M" : "S";
+                writer << Utils::Format("STATE %s %s", CL().key[i], tag) << LineWriter::endl();
+            }
+            writer.Flush(); writer.Close();
+        }
+
+        static void LoadChecklist(void) {
+            s_clLoaded = true;
+            for (int i = 0; i < CL().total; ++i) s_clState[i] = 0;
+            const string path = PlayerFile(PATH_CHECKLIST);
+            if (File::Exists(path) != 1) return;
+            File file(path);
+            LineReader reader(file);
+            string line;
+            auto tok = [](const string &s, size_t &i, string &out) -> bool {
+                while (i < s.size() && (s[i] == ' ' || s[i] == '\t')) i++;
+                size_t st = i; while (i < s.size() && s[i] != ' ' && s[i] != '\t' && s[i] != '\r') i++;
+                if (i == st) return false; out = s.substr(st, i - st); return true;
+            };
+            while (reader(line)) {
+                if (line.empty() || line[0] == '#') continue;
+                size_t i = 0; string kw; if (!tok(line, i, kw)) continue;
+                if (kw != "STATE") continue;
+                string key, tag;
+                if (!tok(line, i, key) || !tok(line, i, tag)) continue;
+                int idx = ChecklistIndexForKey(key);
+                if (idx < 0) continue; // stale key from a regenerated data table - silently dropped
+                u8 v = (tag == "A") ? 1 : (tag == "M") ? 2 : (tag == "S") ? 3 : 0;
+                if (v) s_clState[idx] = v;
+            }
+        }
+
+        static void ChecklistLoadOnce(void) { if (!s_clLoaded) LoadChecklist(); }
+
+        static string ChecklistPad3(int n) {
+            string p; if (n < 100) p += "0"; if (n < 10) p += "0"; p += to_string(n); return p;
+        }
+
+        // Visible item rows on the bottom screen. 8, not 9: rows are y = 52 + r*20 and the window's inner
+        // area ends at y=220, so a 9th row (212..230) draws through the frame. Verified on hardware.
+        static const int CL_ROWS = 8;
+
+        // Task wording for the running game. NO checklist task is exclusive to one version - the source's
+        // `formats` field marks which WORD applies to which game ("Capture Groudon" on OR, "Capture Kyogre"
+        // on AS), so the generator resolves it into clTask (Omega Ruby) + clTaskAlt (Alpha Sapphire, empty
+        // when both read the same). Only 6 of the 422 differ.
+        static const char *ChecklistTask(int i) {
+            return (currGameName == GameName::AlphaSapphire && CL().taskAlt[i][0]) ? CL().taskAlt[i] : CL().task[i];
+        }
+
+        // Sprite id for the running game (clSprAlt covers the version-paired names, e.g. the
+        // Groudon/Kyogre task shows each game's own mascot).
+        static int ChecklistSprId(int i) {
+            return (currGameName == GameName::AlphaSapphire && CL().sprAlt[i]) ? CL().sprAlt[i] : CL().sprId[i];
+        }
+        // dir: "big"/"list" for items, "Spawner"/"SpawnerList" for species.
+        static string ChecklistSprPath(int i, bool big) {
+            int id = ChecklistSprId(i);
+            if (CL().sprType[i] == 1) return string("Assets/BagSprites/") + (big ? "big/" : "list/") + ChecklistPad3(id) + ".bmp";
+            if (CL().sprType[i] == 2) return string(big ? "Assets/Spawner/normal/" : "Assets/SpawnerList/normal/") + ChecklistPad3(id) + ".bmp";
+            return "";
+        }
+
+        // Up/Down (auto-repeat, wrapping) + Left/Right page jump, mirroring PickerListNav. L/R are
+        // deliberately NOT consumed here -- at this screen's item level they switch category, so the
+        // page jump lives on the d-pad instead. Categories run to 101 rows (TMs), so stepping one at a
+        // time is not a real way to reach the far end.
+        static void ChecklistItemNav(int &cursor, int &scroll, int count, int rows, int &heldDir, int &repeatTimer) {
+            if (count <= 0) { cursor = 0; scroll = 0; heldDir = 0; return; }
+            if (cursor >= count) cursor = count - 1;
+            auto reveal = [&]() {
+                if (cursor < scroll) scroll = cursor;
+                if (cursor >= scroll + rows) scroll = cursor - rows + 1;
+                if (scroll > count - rows) scroll = count - rows;
+                if (scroll < 0) scroll = 0;
+            };
+            int dir = Controller::IsKeyDown(Key::Down) ? 1 : (Controller::IsKeyDown(Key::Up) ? -1 : 0);
+            if (dir != 0) {
+                bool fire = false;
+                if (dir != heldDir) { heldDir = dir; repeatTimer = 16; fire = true; }
+                else if (--repeatTimer <= 0) { repeatTimer = 4; fire = true; }
+                if (fire) { cursor = (cursor + dir + count) % count; reveal(); }
+            } else heldDir = 0;
+            // Page jump clamps instead of wrapping: Up/Down already own "go round the end", and a wrapping
+            // jump makes it impossible to just land on the first or last row.
+            int jump = 0;
+            if (Controller::IsKeyPressed(Key::Right)) jump += rows;
+            if (Controller::IsKeyPressed(Key::Left))  jump -= rows;
+            if (jump != 0) {
+                cursor += jump;
+                if (cursor < 0) cursor = 0;
+                if (cursor >= count) cursor = count - 1;
+                reveal();
+            }
+        }
+
+        // ===== Post-game Checklist (Fase 4) =====
+        // Two-level hub (mockup approved by the user: "topo da A + base da C" fusion). Level 1 (hub)
+        // shows all 10 categories with progress on top and a tappable 2x5 category grid on the
+        // bottom. Level 2 (items) shows the scrollable, touchable task list for one category on the
+        // bottom, with a live info card for the item under the cursor on top.
+        //
+        // Credits: checklist data from PhilMurwin/PokemonChecklists (github.com/PhilMurwin/
+        // PokemonChecklists), ORAS list by technophonix. Feature suggested by forum user VM21.
+        //
+        // NOT in this pass (deliberately deferred, see project plan): the "arm teleport" (START)
+        // action needs the Teleport entry's own MenuEntry* for SetGameFunc + its Hotkeys[0] gate,
+        // which this screen doesn't have -- copying the PokeMart-cart bridge pattern here would arm
+        // on the WRONG hotkeys. X still reveals the location text; there's just no live warp-arm yet.
+        void PostgameChecklist(MenuEntry *entry) {
+            (void)entry;
+            const Screen &top = OSD::GetTopScreen();
+            const Screen &bot = OSD::GetBottomScreen();
+            const FwkSettings &st = FwkSettings::Get();
+            Color bg = st.BackgroundMainColor, bg2 = st.BackgroundSecondaryColor, txt = st.MainTextColor;
+            Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
+
+            ChecklistLoadOnce();
+
+            int level = 0;                 // 0 = hub, 1 = items
+            int hubCur = 0;                // 0..9, 2x5 grid (col = i/5, row = i%5), row-major matches CL().cat[]
+            static int catCursor[CL_CATCOUNT_MAX]; static int catScroll[CL_CATCOUNT_MAX];
+            for (int i = 0; i < CL().catCount; ++i) { catCursor[i] = 0; catScroll[i] = 0; }
+            int filterMode = 0;            // 0 All, 1 Todo, 2 Done
+            bool revealLoc = false;        // X toggle, sticky for the whole session
+            int heldDir = 0, repeatTimer = 0;
+            int filtIdx[110]; int filtCount = 0;
+            int lastCat = -1, lastFilter = -1;
+            bool confirming = false; int undoN = 0;   // START > "undo my clears" confirmation
+            string flashMsg; int flash = 0;
+            int mId = -1, mStart = 0, mTick = 0, mDelay = 0; // DrawMarquee state for the selected row
+
+            const int RCACHE = 12;
+            Image rowIcon[RCACHE]; int rowIconKey[RCACHE]; int rowRR = 0;
+            for (int i = 0; i < RCACHE; ++i) rowIconKey[i] = -1;
+            auto getRowIcon = [&](int gi) -> Image* {
+                int key = CL().sprType[gi] * 100000 + ChecklistSprId(gi);
+                for (int i = 0; i < RCACHE; ++i) if (rowIconKey[i] == key) return &rowIcon[i];
+                int slot = rowRR; rowRR = (rowRR + 1) % RCACHE;
+                rowIcon[slot].LoadFromFile(ChecklistSprPath(gi, false));
+                rowIconKey[slot] = key;
+                return &rowIcon[slot];
+            };
+            Image cardIcon; int cardIconKey = -1;
+
+            bool wasDown = false;
+            UIntVector lastPos = Touch::GetPosition();
+
+            while (Controller::IsKeyDown(Key::A) || Touch::IsDown()) { Controller::Update(); OSD::SwapBuffers(); }
+
+            auto inBox = [](const UIntVector &p, int x, int y, int w, int h) -> bool {
+                return (int)p.x >= x && (int)p.x < x + w && (int)p.y >= y && (int)p.y < y + h;
+            };
+            auto drawCentered = [&](const Screen &s, const string &str, int cx, int y, Color col) {
+                int w = (int)OSD::GetTextWidth(true, str);
+                s.DrawSysfont(str, cx - w / 2, y, col);
+            };
+            // Truncate to fit a pixel width, with an ellipsis. The task strings come from upstream and
+            // routinely blow past a row ("Complete the OR / AS Hoenn Pokedex" is ~306px in a 206px slot),
+            // so every fixed-width draw has to clamp - the sysfont does no clipping of its own.
+            auto fitText = [&](const string &s, int maxW) -> string {
+                if ((int)OSD::GetTextWidth(true, s) <= maxW) return s;
+                string t = s;
+                while (t.size() > 1 && (int)OSD::GetTextWidth(true, t + "...") > maxW) t.erase(t.size() - 1);
+                return t + "...";
+            };
+            // Word-based greedy wrap, centered; returns the Y just past the last line (chain paragraphs).
+            // maxLines caps the block so a long task can't push the blocks below it out of the window;
+            // the last kept line gets ellipsised rather than silently dropping the overflow.
+            auto drawWrapCenter = [&](const Screen &s, const string &str, int cx, int y, int maxW, int lineH, Color col, int maxLines) -> int {
+                if (str.empty()) return y;
+                vector<string> words;
+                { string w; for (size_t i = 0; i < str.size(); ++i) { char c = str[i];
+                    if (c == ' ') { if (!w.empty()) { words.push_back(w); w.clear(); } } else w += c; }
+                  if (!w.empty()) words.push_back(w); }
+                vector<string> lines;
+                string line;
+                for (size_t wi = 0; wi < words.size(); ++wi) {
+                    string trial = line.empty() ? words[wi] : (line + " " + words[wi]);
+                    if (!line.empty() && (int)OSD::GetTextWidth(true, trial) > maxW) { lines.push_back(line); line = words[wi]; }
+                    else line = trial;
+                }
+                if (!line.empty()) lines.push_back(line);
+                int cy = y;
+                for (int i = 0; i < (int)lines.size() && i < maxLines; ++i) {
+                    bool last = (i == maxLines - 1) && ((int)lines.size() > maxLines);
+                    drawCentered(s, last ? fitText(lines[i] + " ...", maxW) : lines[i], cx, cy, col);
+                    cy += lineH;
+                }
+                return cy;
+            };
+            // Pill sized to its own text (a fixed-width box clipped "Detected from your save" on hardware).
+            auto drawPill = [&](const Screen &s, const string &str, int cx, int y, Color fill, Color edge, Color textCol) {
+                int w = (int)OSD::GetTextWidth(true, str) + 16;
+                if (w > 320) w = 320;
+                s.DrawRect(cx - w / 2, y, w, 22, fill, true);
+                s.DrawRect(cx - w / 2, y, w, 22, edge, false);
+                drawCentered(s, str, cx, y + 5, textCol);
+            };
+
+            while (true) {
+                Controller::Update();
+                if (System::IsSleeping()) break;
+                if (Controller::IsKeyPressed(Key::Select)) {
+                    while (Controller::IsKeyDown(Key::Select)) { Controller::Update(); OSD::SwapBuffers(); }
+                    PluginMenu::Close(); break;
+                }
+                if (flash > 0) --flash;
+
+                UIntVector pos = Touch::GetPosition();
+                bool down = Touch::IsDown();
+                bool tap = wasDown && !down; // fire on release
+                if (down) lastPos = pos;
+                wasDown = down;
+
+                // ===== "Undo my clears" confirmation (modal: owns the whole frame) =====
+                // Restores every item you cleared back to untouched, so the next Auto-fill can see them
+                // again. It deliberately does NOT touch what you checked by hand - that was never the
+                // thing you lost track of.
+                if (confirming) {
+                    const int byY = 152, byH = 40, yesX = 44, yesW = 108, noX = 168, noW = 108;
+                    bool doYes = Controller::IsKeyPressed(Key::A) || (tap && inBox(lastPos, yesX, byY, yesW, byH));
+                    bool doNo  = Controller::IsKeyPressed(Key::B) || (tap && inBox(lastPos, noX,  byY, noW,  byH));
+                    if (doYes) {
+                        int n = 0;
+                        for (int i = 0; i < CL().total; ++i) if (s_clState[i] == 3) { s_clState[i] = 0; ++n; }
+                        SaveChecklist();
+                        flashMsg = Utils::Format("Restored %d item%s - run Auto-fill", n, n == 1 ? "" : "s");
+                        flash = 120;
+                        confirming = false; lastCat = -1; drainKeys(); wasDown = false;
+                    } else if (doNo) { confirming = false; drainKeys(); wasDown = false; }
+
+                    // This branch owns the frame (it `continue`s past the main draw), so it repaints both
+                    // windows itself rather than leaving the previous buffer showing through.
+                    top.DrawRect(30, 20, 340, 200, bg, true);
+                    top.DrawRect(30, 20, 340, 200, border, false);
+                    bot.DrawRect(20, 20, 280, 200, bg2, true);
+                    bot.DrawRect(20, 20, 280, 200, border, false);
+
+                    Color hdr = Color::Yellow; // ties the modal to the yellow boxes it's about to clear
+                    top.DrawRect(48, 46, 304, 150, bg, true);
+                    top.DrawRect(48, 46, 304, 150, hdr, false);
+                    top.DrawRect(48, 46, 304, 24, hdr, true);
+                    drawCentered(top, "Undo my clears", 200, 51, AutoContrastText(hdr));
+                    int cy = drawWrapCenter(top, Utils::Format("%d item%s you cleared will go back to untouched.",
+                                                               undoN, undoN == 1 ? "" : "s"), 200, 88, 272, 18, txt, 2);
+                    drawWrapCenter(top, "Items you checked by hand are not affected.", 200, cy + 8, 272, 18, txt, 2);
+                    drawCentered(top, "Run Auto-fill afterwards to re-detect them.", 200, 168, border);
+
+                    bot.DrawSysfont(title << "Undo my clears", 34, 40, title);
+                    bot.DrawRect(yesX, byY, yesW, byH, Color::LimeGreen, true);
+                    bot.DrawRect(yesX, byY, yesW, byH, border, false);
+                    drawCentered(bot, "Yes", yesX + yesW / 2, byY + 13, AutoContrastText(Color::LimeGreen));
+                    bot.DrawRect(noX, byY, noW, byH, bg, true);
+                    bot.DrawRect(noX, byY, noW, byH, border, false);
+                    drawCentered(bot, "No", noX + noW / 2, byY + 13, txt);
+                    drawCentered(bot, "A / B", 160, byY + byH + 8, border);
+
+                    OSD::SwapBuffers();
+                    continue;
+                }
+
+                if (level == 0) {
+                    // ---- HUB navigation ----
+                    if (Controller::IsKeyPressed(Key::B)) break;
+                    int col = hubCur / 5, row = hubCur % 5;
+                    if (Controller::IsKeyPressed(Key::Down)) row = (row + 1) % 5;
+                    if (Controller::IsKeyPressed(Key::Up))   row = (row + 4) % 5;
+                    if (Controller::IsKeyPressed(Key::Left) || Controller::IsKeyPressed(Key::Right)) col = 1 - col;
+                    hubCur = col * 5 + row;
+                    // XY has 9 categories, not 10 -> the bottom-right cell of the 2x5 grid is empty;
+                    // don't let the cursor land on it (would index CL().cat out of bounds).
+                    if (hubCur >= CL().catCount) hubCur = CL().catCount - 1;
+                    if (Controller::IsKeyPressed(Key::Y)) {
+                        int n = ChecklistAutoFill(s_clState); SaveChecklist();
+                        flashMsg = Utils::Format("Auto-filled %d item%s", n, n == 1 ? "" : "s"); flash = 90;
+                    }
+                    if (Controller::IsKeyPressed(Key::Start)) {
+                        undoN = 0;
+                        for (int i = 0; i < CL().total; ++i) if (s_clState[i] == 3) ++undoN;
+                        if (undoN == 0) { flashMsg = "Nothing to undo"; flash = 90; }
+                        else { confirming = true; drainKeys(); wasDown = false; continue; }
+                    }
+                    if (tap) {
+                        for (int i = 0; i < CL().catCount; ++i) {
+                            int c = i / 5, r = i % 5;
+                            int bx = 26 + c * 136, by = 26 + r * 28;
+                            if (inBox(lastPos, bx, by, 132, 24)) { hubCur = i; level = 1; lastCat = -1; }
+                        }
+                        if (inBox(lastPos, 26, 176, 268, 24)) {
+                            int n = ChecklistAutoFill(s_clState); SaveChecklist();
+                            flashMsg = Utils::Format("Auto-filled %d item%s", n, n == 1 ? "" : "s"); flash = 90;
+                        }
+                    }
+                    if (Controller::IsKeyPressed(Key::A)) { level = 1; lastCat = -1; }
+                } else {
+                    // ---- ITEM LIST navigation ----
+                    if (Controller::IsKeyPressed(Key::B)) { level = 0; }
+                    if (Controller::IsKeyPressed(Key::L)) { hubCur = (hubCur + CL().catCount - 1) % CL().catCount; lastCat = -1; }
+                    if (Controller::IsKeyPressed(Key::R)) { hubCur = (hubCur + 1) % CL().catCount; lastCat = -1; }
+                    if (Controller::IsKeyPressed(Key::Y)) { filterMode = (filterMode + 1) % 3; lastFilter = -1; }
+                    if (Controller::IsKeyPressed(Key::X)) revealLoc = !revealLoc;
+
+                    if (level == 1) {
+                        const ClCat &cc = CL().cat[hubCur];
+                        if (hubCur != lastCat || filterMode != lastFilter) {
+                            filtCount = 0;
+                            for (int i = cc.first; i < cc.first + cc.count && filtCount < 110; ++i) {
+                                bool checked = (s_clState[i] == 1 || s_clState[i] == 2);
+                                if (filterMode == 1 && checked) continue;   // Todo: hide done
+                                if (filterMode == 2 && !checked) continue;  // Done: hide todo
+                                filtIdx[filtCount++] = i;
+                            }
+                            lastCat = hubCur; lastFilter = filterMode;
+                            if (catCursor[hubCur] >= filtCount) catCursor[hubCur] = filtCount > 0 ? filtCount - 1 : 0;
+                        }
+
+                        ChecklistItemNav(catCursor[hubCur], catScroll[hubCur], filtCount, CL_ROWS, heldDir, repeatTimer);
+                        int cursor = catCursor[hubCur], scroll = catScroll[hubCur];
+
+                        // START = arm the Teleport at this item's location. It does NOT warp: the real
+                        // warp is ApplyLocation, which only fires when the player walks through a door
+                        // holding the Teleport entry's own hotkey. The toast says exactly that, and names
+                        // the actual key, since it's rebindable.
+                        if (filtCount > 0 && Controller::IsKeyPressed(Key::Start)) {
+                            int gi = filtIdx[cursor];
+                            int li = revealLoc ? CL().locIdx[gi] : -1;   // no arming a location you haven't revealed
+                            if (li >= 0) {
+                                if (ChecklistArmTeleport(li))
+                                    OSD::Notify(Utils::Format("Warp set. Hold %s and enter any door.",
+                                                              ChecklistTeleportKeyName().c_str()));
+                                else
+                                    OSD::Notify("No warp point saved there yet. Set one in Teleportation (START).");
+                            }
+                        }
+
+                        if (filtCount > 0 && (tap || Controller::IsKeyPressed(Key::A))) {
+                            bool rowTapped = !tap; // A-press always applies to the row under cursor
+                            if (tap) {
+                                for (int r = 0; r < CL_ROWS && scroll + r < filtCount; ++r) {
+                                    if (inBox(lastPos, 26, 52 + r * 20, 268, 18)) { cursor = scroll + r; catCursor[hubCur] = cursor; rowTapped = true; break; }
+                                }
+                            }
+                            if (rowTapped) {
+                                int gi = filtIdx[cursor];
+                                bool checked = (s_clState[gi] == 1 || s_clState[gi] == 2);
+                                s_clState[gi] = checked ? 3 : 2;
+                                SaveChecklist();
+                            }
+                        }
+                    }
+                }
+
+                // =========================================================== DRAW
+                top.DrawRect(30, 20, 340, 200, bg, true);
+                top.DrawRect(30, 20, 340, 200, border, false);
+                bot.DrawRect(20, 20, 280, 200, bg2, true);
+                bot.DrawRect(20, 20, 280, 200, border, false);
+
+                if (level == 0) {
+                    // ---- TOP: category overview ----
+                    top.DrawSysfont(title << "Post-game Checklist", 44, 26, title);
+                    // Real running-game name (AutoGame is version-based, so it would mislabel X/Y).
+                    string gameName = currGameName == GameName::X ? "X"
+                                    : currGameName == GameName::Y ? "Y"
+                                    : currGameName == GameName::OmegaRuby ? "Omega Ruby" : "Alpha Sapphire";
+                    { int w = (int)OSD::GetTextWidth(true, gameName); top.DrawSysfont(gameName, 356 - w, 26, txt); }
+                    top.DrawRect(40, 48, 320, 1, border, true);
+
+                    int totalDone = 0, totalAll = CL().total;
+                    for (int c = 0; c < CL().catCount; ++c) {
+                        int done = 0;
+                        for (int i = CL().cat[c].first; i < CL().cat[c].first + CL().cat[c].count; ++i)
+                            if (s_clState[i] == 1 || s_clState[i] == 2) ++done;
+                        totalDone += done;
+                        int col = c / 5, row = c % 5;
+                        // 5 rows from y=58 (pitch 20) -> last row spans 138..153, clearing the y=158 divider.
+                        int x = col == 0 ? 44 : 212, xr = col == 0 ? 196 : 356, y = 58 + row * 20;
+                        Color rowCol = (c == hubCur) ? title : txt;
+                        bool full = (CL().cat[c].count > 0 && done == (int)CL().cat[c].count);
+                        Color fracCol = full ? Color::LimeGreen : rowCol;
+                        top.DrawSysfont(rowCol << CL().cat[c].name, x, y, rowCol);
+                        string frac = Utils::Format("%d/%d", done, (int)CL().cat[c].count);
+                        int w = (int)OSD::GetTextWidth(true, frac);
+                        top.DrawSysfont(fracCol << frac, xr - w, y, fracCol);
+                    }
+                    top.DrawRect(40, 158, 320, 1, border, true);
+                    // Text first, bar BELOW it: the sysfont line at y=164 occupies ~164-179, so the old
+                    // y=176 bar was drawing straight through the total's glyphs on hardware.
+                    top.DrawSysfont(txt << "Total", 44, 164, txt);
+                    int pct = totalAll > 0 ? (totalDone * 100 / totalAll) : 0;
+                    string totFrac = Utils::Format("%d/%d  (%d%%)", totalDone, totalAll, pct);
+                    { int w = (int)OSD::GetTextWidth(true, totFrac); top.DrawSysfont(Color::LimeGreen << totFrac, 356 - w, 164, Color::LimeGreen); }
+                    top.DrawRect(44, 184, 312, 6, bg2, true);
+                    int barW = totalAll > 0 ? (312 * totalDone / totalAll) : 0;
+                    top.DrawRect(44, 184, barW, 6, Color::LimeGreen, true);
+                    // Laid out by measured text width rather than fixed x: "cleared" is the widest label
+                    // and the hardcoded stops had no room left for a 4th chip.
+                    { struct Chip { const char *label; Color col; bool filled; };
+                      const Chip chips[4] = { {"auto", Color::LimeGreen, true}, {"you", sel, true},
+                                              {"todo", bg, false}, {"cleared", Color::Yellow, false} };
+                      int x = 44;
+                      for (int i = 0; i < 4; ++i) {
+                          top.DrawRect(x, 198, 10, 10, chips[i].col, chips[i].filled);
+                          top.DrawSysfont(txt << chips[i].label, x + 16, 199, txt);
+                          x += 16 + (int)OSD::GetTextWidth(true, chips[i].label) + 16;
+                      } }
+
+                    // ---- BOTTOM: 2x5 category switcher + Auto-fill ----
+                    for (int i = 0; i < CL().catCount; ++i) {
+                        int c = i / 5, r = i % 5;
+                        int x = 26 + c * 136, y = 26 + r * 28;
+                        bool selRow = (i == hubCur);
+                        bot.DrawRect(x, y, 132, 24, selRow ? sel : bg, true);
+                        bot.DrawRect(x, y, 132, 24, selRow ? title : border, false);
+                        Color cText = selRow ? bg2 : txt;
+                        int w = (int)OSD::GetTextWidth(true, CL().cat[i].name);
+                        bot.DrawSysfont(cText << CL().cat[i].name, x + (132 - w) / 2, y + 6, cText);
+                    }
+                    bot.DrawRect(26, 170, 268, 1, border, true);
+                    bot.DrawRect(26, 176, 268, 24, bg, true);
+                    bot.DrawRect(26, 176, 268, 24, Color::LimeGreen, false);
+                    drawCentered(bot, fitText(flash > 0 ? flashMsg : string("Auto-fill from save"), 260), 160, 181, Color::LimeGreen);
+                    // Measured on hardware: only the two non-obvious keys fit. "Tap a category" is
+                    // self-evident with the grid right there, and B-to-go-back is a plugin-wide given.
+                    drawCentered(bot, "Y Auto-fill   START undo clears", 160, 202, txt);
+                } else {
+                    const ClCat &cc = CL().cat[hubCur];
+                    int cursor = catCursor[hubCur], scroll = catScroll[hubCur];
+
+                    // ---- TOP: live card for the item under the cursor ----
+                    // Layout follows the approved mockup, modelled on the Pokemon Spawner's own detail
+                    // sheet: a big framed sprite on the left, a label/value block on the right with ONE
+                    // left edge so the eye runs down a single column. Labels take `title` and values
+                    // `txt` - with a single-size sysfont, colour and alignment are the only hierarchy
+                    // available (an earlier pass put everything in `txt` and read as a wall of text).
+                    top.DrawSysfont(title << fitText(CL().cat[hubCur].name, 200), 44, 26, title);
+                    { int done = 0;
+                      for (int i = CL().cat[hubCur].first; i < CL().cat[hubCur].first + CL().cat[hubCur].count; ++i)
+                          if (s_clState[i] == 1 || s_clState[i] == 2) ++done;
+                      bool full = (done == (int)CL().cat[hubCur].count);
+                      string hdr = Utils::Format("%d/%d", done, (int)CL().cat[hubCur].count);
+                      Color fill = full ? Color::LimeGreen : border;
+                      top.DrawRect(286, 24, 70, 18, fill, true);
+                      drawCentered(top, hdr, 321, 27, AutoContrastText(fill)); }
+                    top.DrawRect(40, 48, 320, 1, border, true);
+
+                    if (filtCount > 0) {
+                        int gi = filtIdx[cursor];
+                        bool hasSpr = (CL().sprType[gi] != 0);
+                        if (hasSpr) {
+                            int key = CL().sprType[gi] * 100000 + ChecklistSprId(gi);
+                            if (key != cardIconKey) { cardIcon.LoadFromFile(ChecklistSprPath(gi, true)); cardIconKey = key; }
+                            top.DrawRect(44, 56, 76, 76, bg2, true);
+                            top.DrawRect(44, 56, 76, 76, border, false);
+                            if (cardIcon.IsLoaded()) {
+                                int sw = cardIcon.Width(), sh = cardIcon.Height();
+                                cardIcon.Draw(top, 44 + (76 - sw) / 2, 56 + (76 - sh) / 2, Color::Magenta);
+                            }
+                        }
+                        // Without a sprite (~40% of the list: Battle, Upgrades, Activities...) the text
+                        // block claims the full width instead of leaving the box's hole behind.
+                        int lx = hasSpr ? 132 : 44;          // label column
+                        int vx = hasSpr ? 196 : 108;         // value column
+                        int rx = 356;                        // right edge
+                        int nameY = drawWrapCenter(top, ChecklistTask(gi), (lx + rx) / 2, 58, rx - lx, 18, title, 2);
+                        top.DrawRect(lx, nameY + 4, rx - lx, 1, border, true);
+
+                        int y = nameY + 14;
+                        top.DrawSysfont(title << "Status", lx, y, title);
+                        string prov = (s_clState[gi] == 1) ? "From your save"
+                                    : (s_clState[gi] == 2) ? "Checked by you"
+                                    : (s_clState[gi] == 3) ? "You cleared this"
+                                    : "Not done yet";
+                        Color pf = (s_clState[gi] == 1) ? Color::LimeGreen
+                                 : (s_clState[gi] == 2) ? sel
+                                 : (s_clState[gi] == 3) ? Color::Yellow : border;
+                        top.DrawRect(vx, y - 2, rx - vx, 18, pf, true);
+                        drawCentered(top, fitText(prov, rx - vx - 8), (vx + rx) / 2, y, AutoContrastText(pf));
+
+                        y += 28;
+                        top.DrawSysfont(title << "Hint", lx, y, title);
+                        if (CL().tip[gi][0]) drawWrapCenter(top, CL().tip[gi], (vx + rx) / 2, y, rx - vx, 18, txt, 2);
+                        else              top.DrawSysfont(border << "-", vx, y, border);
+
+                        y += 46;
+                        top.DrawSysfont(title << "Where", lx, y, title);
+                        string loc = CL().spoil[gi];
+                        if (loc.empty()) top.DrawSysfont(border << "-", vx, y, border);
+                        else if (!revealLoc) {
+                            top.DrawRect(vx, y - 2, rx - vx, 18, bg2, true);
+                            top.DrawRect(vx, y - 2, rx - vx, 18, sel, false);
+                            drawCentered(top, "X: show location", (vx + rx) / 2, y, sel);
+                        } else {
+                            top.DrawRect(vx, y - 2, rx - vx, 18, bg2, true);
+                            top.DrawRect(vx, y - 2, rx - vx, 18, sel, false);
+                            drawCentered(top, fitText(loc, rx - vx - 8), (vx + rx) / 2, y, sel);
+                        }
+                    } else {
+                        drawCentered(top, "Nothing here right now.", 200, 110, txt);
+                        drawCentered(top, "Try Y to change the filter.", 200, 128, txt);
+                    }
+                    // Footer. The warp state takes this line over once a location is showing, rather than
+                    // claiming a line of its own: the card runs to y~198 when a task name wraps to two
+                    // lines, and "X location" has nothing left to say at the moment X has been pressed.
+                    // Measured: the old hint was ~490px of text in a 340px window. A/B are obvious.
+                    int fLoc = (filtCount > 0 && revealLoc && CL().spoil[filtIdx[cursor]][0]) ? CL().locIdx[filtIdx[cursor]] : -1;
+                    if (fLoc >= 0) {
+                        bool ok = ChecklistTeleportAvailable(fLoc);
+                        // Armed state comes from Codes.cpp, not a local flag: picking another destination
+                        // in Teleportation itself must un-say "warp set" here.
+                        bool armed = ok && ChecklistArmedTarget() == fLoc;
+                        drawCentered(top, armed ? "START: warp set" : ok ? "START: set warp target"
+                                                                         : "Need warp point - see Teleportation",
+                                     200, 200, armed ? Color::LimeGreen : ok ? sel : Color::Red);
+                    } else {
+                        drawCentered(top, "L/R category   Y filter   X location", 200, 200, border);
+                    }
+
+                    // ---- BOTTOM: item list ----
+                    string filterLabel = filterMode == 0 ? "All" : filterMode == 1 ? "Todo" : "Done";
+                    bot.DrawSysfont(border << "<", 28, 26, border);
+                    bot.DrawSysfont(title << fitText(cc.name, 120), 44, 26, title);
+                    { int done = 0; for (int i = cc.first; i < cc.first + cc.count; ++i) if (s_clState[i] == 1 || s_clState[i] == 2) ++done;
+                      string frac = Utils::Format("%s  %d/%d", filterLabel.c_str(), done, (int)cc.count);
+                      int w = (int)OSD::GetTextWidth(true, frac); bot.DrawSysfont(txt << frac, 266 - w, 26, txt);
+                      bot.DrawSysfont(border << ">", 272, 26, border); }
+                    bot.DrawRect(26, 48, 268, 1, border, true);
+
+                    // 8 rows, not 9: y = 52 + r*20 with r=0..8 put the 9th row at 212..230, and the window
+                    // ends at y=220 - it was drawing straight through the frame on hardware. 8 rows end at 210.
+                    for (int r = 0; r < CL_ROWS && scroll + r < filtCount; ++r) {
+                        int gi = filtIdx[scroll + r];
+                        int y = 52 + r * 20;
+                        bool isCur = (scroll + r == cursor);
+                        if (isCur) bot.DrawRect(26, y, 268, 18, sel, true);
+                        Color rc = isCur ? bg2 : txt;
+                        if (isCur) bot.DrawSysfont(rc << "\xE2\x86\x92", 28, y + 4, rc);
+                        bool hasIcon = (CL().sprType[gi] != 0);
+                        if (hasIcon) { Image *ic = getRowIcon(gi); ic->Draw(bot, 44, y + 1, Color::Magenta); }
+                        int tx = hasIcon ? 64 : 44;
+                        int availW = 268 - tx;   // stop before the state box at x=272
+                        // The selected row marquees when it overflows (same treatment the PokeMart strip
+                        // uses); the others get a hard ellipsis. Either way nothing escapes the window.
+                        if (isCur) DrawMarquee(bot, ChecklistTask(gi), tx, y + 4, availW, rc, mId, gi, mStart, mTick, mDelay);
+                        else       bot.DrawSysfont(rc << fitText(ChecklistTask(gi), availW), tx, y + 4, rc);
+                        // State 3 (you cleared an auto-mark) gets its own outline: it reads as unchecked
+                        // like state 0, but Auto-fill will never touch it again, so drawing the two the
+                        // same way hid the one fact you need to undo it. Yellow = the theme's attention
+                        // accent, free since the version-only marker was dropped.
+                        u8 stt = s_clState[gi];
+                        if (stt == 1) bot.DrawRect(272, y + 3, 11, 11, Color::LimeGreen, true);
+                        else if (stt == 2) bot.DrawRect(272, y + 3, 11, 11, sel, true);
+                        else if (stt == 3) bot.DrawRect(272, y + 3, 11, 11, Color::Yellow, false);
+                        else bot.DrawRect(272, y + 3, 11, 11, border, false);
+                    }
+                    if (filtCount == 0) drawCentered(bot, "Nothing here.", 160, 100, txt);
+                }
+
+                OSD::SwapBuffers();
+            }
+        }
+
         // ===== Living Dex Dashboard =====
         // Read-only collection panel: scans all 31 boxes x 30 + the party once, marks which of the 721 species
         // you OWN (and which you own SHINY), then shows a paginated 9x4 grid using the existing 32px BoxIcons
@@ -2703,7 +3396,7 @@ namespace CTRPluginFramework {
                     }
                 }
                 if (!showCard && Controller::IsKeyPressed(Key::X)) {
-                    File f("LivingDex.txt", File::RWC | File::TRUNCATE);
+                    File f(PlayerFile(PATH_LIVINGDEX), File::RWC | File::TRUNCATE);
                     if (f.IsOpen()) {
                         string out = "Living Dex - owned " + to_string(ownedN) + "/721, shiny " + to_string(shinyN) + "\n\nMissing:\n";
                         for (u16 sp = 1; sp <= 721; ++sp)
@@ -2732,7 +3425,7 @@ namespace CTRPluginFramework {
                 } else if (tap && inBox(lastPos, COL2_X, ROW2_Y, CW, RBH)) {
                     missState = (missState + 1) % 3; ++filterVer; rebuild(); // cycles All -> Missing -> Owned -> All
                 } else if (tap && inBox(lastPos, GX, EXPORT_Y, GW, EXPORT_H)) {
-                    File f("LivingDex.txt", File::RWC | File::TRUNCATE);
+                    File f(PlayerFile(PATH_LIVINGDEX), File::RWC | File::TRUNCATE);
                     if (f.IsOpen()) {
                         string out = "Living Dex - owned " + to_string(ownedN) + "/721, shiny " + to_string(shinyN) + "\n\nMissing:\n";
                         for (u16 sp = 1; sp <= 721; ++sp)

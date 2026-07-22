@@ -5,6 +5,11 @@
 #include "Helpers.hpp"
 
 namespace CTRPluginFramework {
+    // Path for a player-owned data file, under the plugin folder's PlayerData/ subfolder (creating it on
+    // first use). Keeps MyTeleport/ShinyHunts/Checklist/LivingDex out of /luma/plugins/<TID>/, which was
+    // getting crowded next to the .3gx and the Assets/AppGuide/GameGuide trees.
+    string PlayerFile(const char *name);
+
     void UpdateIcon(MenuEntry *entry);
     void IgnoreUnclickableIcons(MenuEntry *entry);
     void UpdateNices(MenuEntry *entry);
@@ -77,6 +82,13 @@ namespace CTRPluginFramework {
     void ActionMusic(MenuEntry *entry);
     void ApplyMusic(MenuEntry *entry);
     void Teleportation(MenuEntry *entry);
+    extern MenuEntry *g_teleportEntry; // the Teleportation entry; other screens arm a warp on it (set in Main.cpp)
+    // Teleport bridge (ResolveSpot/sTele*/gSpots are static to Codes.cpp - reach them through these, the way
+    // BagCartAdd/BagCartClear reach the PokeMart cart). locIdx = a kParsedLocations index, or ROUTE_BASE + N.
+    bool ChecklistTeleportAvailable(int locIdx); // would ResolveSpot find a drop point? (routes need a saved SPOT)
+    bool ChecklistArmTeleport(int locIdx);       // set the destination on g_teleportEntry - does NOT warp by itself
+    int ChecklistArmedTarget(void);              // target currently armed (-1 = none); both arming paths keep it true
+    string ChecklistTeleportKeyName(void);       // the Teleport entry's real (rebindable) hotkey, for the toast
     void ZoneFinder(MenuEntry *entry); // TEMP DEBUG: locate the live current-map RAM address
     void LoadMyTeleport(void);    // load HERE binds + custom teleport SPOTs from the plugin folder (MyTeleport.txt)
     void FlyMapInSummary(MenuEntry *entry);

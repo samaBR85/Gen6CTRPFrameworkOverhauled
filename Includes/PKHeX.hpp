@@ -138,6 +138,7 @@
       int  CountParty(void);                // # of occupied overworld party slots (HUD Party count uses this)
       void TrainerCard(MenuEntry *entry);    // read-only shareable card (root menu, after View Party Summary)
       void LivingDex(MenuEntry *entry);      // read-only collection dashboard (Trainer Info): owned/shiny/missing grid
+      void PostgameChecklist(MenuEntry *entry); // Post-game Checklist (Trainer Info, ORAS-only): 422-item completionist list, hybrid monotonic auto-fill
       void GymCoach(MenuEntry *entry);  // Gym Coach (Trainer Info): browse the next Gym Leader/E4/Champion's team + matchup verdict vs your party
       void LevelCapTool(MenuEntry *entry); // Level Cap (Trainer Info): nuzlocke per-gym level cap manager (auto ace+offset, Warn/Enforce/Off)
       int  LevelCapOverCount(int *outCap); // HUD helper: # party mons over the current cap (writes cap); -1 if Off/unavailable

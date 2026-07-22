@@ -787,7 +787,12 @@ namespace CTRPluginFramework {
         MenuFolder *movement = new MenuFolder(getLanguage->Get("MENU_MOVEMENT_TRAVEL"), getLanguage->Get("NOTE_MOVEMENT_TRAVEL"));
         Fav(movement, "FAV_MOVEMENT_TRAVEL");
 
-        *movement += Fav(HotkeyEntry(new MenuEntry(getLanguage->Get("MISC_TELEPORTATION"), nullptr, Teleportation, getLanguage->Get("NOTE_MISC_TELEPORTATION")), {Key::L, ""}), "FAV_MISC_TELEPORTATION"); // <W, tested: O3DS/O2DS - Y/OR
+        // Captured into g_teleportEntry (same reason as g_respawnLastEntry above) so other screens can arm a
+        // warp destination on THIS entry - arming needs its MenuEntry* for SetGameFunc and its own Hotkeys[0]
+        // as the hold-to-warp gate. Behaviour of the Teleport entry itself is unchanged.
+        MenuEntry *teleportEntry = new MenuEntry(getLanguage->Get("MISC_TELEPORTATION"), nullptr, Teleportation, getLanguage->Get("NOTE_MISC_TELEPORTATION"));
+        g_teleportEntry = teleportEntry;
+        *movement += Fav(HotkeyEntry(teleportEntry, {Key::L, ""}), "FAV_MISC_TELEPORTATION"); // <W, tested: O3DS/O2DS - Y/OR
         *movement += Fav(HotkeyEntry(new MenuEntry(getLanguage->Get("MISC_FAST_WALK_RUN"), FastWalkRun, getLanguage->Get("NOTE_MISC_FAST_WALK_RUN")), {Key::ZL, ""}), "FAV_MISC_FAST_WALK_RUN"); // <W
         *movement += Fav(HotkeyEntry(new MenuEntry(getLanguage->Get("MISC_WALK_THROUGH_WALLS"), WalkThroughWalls, getLanguage->Get("NOTE_MISC_WALK_THROUGH_WALLS")), {Key::R, ""}), "FAV_MISC_WALK_THROUGH_WALLS"); // <W, tested: O3DS/O2DS - Y/OR
         *movement += Fav(new MenuEntry(getLanguage->Get("MISC_STAY_IN_ACTION"), StayInAction, getLanguage->Get("NOTE_MISC_STAY_IN_ACTION")), "FAV_MISC_STAY_IN_ACTION"); // <W, tested: O3DS/O2DS - Y/OR
@@ -867,6 +872,9 @@ namespace CTRPluginFramework {
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_NATURE_IV_EV_ADVISOR"), nullptr, PKHeX::EVAdvisor, getLanguage->Get("NOTE_NATURE_IV_EV_ADVISOR")), "FAV_EV_ADVISOR");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_HELD_ITEM_ADVISOR"), nullptr, PKHeX::HeldItemAdvisor, getLanguage->Get("NOTE_HELD_ITEM_ADVISOR")), "FAV_HELD_ITEM_ADVISOR");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_LIVING_DEX"), nullptr, PKHeX::LivingDex, getLanguage->Get("NOTE_LIVING_DEX")), "FAV_LIVING_DEX");
+        if (currGameSeries == GameSeries::ORAS || currGameSeries == GameSeries::XY) { // ChecklistData.hpp has both tables
+            *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_POSTGAME"), nullptr, PKHeX::PostgameChecklist, getLanguage->Get("NOTE_POSTGAME")), "FAV_POSTGAME");
+        }
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_GYM_COACH"), nullptr, PKHeX::GymCoach, getLanguage->Get("NOTE_GYM_COACH")), "FAV_GYM_COACH");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_LEVEL_CAP"), nullptr, PKHeX::LevelCapTool, getLanguage->Get("NOTE_LEVEL_CAP")), "FAV_LEVEL_CAP");
         *trainerInfo += Fav(new MenuEntry(getLanguage->Get("MENU_TRAINER_CARD"), nullptr, PKHeX::TrainerCard, getLanguage->Get("NOTE_TRAINER_CARD")), "FAV_TRAINER_CARD");
@@ -891,7 +899,7 @@ namespace CTRPluginFramework {
         // Tools menu, which read their labels via SetFrameworkText/FwText. SetLanguage() pushes those
         // translations, so it must run BEFORE the menu is constructed (InitMenu later reuses the parsed instance).
         SetLanguage(false);
-        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 8, 1, getLanguage->Get("FW_ABOUT_BODY"));
+        PluginMenu *menu = new PluginMenu("Gen6CTRPFramework Overhauled", 0, 8, 2, getLanguage->Get("FW_ABOUT_BODY"));
         // Enable menu synchronization with the game's frame rate
         menu->SynchronizeWithFrame(true);
         // Pause the execution for 100 milliseconds to ensure the menu is properly initialized

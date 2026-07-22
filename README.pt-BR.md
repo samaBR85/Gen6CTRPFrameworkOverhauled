@@ -1,4 +1,4 @@
-# Gen6CTRPluginFrameworkOverhauled — v0.8.1
+# Gen6CTRPluginFrameworkOverhauled — v0.8.2
 
 [English](README.md) · **Português**
 
