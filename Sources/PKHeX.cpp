@@ -6016,9 +6016,9 @@ namespace CTRPluginFramework {
             static const int inMap[6] = {0, 1, 2, 4, 5, 3}; // display HP,Atk,Def,SpA,SpD,Spe -> iv32/EV index
             static const char *ITEMS[] = {
                 "Max IVs (31)", "Max EVs (252/252/4)", "Clear EVs (0)", "Max Friendship (255)",
-                "Toggle Pokerus", "Restore PP", "Reroll PID",
+                "Toggle Pokerus", "Restore PP", "Reroll PID", "Max Affection (255)",
             };
-            const int N = 7; int cursor = 0; string msg;
+            const int N = 8; int cursor = 0; string msg;
 
             while (Controller::IsKeyDown(Key::X) || Controller::IsKeyDown(Key::A)) { Controller::Update(); OSD::SwapBuffers(); }
             while (true) {
@@ -6029,7 +6029,7 @@ namespace CTRPluginFramework {
                 if (KeyRep(Key::Down)) cursor = (cursor + 1) % N;
                 if (Controller::IsKeyPressed(Key::A)) {
                     switch (cursor) {
-                        case 0: pk.iv32 = (pk.iv32 & 0xC0000000u) | 0x3FFFFFFFu; msg = "IVs maxed (31)"; break; // keep egg/nick bits
+                        case 0: pk.iv32 = (pk.iv32 & 0xC0000000u) | 0x3FFFFFFFu; msg = "IVs set to 31 (max)"; break; // keep egg/nick bits
                         case 1: { for (int i = 0; i < 6; i++) pk.EV[i] = 0;
                                   int b1 = -1, b2 = -1; // two highest base stats among Atk..Spe (display 1..5)
                                   for (int d = 1; d < 6; d++) {
@@ -6039,16 +6039,17 @@ namespace CTRPluginFramework {
                                   if (b1 >= 0) pk.EV[inMap[b1]] = 252;
                                   if (b2 >= 0) pk.EV[inMap[b2]] = 252;
                                   pk.EV[0] = 4; // 4 HP
-                                  msg = "EVs set 252/252/4"; break; }
-                        case 2: for (int i = 0; i < 6; i++) pk.EV[i] = 0; msg = "EVs cleared"; break;
-                        case 3: pk.originalTrainerFriendship = 255; AdjustFriendship(&pk, 255); msg = "Friendship 255"; break; // OT + handler
+                                  msg = "EVs set to 252/252/4"; break; }
+                        case 2: for (int i = 0; i < 6; i++) pk.EV[i] = 0; msg = "EVs cleared to 0"; break;
+                        case 3: pk.originalTrainerFriendship = 255; AdjustFriendship(&pk, 255); msg = "Friendship set to 255 (max)"; break; // OT + handler
                         case 4: if (pk.infected) { SetPokerusStatus(&pk, 0, 0); msg = "Pokerus removed"; }
                                 else { SetPokerusStatus(&pk, 4, 1); msg = "Pokerus given"; } break;
                         case 5: { for (int i = 0; i < 4; i++) if (pk.move[i] >= 1 && pk.move[i] <= 621) {
                                       int base = gMoveExtra[pk.move[i] - 1][2]; int up = pk.movePPUp[i]; if (up > 3) up = 3;
                                       pk.movePP[i] = (u8)(base * (5 + up) / 5);
-                                  } msg = "PP restored"; break; }
+                                  } msg = "PP fully restored"; break; }
                         case 6: pk.PID = Utils::Random(1, 0xFFFFFFFF); msg = "PID rerolled"; break;
+                        case 7: pk.originalTrainerAffection = 255; pk.hiddenTrainerAffection = 255; msg = "Affection set to 255 (max)"; break; // OT + handler; for Sylveon (needs a Fairy move + level up)
                     }
                     SetPokemon(ptr, &pk);
                     while (Controller::IsKeyDown(Key::A)) { Controller::Update(); OSD::SwapBuffers(); }
@@ -6064,7 +6065,9 @@ namespace CTRPluginFramework {
                   top.DrawSysfont(sel << "EVs " << txt << evs, 42, 98, txt); }
                 top.DrawSysfont(sel << "Friendship " << txt << to_string(pk.originalTrainerFriendship)
                                     << sel << "   Pokerus " << txt << (pk.infected ? "Yes" : "No"), 42, 118, txt);
-                top.DrawSysfont(sel << "Shiny " << txt << (IsShiny(&pk) ? "Yes" : "No"), 42, 138, txt);
+                top.DrawSysfont(sel << "Shiny " << txt << (IsShiny(&pk) ? "Yes" : "No")
+                                    << sel << "   Affection " << txt << to_string(pk.originalTrainerAffection), 42, 138, txt);
+                if (!msg.empty()) top.DrawSysfont(Color::LimeGreen << msg, 42, 170, Color::LimeGreen); // confirmation up here - the 8-row list below has no spare space
 
                 // ---- BOTTOM: action list ----
                 bot.DrawRect(20, 20, 280, 200, bg, true); bot.DrawRect(20, 20, 280, 200, border, false);
@@ -6074,7 +6077,6 @@ namespace CTRPluginFramework {
                     if (i == cursor) bot.DrawRect(26, y - 2, 268, 18, bg2, true);
                     bot.DrawSysfont((i == cursor ? sel : txt) << ITEMS[i], 40, y, i == cursor ? sel : txt);
                 }
-                if (!msg.empty()) bot.DrawSysfont(title << msg, 34, 190, title);
                 bot.DrawSysfont(txt << "A apply   B back", 20 + (280 - (int)OSD::GetTextWidth(true, "A apply   B back")) / 2, 206, txt);
                 OSD::SwapBuffers();
             }
