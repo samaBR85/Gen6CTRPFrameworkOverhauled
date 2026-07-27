@@ -1,14 +1,14 @@
 {
   "storeInfo": {
-    "title": "Gen6 CTRPF Overhauled",
+    "title": "samaBR85's 3DS Store",
     "author": "samaBR85",
-    "description": "Pokemon X/Y/OR/AS plugin - spawner, PokeMart anywhere, PC Box++, in-battle tools, teleport, mini-games, 25 themes, 7 languages.",
+    "description": "Gen6 CTRPF Overhauled (Pokemon X/Y/OR/AS) and OcarinaCTRComposer (Ocarina of Time 3D) - self-rendered Luma3DS plugins.",
     "url": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.unistore",
     "file": "gen6ctrpf.unistore",
     "sheet": "gen6ctrpf.t3x",
     "sheetURL": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.t3x",
     "version": 4,
-    "revision": 27
+    "revision": 28
   },
   "storeContent": [
     {
@@ -42,6 +42,41 @@
         {
           "type": "deleteFile",
           "file": "sdmc:/gen6ctrpf.zip",
+          "message": "Cleaning up..."
+        }
+      ]
+    },
+    {
+      "info": {
+        "title": "OcarinaCTRComposer",
+        "author": "samaBR85",
+        "description": "Cheats + tools overlay for The Legend of Zelda: Ocarina of Time 3D (USA). Teleport, self-naming waypoints, Toggle Age, 100% Checklist with save-synced auto-fill, Cheat Search, RAM Dumper, Hex Editor, embedded walkthrough, 26 themes.",
+        "category": ["game"],
+        "console": ["3DS"],
+        "icon_index": 1,
+        "sheet_index": 0,
+        "last_updated": "2026-07-27 (UTC)",
+        "license": "mit",
+        "version": "1.0.0"
+      },
+      "Download & Install Plugin": [
+        {
+          "type": "downloadRelease",
+          "repo": "samaBR85/OcarinaCTRComposer",
+          "file": "OcarinaCTRComposer-unistore.zip",
+          "output": "sdmc:/octrc.zip",
+          "message": "Downloading the latest OcarinaCTRComposer..."
+        },
+        {
+          "type": "extractFile",
+          "file": "sdmc:/octrc.zip",
+          "input": "",
+          "output": "sdmc:/",
+          "message": "Extracting plugin + guide to the SD root..."
+        },
+        {
+          "type": "deleteFile",
+          "file": "sdmc:/octrc.zip",
           "message": "Cleaning up..."
         }
       ]
