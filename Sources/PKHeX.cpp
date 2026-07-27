@@ -6015,8 +6015,8 @@ namespace CTRPluginFramework {
             Color sel = st.MenuSelectedItemColor, title = st.WindowTitleColor, border = st.BackgroundBorderColor;
             static const int inMap[6] = {0, 1, 2, 4, 5, 3}; // display HP,Atk,Def,SpA,SpD,Spe -> iv32/EV index
             static const char *ITEMS[] = {
-                "Max IVs (31)", "Max EVs (252/252/4)", "Clear EVs (0)", "Max Friendship (255)",
-                "Toggle Pokerus", "Restore PP", "Reroll PID", "Max Affection (255)",
+                "Max IVs (31)", "Max EVs (252/252/4)", "Max Friendship (255)", "Max Affection (255)",
+                "Clear EVs (0)", "Toggle Pokerus", "Restore PP", "Reroll PID",
             };
             const int N = 8; int cursor = 0; string msg;
 
@@ -6040,16 +6040,16 @@ namespace CTRPluginFramework {
                                   if (b2 >= 0) pk.EV[inMap[b2]] = 252;
                                   pk.EV[0] = 4; // 4 HP
                                   msg = "EVs set to 252/252/4"; break; }
-                        case 2: for (int i = 0; i < 6; i++) pk.EV[i] = 0; msg = "EVs cleared to 0"; break;
-                        case 3: pk.originalTrainerFriendship = 255; AdjustFriendship(&pk, 255); msg = "Friendship set to 255 (max)"; break; // OT + handler
-                        case 4: if (pk.infected) { SetPokerusStatus(&pk, 0, 0); msg = "Pokerus removed"; }
+                        case 2: pk.originalTrainerFriendship = 255; AdjustFriendship(&pk, 255); msg = "Friendship set to 255 (max)"; break; // OT + handler
+                        case 3: pk.originalTrainerAffection = 255; pk.hiddenTrainerAffection = 255; msg = "Affection set to 255 (max)"; break; // OT + handler; for Sylveon (needs a Fairy move + level up)
+                        case 4: for (int i = 0; i < 6; i++) pk.EV[i] = 0; msg = "EVs cleared to 0"; break;
+                        case 5: if (pk.infected) { SetPokerusStatus(&pk, 0, 0); msg = "Pokerus removed"; }
                                 else { SetPokerusStatus(&pk, 4, 1); msg = "Pokerus given"; } break;
-                        case 5: { for (int i = 0; i < 4; i++) if (pk.move[i] >= 1 && pk.move[i] <= 621) {
+                        case 6: { for (int i = 0; i < 4; i++) if (pk.move[i] >= 1 && pk.move[i] <= 621) {
                                       int base = gMoveExtra[pk.move[i] - 1][2]; int up = pk.movePPUp[i]; if (up > 3) up = 3;
                                       pk.movePP[i] = (u8)(base * (5 + up) / 5);
                                   } msg = "PP fully restored"; break; }
-                        case 6: pk.PID = Utils::Random(1, 0xFFFFFFFF); msg = "PID rerolled"; break;
-                        case 7: pk.originalTrainerAffection = 255; pk.hiddenTrainerAffection = 255; msg = "Affection set to 255 (max)"; break; // OT + handler; for Sylveon (needs a Fairy move + level up)
+                        case 7: pk.PID = Utils::Random(1, 0xFFFFFFFF); msg = "PID rerolled"; break;
                     }
                     SetPokemon(ptr, &pk);
                     while (Controller::IsKeyDown(Key::A)) { Controller::Update(); OSD::SwapBuffers(); }
