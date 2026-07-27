@@ -1,6 +1,6 @@
 {
   "storeInfo": {
-    "title": "samaBR85's 3DS Store",
+    "title": "samaBR85",
     "author": "samaBR85",
     "description": "Gen6 CTRPF Overhauled (Pokemon X/Y/OR/AS) and OcarinaCTRComposer (Ocarina of Time 3D) - self-rendered Luma3DS plugins.",
     "url": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.unistore",
@@ -8,7 +8,7 @@
     "sheet": "gen6ctrpf.t3x",
     "sheetURL": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.t3x",
     "version": 4,
-    "revision": 28
+    "revision": 29
   },
   "storeContent": [
     {
@@ -16,8 +16,12 @@
         "title": "Gen6 CTRPF Overhauled",
         "author": "samaBR85",
         "description": "Installs the plugin and its data folder to the SD root for all four Gen 6 games (X / Y / Omega Ruby / Alpha Sapphire). One .3gx auto-detects the game. Save the game in-plugin to keep changes.",
-        "category": ["game"],
-        "console": ["3DS"],
+        "category": [
+          "game"
+        ],
+        "console": [
+          "3DS"
+        ],
         "icon_index": 0,
         "sheet_index": 0,
         "last_updated": "2026-07-19 (UTC)",
@@ -51,8 +55,12 @@
         "title": "OcarinaCTRComposer",
         "author": "samaBR85",
         "description": "Cheats + tools overlay for The Legend of Zelda: Ocarina of Time 3D (USA). Teleport, self-naming waypoints, Toggle Age, 100% Checklist with save-synced auto-fill, Cheat Search, RAM Dumper, Hex Editor, embedded walkthrough, 26 themes.",
-        "category": ["game"],
-        "console": ["3DS"],
+        "category": [
+          "game"
+        ],
+        "console": [
+          "3DS"
+        ],
         "icon_index": 1,
         "sheet_index": 0,
         "last_updated": "2026-07-27 (UTC)",
