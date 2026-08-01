@@ -8,7 +8,7 @@
     "sheet": "gen6ctrpf.t3x",
     "sheetURL": "https://raw.githubusercontent.com/samaBR85/Gen6CTRPFrameworkOverhauled/main/unistore/gen6ctrpf.t3x",
     "version": 4,
-    "revision": 29
+    "revision": 30
   },
   "storeContent": [
     {
@@ -63,9 +63,9 @@
         ],
         "icon_index": 1,
         "sheet_index": 0,
-        "last_updated": "2026-07-27 (UTC)",
+        "last_updated": "2026-08-01 (UTC)",
         "license": "mit",
-        "version": "1.0.0"
+        "version": "1.0.1"
       },
       "Download & Install Plugin": [
         {
